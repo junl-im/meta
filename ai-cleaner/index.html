@@ -6,10 +6,10 @@
 <title>곰같은여우의 AI 흔적 지우개 v6.5.1</title>
 <meta name="description" content="브라우저에서 로컬로 동작하는 글 다듬기·이미지 출처 신호 검사 도구">
 <meta name="theme-color" content="#fff8f0">
-<meta name="app-version" content="6.5.1">
-<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-v65.png?v=651">
-<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon-v65.png?v=651">
-<link rel="manifest" href="site.webmanifest?v=651">
+<meta name="app-version" content="6.6">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-v66.png?v=66">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon-v66.png?v=66">
+<link rel="manifest" href="site.webmanifest?v=66">
 <link rel="stylesheet" href="css/app.css?v=651">
 </head>
 <body>
@@ -43,7 +43,7 @@
         <textarea id="input" class="textarea" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false" placeholder="글을 붙여넣어 주세요.&#10;&#10;입력한 내용은 서버로 전송되지 않습니다."></textarea>
         <div class="actions">
           <button class="btn soft" id="sample">샘플</button>
-          <label class="btn filelabel">TXT/MD/HTML 열기<input id="textFileInput" type="file" accept=".txt,.md,.markdown,.html,.htm,.rtf,text/plain,text/markdown,text/html"></label>
+          <label class="btn filelabel">파일 열기<input id="textFileInput" type="file" accept=".txt,.md,.markdown,.html,.htm,.rtf,.csv,.json,.jsonl,.log,.xml,.yaml,.yml,.ini,.cfg,.conf,.properties,.toml,.sql,.js,.mjs,.cjs,.ts,.jsx,.tsx,.css,.scss,.less,.py,.java,.c,.h,.cpp,.hpp,.cs,.go,.rs,.php,.rb,.sh,.bat,.cmd,.ps1,.tex,text/plain,text/markdown,text/html,text/csv,application/json,application/xml,text/xml"></label>
           <button class="btn" id="reset">초기화</button>
         </div>
         <div class="settings">
@@ -67,7 +67,7 @@
       </div>
     </section>
 
-    <div class="bridgeAction" aria-label="원본을 다듬어 결과로 반영"><button class="bridgeBtn" id="analyze" type="button"><span>✨</span><b>다듬기</b><small>→</small></button></div>
+    <div class="bridgeAction" aria-label="결과 작성 흐름 미리보기"><button class="bridgeBtn previewBridge" id="typingPreviewButton" type="button" title="실제 키 입력이 아니라 결과를 한 글자씩 보여주는 시각적 미리보기입니다."><span>▶</span><b>작성 미리보기</b><small>한 글자씩</small></button><button id="analyze" type="button" hidden aria-hidden="true">다듬기</button></div>
 
     <section class="card">
       <div class="head">
@@ -79,6 +79,11 @@
       </div>
       <div class="body">
         <div id="cleanedPane">
+          <div class="typingPreviewOverlay" id="typingPreviewOverlay" hidden>
+            <div class="typingPreviewHead"><div><b>작성 흐름 미리보기</b><span class="sub">시각적 재생만 하며 실제 키보드 입력을 만들지 않습니다.</span></div><button class="iconBtn" id="typingPreviewClose" type="button" aria-label="닫기">×</button></div>
+            <pre id="typingPreviewText" class="typingPreviewText"></pre>
+            <div class="typingPreviewControls"><button class="mini passive" id="typingPreviewPause" type="button">일시정지</button><label class="sub">속도 <select id="typingPreviewSpeed" class="miniSelect"><option value="1">느리게</option><option value="3" selected>보통</option><option value="7">빠르게</option></select></label><span class="locateStatus" id="typingPreviewProgress">0%</span></div>
+          </div>
           <textarea id="output" class="resultarea" readonly spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false" placeholder="다듬기를 실행하면 결과가 표시됩니다."></textarea>
           <div class="actions">
             <button class="btn primary" id="copy">결과 복사</button>
@@ -203,7 +208,7 @@
   </div>
 </main>
 
-<div class="footer">곰같은여우의 AI 흔적 지우개 v6.5 · 브라우저 로컬 처리</div>
+<div class="footer">곰같은여우의 AI 흔적 지우개 v6.6 · 브라우저 로컬 처리</div>
 </div>
 
 <div class="floatingDock" id="floatingDock" aria-label="분석 도우미">
@@ -227,7 +232,7 @@
     <button class="iconBtn" type="button" data-close-panel="reviewPanel" aria-label="닫기">×</button>
   </div>
   <div class="floatBody">
-    <div class="v62reviewbar"><span class="tag blue">편집 보조</span><span class="sub">필요한 문장만 수정한 뒤 반영하세요.</span><button class="btn primary" id="v62ApplyReviews" type="button">선택 수정 반영</button></div>
+    <div class="v62reviewbar"><span class="tag blue">편집 보조</span><span class="sub">문장을 직접 고치거나 “추천안 채우기”를 누른 뒤 반영하세요.</span><span class="reviewEditCount" id="reviewEditCount">수정됨 0개</span><button class="btn primary" id="v62ApplyReviews" type="button" disabled>수정 내용 반영</button></div>
     <div id="v62ReviewList" class="v62reviewlist"><div class="empty">검토할 문장이 없습니다.</div></div>
   </div>
 </section>
@@ -256,7 +261,7 @@
 </div>
 <div class="appToast" id="appToast" hidden></div>
 
-<script src="js/app.js?v=651" defer></script>
-<script src="js/image-analyzer.js?v=651" defer></script>
+<script src="js/app.js?v=66" defer></script>
+<script src="js/image-analyzer.js?v=66" defer></script>
 </body>
 </html>

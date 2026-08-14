@@ -1,0 +1,29 @@
+{
+  "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
+  "version": "6.6",
+  "date": "2026-08-14",
+  "repo": "junl-im/meta",
+  "pages": "https://junl-im.github.io/meta/",
+  "appPath": "ai-cleaner/",
+  "defaultBranch": "main",
+  "deployment": "GitHub Pages branch deployment from main/root",
+  "protectedPaths": [
+    "OPTION/**"
+  ],
+  "userWorkflow": "receive ZIP -> overwrite local meta -> GitHub Desktop commit -> push",
+  "criticalSafety": [
+    "preserve meaning-sensitive Unicode by default",
+    "no detector-bypass scoring",
+    "no external synthetic typing/keystroke automation"
+  ],
+  "primaryFiles": [
+    "index.html",
+    "ai-cleaner/index.html",
+    "ai-cleaner/css/app.css",
+    "ai-cleaner/js/app.js",
+    "ai-cleaner/js/image-analyzer.js",
+    "ai-cleaner/version.json",
+    ".github/workflows/ai-cleaner-ci.yml"
+  ],
+  "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first."
+}

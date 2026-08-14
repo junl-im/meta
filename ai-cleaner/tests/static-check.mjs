@@ -89,6 +89,11 @@ if (failures.length === 0) {
 
   const updateGuard = /fetch\(`version\.json\?ts=\$\{Date\.now\(\)\}`/.test(app) && /cache:\s*['"]no-store['"]/.test(app) && /location\.replace\(/.test(app);
   updateGuard ? pass('automatic cache refresh guard', 'version.json + no-store + cache-busting navigation') : fail('automatic cache refresh guard', 'automatic version refresh guard missing');
+
+  const v66Ux = /typingPreviewButton/.test(html) && /reviewEditCount/.test(html) && /추천안 채우기/.test(app) && /function positionPanelDefault/.test(app) && /function importedText/.test(app);
+  v66Ux ? pass('v6.6 usability hooks', 'review edit-state + popup default + visual typing preview + expanded file import') : fail('v6.6 usability hooks', 'one or more v6.6 hooks missing');
+
+  /keyboardEvent|dispatchEvent\(new KeyboardEvent|execCommand\(['"]insertText/.test(app) ? fail('no synthetic typing automation', 'synthetic keyboard/input automation found') : pass('no synthetic typing automation', 'visual preview only');
 }
 
 for (const p of passes) console.log(`PASS ${p.name}${p.detail ? ` — ${p.detail}` : ''}`);

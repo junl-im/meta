@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 
-const APP_VERSION='6.5.1';
+const APP_VERSION='6.6';
 let appUpdateCheckBusy=false;
 async function checkForAppUpdate(){
   if(appUpdateCheckBusy)return;
@@ -316,21 +316,41 @@ function renderStats(){
   $('#cleanScore').textContent=`텍스트 위생 ${state.original?state.score:'--'}`;
 }
 
+function reviewSuggestion(text){
+  let s=text;
+  s=s.replace(/자주 묻는 질문\s*\(FAQ\)/g,'자주 물어보시더라고요');
+  s=s.replace(/결론적으로|요약하자면|정리하자면|마무리하자면/g,'그래서');
+  s=s.replace(/\*\*([^*\n]+)\*\*/g,'$1');
+  s=s.replace(/^(#{1,6})\s+(.+)$/gm,'$2');
+  return s===text?'':s;
+}
+
 function buildReviews(){
-  const all=sentences(state.base||''),limit=400;state.reviewOverflow=Math.max(0,all.length-limit);
+  const source=$('#output').value||state.working||state.base||'';
+  const previous=new Map((state.reviews||[]).map(r=>[`${r.start}:${r.text}`,r]));
+  const all=sentences(source),limit=400;state.reviewOverflow=Math.max(0,all.length-limit);
   state.reviews=all.slice(0,limit).map((x,i)=>{
     let score=0,reasons=[];
     if($('#length').checked){if(x.text.length>100){score+=2;reasons.push('100자 초과 긴 문장');}else if(x.text.length>72){score++;reasons.push('조금 긴 문장');}}
     const sig=sentenceSignals(x.text);if(sig.length){score+=Math.min(2,sig.length);reasons.push(...sig.slice(0,2));}
-    return {id:'s'+i,...x,score,reasons:[...new Set(reasons)],edit:x.text,selected:score>=1.5};
+    const prev=previous.get(`${x.start}:${x.text}`),suggestion=reviewSuggestion(x.text);
+    return {id:'s'+i,...x,score,reasons:[...new Set(reasons)],suggestion,edit:prev?prev.edit:x.text,selected:prev?prev.selected:false};
   });
-  const box=$('#v62ReviewList');
-  const candidates=state.reviews.filter(r=>r.score>=1);
+  const box=$('#v62ReviewList'),candidates=state.reviews.filter(r=>r.score>=1);
   $('#reviewPanelStatus').textContent=state.reviewOverflow?`검토 후보 ${candidates.length}개 · ${state.reviewOverflow}문장 추가 생략`:`검토 후보 ${candidates.length}개`;
-  box.innerHTML=candidates.length?candidates.map(r=>`<div class="v62review ${r.score>=1.5?'attn':''}"><div class="itemtop"><label class="check"><input type="checkbox" data-rsel="${r.id}" ${r.selected?'checked':''}> 선택</label><span class="tag blue">편집 체크 ${r.score.toFixed(1)}</span><span class="v62small">${r.text.length}자</span></div><div class="src">${esc(r.text)}</div><textarea spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false" data-redit="${r.id}">${esc(r.edit)}</textarea><div class="v62reason">${r.reasons.length?'확인: '+esc(r.reasons.join(' · ')):'특별한 편집 신호 없음'}</div></div>`).join(''):'<div class="empty">따로 검토할 문장이 없습니다.</div>';
-  $$('[data-rsel]').forEach(e=>e.onchange=()=>{const r=state.reviews.find(x=>x.id===e.dataset.rsel);if(r)r.selected=e.checked;});
-  $$('[data-redit]').forEach(e=>e.oninput=()=>{const r=state.reviews.find(x=>x.id===e.dataset.redit);if(r)r.edit=e.value;});
-  configureEditors(box);
+  box.innerHTML=candidates.length?candidates.map(r=>`<div class="v62review ${r.score>=1.5?'attn':''}" data-review-card="${r.id}"><div class="itemtop"><label class="check"><input type="checkbox" data-rsel="${r.id}" ${r.selected?'checked':''}> 반영 선택</label><span class="tag blue">편집 체크 ${r.score.toFixed(1)}</span><span class="v62small">${r.text.length}자</span></div><div class="src">${esc(r.text)}</div><textarea spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false" data-redit="${r.id}">${esc(r.edit)}</textarea><div class="v62reason">${r.reasons.length?'확인: '+esc(r.reasons.join(' · ')):'특별한 편집 신호 없음'}</div><div class="itemactions">${r.suggestion?`<button class="mini suggest" type="button" data-rsuggest="${r.id}">추천안 채우기</button>`:''}<button class="mini locate" type="button" data-rlocate="${r.id}">🔍 결과에서 보기</button></div></div>`).join(''):'<div class="empty">따로 검토할 문장이 없습니다.</div>';
+  $$('[data-rsel]').forEach(e=>e.onchange=()=>{const r=state.reviews.find(x=>x.id===e.dataset.rsel);if(r)r.selected=e.checked;updateReviewApplyState();});
+  $$('[data-redit]').forEach(e=>e.oninput=()=>{const r=state.reviews.find(x=>x.id===e.dataset.redit);if(r){r.edit=e.value;const card=e.closest('[data-review-card]');if(card)card.classList.toggle('reviewChanged',r.edit!==r.text);}updateReviewApplyState();});
+  $$('[data-rsuggest]').forEach(b=>b.onclick=()=>{const r=state.reviews.find(x=>x.id===b.dataset.rsuggest);if(!r||!r.suggestion)return;const area=box.querySelector(`[data-redit="${r.id}"]`);if(area){area.value=r.suggestion;area.dispatchEvent(new Event('input',{bubbles:true}));}const check=box.querySelector(`[data-rsel="${r.id}"]`);if(check){check.checked=true;check.dispatchEvent(new Event('change',{bubbles:true}));}});
+  $$('[data-rlocate]').forEach(b=>b.onclick=()=>{const r=state.reviews.find(x=>x.id===b.dataset.rlocate);if(r)locateInTextarea($('#output'),r.text,0,'');});
+  configureEditors(box);updateReviewApplyState();
+}
+
+function updateReviewApplyState(){
+  const changed=state.reviews.filter(r=>r.selected&&r.edit!==r.text).length;
+  const badge=$('#reviewEditCount'),button=$('#v62ApplyReviews');
+  if(badge){badge.textContent=`수정됨 ${changed}개`;badge.classList.toggle('ready',changed>0);}
+  if(button)button.disabled=changed===0;
 }
 
 function countIssuesLight(text){
@@ -354,12 +374,18 @@ function queueCompare(){clearTimeout(compareTimer);compareTimer=setTimeout(rende
 
 function applyReviews(){
   let text=$('#output').value||state.working,done=0;
-  for(const r of state.reviews.filter(r=>r.selected&&r.edit!==r.text).sort((a,b)=>b.start-a.start)){
-    let idx=-1;if(text.slice(r.start,r.end)===r.text)idx=r.start;if(idx<0)idx=text.indexOf(r.text,Math.max(0,r.start-80));if(idx<0)idx=text.indexOf(r.text);
+  const selected=state.reviews.filter(r=>r.selected);
+  const changed=selected.filter(r=>r.edit!==r.text);
+  if(!changed.length){
+    showToast(selected.length?'체크만으로는 문장이 바뀌지 않습니다. 문장을 수정하거나 추천안 채우기를 눌러주세요.':'수정할 문장을 먼저 선택해 주세요.');
+    return;
+  }
+  for(const r of changed.sort((a,b)=>b.start-a.start)){
+    let idx=-1;if(text.slice(r.start,r.end)===r.text)idx=r.start;if(idx<0)idx=text.indexOf(r.text,Math.max(0,r.start-100));if(idx<0)idx=text.indexOf(r.text);
     if(idx>=0){text=text.slice(0,idx)+r.edit+text.slice(idx+r.text.length);done++;}
   }
-  if(!done)return showToast('수정한 문장이 없습니다.');
-  state.working=text;state.manual=true;$('#output').value=text;renderCompare();renderIssues();syncWidgets();flashOutput();
+  if(!done)return showToast('현재 결과에서 수정 대상 문장을 찾지 못했습니다. 다시 분석한 뒤 시도해 주세요.');
+  state.working=text;state.manual=true;$('#output').value=text;renderCompare();renderIssues();buildReviews();syncWidgets();flashOutput();showToast(`${done}개 문장을 반영했습니다.`);
 }
 
 function download(name,data,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);}
@@ -374,8 +400,19 @@ function syncWidgets(){
   if(!textVisible){$('#issuesPanel').hidden=true;$('#reviewPanel').hidden=true;$('#techPanel').hidden=true;}
 }
 
+function positionPanelDefault(panel){
+  if(innerWidth<=760||!panel)return;
+  const anchor=$('#input').getBoundingClientRect(),r=panel.getBoundingClientRect();
+  const offsets={issuesPanel:[14,12],reviewPanel:[34,30],techPanel:[54,48]};
+  const [ox,oy]=offsets[panel.id]||[14,12];
+  const left=Math.max(8,Math.min(innerWidth-r.width-8,anchor.left+ox));
+  const top=Math.max(76,Math.min(innerHeight-r.height-8,anchor.top+oy));
+  panel.style.left=left+'px';panel.style.top=top+'px';panel.style.right='auto';panel.style.bottom='auto';
+}
+
 function openPanel(id){
   const panel=$('#'+id);panel.hidden=false;
+  if(panel.dataset.defaultPosition==='pending'){positionPanelDefault(panel);panel.dataset.defaultPosition='done';}
   if(id==='issuesPanel'){state.issueUnread=false;$('#issuesWidget').classList.remove('attention');}
   if(id==='reviewPanel'){state.reviewUnread=false;$('#reviewWidget').classList.remove('attention');}
   if(id==='techPanel'){state.techUnread=false;$('#techWidget').classList.remove('attention');}
@@ -384,8 +421,8 @@ function openPanel(id){
 openPanel.z=220;
 
 function makeDraggable(panel){
-  const handle=panel.querySelector('[data-drag-handle]');if(!handle)return;let drag=null;const key='v65-pos-'+panel.id;
-  try{const saved=JSON.parse(localStorage.getItem(key)||'null');if(saved&&innerWidth>760){panel.style.left=saved.left+'px';panel.style.top=saved.top+'px';panel.style.right='auto';panel.style.bottom='auto';if(saved.width)panel.style.width=saved.width+'px';if(saved.height)panel.style.height=saved.height+'px';}}catch(_){}
+  const handle=panel.querySelector('[data-drag-handle]');if(!handle)return;let drag=null;const key='v66-pos-'+panel.id;
+  try{const saved=JSON.parse(localStorage.getItem(key)||'null');if(saved&&innerWidth>760){panel.style.left=saved.left+'px';panel.style.top=saved.top+'px';panel.style.right='auto';panel.style.bottom='auto';if(saved.width)panel.style.width=saved.width+'px';if(saved.height)panel.style.height=saved.height+'px';panel.dataset.defaultPosition='done';}else panel.dataset.defaultPosition='pending';}catch(_){panel.dataset.defaultPosition='pending';}
   handle.addEventListener('pointerdown',(e)=>{
     if(e.button!==0||innerWidth<=760||e.target.closest('button'))return;
     const r=panel.getBoundingClientRect();drag={dx:e.clientX-r.left,dy:e.clientY-r.top,id:e.pointerId};handle.setPointerCapture(e.pointerId);
@@ -433,20 +470,51 @@ document.addEventListener('pointerdown',(e)=>{if(!e.target.closest('#textContext
 document.addEventListener('dragstart',(e)=>{e.preventDefault();});
 $('#textContextMenu').addEventListener('click',(e)=>{const b=e.target.closest('[data-context-action]');if(b&&!b.disabled)contextAction(b.dataset.contextAction);});
 
+let typingPreview={running:false,paused:false,chars:[],index:0,frame:0,last:0};
+function stopTypingPreview(){cancelAnimationFrame(typingPreview.frame);typingPreview.running=false;typingPreview.paused=false;$('#typingPreviewOverlay').hidden=true;$('#typingPreviewPause').textContent='일시정지';}
+function startTypingPreview(){
+  if(!$('#output').value&&$('#input').value.trim())analyze(true);
+  const text=$('#output').value;if(!text)return showToast('먼저 원본 글을 입력해 주세요.');
+  cancelAnimationFrame(typingPreview.frame);typingPreview={running:true,paused:false,chars:Array.from(text),index:0,frame:0,last:0};
+  const overlay=$('#typingPreviewOverlay'),box=$('#typingPreviewText');overlay.hidden=false;box.textContent='';$('#typingPreviewPause').textContent='일시정지';$('#typingPreviewProgress').textContent='0%';
+  const step=(ts)=>{
+    if(!typingPreview.running)return;
+    if(typingPreview.paused){typingPreview.frame=requestAnimationFrame(step);return;}
+    const speed=Number($('#typingPreviewSpeed').value)||3;
+    if(!typingPreview.last||ts-typingPreview.last>=16){
+      const end=Math.min(typingPreview.chars.length,typingPreview.index+speed);box.append(document.createTextNode(typingPreview.chars.slice(typingPreview.index,end).join('')));typingPreview.index=end;typingPreview.last=ts;
+      $('#typingPreviewProgress').textContent=Math.round((typingPreview.index/Math.max(1,typingPreview.chars.length))*100)+'%';box.scrollTop=box.scrollHeight;
+    }
+    if(typingPreview.index>=typingPreview.chars.length){typingPreview.running=false;$('#typingPreviewPause').textContent='완료';return;}
+    typingPreview.frame=requestAnimationFrame(step);
+  };
+  typingPreview.frame=requestAnimationFrame(step);
+}
+$('#typingPreviewButton').onclick=startTypingPreview;$('#typingPreviewClose').onclick=stopTypingPreview;$('#typingPreviewPause').onclick=()=>{if(!typingPreview.running)return;typingPreview.paused=!typingPreview.paused;$('#typingPreviewPause').textContent=typingPreview.paused?'계속':'일시정지';};
+
 let timer;
 $('#input').addEventListener('input',()=>{renderStats();if($('#liveScan').checked){clearTimeout(timer);timer=setTimeout(()=>analyze(true),liveDelay($('#input').value.length));}});
 $('#analyze').onclick=()=>analyze(false);$('#sample').onclick=()=>{$('#input').value=sample;analyze(true);};$('#reset').onclick=()=>location.reload();
 ['norm','repeat','length','liveScan','cleanProfile'].forEach(id=>$('#'+id).addEventListener('change',()=>{if($('#input').value.trim()&&id!=='liveScan')analyze(true);}));
 
 $('#copy').onclick=async()=>{if($('#output').value){await navigator.clipboard.writeText($('#output').value);showToast('결과를 복사했습니다.');}};
-$('#downloadTxt').onclick=()=>$('#output').value&&download('cleaned-v6.5.txt',$('#output').value,'text/plain;charset=utf-8');
-$('#downloadJson').onclick=()=>state.original&&download('ai-clean-report-v6.5.json',JSON.stringify({version:'6.5',profile:$('#cleanProfile').value,hygieneScore:state.score,analysisMs:state.analyzeMs,autoProcessed:state.chars,preserved:state.allChars.filter(x=>!x.auto),homoglyphs:state.homoglyphs,suggestions:state.issues},null,2),'application/json;charset=utf-8');
+$('#downloadTxt').onclick=()=>$('#output').value&&download('cleaned-v6.6.txt',$('#output').value,'text/plain;charset=utf-8');
+$('#downloadJson').onclick=()=>state.original&&download('ai-clean-report-v6.6.json',JSON.stringify({version:'6.6',profile:$('#cleanProfile').value,hygieneScore:state.score,analysisMs:state.analyzeMs,autoProcessed:state.chars,preserved:state.allChars.filter(x=>!x.auto),homoglyphs:state.homoglyphs,suggestions:state.issues},null,2),'application/json;charset=utf-8');
 $('#undoAll').onclick=()=>{if(!state.original)return;state.applied.clear();state.manual=false;state.working=state.base;renderAll();flashOutput();};
 $('#editResult').onclick=()=>{if(!state.original)return;if($('#output').readOnly){$('#output').readOnly=false;$('#output').focus();$('#editResult').textContent='✓ 수정 완료';}else{$('#output').readOnly=true;state.working=$('#output').value;state.manual=true;$('#editResult').textContent='✎ 직접 수정';renderCompare();flashOutput();}};
 $('#output').addEventListener('input',()=>{if(!$('#output').readOnly){state.working=$('#output').value;state.manual=true;queueCompare();}});
 $('#v62ApplyReviews').onclick=applyReviews;
 
-$('#textFileInput').addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;let s=await f.text();if(/\.html?$/i.test(f.name)){const d=new DOMParser().parseFromString(s,'text/html');s=(d.body&&d.body.innerText)||d.documentElement.textContent||'';}$('#input').value=s;analyze(true);e.target.value='';});
+function rtfToText(raw){
+  return raw.replace(/\\par[d]?\b ?/g,'\n').replace(/\\tab\b ?/g,'\t').replace(/\\'[0-9a-fA-F]{2}/g,m=>String.fromCharCode(parseInt(m.slice(2),16))).replace(/\\[a-zA-Z]+-?\d* ?/g,'').replace(/[{}]/g,'').replace(/\\([\\{}])/g,'$1');
+}
+function importedText(name,raw){
+  if(/\.html?$/i.test(name)){const d=new DOMParser().parseFromString(raw,'text/html');return (d.body&&d.body.innerText)||d.documentElement.textContent||'';}
+  if(/\.xml$/i.test(name)){try{const d=new DOMParser().parseFromString(raw,'application/xml');if(!d.querySelector('parsererror'))return d.documentElement.textContent||raw;}catch(_){}return raw;}
+  if(/\.rtf$/i.test(name))return rtfToText(raw);
+  return raw;
+}
+$('#textFileInput').addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{const raw=await f.text(),s=importedText(f.name,raw);$('#input').value=s;analyze(true);showToast(`${f.name} 파일을 열었습니다.`);}catch(err){showToast('파일을 읽지 못했습니다. 텍스트 기반 파일인지 확인해 주세요.');}finally{e.target.value='';}});
 
 $$('[data-resulttab]').forEach(t=>t.onclick=()=>activateResultTab(t.dataset.resulttab));
 $$('[data-xray-filter]').forEach(b=>b.onclick=()=>{xrayFilter=b.dataset.xrayFilter;$$('[data-xray-filter]').forEach(x=>x.classList.toggle('active',x===b));$('#xrayView').dataset.filter=xrayFilter;});
