@@ -19,9 +19,39 @@ During this migration:
 4. ✅ Add structured image metadata parsing with ExifReader 4.42.0.
 5. ✅ Add official C2PA manifest reading/validation with `@contentauth/c2pa-web` 0.13.4.
 6. ✅ Restore alpha, residual-noise, periodicity and local-region image heuristics as a separate image module.
-7. ⏳ Add browser regression tests using representative text and C2PA/non-C2PA image fixtures.
-8. ⏳ Test the branch build in a deployable preview before merging to `main`.
-9. ⏳ Revisit GitHub Actions/Vite deployment only after the current Branch deployment remains stable.
+7. ✅ Add browser regression tests and dependency-free static checks.
+8. ✅ Add a GitHub Actions static-check workflow without changing GitHub Pages deployment.
+9. ⏳ Execute the browser suite in a real GitHub Pages/static preview, including the official C2PA fixture.
+10. ⏳ Merge only after the preview checks are green.
+11. ⏳ Revisit Vite/Actions-based Pages deployment only after the current Branch deployment remains stable.
+
+## Regression suite
+
+Browser test page after deployment:
+
+`/meta/ai-cleaner/tests/`
+
+The browser suite checks:
+
+- standard/safe/inspect Unicode cleaning profiles
+- preservation of ZWJ/ZWNJ/variation-selector-sensitive content
+- NFKC opt-in behavior
+- X-ray code-point rendering
+- sentence-review card creation
+- synthetic PNG local image analysis
+- ExifReader loading
+- C2PA SDK execution path
+- optional network test using an official public C2PA fixture
+
+Dependency-free static checker:
+
+```sh
+node ai-cleaner/tests/static-check.mjs
+```
+
+It checks duplicate HTML IDs, JavaScript DOM references, pinned dependency versions, script load order, protected Unicode guards, C2PA source-type tokens, required UI styles and accidental base64 image bloat.
+
+The workflow `.github/workflows/ai-cleaner-ci.yml` runs syntax/static checks only. It does not deploy Pages and is scoped to AI Cleaner changes.
 
 ## Image provenance policy
 
