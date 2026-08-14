@@ -12,11 +12,12 @@
 <body>
 <div class="wrap">
   <div class="card">
-    <div class="row"><span class="badge">Phase 4</span><b>AI Cleaner 브라우저 회귀 테스트</b></div>
-    <p class="muted">실제 <code>../index.html</code>을 같은 출처 iframe으로 열어 핵심 동작을 검사합니다. 테스트용 글·이미지는 브라우저 안에서 생성하며 업로드하지 않습니다.</p>
+    <div class="row"><span class="badge">Phase 5</span><b>AI Cleaner 브라우저 회귀 테스트</b></div>
+    <p class="muted">실제 <code>../index.html</code>을 같은 출처 iframe으로 열어 핵심 동작을 검사합니다. Windows에서는 이 폴더의 <code>START-PREVIEW.cmd</code>를 실행하면 로컬 서버와 이 페이지가 자동으로 열립니다.</p>
     <div class="row">
       <button id="runCore" class="btn primary">핵심 테스트 실행</button>
       <button id="runNetwork" class="btn">CDN/C2PA 네트워크 테스트</button>
+      <button id="copyReport" class="btn">결과 복사</button>
       <button id="reloadApp" class="btn">앱 새로고침</button>
     </div>
     <div id="summary" class="summary" style="margin-top:14px">대기 중</div>
@@ -28,5 +29,6 @@
   </div>
 </div>
 <script src="regression.js" defer></script>
+<script src="report.js" defer></script>
 </body>
 </html>
