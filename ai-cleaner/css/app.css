@@ -12,8 +12,9 @@ button,textarea,input{font:inherit}button{cursor:pointer}
 .wrap{max-width:1460px;margin:auto;padding:0 22px 54px}
 .top{height:68px;border-bottom:1px solid #2b1d1210;display:flex;align-items:center;justify-content:space-between;
   position:sticky;top:0;background:#fff8f0ee;backdrop-filter:blur(18px);z-index:10}
-.brand{display:flex;gap:11px;align-items:center}.logo{width:42px;height:42px;border-radius:50%;overflow:hidden;background:transparent;
-  display:grid;place-items:center;flex:0 0 42px}.logo{font-size:24px;background:linear-gradient(135deg,#fff0df,#ffe1bd)}.brand b{font-size:16px}.pill{display:inline-flex;padding:4px 8px;border-radius:999px;
+.brand{display:flex;gap:11px;align-items:center}.logo{width:42px;height:42px;border-radius:50%;overflow:hidden;
+  display:grid;place-items:center;flex:0 0 42px;font-size:0;background:#fff url("../assets/fox-logo.png") center/cover no-repeat;
+  box-shadow:0 2px 8px rgba(43,29,18,.12)}.brand b{font-size:16px}.pill{display:inline-flex;padding:4px 8px;border-radius:999px;
   font-size:10px;font-weight:800;background:var(--orange);color:white}.sub{font-size:11px;color:var(--muted);margin-top:2px}
 .toptools{display:flex;align-items:center;gap:8px}.toolnav{display:flex;gap:4px;background:#f4e8dc;padding:4px;border-radius:999px}
 .toolnav button{border:0;background:transparent;border-radius:999px;padding:8px 12px;font-size:10px;font-weight:900;color:var(--muted)}
