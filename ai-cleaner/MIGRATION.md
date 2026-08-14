@@ -21,15 +21,26 @@ During this migration:
 6. ✅ Restore alpha, residual-noise, periodicity and local-region image heuristics as a separate image module.
 7. ✅ Add browser regression tests and dependency-free static checks.
 8. ✅ Add a GitHub Actions static-check workflow without changing GitHub Pages deployment.
-9. ⏳ Execute the browser suite in a real GitHub Pages/static preview, including the official C2PA fixture.
-10. ⏳ Merge only after the preview checks are green.
-11. ⏳ Revisit Vite/Actions-based Pages deployment only after the current Branch deployment remains stable.
+9. ✅ Add a Windows one-click local preview server and copyable regression report.
+10. ⏳ Execute the browser suite on a user machine with normal network access, including the official C2PA fixture.
+11. ⏳ Merge only after the browser checks are green.
+12. ⏳ Revisit Vite/Actions-based Pages deployment only after the current Branch deployment remains stable.
+
+## Local browser preview
+
+For Windows + GitHub Desktop:
+
+1. Check out `agent/ai-cleaner-migration`.
+2. Open the repository folder in Explorer.
+3. Double-click `ai-cleaner/tests/START-PREVIEW.cmd`.
+4. The launcher starts a PowerShell TCP server bound only to `127.0.0.1` and opens `http://127.0.0.1:8765/tests/`.
+5. Run **핵심 테스트 실행** first, then **CDN/C2PA 네트워크 테스트**.
+6. Use **결과 복사** to copy the full regression report.
+7. Stop the local server with `Ctrl+C` in the PowerShell window.
+
+The preview server is rooted at `ai-cleaner/` and therefore cannot serve files under repository-level `OPTION/`.
 
 ## Regression suite
-
-Browser test page after deployment:
-
-`/meta/ai-cleaner/tests/`
 
 The browser suite checks:
 
@@ -49,9 +60,9 @@ Dependency-free static checker:
 node ai-cleaner/tests/static-check.mjs
 ```
 
-It checks duplicate HTML IDs, JavaScript DOM references, pinned dependency versions, script load order, protected Unicode guards, C2PA source-type tokens, required UI styles and accidental base64 image bloat.
+It checks duplicate HTML IDs, JavaScript DOM references, pinned dependency versions, script load order, protected Unicode guards, C2PA source-type tokens, required UI styles, local-preview scope and accidental base64 image bloat.
 
-The workflow `.github/workflows/ai-cleaner-ci.yml` runs syntax/static checks only. It does not deploy Pages and is scoped to AI Cleaner changes.
+The workflow `.github/workflows/ai-cleaner-ci.yml` runs syntax/static checks only. It also fails if `OPTION/**` appears in the diff. It does not deploy Pages.
 
 ## Image provenance policy
 
