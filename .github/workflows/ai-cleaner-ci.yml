@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - main
+      - 'agent/ai-cleaner-migration'
     paths:
       - 'ai-cleaner/**'
       - '.github/workflows/ai-cleaner-ci.yml'
