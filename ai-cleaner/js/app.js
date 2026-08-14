@@ -1,6 +1,41 @@
 (() => {
 'use strict';
 
+const APP_VERSION='6.5.1';
+let appUpdateCheckBusy=false;
+async function checkForAppUpdate(){
+  if(appUpdateCheckBusy)return;
+  appUpdateCheckBusy=true;
+  try{
+    const res=await fetch(`version.json?ts=${Date.now()}`,{cache:'no-store'});
+    if(!res.ok)return;
+    const data=await res.json();
+    const latest=String(data&&data.version||'').trim();
+    if(!latest)return;
+    const reloadKey='ai-cleaner-refresh-target';
+    if(latest===APP_VERSION){
+      try{sessionStorage.removeItem(reloadKey);}catch(_){}
+      return;
+    }
+    let already='';
+    try{already=sessionStorage.getItem(reloadKey)||'';}catch(_){}
+    if(already===latest)return;
+    try{sessionStorage.setItem(reloadKey,latest);}catch(_){}
+    const url=new URL(location.href);
+    url.searchParams.set('__appv',latest);
+    url.searchParams.set('__fresh',String(Date.now()));
+    location.replace(url.toString());
+  }catch(_){
+    // Offline/local-file mode: silently keep the current working version.
+  }finally{
+    appUpdateCheckBusy=false;
+  }
+}
+checkForAppUpdate();
+window.addEventListener('online',checkForAppUpdate);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkForAppUpdate();});
+setInterval(checkForAppUpdate,120000);
+
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 const sample = 'AI가\u200B 쓴 글에는\u200E 보이지 않는 문자가 섞일 수 있어요.\u00A0\n\n결론적으로 이번 제품은 생각보다 사용감이 좋았습니다.\n정말 정말 좋은 제품이라서 적극 추천드립니다.\n정말 좋은 선택이고 정말 좋은 경험이며 정말 좋은 결과입니다.\n정말 좋은 문장이라 정말 좋은 표현을 반복해서 정말 좋은 예시를 만듭니다.\n\n자주 묻는 질문 (FAQ)';
