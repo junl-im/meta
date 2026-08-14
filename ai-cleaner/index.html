@@ -1,67 +1,237 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<!-- favicon asset: fox-circle-v6.0 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>곰같은여우의 AI 흔적 지우개 v6.3</title>
-<meta name="description" content="브라우저 로컬 텍스트·이미지 분석 도구">
-<link rel="stylesheet" href="css/app.css">
+<title>곰같은여우의 AI 흔적 지우개 v6.4</title>
+<meta name="description" content="브라우저에서 로컬로 동작하는 글 다듬기·이미지 출처 신호 검사 도구">
+<meta name="theme-color" content="#fff8f0">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-v64.png?v=64">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon-v64.png?v=64">
+<link rel="stylesheet" href="css/app.css?v=64">
 </head>
 <body>
 <div class="wrap">
 <header class="top">
   <div class="brand">
-    <div class="logo" id="brandIcon" aria-label="곰같은여우 아이콘">🦊</div>
-    <div><div><b>곰같은여우의 AI 흔적 지우개</b> <span class="pill">v6.3 이미지 확장</span></div>
-    <div class="sub">텍스트 클린룸 · 편집 품질 · 구조화 메타데이터 · C2PA 출처 분석</div></div>
+    <div class="logo" id="brandIcon" role="img" aria-label="곰같은여우 아이콘"></div>
+    <div>
+      <div><b>곰같은여우의 AI 흔적 지우개</b> <span class="pill">v6.4</span></div>
+      <div class="sub">쉽게 다듬고 · 필요한 정보만 펼쳐보고 · 브라우저에서 로컬 처리</div>
+    </div>
   </div>
-  <div class="toptools"><div class="toolnav" aria-label="분석 도구 전환"><button class="active" data-tool="text">AI 글 분석</button><button data-tool="image">AI 이미지 분석</button></div></div>
+  <div class="toptools">
+    <div class="toolnav" aria-label="도구 전환">
+      <button class="active" data-tool="text">AI 글 다듬기</button>
+      <button data-tool="image">AI 이미지 검사</button>
+    </div>
+  </div>
 </header>
 
 <main id="textTool">
-  <section class="hero"><h1>붙여넣고 바로 <span>정리본</span>을 확인하세요.</h1><p>원본은 왼쪽에 유지하고, 오른쪽에서 정리 결과·X-ray·변경사항을 바로 비교합니다. 숨은 문자와 특수 공백은 웹·문서 편집기·메신저를 오가며 생길 수 있는 기술적 흔적으로 다루고, 의미가 바뀔 수 있는 문자(조이너·변형 선택자 등)는 기본적으로 보존합니다.</p></section>
+  <section class="hero">
+    <h1>붙여넣고 바로 <span>다듬어진 결과</span>를 확인하세요.</h1>
+    <p>원문과 결과를 나란히 보면서 필요한 교정만 골라 반영할 수 있습니다. 숨은 문자와 특수 공백은 기술적 흔적으로 확인하고, 의미가 바뀔 수 있는 조이너·변형 선택자는 기본적으로 보존합니다.</p>
+  </section>
+
   <div class="workspace">
-    <section class="card"><div class="head"><b>① 원본</b><span class="sub">입력창</span></div><div class="body">
-      <textarea id="input" class="textarea" placeholder="블로그 글을 붙여넣어 주세요.&#10;&#10;원본은 서버로 전송되지 않습니다."></textarea>
-      <div class="actions"><button class="btn soft" id="sample">샘플 불러오기</button><label class="btn filelabel">TXT/MD/HTML 열기<input id="textFileInput" type="file" accept=".txt,.md,.markdown,.html,.htm,.rtf,text/plain,text/markdown,text/html"></label><button class="btn orange" id="analyze">✨ 분석 & 정리</button><button class="btn" id="reset">초기화</button></div>
-      <div class="settings"><label class="check"><input type="checkbox" id="liveScan" checked> 입력 중 실시간 분석</label><label class="check"><input type="checkbox" id="norm"> NFKC 정규화 적용 <span title="호환 문자를 바꿀 수 있어 기본값은 꺼져 있습니다.">ⓘ</span></label><label class="check"><input type="checkbox" id="repeat" checked> 반복 단어 검사</label><label class="check"><input type="checkbox" id="length" checked> 문장 길이 편차</label></div>
-      <div class="v6toolbar"><label class="sub" for="cleanProfile"><b>기술 정리 강도</b></label><select id="cleanProfile" class="v6select" title="의미 보존을 우선합니다."><option value="inspect">검사 전용 · 자동 변경 없음</option><option value="safe">보수적 · 제어/숨은 문자만</option><option value="standard" selected>표준 · 특수 공백까지 정리</option></select><span class="cleanScore" id="cleanScore">텍스트 위생 점수 --</span></div>
-      <div id="textStats" class="statsrow"><span class="statpill">문자 <b>0</b></span><span class="statpill">단어 <b>0</b></span><span class="statpill">줄 <b>0</b></span></div>
-      <div class="v6note">설정만 브라우저에 저장하며 입력한 글 자체는 저장하지 않습니다. 조이너·변형 선택자·Unicode Tag처럼 의미 또는 출처 신호와 연결될 수 있는 문자는 자동 삭제하지 않고 확인만 합니다.</div>
-    </div></section>
-    <section class="card"><div class="head"><b>② 결과</b><div class="tabs"><button class="tab active" data-resulttab="cleaned">정리본</button><button class="tab" data-resulttab="xray">X-ray</button><button class="tab" data-resulttab="changes">정리사항</button><button class="tab" data-resulttab="review">문장 검토</button></div></div><div class="body">
-      <div id="cleanedPane"><textarea id="output" class="resultarea" readonly placeholder="분석 & 정리를 누르면 결과가 여기에 바로 표시됩니다."></textarea><div class="actions"><button class="btn primary" id="copy">정리본 복사</button><button class="btn" id="downloadTxt">TXT 저장</button><button class="btn" id="editResult">✎ 직접 수정</button><button class="btn danger" id="undoAll">↶ 전체 되돌리기</button></div></div>
-      <div id="xrayPane" class="hidden"><div class="legendline"><span><i class="legenddot" style="background:#fff0ef"></i>자동 정리</span><span><i class="legenddot" style="background:#fff5d8"></i>특수 공백</span><span><i class="legenddot" style="background:#eef5ff"></i>기본 보존</span></div><div id="xrayView" class="xray"><div class="empty">텍스트를 입력하면 숨은 문자의 위치를 눈에 보이게 표시합니다.</div></div><div class="v6note">X-ray는 표시 전용입니다. 실제 원문에는 표식 문자를 삽입하지 않습니다.</div></div>
-      <div id="changesPane" class="hidden"><div id="changesList" class="changelist"><div class="empty">아직 정리한 내용이 없습니다.</div></div></div>
-      <div id="reviewPane" class="hidden"><div class="v62reviewbar"><span class="tag blue">편집 보조</span><span class="sub">긴 문장·정형 표현·반복 리듬처럼 읽기 품질에 영향을 줄 수 있는 문장을 모아 봅니다.</span><button class="btn primary" id="v62ApplyReviews" type="button">선택 수정 반영</button></div><div id="v62ReviewList" class="v62reviewlist"><div class="empty">분석 후 문장별 검토 카드가 표시됩니다.</div></div></div>
-    </div></section>
+    <section class="card">
+      <div class="head"><b>원본</b><span class="sub">붙여넣기 또는 파일 열기</span></div>
+      <div class="body">
+        <textarea id="input" class="textarea" placeholder="글을 붙여넣어 주세요.&#10;&#10;입력한 내용은 서버로 전송되지 않습니다."></textarea>
+        <div class="actions">
+          <button class="btn soft" id="sample">샘플</button>
+          <label class="btn filelabel">TXT/MD/HTML 열기<input id="textFileInput" type="file" accept=".txt,.md,.markdown,.html,.htm,.rtf,text/plain,text/markdown,text/html"></label>
+          <button class="btn orange" id="analyze">✨ 다듬기</button>
+          <button class="btn" id="reset">초기화</button>
+        </div>
+        <div class="settings">
+          <label class="check"><input type="checkbox" id="liveScan" checked> 입력 중 자동 분석</label>
+          <label class="check"><input type="checkbox" id="norm"> NFKC 정규화 <span title="호환 문자를 바꿀 수 있어 기본값은 꺼져 있습니다.">ⓘ</span></label>
+          <label class="check"><input type="checkbox" id="repeat" checked> 반복 단어 찾기</label>
+          <label class="check"><input type="checkbox" id="length" checked> 긴 문장 찾기</label>
+        </div>
+        <div class="v6toolbar">
+          <label class="sub" for="cleanProfile"><b>정리 강도</b></label>
+          <select id="cleanProfile" class="v6select">
+            <option value="inspect">검사만 · 원문 유지</option>
+            <option value="safe">보수적 · 숨은 문자만</option>
+            <option value="standard" selected>표준 · 특수 공백까지</option>
+          </select>
+          <span class="cleanScore" id="cleanScore">텍스트 위생 --</span>
+          <span class="perfPill" id="textPerf">대기</span>
+        </div>
+        <div id="textStats" class="statsrow"><span class="statpill">문자 <b>0</b></span><span class="statpill">단어 <b>0</b></span><span class="statpill">줄 <b>0</b></span></div>
+        <div class="v6note">교정 제안이나 기술 정보가 발견되면 오른쪽 아래에 작은 위젯이 나타납니다. 필요한 경우에만 열어보세요.</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head">
+        <b>결과</b>
+        <div class="tabs">
+          <button class="tab active" data-resulttab="cleaned">정리본</button>
+          <button class="tab" data-resulttab="xray">X-ray</button>
+          <button class="tab" data-resulttab="review">문장 검토</button>
+        </div>
+      </div>
+      <div class="body">
+        <div id="cleanedPane">
+          <textarea id="output" class="resultarea" readonly placeholder="다듬기를 실행하면 결과가 표시됩니다."></textarea>
+          <div class="actions">
+            <button class="btn primary" id="copy">결과 복사</button>
+            <button class="btn" id="downloadTxt">TXT 저장</button>
+            <button class="btn" id="editResult">✎ 직접 수정</button>
+            <button class="btn danger" id="undoAll">↶ 모두 되돌리기</button>
+          </div>
+        </div>
+        <div id="xrayPane" class="hidden">
+          <div class="legendline"><span><i class="legenddot auto"></i>자동 정리</span><span><i class="legenddot space"></i>특수 공백</span><span><i class="legenddot keep"></i>기본 보존</span></div>
+          <div id="xrayView" class="xray"><div class="empty">숨은 문자가 있으면 위치를 눈에 보이게 표시합니다.</div></div>
+          <div class="v6note">X-ray는 표시 전용이며 원문에 표식 문자를 넣지 않습니다.</div>
+        </div>
+        <div id="reviewPane" class="hidden">
+          <div class="v62reviewbar">
+            <span class="tag blue">편집 보조</span>
+            <span class="sub">긴 문장이나 반복되는 흐름을 직접 읽어보고 필요한 것만 수정하세요.</span>
+            <button class="btn primary" id="v62ApplyReviews" type="button">선택 수정 반영</button>
+          </div>
+          <div id="v62ReviewList" class="v62reviewlist"><div class="empty">분석 후 문장별 검토 카드가 표시됩니다.</div></div>
+        </div>
+      </div>
+    </section>
   </div>
-  <section class="card diagbar" aria-label="진단 요약"><span class="diagtitle">③ 진단</span><span class="metric"><strong id="diagHidden">0</strong> 숨은 문자·복사 흔적</span><span class="metric"><strong id="diagSpace">0</strong> 특수 공백·서식 흔적</span><span class="metric warn"><strong id="diagLanguage">0</strong> 정형 표현·편집 신호</span><span class="metric"><strong id="diagStyle">0</strong> 문체 제안</span><span class="metric"><strong id="diagFormat">0</strong> 마크다운 서식 흔적</span><span class="metric"><strong id="diagRead">0</strong> 반복·가독성</span><span class="metric good"><strong id="diagAuto">0</strong> 자동 처리</span><span class="sub" id="diagStatus">분석 전</span></section>
-  <section class="card" id="v62CompareCard" style="margin-top:10px"><div class="head"><b>③-1 전/후 비교</b><span class="sub">AI 판별 점수가 아니라 기술 흔적·편집 체크의 변화입니다.</span></div><div class="body"><div class="v62compare"><div class="v62tile"><div class="lab">원문 텍스트 위생</div><div class="num" id="v62HygBefore">—</div><div class="v62delta" id="v62HygDelta">분석 전</div></div><div class="v62tile"><div class="lab">현재 정리본 텍스트 위생</div><div class="num" id="v62HygAfter">—</div><div class="v62delta" id="v62IssueDelta">분석 전</div></div></div></div></section>
-  <div class="notice" style="margin-top:8px"><b>분석 기준</b> · 숨은 Unicode, 특수 공백, Markdown 잔재, 유사문자, 반복 구문과 읽기 흐름을 나눠 보여줍니다. 이런 특징은 복사·서식·작성 습관에서도 생길 수 있으므로 AI 작성 여부를 확정하지 않습니다. 토큰 기반 워터마크나 서비스 내부 출처 신호는 전용 검증 수단 없이는 이 로컬 HTML에서 확인할 수 없습니다.</div>
-  <div class="lower"><section class="card"><div class="head"><b>④ 변경사항 & 선택 교정</b><span id="issueCount" class="tag">0건</span></div><div class="body"><div id="issues"><div class="empty">분석 후 정형 표현·초안 지시문·마크다운·반복·가독성 제안을 확인할 수 있습니다.</div></div></div></section><section class="card"><details class="tech"><summary>⑤ 기술 상세 ▾ <span class="sub">유니코드 · 웹 복사 흔적 · 처리 내용</span></summary><div class="techbody"><div class="actions" style="margin-top:0;margin-bottom:10px"><button class="btn" id="downloadJson">진단 JSON</button></div><div class="tablewrap"><table><thead><tr><th>위치</th><th>코드</th><th>종류</th><th>처리</th><th>상태</th></tr></thead><tbody id="removalTable"><tr><td colspan="5" class="empty">분석된 특수 문자가 없습니다.</td></tr></tbody></table></div></div></details></section></div>
+
+  <section class="card diagbar" aria-label="진단 요약">
+    <span class="diagtitle">진단</span>
+    <span class="metric"><strong id="diagHidden">0</strong> 숨은 문자</span>
+    <span class="metric"><strong id="diagSpace">0</strong> 특수 공백</span>
+    <span class="metric warn"><strong id="diagLanguage">0</strong> 편집 제안</span>
+    <span class="metric"><strong id="diagFormat">0</strong> 서식 흔적</span>
+    <span class="metric"><strong id="diagRead">0</strong> 반복·가독성</span>
+    <span class="metric good"><strong id="diagAuto">0</strong> 자동 처리</span>
+    <span class="sub" id="diagStatus">분석 전</span>
+  </section>
+
+  <section class="card compareCard" id="v62CompareCard">
+    <div class="head"><b>전/후 비교</b><span class="sub">AI 판별 점수가 아니라 기술 흔적과 편집 체크 변화입니다.</span></div>
+    <div class="body">
+      <div class="v62compare">
+        <div class="v62tile"><div class="lab">원문 텍스트 위생</div><div class="num" id="v62HygBefore">—</div><div class="v62delta" id="v62HygDelta">분석 전</div></div>
+        <div class="v62tile"><div class="lab">현재 결과 텍스트 위생</div><div class="num" id="v62HygAfter">—</div><div class="v62delta" id="v62IssueDelta">분석 전</div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="notice"><b>참고</b> · 숨은 Unicode, 특수 공백, Markdown 잔재, 유사문자, 반복 구문과 읽기 흐름을 나눠 보여줍니다. 이런 특징만으로 AI 작성 여부를 확정하지 않습니다.</div>
 </main>
 
 <main id="imageTool" class="hidden">
-  <section class="hero"><h1>이미지 출처 신호를 <span>구조화해서 분석</span>합니다.</h1><p>ExifReader 구조화 메타데이터, 공식 C2PA manifest, 생성 도구·프롬프트 흔적, 알파·잔차 노이즈·주기성·국소 통계를 브라우저에서 함께 확인합니다. 명시적 출처 신호와 시각적 휴리스틱을 구분해서 표시합니다.</p></section>
-  <section class="card"><div class="body"><div id="dropzone" class="dropzone"><div><b>📂 이미지 분석</b><div class="sub">클릭하거나 PNG/JPG/WebP 파일을 이곳에 끌어놓으세요.</div><div class="actions" style="justify-content:center"><button type="button" class="btn orange" id="openImage">파일 열기</button></div><div class="sub" id="imageLoadStatus" style="margin-top:8px">ExifReader · C2PA · 메타데이터 · 알파 · 노이즈 · 주기 패턴 · 국소 영역</div></div></div><input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp" hidden></div></section>
-  <div id="imageResults" class="hidden">
-    <div class="imageGrid"><section class="card"><div class="head"><b>원본 이미지</b><span class="sub" id="imageMeta">—</span></div><div class="body"><div class="viewer"><img id="sourceImage" alt="원본 이미지"></div></div></section><section class="card"><div class="head"><b>상대적 시각 패턴 영역</b><span class="tag blue">휴리스틱</span></div><div class="body"><div class="viewer"><canvas id="heatCanvas"></canvas></div><div id="regionLegend" class="regionLegend"><span class="sub">상대적으로 통계 점수가 높은 구간을 최대 5곳까지 표시합니다.</span></div></div></section></div>
+  <section class="hero">
+    <h1>이미지의 <span>출처 신호와 메타데이터</span>를 확인하세요.</h1>
+    <p>구조화 메타데이터, C2PA Content Credentials, 파일 내부의 명시적 생성 도구 정보와 시각 통계를 구분해서 보여줍니다.</p>
+  </section>
+  <section class="card">
+    <div class="body">
+      <div id="dropzone" class="dropzone">
+        <div>
+          <b>📂 AI 이미지 검사</b>
+          <div class="sub">PNG/JPG/WebP 파일을 클릭하거나 끌어놓으세요.</div>
+          <div class="actions center"><button type="button" class="btn orange" id="openImage">이미지 열기</button></div>
+          <div class="imageStatus"><span class="sub" id="imageLoadStatus">이미지를 선택하면 검사를 시작합니다.</span><span class="perfPill" id="imagePerf">대기</span></div>
+        </div>
+      </div>
+      <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp" hidden>
+    </div>
+  </section>
 
-    <section class="card imageScore"><div class="head" style="padding:0;border:0;min-height:auto"><div><b>AI 생성 의심 지수</b><div class="sub">명시적 출처 단서 + 파일 구조 + 시각 통계의 내부 비교 지수</div></div><div class="bigscore"><div class="num" id="imageScoreNum">—</div><b>/ 100</b></div></div><div class="progress"><div id="imageProgress"></div></div><div class="signalgrid"><div class="signal"><b>C2PA / Content Credentials</b><p id="sigC2PA">—</p></div><div class="signal"><b>비가시/투명 워터마크</b><p id="sigWatermark">—</p></div><div class="signal"><b>생성 도구 메타데이터</b><p id="sigGenerator">—</p></div><div class="signal"><b>프롬프트·워크플로 흔적</b><p id="sigPrompt">—</p></div><div class="signal"><b>알파/투명 채널</b><p id="sigAlpha">—</p></div><div class="signal"><b>잔차 노이즈</b><p id="sigNoise">—</p></div><div class="signal"><b>주기성·격자 패턴</b><p id="sigPeriodic">—</p></div><div class="signal"><b>국소 통계</b><p id="sigLocal">—</p></div><div class="signal"><b>파일 구조</b><p id="sigFile">—</p></div></div><div id="evidenceList" class="evidenceList"></div><div class="notice warnbox"><b>중요</b> · 이 지수는 생성 출처의 확률이 아닙니다. 공식 C2PA manifest의 digitalSourceType 같은 명시적 출처 정보와 일반적인 시각 휴리스틱을 구분해서 해석하세요. SynthID 같은 공급자 전용 비가시 워터마크는 이 도구가 직접 인증하지 않습니다.</div></section>
+  <div id="imageResults" class="hidden">
+    <div class="imageGrid">
+      <section class="card"><div class="head"><b>원본 이미지</b><span class="sub" id="imageMeta">—</span></div><div class="body"><div class="viewer"><img id="sourceImage" alt="원본 이미지"></div></div></section>
+      <section class="card"><div class="head"><b>상대적 시각 패턴 영역</b><span class="tag blue">참고용</span></div><div class="body"><div class="viewer"><canvas id="heatCanvas"></canvas></div><div id="regionLegend" class="regionLegend"><span class="sub">상대적으로 통계가 두드러진 구간을 표시합니다.</span></div></div></section>
+    </div>
+
+    <section class="card imageScore">
+      <div class="head scoreHead">
+        <div><b>출처 신호 참고 지수</b><div class="sub">확률이 아닌 내부 비교 지수입니다.</div></div>
+        <div class="bigscore"><div class="num" id="imageScoreNum">—</div><b>/ 100</b></div>
+      </div>
+      <div class="progress"><div id="imageProgress"></div></div>
+      <div class="signalgrid">
+        <div class="signal"><b>C2PA / Content Credentials</b><p id="sigC2PA">—</p></div>
+        <div class="signal"><b>비가시/투명 워터마크</b><p id="sigWatermark">—</p></div>
+        <div class="signal"><b>생성 도구 메타데이터</b><p id="sigGenerator">—</p></div>
+        <div class="signal"><b>프롬프트·워크플로 흔적</b><p id="sigPrompt">—</p></div>
+        <div class="signal"><b>알파/투명 채널</b><p id="sigAlpha">—</p></div>
+        <div class="signal"><b>잔차 노이즈</b><p id="sigNoise">—</p></div>
+        <div class="signal"><b>주기성·격자 패턴</b><p id="sigPeriodic">—</p></div>
+        <div class="signal"><b>국소 통계</b><p id="sigLocal">—</p></div>
+        <div class="signal"><b>파일 구조</b><p id="sigFile">—</p></div>
+      </div>
+      <div id="evidenceList" class="evidenceList"></div>
+      <div class="notice warnbox"><b>중요</b> · C2PA 같은 명시적 출처 정보와 시각 휴리스틱은 서로 다른 종류의 신호입니다. 이 지수를 생성 확률로 해석하지 마세요.</div>
+    </section>
 
     <div class="imageGrid provenanceGrid">
-      <section class="card"><div class="head"><b>구조화 메타데이터</b><span class="tag blue">ExifReader 4.42.0</span></div><div class="body"><div class="signalgrid metaDetailGrid"><div class="signal"><b>SDK 상태</b><p id="metaSdkStatus">—</p></div><div class="signal"><b>태그 수</b><p id="metaCount">—</p></div><div class="signal"><b>카메라</b><p id="metaCamera">—</p></div><div class="signal"><b>소프트웨어</b><p id="metaSoftware">—</p></div><div class="signal"><b>작성 시각</b><p id="metaDate">—</p></div><div class="signal"><b>작성자/권리</b><p id="metaAuthor">—</p></div><div class="signal"><b>GPS</b><p id="metaGps">—</p></div><div class="signal"><b>메타 컨테이너</b><p id="metaContainers">—</p></div></div><div class="v6note">개인정보 보호를 위해 GPS 좌표 값 자체는 화면에 표시하지 않고 존재 여부만 알려줍니다.</div></div></section>
-      <section class="card"><div class="head"><b>Content Credentials</b><span class="tag green">공식 c2pa-web 0.13.4</span></div><div class="body"><div class="signalgrid metaDetailGrid"><div class="signal"><b>SDK 상태</b><p id="c2paSdkStatus">—</p></div><div class="signal"><b>Validation</b><p id="c2paValidation">—</p></div><div class="signal"><b>Digital Source Type</b><p id="c2paSource">—</p></div><div class="signal"><b>서명자</b><p id="c2paSigner">—</p></div><div class="signal"><b>Claim</b><p id="c2paClaim">—</p></div></div><div class="v6note">C2PA manifest 존재 자체는 AI 생성이라는 뜻이 아닙니다. digitalCapture, trainedAlgorithmicMedia 등 manifest 내부 출처 유형을 함께 확인합니다.</div></div></section>
+      <section class="card">
+        <div class="head"><b>구조화 메타데이터</b><span class="tag blue">ExifReader</span></div>
+        <div class="body">
+          <div class="signalgrid metaDetailGrid">
+            <div class="signal"><b>SDK 상태</b><p id="metaSdkStatus">—</p></div><div class="signal"><b>태그 수</b><p id="metaCount">—</p></div>
+            <div class="signal"><b>카메라</b><p id="metaCamera">—</p></div><div class="signal"><b>소프트웨어</b><p id="metaSoftware">—</p></div>
+            <div class="signal"><b>작성 시각</b><p id="metaDate">—</p></div><div class="signal"><b>작성자/권리</b><p id="metaAuthor">—</p></div>
+            <div class="signal"><b>GPS</b><p id="metaGps">—</p></div><div class="signal"><b>메타 컨테이너</b><p id="metaContainers">—</p></div>
+          </div>
+          <div class="v6note">GPS 좌표 값은 화면에 표시하지 않고 존재 여부만 알려줍니다.</div>
+        </div>
+      </section>
+      <section class="card">
+        <div class="head"><b>Content Credentials</b><span class="tag green">공식 C2PA</span></div>
+        <div class="body">
+          <div class="signalgrid metaDetailGrid">
+            <div class="signal"><b>SDK 상태</b><p id="c2paSdkStatus">—</p></div><div class="signal"><b>Validation</b><p id="c2paValidation">—</p></div>
+            <div class="signal"><b>Digital Source Type</b><p id="c2paSource">—</p></div><div class="signal"><b>서명자</b><p id="c2paSigner">—</p></div>
+            <div class="signal"><b>Claim</b><p id="c2paClaim">—</p></div>
+          </div>
+          <div class="v6note">manifest 존재 자체는 AI 생성이라는 뜻이 아닙니다. 내부 출처 유형을 함께 확인하세요.</div>
+        </div>
+      </section>
     </div>
   </div>
 </main>
 
-<div class="footer">곰같은여우의 AI 흔적 지우개 v6.3 · 브라우저 로컬 처리 · 출처 신호와 휴리스틱을 구분해 표시합니다.</div>
+<div class="footer">곰같은여우의 AI 흔적 지우개 v6.4 · 브라우저 로컬 처리</div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/exifreader@4.42.0/dist/exif-reader.js" crossorigin="anonymous"></script>
-<script src="js/app.js" defer></script>
-<script src="js/image-analyzer.js" defer></script>
+
+<div class="floatingDock" id="floatingDock" aria-label="분석 도우미">
+  <button class="floatWidget" id="issuesWidget" type="button" hidden><span class="widgetIcon">✨</span><span>교정 제안</span><b id="issueCount">0</b></button>
+  <button class="floatWidget tech" id="techWidget" type="button" hidden><span class="widgetIcon">⌘</span><span>기술 정보</span><b id="techCount">0</b></button>
+</div>
+
+<section class="floatPanel" id="issuesPanel" aria-label="교정 제안" hidden>
+  <div class="floatHead" data-drag-handle>
+    <div><b>교정 제안</b><span class="sub" id="issuesPanelStatus">필요한 것만 반영하세요.</span></div>
+    <button class="iconBtn" type="button" data-close-panel="issuesPanel" aria-label="닫기">×</button>
+  </div>
+  <div class="floatBody" id="issues"><div class="empty">교정 제안이 없습니다.</div></div>
+</section>
+
+<section class="floatPanel techPanel" id="techPanel" aria-label="기술 정보" hidden>
+  <div class="floatHead" data-drag-handle>
+    <div><b>기술 정보</b><span class="sub" id="techPanelStatus">숨은 문자와 보존 항목을 확인합니다.</span></div>
+    <button class="iconBtn" type="button" data-close-panel="techPanel" aria-label="닫기">×</button>
+  </div>
+  <div class="floatBody">
+    <div class="actions compact"><button class="btn" id="downloadJson">진단 JSON 저장</button></div>
+    <div id="techSummary" class="techSummary"></div>
+    <div class="tablewrap">
+      <table><thead><tr><th>위치</th><th>코드</th><th>종류</th><th>처리</th><th>상태</th></tr></thead>
+      <tbody id="removalTable"><tr><td colspan="5" class="empty">기술 정보가 없습니다.</td></tr></tbody></table>
+    </div>
+  </div>
+</section>
+
+<script src="js/app.js?v=64" defer></script>
+<script src="js/image-analyzer.js?v=64" defer></script>
 </body>
 </html>
