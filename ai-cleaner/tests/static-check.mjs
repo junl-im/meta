@@ -1,14 +1,18 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 
-const here = path.dirname(new URL(import.meta.url).pathname);
+const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
 const files = {
   html: path.join(root, 'index.html'),
   app: path.join(root, 'js', 'app.js'),
   image: path.join(root, 'js', 'image-analyzer.js'),
-  css: path.join(root, 'css', 'app.css')
+  css: path.join(root, 'css', 'app.css'),
+  regression: path.join(root, 'tests', 'regression.js'),
+  previewPs1: path.join(root, 'tests', 'preview.ps1'),
+  previewCmd: path.join(root, 'tests', 'START-PREVIEW.cmd')
 };
 
 const failures = [];
@@ -26,6 +30,7 @@ if (failures.length === 0) {
   const app = fs.readFileSync(files.app, 'utf8');
   const image = fs.readFileSync(files.image, 'utf8');
   const css = fs.readFileSync(files.css, 'utf8');
+  const previewPs1 = fs.readFileSync(files.previewPs1, 'utf8');
 
   const ids = [...html.matchAll(/\bid=["']([^"']+)["']/g)].map((m) => m[1]);
   const seen = new Set();
@@ -73,6 +78,9 @@ if (failures.length === 0) {
 
   const forbiddenHtml = /data:image\/(png|jpeg|webp);base64,/i.test(html);
   forbiddenHtml ? fail('embedded base64 image bloat', 'data:image base64 found in index.html') : pass('embedded base64 image bloat', 'none in index.html');
+
+  const previewLocalOnly = /IPAddress\]::Loopback/.test(previewPs1) && /Resolve-Path \(Join-Path \$PSScriptRoot '\.\.'\)/.test(previewPs1);
+  previewLocalOnly ? pass('local preview scope', 'loopback + ai-cleaner root') : fail('local preview scope', 'preview server must remain loopback-only and rooted at ai-cleaner');
 }
 
 for (const p of passes) console.log(`PASS ${p.name}${p.detail ? ` — ${p.detail}` : ''}`);
