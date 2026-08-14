@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Cleaner v6.3 Regression Lab</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;color:#2b1d12;background:#fff8f0}
+*{box-sizing:border-box}body{margin:0}.wrap{max-width:1180px;margin:auto;padding:24px}.card{background:#fff;border:1px solid #eadbca;border-radius:18px;padding:18px;margin-bottom:14px}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.btn{border:1px solid #eadbca;background:#fff;border-radius:999px;padding:10px 14px;font-weight:800;cursor:pointer}.btn.primary{background:#2b1d12;color:#fff;border-color:#2b1d12}.muted{color:#806b5c;font-size:13px}.summary{font-size:26px;font-weight:900}.tests{display:grid;gap:8px;margin-top:14px}.test{border:1px solid #eadbca;border-radius:12px;padding:11px 12px;background:#fffdf9}.test.pass{border-color:#bfe0c5;background:#eaf7ea}.test.fail{border-color:#efbbb7;background:#fff0ef}.test.skip{border-color:#eadbca;background:#f7f4f1}.name{font-weight:850}.detail{font-size:12px;color:#806b5c;margin-top:4px;white-space:pre-wrap}.framewrap{height:520px;border:1px solid #eadbca;border-radius:14px;overflow:hidden;background:#fff}iframe{width:100%;height:100%;border:0}.badge{display:inline-flex;padding:5px 9px;border-radius:999px;background:#fff0df;font-size:12px;font-weight:850}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="row"><span class="badge">Phase 4</span><b>AI Cleaner 브라우저 회귀 테스트</b></div>
+    <p class="muted">실제 <code>../index.html</code>을 같은 출처 iframe으로 열어 핵심 동작을 검사합니다. 테스트용 글·이미지는 브라우저 안에서 생성하며 업로드하지 않습니다.</p>
+    <div class="row">
+      <button id="runCore" class="btn primary">핵심 테스트 실행</button>
+      <button id="runNetwork" class="btn">CDN/C2PA 네트워크 테스트</button>
+      <button id="reloadApp" class="btn">앱 새로고침</button>
+    </div>
+    <div id="summary" class="summary" style="margin-top:14px">대기 중</div>
+    <div id="tests" class="tests"></div>
+  </div>
+  <div class="card">
+    <div class="row"><b>테스트 대상 앱</b><span id="frameStatus" class="muted">불러오는 중…</span></div>
+    <div class="framewrap" style="margin-top:10px"><iframe id="appFrame" src="../index.html" title="AI Cleaner 테스트 대상"></iframe></div>
+  </div>
+</div>
+<script src="regression.js" defer></script>
+</body>
+</html>
