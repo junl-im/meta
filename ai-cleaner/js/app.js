@@ -12,11 +12,27 @@ const lookalike = {'а':'Cyrillic a','е':'Cyrillic e','о':'Cyrillic o','р':'C
 let state = {
   original:'', base:'', working:'', chars:[], allChars:[], issues:[], applied:new Set(),
   manual:false, homoglyphs:[], reviews:[], score:100, focusCycles:Object.create(null),
-  issueUnread:false, techUnread:false, analyzeMs:0
+  issueUnread:false, reviewUnread:false, techUnread:false, analyzeMs:0, reviewOverflow:0
 };
+let compareTimer = 0;
+let xrayFilter = 'all';
+let contextTarget = null;
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const hex = (cp) => 'U+' + cp.toString(16).toUpperCase().padStart(4,'0');
+
+function configureEditors(root=document){
+  root.querySelectorAll('textarea').forEach(el=>{
+    el.spellcheck=false;
+    el.setAttribute('spellcheck','false');
+    el.setAttribute('autocorrect','off');
+    el.setAttribute('autocapitalize','off');
+    el.setAttribute('autocomplete','off');
+    el.setAttribute('data-gramm','false');
+    el.setAttribute('data-gramm_editor','false');
+    el.setAttribute('data-enable-grammarly','false');
+  });
+}
 
 function info(ch,pos,profile){
   const cp=ch.codePointAt(0), code=hex(cp);
@@ -87,19 +103,22 @@ function issues(text){
   for(const m of text.matchAll(/\n{3,}/g)) add('연속 빈 줄','빈 줄을 줄이면 읽기 흐름이 좋아집니다.',m[0],'\n\n','read',m.index,m.index+m[0].length);
 
   if($('#repeat').checked){
-    const re=/[가-힣A-Za-z0-9]{2,}/g, counts=new Map(), positions=new Map();
+    const re=/[가-힣A-Za-z0-9]{2,}/g, counts=new Map();
     let m;
-    while((m=re.exec(text))){
-      const w=m[0];
-      counts.set(w,(counts.get(w)||0)+1);
-      if(!positions.has(w))positions.set(w,[]);
-      positions.get(w).push(m.index);
-    }
+    while((m=re.exec(text))) counts.set(m[0],(counts.get(m[0])||0)+1);
     [...counts.entries()].filter(([,n])=>n>=6).sort((a,b)=>b[1]-a[1]).slice(0,6).forEach(([w,n])=>{
-      add('반복 단어',`“${w}”가 ${n}회 반복됩니다. 돋보기로 위치를 순서대로 확인해보세요.`,`${w} × ${n}`,null,'read',-1,-1,{word:w,positions:positions.get(w)});
+      add('반복 단어',`“${w}”가 ${n}회 반복됩니다. 돋보기로 위치를 순서대로 확인해보세요.`,`${w} × ${n}`,null,'read',-1,-1,{word:w});
     });
   }
   return out;
+}
+
+function sentenceSignals(text){
+  const reasons=[];
+  if(/자주 묻는 질문\s*\(FAQ\)/.test(text))reasons.push('정형 템플릿');
+  if(/결론적으로|요약하자면|정리하자면|마무리하자면/.test(text))reasons.push('정형 전환어');
+  if(/\*\*[^*\n]+\*\*/.test(text)||/^#{1,6}\s+/m.test(text))reasons.push('마크다운 서식');
+  return reasons;
 }
 
 function hygiene(text,all,hom){
@@ -111,24 +130,30 @@ function analyze(silent=false){
   const t0=performance.now();
   const input=$('#input').value;
   if(!input.trim()){if(!silent)alert('먼저 글을 붙여넣어 주세요.');return;}
+  const prevIssueCount=state.issues.length;
+  const prevReviewCount=state.reviews.filter(r=>r.score>=1).length;
+  const prevTechCount=state.allChars.length+state.homoglyphs.length;
+  const hadOriginal=!!state.original;
   const sc=scan(input);
   let base=sc.clean;
   if($('#norm').checked)base=base.normalize('NFKC');
-  const hom=homoglyphs(base);
-  const foundIssues=issues(base);
-  const prevIssueCount=state.issues.length, prevTechCount=state.allChars.length+state.homoglyphs.length;
+  const hom=homoglyphs(base), foundIssues=issues(base);
   state={
     original:input,base,working:base,chars:sc.auto,allChars:sc.all,issues:foundIssues,applied:new Set(),manual:false,
     homoglyphs:hom,reviews:[],score:hygiene(input,sc.all,hom),focusCycles:Object.create(null),
-    issueUnread:foundIssues.length>0&&(foundIssues.length!==prevIssueCount||!state.original),
-    techUnread:(sc.all.length+hom.length)>0&&((sc.all.length+hom.length)!==prevTechCount||!state.original),
-    analyzeMs:0
+    issueUnread:foundIssues.length>0&&(!hadOriginal||foundIssues.length!==prevIssueCount),
+    reviewUnread:false,
+    techUnread:(sc.all.length+hom.length)>0&&(!hadOriginal||(sc.all.length+hom.length)!==prevTechCount),
+    analyzeMs:0,reviewOverflow:0
   };
   $('#output').readOnly=true;
   $('#editResult').textContent='✎ 직접 수정';
   renderAll();
+  const reviewCount=state.reviews.filter(r=>r.score>=1).length;
+  state.reviewUnread=reviewCount>0&&(!hadOriginal||reviewCount!==prevReviewCount);
   state.analyzeMs=performance.now()-t0;
   $('#textPerf').textContent=`${state.analyzeMs.toFixed(state.analyzeMs<10?1:0)}ms`;
+  syncWidgets();
 }
 
 function rebuild(){
@@ -141,14 +166,7 @@ function rebuild(){
 }
 
 function renderAll(){
-  rebuild();
-  renderDiag();
-  renderIssues();
-  renderTech();
-  renderStats();
-  buildReviews();
-  renderCompare();
-  syncWidgets();
+  rebuild();buildReviews();renderDiag();renderIssues();renderTech();renderStats();renderCompare();syncWidgets();configureEditors();
   if(!$('#xrayPane').classList.contains('hidden'))renderXray();
 }
 
@@ -160,7 +178,7 @@ function renderDiag(){
   $('#diagFormat').textContent=state.issues.filter(x=>x.kind==='format').length;
   $('#diagRead').textContent=state.issues.filter(x=>x.kind==='read').length;
   $('#diagAuto').textContent=state.chars.length;
-  $('#diagStatus').textContent=`기술 ${state.allChars.length+state.homoglyphs.length} · 교정 제안 ${state.issues.length}`;
+  $('#diagStatus').textContent=`기술 ${state.allChars.length+state.homoglyphs.length} · 교정 ${state.issues.length} · 문장 검토 ${state.reviews.filter(r=>r.score>=1).length}`;
 }
 
 function renderIssues(){
@@ -169,7 +187,7 @@ function renderIssues(){
   box.innerHTML=state.issues.map(x=>{
     const locateTarget=x.word||((x.start>=0&&x.before)?x.before:null);
     const locate=locateTarget?`<button class="mini locate" data-locate="${x.id}" title="결과에서 위치 찾기">🔍 위치 보기</button><span class="locateStatus" id="loc-${x.id}"></span>`:'';
-    const apply=x.applicable?(state.applied.has(x.id)?`<button class="mini undo" data-undo="${x.id}">↶ 되돌리기</button>`:`<button class="mini apply" data-apply="${x.id}">반영</button>`):'<span class="tag blue">확인 항목</span>';
+    const apply=x.applicable?(state.applied.has(x.id)?`<button class="mini undo" data-undo="${x.id}">↶ 되돌리기</button>`:`<button class="mini apply" data-apply="${x.id}">반영</button>`):'<span class="mini passive">확인 항목</span>';
     return `<div class="item"><div class="itemtop"><span class="tag ${x.kind==='format'?'blue':''}">${esc(x.cat)}</span><span class="sub">${esc(x.before||'')}</span></div><p>${esc(x.reason)}</p><div class="itemactions">${apply}${locate}</div></div>`;
   }).join('');
   $$('[data-apply]').forEach(b=>b.onclick=()=>{state.applied.add(b.dataset.apply);state.manual=false;renderAll();flashOutput();});
@@ -177,251 +195,238 @@ function renderIssues(){
   $$('[data-locate]').forEach(b=>b.onclick=()=>locateIssue(b.dataset.locate));
 }
 
+function activateResultTab(name){
+  $$('[data-resulttab]').forEach(x=>x.classList.toggle('active',x.dataset.resulttab===name));
+  ['cleaned','xray'].forEach(n=>$('#'+n+'Pane').classList.toggle('hidden',name!==n));
+  if(name==='xray')renderXray();
+}
+
+function scrollTextareaToRange(el,start,end){
+  const value=el.value||'';
+  start=Math.max(0,Math.min(value.length,start));end=Math.max(start,Math.min(value.length,end));
+  const cs=getComputedStyle(el), mirror=document.createElement('div');
+  mirror.style.position='fixed';mirror.style.left='-100000px';mirror.style.top='0';mirror.style.visibility='hidden';
+  mirror.style.boxSizing='border-box';mirror.style.width=el.offsetWidth+'px';mirror.style.padding=cs.padding;mirror.style.border=cs.border;
+  mirror.style.fontFamily=cs.fontFamily;mirror.style.fontSize=cs.fontSize;mirror.style.fontWeight=cs.fontWeight;mirror.style.fontStyle=cs.fontStyle;
+  mirror.style.letterSpacing=cs.letterSpacing;mirror.style.lineHeight=cs.lineHeight;mirror.style.whiteSpace='pre-wrap';mirror.style.wordBreak='break-word';mirror.style.overflowWrap='break-word';
+  mirror.textContent=value.slice(0,start);
+  const marker=document.createElement('span');marker.textContent=value.slice(start,Math.max(start+1,end))||'\u200b';mirror.appendChild(marker);
+  document.body.appendChild(mirror);
+  const targetY=marker.offsetTop;
+  mirror.remove();
+  el.focus({preventScroll:true});
+  el.setSelectionRange(start,end);
+  const lineHeight=parseFloat(cs.lineHeight)||parseFloat(cs.fontSize)*1.6||20;
+  el.scrollTop=Math.max(0,targetY-el.clientHeight*.42+lineHeight*2);
+  const r=el.getBoundingClientRect();
+  if(r.top<70||r.bottom>innerHeight-20)el.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
 function locateIssue(id){
-  const issue=state.issues.find(x=>x.id===id);
-  if(!issue)return;
-  const text=$('#output').value, needle=issue.word||issue.before;
-  if(!needle)return;
+  const issue=state.issues.find(x=>x.id===id);if(!issue)return;
+  activateResultTab('cleaned');
+  const out=$('#output'),text=out.value,needle=issue.word||issue.before;if(!needle)return;
   const starts=[];let from=0;
-  while(from<=text.length){
-    const idx=text.indexOf(needle,from);
-    if(idx<0)break;
-    starts.push(idx);from=idx+Math.max(1,needle.length);
-    if(starts.length>500)break;
-  }
+  while(from<=text.length){const idx=text.indexOf(needle,from);if(idx<0)break;starts.push(idx);from=idx+Math.max(1,needle.length);if(starts.length>=500)break;}
   const status=$('#loc-'+id);
   if(!starts.length){if(status)status.textContent='현재 결과에서 찾지 못함';return;}
-  const next=(state.focusCycles[id]||0)%starts.length;
-  state.focusCycles[id]=next+1;
-  const pos=starts[next], out=$('#output');
-  out.focus({preventScroll:false});
-  out.setSelectionRange(pos,pos+needle.length);
-  if(status)status.textContent=`${next+1}/${starts.length}`;
-  out.scrollIntoView({behavior:'smooth',block:'center'});
+  const next=(state.focusCycles[id]||0)%starts.length;state.focusCycles[id]=next+1;
+  const pos=starts[next];if(status)status.textContent=`${next+1}/${starts.length}`;
+  requestAnimationFrame(()=>scrollTextareaToRange(out,pos,pos+needle.length));
+}
+
+function locateOriginalPosition(pos,len=1){
+  const input=$('#input');
+  requestAnimationFrame(()=>scrollTextareaToRange(input,pos,pos+Math.max(1,len)));
 }
 
 function flashOutput(){
-  const out=$('#output');
-  out.classList.remove('resultFlash');void out.offsetWidth;out.classList.add('resultFlash');
+  const out=$('#output');out.classList.remove('resultFlash');void out.offsetWidth;out.classList.add('resultFlash');
   setTimeout(()=>out.classList.remove('resultFlash'),800);
 }
 
 function renderTech(){
   const rows=[];
-  for(const x of state.allChars.slice(0,500)){
-    rows.push(`<tr><td>${x.pos}</td><td><b>${x.code}</b></td><td>${esc(x.type)}</td><td>${esc(x.action)}</td><td>${x.auto?'자동':'보존'}</td></tr>`);
-  }
-  for(const x of state.homoglyphs.slice(0,100)){
-    rows.push(`<tr><td>${x.pos}</td><td><b>${x.code}</b></td><td>유사문자</td><td>확인</td><td>보존</td></tr>`);
-  }
+  for(const x of state.allChars.slice(0,500))rows.push(`<tr><td>${x.pos}</td><td><b>${x.code}</b></td><td>${esc(x.type)}</td><td>${esc(x.action)}</td><td>${x.auto?'자동':'보존'}</td></tr>`);
+  for(const x of state.homoglyphs.slice(0,100))rows.push(`<tr><td>${x.pos}</td><td><b>${x.code}</b></td><td>유사문자</td><td>확인</td><td>보존</td></tr>`);
   $('#removalTable').innerHTML=rows.length?rows.join(''):'<tr><td colspan="5" class="empty">기술 정보가 없습니다.</td></tr>';
-  const hidden=state.allChars.filter(x=>x.type==='숨은 문자').length;
-  const spaces=state.allChars.filter(x=>x.type==='특수 공백').length;
-  const kept=state.allChars.filter(x=>!x.auto).length;
-  $('#techSummary').innerHTML=[
-    `<span class="techChip">숨은 문자 <b>${hidden}</b></span>`,
-    `<span class="techChip">특수 공백 <b>${spaces}</b></span>`,
-    `<span class="techChip">보존 항목 <b>${kept}</b></span>`,
-    `<span class="techChip">유사문자 <b>${state.homoglyphs.length}</b></span>`
-  ].join('');
+  const hidden=state.allChars.filter(x=>x.type==='숨은 문자').length,spaces=state.allChars.filter(x=>x.type==='특수 공백').length,kept=state.allChars.filter(x=>!x.auto).length;
+  $('#techSummary').innerHTML=[`<span class="techChip">숨은 문자 <b>${hidden}</b></span>`,`<span class="techChip">특수 공백 <b>${spaces}</b></span>`,`<span class="techChip">보존 항목 <b>${kept}</b></span>`,`<span class="techChip">유사문자 <b>${state.homoglyphs.length}</b></span>`].join('');
 }
 
 function renderXray(){
   const box=$('#xrayView');
-  if(!state.original){box.innerHTML='<div class="empty">숨은 문자가 있으면 위치를 눈에 보이게 표시합니다.</div>';return;}
+  if(!state.original){box.innerHTML='<div class="empty">숨은 문자가 있으면 위치를 눈에 보이게 표시합니다.</div>';$('#xraySummary').innerHTML='';return;}
   const byPos=new Map(state.allChars.map(x=>[x.pos,x]));
+  const hidden=state.allChars.filter(x=>x.type==='숨은 문자').length,spaces=state.allChars.filter(x=>x.type==='특수 공백').length,kept=state.allChars.filter(x=>!x.auto).length;
+  $('#xraySummary').innerHTML=`<span class="techChip">숨은 문자 <b>${hidden}</b></span><span class="techChip">특수 공백 <b>${spaces}</b></span><span class="techChip">보존 <b>${kept}</b></span>`;
   let html='',i=0;
   for(const ch of state.original){
     const x=byPos.get(i);
-    html+=x?`<span class="${x.auto?(x.type==='특수 공백'?'xrhit xrspace':'xrhit'):'xrhit xrkeep'}" title="${esc(x.name)}">${x.code}</span>`:esc(ch);
+    if(x){
+      const kind=x.type==='특수 공백'?'space':(x.auto?'auto':'keep');
+      const cls=kind==='space'?'xrhit xrspace':kind==='auto'?'xrhit xrauto':'xrhit xrkeep';
+      html+=`<button type="button" class="${cls}" data-xkind="${kind}" data-xpos="${x.pos}" data-xlen="${x.char.length}" title="${esc(x.name)} · 원본 위치로 이동">${x.code}</button>`;
+    }else html+=esc(ch);
     i+=ch.length;
   }
-  box.innerHTML=html;
+  box.innerHTML=html;box.dataset.filter=xrayFilter;
+  $$('[data-xpos]').forEach(el=>el.onclick=()=>locateOriginalPosition(Number(el.dataset.xpos),Number(el.dataset.xlen)||1));
 }
 
 function codePointLength(t){let n=0;for(const _ of t)n++;return n;}
-
 function renderStats(){
-  const t=state.original||$('#input').value||'';
-  const words=(t.match(/[가-힣A-Za-z0-9]{2,}/g)||[]).length;
-  const lines=t?t.split(/\r?\n/).length:0;
+  const t=state.original||$('#input').value||'',words=(t.match(/[가-힣A-Za-z0-9]{2,}/g)||[]).length,lines=t?t.split(/\r?\n/).length:0;
   $('#textStats').innerHTML=`<span class="statpill">문자 <b>${codePointLength(t)}</b></span><span class="statpill">단어 <b>${words}</b></span><span class="statpill">줄 <b>${lines}</b></span>`;
   $('#cleanScore').textContent=`텍스트 위생 ${state.original?state.score:'--'}`;
 }
 
 function buildReviews(){
-  state.reviews=sentences(state.base||'').map((x,i)=>{
+  const all=sentences(state.base||''),limit=400;state.reviewOverflow=Math.max(0,all.length-limit);
+  state.reviews=all.slice(0,limit).map((x,i)=>{
     let score=0,reasons=[];
-    if($('#length').checked){
-      if(x.text.length>100){score+=2;reasons.push('100자 초과 긴 문장');}
-      else if(x.text.length>72){score++;reasons.push('조금 긴 문장');}
-    }
-    const inner=issues(x.text);
-    if(inner.length){score+=Math.min(2,inner.length);reasons.push(...inner.slice(0,2).map(v=>v.cat));}
+    if($('#length').checked){if(x.text.length>100){score+=2;reasons.push('100자 초과 긴 문장');}else if(x.text.length>72){score++;reasons.push('조금 긴 문장');}}
+    const sig=sentenceSignals(x.text);if(sig.length){score+=Math.min(2,sig.length);reasons.push(...sig.slice(0,2));}
     return {id:'s'+i,...x,score,reasons:[...new Set(reasons)],edit:x.text,selected:score>=1.5};
   });
   const box=$('#v62ReviewList');
-  box.innerHTML=state.reviews.length?state.reviews.map(r=>`<div class="v62review ${r.score>=1.5?'attn':''}"><div class="itemtop"><label class="check"><input type="checkbox" data-rsel="${r.id}" ${r.selected?'checked':''}> 선택</label><span class="tag blue">편집 체크 ${r.score.toFixed(1)}</span><span class="v62small">${r.text.length}자</span></div><div class="src">${esc(r.text)}</div><textarea data-redit="${r.id}">${esc(r.edit)}</textarea><div class="v62reason">${r.reasons.length?'확인: '+esc(r.reasons.join(' · ')):'특별한 편집 신호 없음'}</div></div>`).join(''):'<div class="empty">검토할 문장이 없습니다.</div>';
+  const candidates=state.reviews.filter(r=>r.score>=1);
+  $('#reviewPanelStatus').textContent=state.reviewOverflow?`검토 후보 ${candidates.length}개 · ${state.reviewOverflow}문장 추가 생략`:`검토 후보 ${candidates.length}개`;
+  box.innerHTML=candidates.length?candidates.map(r=>`<div class="v62review ${r.score>=1.5?'attn':''}"><div class="itemtop"><label class="check"><input type="checkbox" data-rsel="${r.id}" ${r.selected?'checked':''}> 선택</label><span class="tag blue">편집 체크 ${r.score.toFixed(1)}</span><span class="v62small">${r.text.length}자</span></div><div class="src">${esc(r.text)}</div><textarea spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false" data-redit="${r.id}">${esc(r.edit)}</textarea><div class="v62reason">${r.reasons.length?'확인: '+esc(r.reasons.join(' · ')):'특별한 편집 신호 없음'}</div></div>`).join(''):'<div class="empty">따로 검토할 문장이 없습니다.</div>';
   $$('[data-rsel]').forEach(e=>e.onchange=()=>{const r=state.reviews.find(x=>x.id===e.dataset.rsel);if(r)r.selected=e.checked;});
   $$('[data-redit]').forEach(e=>e.oninput=()=>{const r=state.reviews.find(x=>x.id===e.dataset.redit);if(r)r.edit=e.value;});
+  configureEditors(box);
+}
+
+function countIssuesLight(text){
+  let n=0;
+  n+=(text.match(/자주 묻는 질문\s*\(FAQ\)/g)||[]).length;
+  n+=(text.match(/결론적으로|요약하자면|정리하자면|마무리하자면/g)||[]).length;
+  n+=(text.match(/\*\*[^*\n]+\*\*/g)||[]).length;
+  n+=(text.match(/^#{1,6}\s+.+$/gm)||[]).length;
+  n+=(text.match(/\n{3,}/g)||[]).length;
+  if($('#repeat').checked){const words=text.match(/[가-힣A-Za-z0-9]{2,}/g)||[],f=new Map();for(const w of words)f.set(w,(f.get(w)||0)+1);n+=[...f.values()].filter(v=>v>=6).length;}
+  return n;
 }
 
 function renderCompare(){
   if(!state.original){$('#v62HygBefore').textContent='—';$('#v62HygAfter').textContent='—';return;}
-  const before=state.score,current=$('#output').value||state.working,sc=scan(current);
-  const after=hygiene(current,sc.all,homoglyphs(sc.clean));
-  $('#v62HygBefore').textContent=before+'/100';
-  $('#v62HygAfter').textContent=after+'/100';
-  $('#v62HygDelta').textContent=`기술 흔적 ${state.allChars.length} → ${sc.all.length}`;
-  $('#v62IssueDelta').textContent=`편집 체크 ${state.issues.length} → ${issues(sc.clean).length}`;
+  const current=$('#output').value||state.working,sc=scan(current),after=hygiene(current,sc.all,homoglyphs(sc.clean));
+  $('#v62HygBefore').textContent=state.score+'/100';$('#v62HygAfter').textContent=after+'/100';
+  $('#v62HygDelta').textContent=`기술 흔적 ${state.allChars.length} → ${sc.all.length}`;$('#v62IssueDelta').textContent=`편집 체크 ${state.issues.length} → ${countIssuesLight(sc.clean)}`;
 }
+function queueCompare(){clearTimeout(compareTimer);compareTimer=setTimeout(renderCompare,180);}
 
 function applyReviews(){
   let text=$('#output').value||state.working,done=0;
   for(const r of state.reviews.filter(r=>r.selected&&r.edit!==r.text).sort((a,b)=>b.start-a.start)){
-    let idx=-1;
-    if(text.slice(r.start,r.end)===r.text)idx=r.start;
-    if(idx<0)idx=text.indexOf(r.text,Math.max(0,r.start-80));
-    if(idx<0)idx=text.indexOf(r.text);
+    let idx=-1;if(text.slice(r.start,r.end)===r.text)idx=r.start;if(idx<0)idx=text.indexOf(r.text,Math.max(0,r.start-80));if(idx<0)idx=text.indexOf(r.text);
     if(idx>=0){text=text.slice(0,idx)+r.edit+text.slice(idx+r.text.length);done++;}
   }
-  if(!done)return alert('수정한 문장이 없습니다.');
-  state.working=text;state.manual=true;$('#output').value=text;
-  renderCompare();renderIssues();syncWidgets();flashOutput();
+  if(!done)return showToast('수정한 문장이 없습니다.');
+  state.working=text;state.manual=true;$('#output').value=text;renderCompare();renderIssues();syncWidgets();flashOutput();
 }
 
-function download(name,data,type){
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([data],{type}));
-  a.download=name;a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),500);
-}
-
-function liveDelay(len){return len>50000?950:len>20000?650:360;}
+function download(name,data,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);}
+function liveDelay(len){return len>50000?1100:len>20000?720:380;}
 
 function syncWidgets(){
-  const textVisible=!$('#textTool').classList.contains('hidden');
-  const issueCount=state.issues.length;
-  const techCount=state.allChars.length+state.homoglyphs.length;
-  const iw=$('#issuesWidget'),tw=$('#techWidget');
-  iw.hidden=!textVisible||issueCount===0;
-  tw.hidden=!textVisible||techCount===0;
-  $('#issueCount').textContent=issueCount;
-  $('#techCount').textContent=techCount;
-  iw.classList.toggle('attention',state.issueUnread&&issueCount>0);
-  tw.classList.toggle('attention',state.techUnread&&techCount>0);
-  if(!textVisible){$('#issuesPanel').hidden=true;$('#techPanel').hidden=true;}
+  const textVisible=!$('#textTool').classList.contains('hidden'),issueCount=state.issues.length,reviewCount=state.reviews.filter(r=>r.score>=1).length,techCount=state.allChars.length+state.homoglyphs.length;
+  const iw=$('#issuesWidget'),rw=$('#reviewWidget'),tw=$('#techWidget');
+  iw.hidden=!textVisible||issueCount===0;rw.hidden=!textVisible||reviewCount===0;tw.hidden=!textVisible||techCount===0;
+  $('#issueCount').textContent=issueCount;$('#reviewCount').textContent=reviewCount;$('#techCount').textContent=techCount;
+  iw.classList.toggle('attention',state.issueUnread&&issueCount>0);rw.classList.toggle('attention',state.reviewUnread&&reviewCount>0);tw.classList.toggle('attention',state.techUnread&&techCount>0);
+  if(!textVisible){$('#issuesPanel').hidden=true;$('#reviewPanel').hidden=true;$('#techPanel').hidden=true;}
 }
 
 function openPanel(id){
-  const panel=$('#'+id);
-  panel.hidden=false;
+  const panel=$('#'+id);panel.hidden=false;
   if(id==='issuesPanel'){state.issueUnread=false;$('#issuesWidget').classList.remove('attention');}
+  if(id==='reviewPanel'){state.reviewUnread=false;$('#reviewWidget').classList.remove('attention');}
   if(id==='techPanel'){state.techUnread=false;$('#techWidget').classList.remove('attention');}
   panel.style.zIndex=String(++openPanel.z);
 }
 openPanel.z=220;
 
 function makeDraggable(panel){
-  const handle=panel.querySelector('[data-drag-handle]');
-  if(!handle)return;
-  let drag=null;
-  const key='v64-pos-'+panel.id;
-  try{
-    const saved=JSON.parse(localStorage.getItem(key)||'null');
-    if(saved&&innerWidth>760){panel.style.left=saved.left+'px';panel.style.top=saved.top+'px';panel.style.right='auto';panel.style.bottom='auto';}
-  }catch(_){}
+  const handle=panel.querySelector('[data-drag-handle]');if(!handle)return;let drag=null;const key='v65-pos-'+panel.id;
+  try{const saved=JSON.parse(localStorage.getItem(key)||'null');if(saved&&innerWidth>760){panel.style.left=saved.left+'px';panel.style.top=saved.top+'px';panel.style.right='auto';panel.style.bottom='auto';if(saved.width)panel.style.width=saved.width+'px';if(saved.height)panel.style.height=saved.height+'px';}}catch(_){}
   handle.addEventListener('pointerdown',(e)=>{
-    if(innerWidth<=760||e.target.closest('button'))return;
-    const r=panel.getBoundingClientRect();
-    drag={dx:e.clientX-r.left,dy:e.clientY-r.top,id:e.pointerId};
-    handle.setPointerCapture(e.pointerId);
-    panel.style.left=r.left+'px';panel.style.top=r.top+'px';panel.style.right='auto';panel.style.bottom='auto';
-    panel.style.zIndex=String(++openPanel.z);
+    if(e.button!==0||innerWidth<=760||e.target.closest('button'))return;
+    const r=panel.getBoundingClientRect();drag={dx:e.clientX-r.left,dy:e.clientY-r.top,id:e.pointerId};handle.setPointerCapture(e.pointerId);
+    panel.style.left=r.left+'px';panel.style.top=r.top+'px';panel.style.right='auto';panel.style.bottom='auto';panel.style.zIndex=String(++openPanel.z);
   });
   handle.addEventListener('pointermove',(e)=>{
-    if(!drag||drag.id!==e.pointerId)return;
-    const maxX=Math.max(8,innerWidth-panel.offsetWidth-8),maxY=Math.max(8,innerHeight-panel.offsetHeight-8);
-    panel.style.left=Math.max(8,Math.min(maxX,e.clientX-drag.dx))+'px';
-    panel.style.top=Math.max(8,Math.min(maxY,e.clientY-drag.dy))+'px';
+    if(!drag||drag.id!==e.pointerId)return;const maxX=Math.max(8,innerWidth-panel.offsetWidth-8),maxY=Math.max(8,innerHeight-panel.offsetHeight-8);
+    panel.style.left=Math.max(8,Math.min(maxX,e.clientX-drag.dx))+'px';panel.style.top=Math.max(8,Math.min(maxY,e.clientY-drag.dy))+'px';
   });
-  const end=()=>{
-    if(!drag)return;
-    try{localStorage.setItem(key,JSON.stringify({left:parseFloat(panel.style.left)||8,top:parseFloat(panel.style.top)||8}));}catch(_){}
-    drag=null;
-  };
+  const savePanel=()=>{if(innerWidth<=760||panel.hidden)return;const r=panel.getBoundingClientRect();try{localStorage.setItem(key,JSON.stringify({left:r.left,top:r.top,width:r.width,height:r.height}));}catch(_){}};
+  const end=()=>{if(!drag)return;savePanel();drag=null;};
   handle.addEventListener('pointerup',end);handle.addEventListener('pointercancel',end);
+  if('ResizeObserver' in window){let rt=0;new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(savePanel,140);}).observe(panel);}
 }
 
-let timer;
-$('#input').addEventListener('input',()=>{
-  renderStats();
-  if($('#liveScan').checked){
-    clearTimeout(timer);
-    timer=setTimeout(()=>analyze(true),liveDelay($('#input').value.length));
-  }
-});
-$('#analyze').onclick=()=>analyze(false);
-$('#sample').onclick=()=>{$('#input').value=sample;analyze(true);};
-$('#reset').onclick=()=>location.reload();
+function showToast(message){
+  const t=$('#appToast');t.textContent=message;t.hidden=false;t.classList.remove('show');void t.offsetWidth;t.classList.add('show');
+  clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.hidden=true,180);},1800);
+}
 
+function isTextEditor(el){return !!el&&el.matches&&el.matches('textarea,input[type="text"],input[type="search"],input[type="url"],input[type="email"]');}
+function hideContextMenu(){$('#textContextMenu').hidden=true;contextTarget=null;}
+function showContextMenu(x,y,target){
+  const menu=$('#textContextMenu');contextTarget=target;menu.hidden=false;menu.style.left='0px';menu.style.top='0px';
+  requestAnimationFrame(()=>{const w=menu.offsetWidth,h=menu.offsetHeight;menu.style.left=Math.max(8,Math.min(innerWidth-w-8,x))+'px';menu.style.top=Math.max(8,Math.min(innerHeight-h-8,y))+'px';});
+  menu.querySelectorAll('[data-context-action="paste"],[data-context-action="append"]').forEach(b=>b.disabled=!!target.readOnly||target.disabled);
+}
+async function clipboardRead(){try{return await navigator.clipboard.readText();}catch(_){showToast('클립보드 읽기가 차단됐습니다. 입력창에서 Ctrl+V를 사용하세요.');return null;}}
+async function contextAction(action){
+  const el=contextTarget;if(!el)return hideContextMenu();
+  if(action==='selectAll'){el.focus();el.select();}
+  else if(action==='copy'){const text=el.value.slice(el.selectionStart||0,el.selectionEnd||0)||el.value;try{await navigator.clipboard.writeText(text);showToast('복사했습니다.');}catch(_){showToast('복사 권한이 없어 Ctrl+C를 사용해 주세요.');}}
+  else if(action==='paste'&&!el.readOnly){const text=await clipboardRead();if(text!=null){el.focus();el.setRangeText(text,el.selectionStart,el.selectionEnd,'end');el.dispatchEvent(new Event('input',{bubbles:true}));}}
+  else if(action==='append'&&!el.readOnly){const text=await clipboardRead();if(text!=null){el.focus();const pos=el.selectionEnd;el.setRangeText(text,pos,pos,'end');el.dispatchEvent(new Event('input',{bubbles:true}));}}
+  hideContextMenu();
+}
+
+document.addEventListener('contextmenu',(e)=>{
+  const editor=e.target.closest&&e.target.closest('textarea,input[type="text"],input[type="search"],input[type="url"],input[type="email"]');
+  e.preventDefault();
+  if(editor)showContextMenu(e.clientX,e.clientY,editor);else hideContextMenu();
+});
+document.addEventListener('selectstart',(e)=>{if(!isTextEditor(e.target)&&!e.target.closest('textarea'))e.preventDefault();});
+document.addEventListener('pointerdown',(e)=>{if(!e.target.closest('#textContextMenu'))hideContextMenu();});
+document.addEventListener('dragstart',(e)=>{e.preventDefault();});
+$('#textContextMenu').addEventListener('click',(e)=>{const b=e.target.closest('[data-context-action]');if(b&&!b.disabled)contextAction(b.dataset.contextAction);});
+
+let timer;
+$('#input').addEventListener('input',()=>{renderStats();if($('#liveScan').checked){clearTimeout(timer);timer=setTimeout(()=>analyze(true),liveDelay($('#input').value.length));}});
+$('#analyze').onclick=()=>analyze(false);$('#sample').onclick=()=>{$('#input').value=sample;analyze(true);};$('#reset').onclick=()=>location.reload();
 ['norm','repeat','length','liveScan','cleanProfile'].forEach(id=>$('#'+id).addEventListener('change',()=>{if($('#input').value.trim()&&id!=='liveScan')analyze(true);}));
 
-$('#copy').onclick=async()=>{if($('#output').value)await navigator.clipboard.writeText($('#output').value);};
-$('#downloadTxt').onclick=()=>$('#output').value&&download('cleaned-v6.4.txt',$('#output').value,'text/plain;charset=utf-8');
-$('#downloadJson').onclick=()=>state.original&&download('ai-clean-report-v6.4.json',JSON.stringify({
-  version:'6.4',profile:$('#cleanProfile').value,hygieneScore:state.score,analysisMs:state.analyzeMs,
-  autoProcessed:state.chars,preserved:state.allChars.filter(x=>!x.auto),homoglyphs:state.homoglyphs,suggestions:state.issues
-},null,2),'application/json;charset=utf-8');
-
+$('#copy').onclick=async()=>{if($('#output').value){await navigator.clipboard.writeText($('#output').value);showToast('결과를 복사했습니다.');}};
+$('#downloadTxt').onclick=()=>$('#output').value&&download('cleaned-v6.5.txt',$('#output').value,'text/plain;charset=utf-8');
+$('#downloadJson').onclick=()=>state.original&&download('ai-clean-report-v6.5.json',JSON.stringify({version:'6.5',profile:$('#cleanProfile').value,hygieneScore:state.score,analysisMs:state.analyzeMs,autoProcessed:state.chars,preserved:state.allChars.filter(x=>!x.auto),homoglyphs:state.homoglyphs,suggestions:state.issues},null,2),'application/json;charset=utf-8');
 $('#undoAll').onclick=()=>{if(!state.original)return;state.applied.clear();state.manual=false;state.working=state.base;renderAll();flashOutput();};
-$('#editResult').onclick=()=>{
-  if(!state.original)return;
-  if($('#output').readOnly){$('#output').readOnly=false;$('#output').focus();$('#editResult').textContent='✓ 수정 완료';}
-  else{$('#output').readOnly=true;state.working=$('#output').value;state.manual=true;$('#editResult').textContent='✎ 직접 수정';renderCompare();flashOutput();}
-};
-$('#output').addEventListener('input',()=>{if(!$('#output').readOnly){state.working=$('#output').value;state.manual=true;renderCompare();}});
+$('#editResult').onclick=()=>{if(!state.original)return;if($('#output').readOnly){$('#output').readOnly=false;$('#output').focus();$('#editResult').textContent='✓ 수정 완료';}else{$('#output').readOnly=true;state.working=$('#output').value;state.manual=true;$('#editResult').textContent='✎ 직접 수정';renderCompare();flashOutput();}};
+$('#output').addEventListener('input',()=>{if(!$('#output').readOnly){state.working=$('#output').value;state.manual=true;queueCompare();}});
 $('#v62ApplyReviews').onclick=applyReviews;
 
-$('#textFileInput').addEventListener('change',async e=>{
-  const f=e.target.files&&e.target.files[0];if(!f)return;
-  let s=await f.text();
-  if(/\.html?$/i.test(f.name)){const d=new DOMParser().parseFromString(s,'text/html');s=(d.body&&d.body.innerText)||d.documentElement.textContent||'';}
-  $('#input').value=s;analyze(true);e.target.value='';
-});
+$('#textFileInput').addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;let s=await f.text();if(/\.html?$/i.test(f.name)){const d=new DOMParser().parseFromString(s,'text/html');s=(d.body&&d.body.innerText)||d.documentElement.textContent||'';}$('#input').value=s;analyze(true);e.target.value='';});
 
-$$('[data-resulttab]').forEach(t=>t.onclick=()=>{
-  $$('[data-resulttab]').forEach(x=>x.classList.remove('active'));t.classList.add('active');
-  ['cleaned','xray','review'].forEach(n=>$('#'+n+'Pane').classList.toggle('hidden',t.dataset.resulttab!==n));
-  if(t.dataset.resulttab==='xray')renderXray();
-});
+$$('[data-resulttab]').forEach(t=>t.onclick=()=>activateResultTab(t.dataset.resulttab));
+$$('[data-xray-filter]').forEach(b=>b.onclick=()=>{xrayFilter=b.dataset.xrayFilter;$$('[data-xray-filter]').forEach(x=>x.classList.toggle('active',x===b));$('#xrayView').dataset.filter=xrayFilter;});
 
-$$('[data-tool]').forEach(b=>b.onclick=()=>{
-  $$('[data-tool]').forEach(x=>x.classList.toggle('active',x===b));
-  $('#textTool').classList.toggle('hidden',b.dataset.tool!=='text');
-  $('#imageTool').classList.toggle('hidden',b.dataset.tool!=='image');
-  syncWidgets();
-});
+$$('[data-tool]').forEach(b=>b.onclick=()=>{$$('[data-tool]').forEach(x=>x.classList.toggle('active',x===b));$('#textTool').classList.toggle('hidden',b.dataset.tool!=='text');$('#imageTool').classList.toggle('hidden',b.dataset.tool!=='image');syncWidgets();});
 
-$('#issuesWidget').onclick=()=>openPanel('issuesPanel');
-$('#techWidget').onclick=()=>openPanel('techPanel');
+$('#issuesWidget').onclick=()=>openPanel('issuesPanel');$('#reviewWidget').onclick=()=>openPanel('reviewPanel');$('#techWidget').onclick=()=>openPanel('techPanel');
 $$('[data-close-panel]').forEach(b=>b.onclick=()=>{$('#'+b.dataset.closePanel).hidden=true;});
-makeDraggable($('#issuesPanel'));makeDraggable($('#techPanel'));
+makeDraggable($('#issuesPanel'));makeDraggable($('#reviewPanel'));makeDraggable($('#techPanel'));
 
 const dz=$('#dropzone'),fi=$('#imageInput');
-const runImage=(f)=>{
-  if(typeof window.loadImage!=='function'){
-    $('#imageLoadStatus').textContent='이미지 검사 엔진을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.';
-    return;
-  }
-  window.loadImage(f);
-};
-$('#openImage').onclick=()=>fi.click();
-dz.onclick=e=>{if(!e.target.closest('#openImage'))fi.click();};
-fi.onchange=()=>fi.files&&fi.files[0]&&runImage(fi.files[0]);
-['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('drag');}));
-['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('drag');}));
+const runImage=(f)=>{if(typeof window.loadImage!=='function'){$('#imageLoadStatus').textContent='이미지 검사 엔진을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.';return;}window.loadImage(f);};
+$('#openImage').onclick=()=>fi.click();dz.onclick=e=>{if(!e.target.closest('#openImage'))fi.click();};fi.onchange=()=>fi.files&&fi.files[0]&&runImage(fi.files[0]);
+['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('drag');}));['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('drag');}));
 dz.addEventListener('drop',e=>{const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(f)runImage(f);});
 
-renderStats();renderXray();syncWidgets();
+configureEditors();renderStats();renderXray();syncWidgets();
 })();

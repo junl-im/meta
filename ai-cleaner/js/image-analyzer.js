@@ -42,22 +42,25 @@ function inferMime(file){
   return'image/jpeg';
 }
 
-function sampledAscii(bytes){
-  const MAX=8*1024*1024;
-  const decoder=new TextDecoder('latin1');
-  if(bytes.length<=MAX)return decoder.decode(bytes);
-  const half=MAX/2;
-  return decoder.decode(bytes.subarray(0,half))+'\n'+decoder.decode(bytes.subarray(bytes.length-half));
-}
-
-function scanBinary(buffer,file){
-  const bytes=new Uint8Array(buffer);
+async function scanBinaryFile(file){
+  const SLICE=4*1024*1024;
+  const headSize=Math.min(file.size,SLICE);
+  const tailStart=file.size>SLICE*2?file.size-SLICE:headSize;
+  const head=new Uint8Array(await file.slice(0,headSize).arrayBuffer());
+  let tailText='';
+  if(tailStart<headSize){
+    tailText='';
+  }else if(tailStart<file.size){
+    const tail=new Uint8Array(await file.slice(tailStart,file.size).arrayBuffer());
+    tailText=new TextDecoder('latin1').decode(tail);
+  }
   let format='알 수 없음';
-  if(bytes[0]===0x89&&bytes[1]===0x50&&bytes[2]===0x4e&&bytes[3]===0x47)format='PNG';
-  else if(bytes[0]===0xff&&bytes[1]===0xd8)format='JPEG';
-  else if(bytes[0]===0x52&&bytes[1]===0x49&&bytes[2]===0x46&&bytes[3]===0x46)format='WebP/RIFF';
+  if(head[0]===0x89&&head[1]===0x50&&head[2]===0x4e&&head[3]===0x47)format='PNG';
+  else if(head[0]===0xff&&head[1]===0xd8)format='JPEG';
+  else if(head[0]===0x52&&head[1]===0x49&&head[2]===0x46&&head[3]===0x46)format='WebP/RIFF';
 
-  const ascii=sampledAscii(bytes),low=ascii.toLowerCase();
+  const ascii=new TextDecoder('latin1').decode(head)+(tailText?'\n'+tailText:'');
+  const low=ascii.toLowerCase();
   const c2paHits=['c2pa','application/jumbf','content credentials','contentcredentials'].filter(k=>low.includes(k));
   const generators=[
     ['OpenAI / DALL-E',/(openai|chatgpt|dall[·\- ]?e)/i],['Adobe Firefly',/firefly/i],
@@ -268,11 +271,10 @@ window.loadImage=async function loadImageStrong(file){
   if(!allowed){alert('PNG, JPG, WebP만 지원합니다.');return;}
   setText('imageLoadStatus','파일 읽는 중…');setText('imagePerf','준비');
   try{
-    const buffer=await file.arrayBuffer();if(seq!==analysisSeq)return;
-    const binary=scanBinary(buffer,file);
+    const binaryPromise=scanBinaryFile(file);
     if(currentObjectUrl)URL.revokeObjectURL(currentObjectUrl);currentObjectUrl=URL.createObjectURL(file);
     const img=new Image(),loaded=new Promise((resolve,reject)=>{img.onload=()=>resolve(img);img.onerror=()=>reject(new Error('브라우저에서 이미지를 디코딩하지 못했습니다.'));});img.src=currentObjectUrl;
-    const [image,exif,c2pa]=await Promise.all([loaded,inspectExif(file),inspectC2pa(file)]);if(seq!==analysisSeq)return;
+    const [image,binary,exif,c2pa]=await Promise.all([loaded,binaryPromise,inspectExif(file),inspectC2pa(file)]);if(seq!==analysisSeq)return;
     setText('imageLoadStatus','픽셀 분석 중…');await new Promise(resolve=>requestAnimationFrame(resolve));if(seq!==analysisSeq)return;
     const visual=analyzePixels(image);if(seq!==analysisSeq)return;
     renderResults(file,image,binary,exif,c2pa,visual);
