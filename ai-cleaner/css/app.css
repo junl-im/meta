@@ -68,13 +68,14 @@ details.tech summary::-webkit-details-marker{display:none}.techbody{padding:14px
 .imageScore{margin-top:14px;padding:16px}.bigscore{display:flex;align-items:flex-end;gap:8px}.bigscore .num{font-size:42px;font-weight:950;line-height:1}
 .progress{height:12px;background:#f3e6da;border-radius:999px;overflow:hidden;margin:12px 0}.progress > div{height:100%;width:0;background:linear-gradient(90deg,#f2c14f,#ff7a00,#b42318);transition:.3s}
 .signalgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.signal{border:1px solid var(--line);background:#fff;border-radius:14px;padding:12px}
-.signal b{font-size:11px}.signal p{font-size:10px;color:var(--muted);line-height:1.5;margin:6px 0 0}
+.signal b{font-size:11px}.signal p{font-size:10px;color:var(--muted);line-height:1.5;margin:6px 0 0;overflow-wrap:anywhere}
 .notice{margin-top:12px;padding:11px 13px;border-radius:12px;background:var(--bluebg);color:var(--blue);font-size:11px;line-height:1.6}
 .evidenceList{margin-top:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.evidenceRow{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 12px;font-size:10px;line-height:1.55;color:var(--muted)}.evidenceRow b{color:var(--ink)}.evidenceRow.strong{background:var(--redbg);border-color:#f0c4bf}.evidenceRow.ok{background:var(--greenbg);border-color:#cfe9cf}.evidenceRow.warn{background:var(--yellowbg);border-color:#f4dd9b}.tiny{font-size:9px;color:#a99280}
 .warnbox{background:var(--yellowbg);color:var(--yellow)}
+.provenanceGrid{align-items:start}.provenanceGrid>.card{height:100%}.metaDetailGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.metaDetailGrid .signal{min-width:0}
 @media(max-width:980px){
   .workspace,.lower,.imageGrid{grid-template-columns:1fr}.textarea,.resultarea{height:340px;min-height:340px}
-  .signalgrid,.evidenceList{grid-template-columns:1fr}.toolnav button{padding:8px 10px}.top .sub{display:none}
+  .signalgrid,.evidenceList,.metaDetailGrid{grid-template-columns:1fr}.toolnav button{padding:8px 10px}.top .sub{display:none}
 }
 
 /* v6.0 text cleanroom additions */
