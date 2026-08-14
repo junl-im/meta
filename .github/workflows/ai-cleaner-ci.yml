@@ -46,6 +46,7 @@ jobs:
           node --check ai-cleaner/js/app.js
           node --check ai-cleaner/js/image-analyzer.js
           node --check ai-cleaner/tests/regression.js
+          node --check ai-cleaner/tests/report.js
           node --check ai-cleaner/tests/static-check.mjs
 
       - name: Static migration checks
