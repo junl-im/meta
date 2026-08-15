@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "6.8.3",
+  "version": "6.8.4",
   "date": "2026-08-15",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -27,12 +27,12 @@
     ".github/workflows/ai-cleaner-ci.yml"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "6.8.3",
-  "asset_version": "683",
+  "current_version": "6.8.4",
+  "asset_version": "684",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "v6.8.3 Cohesion & Integrity + original direct-write verified-result mode",
+  "latestPatch": "v6.8.4 internal result typewriter: original -> result one grapheme at a time, exact verification",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -58,5 +58,13 @@
     "protectedPathsExcluded": [
       "OPTION/**"
     ]
+  },
+  "internalTypewriter": {
+    "source": "original",
+    "target": "result textarea",
+    "clipboard": false,
+    "syntheticKeyboardEvents": false,
+    "incrementalSetRangeText": true,
+    "exactVerification": true
   }
 }

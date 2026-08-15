@@ -75,11 +75,11 @@
 ## CI
 - `.github/workflows/ai-cleaner-ci.yml`: checkout@v7, setup-node@v6, Node 24.
 - JS syntax, static-check, OPTION 보호를 검사한다.
-- v6.8.3은 static-check + Playwright browser-smoke workflow를 포함한다. 실제 GitHub Actions 성공 여부는 Push 후 확인한다.
+- 2026-08-14 v6.5.1 기준 Actions와 Pages 둘 다 Success 확인됨.
 
 ## 다음 개선 후보
 - PDF/DOCX 안전한 로컬 파일 import.
-- Playwright browser-smoke 범위를 모바일/태블릿·팝업 focus flow·직접 작성 모드까지 계속 확장.
+- 실제 브라우저 회귀 테스트를 CI에서 headless browser로 자동화(현재 정적 검사가 중심).
 - 접근성: 키보드 focus trap, ESC로 팝업 닫기, aria-live 알림 정교화.
 - 긴 문서에서 위치 네비게이션/문장검토 벤치마크.
 - 이미지 픽셀 계산을 Web Worker/OffscreenCanvas로 이동할 수 있는지 검토.
@@ -90,7 +90,7 @@
 3. `node ai-cleaner/tests/static-check.mjs` 통과.
 4. HTML ID 중복/DOM 참조 누락 0.
 5. `version.json`, HTML app-version, APP_VERSION 일치.
-6. 태블릿/모바일 980px 이하에서 팝업은 하단 시트, 본문 overflow 정상.
+6. 모바일 760px 이하에서 팝업은 하단 시트, 본문 overflow 정상.
 7. GitHub Pages 루트 주소에서 `/ai-cleaner/` 진입 정상.
 
 
@@ -151,9 +151,20 @@
 - 패치 ZIP에 의미 없는 README/설명 파일은 넣지 않는다. 단, 사용자가 인수인계 갱신을 요청했거나 PROJECT_HANDOFF 자체가 변경된 버전은 변경된 PROJECT_HANDOFF 파일을 패치에도 포함한다.
 
 
-## v6.8.3 원본 그대로 쓰기
+## v6.8.3 원본 직접 쓰기
 - 재작성 스튜디오의 두 번째 핵심 탭은 `⌨ 원본 그대로 쓰기`. 작성 대상은 원본으로 고정한다.
 - 사용자가 앱 내부 textarea에서 실제 키보드로 입력한 문자열만 code point 기준으로 원본과 비교한다. 자동 키 입력/외부 앱 매크로/사람 입력 시뮬레이션은 구현하지 않는다.
 - paste/drop/copy/cut, Ctrl/Cmd+V/C/X, Shift+Insert, beforeinput의 paste/drop 계열, 비신뢰(synthetic) input 이벤트를 차단한다. 한글 IME composition, Backspace, 방향키, 선택 수정은 허용한다.
 - 원본과 100% 일치한 경우에만 **사용자가 직접 작성한 입력 문자열**을 결과에 반영한다. 원본 변수에서 자동 복제해서 결과를 채우는 경로는 제공하지 않는다.
 - 브라우저 환경에서 물리 하드웨어 입력을 암호학적으로 증명할 수는 없으므로, 표준 웹 입력 경로에서 자동 삽입을 최대한 차단하는 best-effort 검증 모드로 설명한다.
+
+
+## v6.8.4 원본 자동 작성(Typewriter)
+- 사용자가 요구한 자동 작성은 외부 사이트/앱 키보드 매크로가 아니라 **AI Cleaner 내부 결과 textarea에 원본을 한 글자씩 누적 작성하는 기능**으로 구현한다.
+- 브리지 버튼 `▶ 원본 자동 작성 / 한 글자씩`을 누르면 원본 textarea의 문자열을 읽고 결과 textarea를 비운 뒤 `Intl.Segmenter(..., grapheme)` 기준(미지원 시 Array.from fallback)으로 순서대로 작성한다.
+- 작성 루프는 `textarea.setRangeText()`로 한 grapheme씩 결과 끝에 추가한다. Clipboard API, paste, `KeyboardEvent`/`InputEvent` 합성, 외부 앱 입력은 사용하지 않는다.
+- 작성 중 원본과 충돌 가능한 결과 편집/Undo/교정/재작성 위젯을 잠그고, 원본 textarea도 임시 readOnly로 고정한다. ESC/닫기로 중지하면 시작 전 히스토리 상태를 복원한다.
+- 완료 시 결과 문자열과 원본 문자열을 strict equality로 검증한다. 100% 일치할 때만 교정 기준선/Undo 히스토리를 확정하고 결과 화면을 보여준다. 실패하면 결과를 확정하지 않는다.
+- 자동 업데이트는 Typewriter 실행 중에는 보류한다.
+- `⌨ 원본 직접 쓰기`는 별도 기능으로 유지하며 실제 사용자의 물리 키보드 입력 검증용이다.
+- 안전 경계: 내부 결과창 시각/문자열 생성은 허용하지만 외부 사이트나 다른 앱에 사람이 입력한 것처럼 합성 키 이벤트를 보내는 자동화는 계속 구현하지 않는다.

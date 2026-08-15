@@ -1,5 +1,17 @@
 import { test, expect } from '@playwright/test';
 
+
+
+test('original auto typewriter writes into result and verifies exact equality', async ({ page }) => {
+  await page.goto('/ai-cleaner/');
+  const source='가나다\nABC🙂';
+  await page.locator('#input').fill(source);
+  await page.locator('#input').dispatchEvent('input');
+  await page.locator('#typingPreviewSpeed').selectOption('0');
+  await page.locator('#typingPreviewButton').click();
+  await expect(page.locator('#output')).toHaveValue(source,{timeout:5000});
+  await expect(page.locator('#output')).toHaveAttribute('data-typewriter-verified','true',{timeout:5000});
+});
 test('AI Cleaner v6.8.2 core browser flow', async ({ page }) => {
   await page.goto('http://127.0.0.1:4173/ai-cleaner/', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('#versionBadge')).toHaveText('v6.8.2');
