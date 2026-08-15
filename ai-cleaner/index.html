@@ -7,10 +7,12 @@
 <meta name="description" content="브라우저에서 로컬로 동작하는 글 다듬기·이미지 출처 신호 검사 도구">
 <meta name="theme-color" content="#fff8f0">
 <meta name="referrer" content="no-referrer">
-<style id="bootCritical">html:not(.boot-ready) body{visibility:hidden}html{background:#fff8f0}</style>
+<style id="bootCritical">html:not(.boot-ready) body{visibility:hidden}html{background:#fff8f0}html.app-booting body{cursor:progress}html.app-booting body *{cursor:progress!important}</style>
 <script>
 (() => {
   'use strict';
+  window.__AI_CLEANER_APP_READY__=false;
+  document.documentElement.classList.add('app-booting');
   const domReady = document.readyState === 'loading' ? new Promise(r => document.addEventListener('DOMContentLoaded', r, {once:true})) : Promise.resolve();
   const addLink = (rel, href, attrs={}) => { const l=document.createElement('link'); l.rel=rel; l.href=href; Object.entries(attrs).forEach(([k,v])=>l.setAttribute(k,v)); document.head.appendChild(l); return l; };
   const loadScript = (src) => new Promise((resolve,reject) => { const s=document.createElement('script'); s.src=src; s.async=false; s.onload=resolve; s.onerror=()=>reject(new Error('스크립트 로드 실패: '+src)); document.body.appendChild(s); });
@@ -29,6 +31,7 @@
     const badge=document.getElementById('versionBadge'); if(badge)badge.textContent=version?'v'+version:'version';
     const footer=document.getElementById('footerVersion'); if(footer)footer.textContent=version?'v'+version:'';
     if(version)document.title='곰같은여우의 AI 흔적 지우개 v'+version;
+    if(document.body){document.body.inert=true;document.body.setAttribute('aria-busy','true');}
     document.documentElement.classList.add('boot-ready');
     const coreScripts=[
       'js/core/event-bus.js','js/core/history-store.js','js/core/work-lock.js','js/core/text-utils.js',
@@ -37,8 +40,18 @@
     ];
     for(const src of coreScripts)await loadScript(src+'?v='+av);
     await loadScript('js/app.js?v='+av);
+    if(!window.AICleanerApp)throw new Error('앱 초기화 완료 객체가 없습니다.');
+    window.AICleanerApp.ready=true;
+    window.__AI_CLEANER_APP_READY__=true;
+    document.documentElement.classList.remove('app-booting');
+    document.documentElement.classList.add('app-ready');
+    if(document.body){document.body.inert=false;document.body.setAttribute('aria-busy','false');}
+    document.dispatchEvent(new CustomEvent('ai-cleaner:ready',{detail:{version:String(config.version||'local'),assetVersion:String(config.assetVersion||'')}}));
   }
-  boot().catch(err=>{console.error(err);document.documentElement.classList.add('boot-ready');});
+  boot().catch(err=>{
+    console.error(err);window.__AI_CLEANER_APP_READY__=false;document.documentElement.classList.remove('app-booting');document.documentElement.classList.add('boot-ready','app-boot-failed');
+    if(document.body){document.body.inert=true;document.body.setAttribute('aria-busy','false');}
+  });
 })();
 </script>
 </head>

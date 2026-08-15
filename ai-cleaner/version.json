@@ -1,6 +1,6 @@
 {
-  "version": "1.4.1",
-  "assetVersion": "141",
+  "version": "1.4.2",
+  "assetVersion": "142",
   "channel": "stable",
-  "updateMode": "worker-stability-timeout-cooldown-stale-event-isolation"
+  "updateMode": "boot-readiness-app-ready-browser-smoke-fix"
 }

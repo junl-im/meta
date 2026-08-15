@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "date": "2026-08-15",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -42,12 +42,12 @@
     "ai-cleaner/js/workers/text-analysis-worker.js"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.4.1",
-  "asset_version": "141",
+  "current_version": "1.4.2",
+  "asset_version": "142",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.4.1 Worker Stability Audit: timeout fallback, circuit-breaker cooldown, stale worker event isolation, messageerror recovery",
+  "latestPatch": "1.4.2 Boot Readiness: app-ready contract, pre-ready interaction lock, readiness-aware browser smoke",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -119,7 +119,7 @@
     "ciPanelSwitchFix": true,
     "hiddenControlE2EFix": true
   },
-  "nextPhase": "1.5.0 large-document performance/worker tuning after 1.4.1 browser-smoke validation",
+  "nextPhase": "1.5.0 large-document performance/worker tuning after 1.4.2 browser-smoke validation",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -178,7 +178,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "141",
+  "assetVersion": "142",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -187,7 +187,7 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "120 passed / 0 failed",
+    "staticChecks": "124 passed / 0 failed",
     "moduleChecks": "PASS",
     "jsSyntax": "PASS",
     "workflowYaml": "PASS",
@@ -228,5 +228,16 @@
     "idleSchedulerFailureFallback": true,
     "thresholdBoundaryCovered": true,
     "delivered140UsedAsPatchBaseline": true
+  },
+  "bootReadiness142": {
+    "explicitAppReadyFlag": true,
+    "appReadyCssClass": true,
+    "readyEvent": "ai-cleaner:ready",
+    "preReadyBodyInert": true,
+    "ariaBusyLifecycle": true,
+    "e2eWaitsForAppReady": true,
+    "foundationModuleRaceFixed": true,
+    "longWorkerInputRaceFixed": true,
+    "delivered141UsedAsPatchBaseline": true
   }
 }

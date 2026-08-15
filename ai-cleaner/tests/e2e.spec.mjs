@@ -9,8 +9,15 @@ test.beforeEach(async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
 });
 
-test('original auto typewriter writes visible text and removes safe hidden characters', async ({ page }) => {
+async function gotoReady(page){
   await page.goto(BASE,{waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>window.__AI_CLEANER_APP_READY__===true&&!!window.AICleanerApp,{timeout:15000});
+  await expect(page.locator('html')).toHaveClass(/app-ready/);
+  await expect(page.locator('body')).toHaveAttribute('aria-busy','false');
+}
+
+test('original auto typewriter writes visible text and removes safe hidden characters', async ({ page }) => {
+  await gotoReady(page);
   const source='가\u200B나다\u00AD\u061C\nABC🙂e\u0301\u00A0끝👩‍💻';
   const expected='가나다\nABC🙂e\u0301 끝👩‍💻';
   await page.locator('#input').fill(source);
@@ -30,8 +37,20 @@ test('original auto typewriter writes visible text and removes safe hidden chara
   await expect(page.locator('#cleanProfile')).toBeEnabled();
 });
 
+test('boot readiness blocks interaction until app wiring is complete', async ({ page }) => {
+  await gotoReady(page);
+  const ready=await page.evaluate(()=>({
+    flag:window.__AI_CLEANER_APP_READY__===true,
+    classReady:document.documentElement.classList.contains('app-ready'),
+    busy:document.body.getAttribute('aria-busy'),
+    inert:document.body.inert,
+    appReady:window.AICleanerApp?.ready===true
+  }));
+  expect(ready).toEqual({flag:true,classReady:true,busy:'false',inert:false,appReady:true});
+});
+
 test('foundation flow keeps state, layout and rewrite tools coherent', async ({ page }) => {
-  await page.goto(BASE,{waitUntil:'domcontentloaded'});
+  await gotoReady(page);
   await expect(page.locator('#versionBadge')).toHaveText('v'+APP_VERSION);
   const modules=await page.evaluate(()=>({
     history:!!window.AICleanerApp?.historyStore,
@@ -89,7 +108,7 @@ test('foundation flow keeps state, layout and rewrite tools coherent', async ({ 
 
 test('layout bridge floats between two cards without reserving a desktop column', async ({ page }) => {
   await page.setViewportSize({width:1280,height:900});
-  await page.goto(BASE,{waitUntil:'domcontentloaded'});
+  await gotoReady(page);
   const geo=await page.locator('.workspace').evaluate((ws)=>{
     const cards=[...ws.querySelectorAll(':scope > .card')];
     const bridge=ws.querySelector('.bridgeAction');
@@ -112,7 +131,7 @@ test('layout bridge floats between two cards without reserving a desktop column'
 
 test('mobile compact panels open small and expand on demand', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto(BASE,{waitUntil:'domcontentloaded'});
+  await gotoReady(page);
   await expect(page.locator('.pill')).toContainText(APP_VERSION);
   await page.locator('#input').fill('모바일 팝업 테스트입니다. 하지만 문장이 길어지면 검토 제안이 표시될 수 있습니다. 그리고 결과도 확인합니다.');
   await page.locator('#analyze').evaluate(el => el.click());
@@ -133,7 +152,7 @@ test('mobile compact panels open small and expand on demand', async ({ page }) =
 });
 
 test('long live analysis runs through worker-safe adapter', async ({ page }) => {
-  await page.goto(BASE,{waitUntil:'domcontentloaded'});
+  await gotoReady(page);
   const longText=('긴 문장 자동 분석 테스트입니다. 숨은 문자\u200B도 정리합니다. ').repeat(180);
   expect(longText.length).toBeGreaterThan(6000);
   await page.locator('#input').fill(longText);

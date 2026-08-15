@@ -330,3 +330,13 @@
 - Validation: module checks PASS, static/architecture 120 passed / 0 failed, JavaScript syntax PASS, workflow YAML PASS. Local browser smoke is not claimed until Playwright dependencies install successfully; verify GitHub Actions `browser-smoke` after push.
 - Next recommended structural step: 1.5.0 large-document performance/Worker tuning after 1.4.1 browser-smoke is green.
 - Local browser validation note: `npm install --ignore-scripts --no-audit --no-fund` timed out at the 120-second execution limit in this environment. It was not retried; any partial `node_modules` / `package-lock.json` was removed. Do not claim local Chromium E2E passed.
+
+
+## 1.4.2 Boot Readiness / Browser Smoke Fix
+- Root cause from GitHub Actions run 31889020366: `DOMContentLoaded` occurred before the asynchronous core/app script chain completed. `boot-ready` exposed the UI too early, so E2E could read `window.AICleanerApp` before creation and could fill the long-text input before its live-analysis handler was attached.
+- Introduces an explicit app-ready contract: `window.__AI_CLEANER_APP_READY__ === true`, `html.app-ready`, `window.AICleanerApp.ready === true`, and `ai-cleaner:ready`. These are published only after `app.js` load completes and the app object exists.
+- During the visible-but-not-yet-ready interval, `body.inert=true` and `aria-busy=true` block real interaction. At ready they are cleared. A boot failure remains non-interactive and is marked `html.app-boot-failed` instead of pretending readiness.
+- Browser E2E uses a common readiness-aware navigation helper before every test. This directly fixes the 1.4.1 foundation-module race and the >6000-character Worker test that previously left output empty because the input event handler was not wired yet.
+- No Worker tuning or UI contract change in 1.4.2; this is a boot lifecycle correctness patch.
+
+- 1.4.2 validation: module checks PASS, static/architecture 124 passed / 0 failed, JavaScript syntax PASS, workflow YAML PASS. Local Playwright/Chromium setup timed out at the 120-second execution limit and was not retried; partial install/test artifacts were removed. GitHub Actions `browser-smoke` remains the final browser verification.
