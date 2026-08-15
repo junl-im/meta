@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "date": "2026-08-15",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -30,15 +30,19 @@
     "ai-cleaner/js/rewrite-studio.js",
     "ai-cleaner/js/image-analyzer.js",
     "ai-cleaner/version.json",
-    ".github/workflows/ai-cleaner-ci.yml"
+    ".github/workflows/ai-cleaner-ci.yml",
+    "ai-cleaner/js/core/state-store.js",
+    "ai-cleaner/js/core/text-engine.js",
+    "ai-cleaner/js/services/update-manager.js",
+    "ai-cleaner/js/features/file-import.js"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.1.1",
-  "asset_version": "111",
+  "current_version": "1.2.0",
+  "asset_version": "120",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.1.1 visible-text write: X-ray UI removed, safe hidden Unicode auto-clean, widget labels restored, typewriter renamed",
+  "latestPatch": "1.2.0 modular core phase 2: stable state store, text engine, file import service, update manager extracted",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -107,21 +111,25 @@
     "ciPanelSwitchFix": true,
     "hiddenControlE2EFix": true
   },
-  "nextPhase": "1.2.0 modular core phase 2 after 1.1.1 UI/text-policy stabilization",
+  "nextPhase": "1.3.0 modular core phase 3 / worker-ready computation boundary after 1.2.0 browser-smoke validation",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
     "scheme": "semantic versioning"
   },
   "modularCore": {
-    "phase": 1,
+    "phase": 2,
     "uiContract": "1.0.0 preserved",
     "bootOrder": [
       "core/event-bus",
       "core/history-store",
       "core/work-lock",
       "core/text-utils",
+      "core/state-store",
+      "core/text-engine",
+      "services/update-manager",
       "ui/panel-manager",
+      "features/file-import",
       "features/typewriter-engine",
       "app"
     ],
@@ -133,6 +141,11 @@
     "sharedTextUtils": true,
     "rewriteLazyLoaded": true,
     "imageLazyLoaded": true,
-    "moduleUnitChecks": true
+    "moduleUnitChecks": true,
+    "stateStore": true,
+    "stateRevisionBoundary": true,
+    "textEngine": true,
+    "fileImportService": true,
+    "updateManager": true
   }
 }

@@ -1,6 +1,6 @@
 # AI Cleaner 프로젝트 인수인계 메모리
 
-업데이트: 2026-08-15 · 현재 패키지: 1.1.1
+업데이트: 2026-08-15 · 현재 패키지: 1.2.0
 
 ## 새 채팅에서 가장 먼저 읽을 것
 이 폴더를 새 채팅에 업로드한 뒤 `PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md 읽고 이어서 개발하자`라고 요청한다. 이 문서는 프로젝트의 결정사항, 보호 경로, UX 방향, 안전 제약, 배포 방식, 알려진 이슈를 보존하기 위한 인수인계 메모리다.
@@ -26,7 +26,7 @@
 - 원본/결과/문장 편집 textarea만 텍스트 선택을 허용한다. 일반 UI는 기본 우클릭/드래그 선택을 막는다. textarea 우클릭은 자체 메뉴를 사용한다.
 - 브라우저 맞춤법/자동교정/Grammarly 힌트는 textarea에서 최대한 끈다.
 - 반복 단어/교정 항목의 `🔍 위치 보기`는 textarea 내부 scrollTop을 계산해 실제 등장 위치로 이동해야 한다.
-- X-ray는 표시 전용. 숨은 Unicode 위치를 보여주며 클릭 시 원본 위치로 이동한다.
+- X-ray 전용 결과 탭은 1.1.1에서 제거했다. 숨은 Unicode/특수 공백/유사문자는 `기술 정보` 패널에서 확인한다.
 
 ## 텍스트 안전 정책
 - 자동 제거 가능: ZWSP, BIDI/control 계열, 표준 프로필의 특수 공백.
@@ -59,7 +59,7 @@
 - 시각 휴리스틱 점수는 확률이 아니며 UI에서 참고 지수로만 표현한다.
 
 ## 성능 결정
-- X-ray 위치 조회는 Map 기반. 탭을 열 때만 렌더링.
+- 기술 정보는 최대 표시량을 제한하고, 핵심 텍스트 분석은 1.2.0의 `core/text-engine.js`에서 DOM과 분리해 계산한다.
 - 실시간 텍스트 분석은 문서 길이에 따라 debounce 증가.
 - 문장 검토 UI는 최대 400문장.
 - 이미지 연속 선택 시 analysis sequence token으로 오래된 비동기 결과가 새 이미지 결과를 덮지 못하게 함.
@@ -79,7 +79,7 @@
 
 ## 다음 개선 후보
 - PDF/DOCX 안전한 로컬 파일 import.
-- 실제 브라우저 회귀 테스트를 CI에서 headless browser로 자동화(현재 정적 검사가 중심).
+- Playwright browser-smoke는 CI에 존재한다. 새 모듈화 이후에는 static/module checks와 browser-smoke를 함께 유지한다.
 - 접근성: 키보드 focus trap, ESC로 팝업 닫기, aria-live 알림 정교화.
 - 긴 문서에서 위치 네비게이션/문장검토 벤치마크.
 - 이미지 픽셀 계산을 Web Worker/OffscreenCanvas로 이동할 수 있는지 검토.
@@ -90,7 +90,7 @@
 3. `node ai-cleaner/tests/static-check.mjs` 통과.
 4. HTML ID 중복/DOM 참조 누락 0.
 5. `version.json`, HTML app-version, APP_VERSION 일치.
-6. 모바일 760px 이하에서 팝업은 하단 시트, 본문 overflow 정상.
+6. 모바일/태블릿 980px 이하에서 compact 하단 시트, 확대/축소, 본문 overflow 정상.
 7. GitHub Pages 루트 주소에서 `/ai-cleaner/` 진입 정상.
 
 
@@ -238,3 +238,18 @@
 - 모바일 420px 이하에서도 floating widget의 이름을 숨기지 않는다. badge만 숨기고 아이콘 + `새 글 재작성` / `교정 제안` / `문장 검토` / `기술 정보` 명칭은 계속 표시한다.
 - 중앙 브리지 메뉴명은 `자동작성 원본 새로쓰기`로 고정한다.
 - 모바일 compact panel 정책은 1.0.0/1.1.0 계약을 그대로 유지한다.
+
+
+## 1.2.0 Modular Core · Phase 2
+- 1.0.0 이후 고정한 UI/레이아웃 계약을 유지하고 `state boundary / text engine / file import / update manager`를 `app.js` 밖으로 분리한다.
+- `core/state-store.js`: 텍스트 작업 상태의 **단일 안정 객체**를 소유한다. `replace/reset` 시 객체 참조 자체를 바꾸지 않아 다른 기능이 오래된 state 객체를 들고 있는 문제를 막는다. `text:changed` 이벤트에는 증가하는 revision을 같이 실어 비동기/Worker 단계의 stale-result 판정 기반으로 사용한다.
+- `core/text-engine.js`: 숨은 Unicode/특수 공백 검사, 의미 민감 Unicode 보존, homoglyph 탐지, 문장 분리, 교정 제안 규칙, 위생 점수, 리뷰 추천 계산을 소유한다. UI 설정은 옵션으로 전달받고 DOM을 직접 읽지 않는다.
+- `features/file-import.js`: 20MB 제한, 바이너리성 텍스트 거부, RTF `\\uN`, HTML/XML/일반 텍스트 변환을 소유한다. app.js에는 파일 선택과 사용자 알림 연결만 남긴다.
+- `services/update-manager.js`: `version.json` polling, update busy, draft 저장/회수, 같은 버전 재로딩 방지, online/visibility/interval 스케줄을 소유한다. UI draft snapshot/restore는 callback으로 주입한다.
+- 부팅 순서: `event-bus → history-store → work-lock → text-utils → state-store → text-engine → update-manager → panel-manager → file-import → typewriter-engine → app.js`. rewrite/image 엔진은 계속 lazy-load한다.
+- `app.js`는 약 717줄에서 약 578줄로 줄었고, 남은 책임은 화면 렌더/사용자 이벤트/도메인 연결 위주다. 파일만 나눈 가짜 모듈화가 아니라 기존 pure/service 책임을 실제 모듈로 이동했다.
+- `tests/module-check.mjs`는 Phase 2 모듈의 상태 객체 identity/revision, Unicode 분석, RTF/바이너리/용량 guard, update draft/reload 준비를 브라우저 없이 검사한다.
+- GitHub Actions static-checks는 새 모듈 문법 + module-check + architecture static-check를 모두 실행한다.
+- UI 변경 의도 없음: 모바일 compact panel, floating widget 명칭, `자동작성 원본 새로쓰기`, visible-text sanitizer 정책은 1.1.1과 동일하다.
+- 다음 구조 단계는 **1.3.0**에서 Diff/분석 계산의 Worker 경계를 준비하거나 render/controller 경계를 더 분리하는 방향. 먼저 1.2.0 browser-smoke가 실제 Push 환경에서 녹색인지 확인한다.
+- 결과물 전달 규칙은 계속 고정: 최종 답변 하단에 전체 통 프로젝트 ZIP + 직전 버전 기준 덮어쓰기 패치 ZIP 두 개를 제공하고 `OPTION/**`은 절대 포함/변경하지 않는다.

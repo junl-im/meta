@@ -1,6 +1,6 @@
 {
-  "version": "1.1.1",
-  "assetVersion": "111",
+  "version": "1.2.0",
+  "assetVersion": "120",
   "channel": "stable",
-  "updateMode": "version-json-boot-session-restore-lazy-tools-modular-core-phase-1-visible-text-write"
+  "updateMode": "version-json-session-restore-lazy-tools-modular-core-phase-2"
 }

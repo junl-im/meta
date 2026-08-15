@@ -4,13 +4,17 @@
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 const Modules=window.AICleanerModules||{};
-const requiredModules=['createEventBus','createHistoryStore','createWorkLock','splitGraphemesExact','sanitizeVisibleTypingSource','createPanelManager','createTypewriterEngine'];
+const requiredModules=['createEventBus','createHistoryStore','createWorkLock','splitGraphemesExact','sanitizeVisibleTypingSource','createTextStateStore','createTextEngine','createFileImportService','createUpdateManager','createPanelManager','createTypewriterEngine'];
 const missingModules=requiredModules.filter(name=>typeof Modules[name]!=='function');
 if(missingModules.length)throw new Error('AI Cleaner core modules missing: '+missingModules.join(', '));
 const eventBus=Modules.createEventBus();
 const workLock=Modules.createWorkLock();
 const splitGraphemesExact=Modules.splitGraphemesExact;
 const sanitizeVisibleTypingSource=Modules.sanitizeVisibleTypingSource;
+const textStateStore=Modules.createTextStateStore();
+const state=textStateStore.state;
+const textEngine=Modules.createTextEngine();
+const fileImport=Modules.createFileImportService();
 
 const APP_META=window.__AI_CLEANER_VERSION__||{};
 const APP_VERSION=String(APP_META.version||'local');
@@ -23,9 +27,6 @@ function loadLazyScript(src){
 }
 async function ensureImageAnalyzer(){if(typeof window.loadImage==='function')return window.loadImage;await loadLazyScript(`js/image-analyzer.js?v=${ASSET_VERSION}`);if(typeof window.loadImage!=='function')throw new Error('이미지 검사 엔진 초기화 실패');return window.loadImage;}
 async function ensureRewriteStudio(){if(window.AICleanerRewriteStudio)return window.AICleanerRewriteStudio;await loadLazyScript(`js/rewrite-studio.js?v=${ASSET_VERSION}`);if(!window.AICleanerRewriteStudio)throw new Error('재작성 스튜디오 초기화 실패');return window.AICleanerRewriteStudio;}
-const UPDATE_DRAFT_KEY='ai-cleaner-update-draft-v1';
-const UPDATE_RELOAD_KEY='ai-cleaner-refresh-target';
-let appUpdateCheckBusy=false;
 const historyStore=Modules.createHistoryStore({limit:60,signature:s=>JSON.stringify([s.output,s.manual,s.applied,s.issueBase])});
 let manualEditBaseline='';
 let inputDirty=false;
@@ -39,53 +40,27 @@ function applyVersionUi(){
   if(APP_VERSION!=='local')document.title=`곰같은여우의 AI 흔적 지우개 v${APP_VERSION}`;
 }
 
-function captureUpdateDraft(targetVersion){
-  try{
-    const draft={
-      savedAt:Date.now(),targetVersion,
-      input:$('#input')?.value||'',output:$('#output')?.value||'',
-      outputReadOnly:$('#output')?.readOnly!==false,
-      settings:{profile:$('#cleanProfile')?.value||'standard',norm:!!$('#norm')?.checked,repeat:!!$('#repeat')?.checked,length:!!$('#length')?.checked,liveScan:!!$('#liveScan')?.checked},
-      activeTool:document.querySelector('[data-tool].active')?.dataset.tool||'text',
-      resultTab:document.querySelector('[data-resulttab].active')?.dataset.resulttab||'cleaned'
-    };
-    sessionStorage.setItem(UPDATE_DRAFT_KEY,JSON.stringify(draft));
-  }catch(_){}
-}
-
-async function checkForAppUpdate(){
-  if(appUpdateCheckBusy||APP_VERSION==='local'||workLock.isLocked('typewriter'))return;
-  appUpdateCheckBusy=true;
-  try{
-    const res=await fetch(`version.json?ts=${Date.now()}`,{cache:'no-store'});if(!res.ok)return;
-    const data=await res.json(),latest=String(data&&data.version||'').trim();if(!latest)return;
-    if(latest===APP_VERSION){try{sessionStorage.removeItem(UPDATE_RELOAD_KEY);}catch(_){}return;}
-    let already='';try{already=sessionStorage.getItem(UPDATE_RELOAD_KEY)||'';}catch(_){}
-    if(already===latest)return;
-    captureUpdateDraft(latest);try{sessionStorage.setItem(UPDATE_RELOAD_KEY,latest);}catch(_){}
-    const url=new URL(location.href);url.searchParams.set('__appv',latest);url.searchParams.set('__fresh',String(Date.now()));location.replace(url.toString());
-  }catch(_){}finally{appUpdateCheckBusy=false;}
-}
-
-const sample = 'AI가\u200B 쓴 글에는\u200E 보이지 않는 문자가 섞일 수 있어요.\u00A0\n\n결론적으로 이번 제품은 생각보다 사용감이 좋았습니다.\n정말 정말 좋은 제품이라서 적극 추천드립니다.\n정말 좋은 선택이고 정말 좋은 경험이며 정말 좋은 결과입니다.\n정말 좋은 문장이라 정말 좋은 표현을 반복해서 정말 좋은 예시를 만듭니다.\n\n자주 묻는 질문 (FAQ)';
-const specialSpaces = new Set([0xA0,0x1680,0x2000,0x2001,0x2002,0x2003,0x2004,0x2005,0x2006,0x2007,0x2008,0x2009,0x200A,0x202F,0x205F,0x3000]);
-const removable = new Set([0x200B,0x200E,0x200F,0x202A,0x202B,0x202C,0x202D,0x202E,0x2066,0x2067,0x2068,0x2069,0xFEFF]);
-const sensitive = new Set([0x200C,0x200D,0x2060]);
-const lookalike = {'а':'Cyrillic a','е':'Cyrillic e','о':'Cyrillic o','р':'Cyrillic er','с':'Cyrillic es','х':'Cyrillic ha','у':'Cyrillic u','і':'Cyrillic i'};
-
-function makeEmptyTextState(){
+function captureUpdateDraftData(targetVersion){
   return {
-    original:'', base:'', issueBase:'', working:'', chars:[], allChars:[], issues:[], applied:new Set(),
-    manual:false, homoglyphs:[], reviews:[], score:100, focusCycles:Object.create(null),
-    issueUnread:false, reviewUnread:false, techUnread:false, analyzeMs:0, reviewOverflow:0
+    savedAt:Date.now(),targetVersion,
+    input:$('#input')?.value||'',output:$('#output')?.value||'',
+    outputReadOnly:$('#output')?.readOnly!==false,
+    settings:{profile:$('#cleanProfile')?.value||'standard',norm:!!$('#norm')?.checked,repeat:!!$('#repeat')?.checked,length:!!$('#length')?.checked,liveScan:!!$('#liveScan')?.checked},
+    activeTool:document.querySelector('[data-tool].active')?.dataset.tool||'text',
+    resultTab:document.querySelector('[data-resulttab].active')?.dataset.resulttab||'cleaned'
   };
 }
-let state=makeEmptyTextState();
-let compareTimer = 0;
-let contextTarget = null;
+
+const updateManager=Modules.createUpdateManager({
+  currentVersion:APP_VERSION,
+  isBlocked:()=>workLock.isLocked(),
+  captureDraft:captureUpdateDraftData,
+  restoreDraft:restoreUpdateDraftData
+});
+
+const sample = 'AI가\u200B 쓴 글에는\u200E 보이지 않는 문자가 섞일 수 있어요.\u00A0\n\n결론적으로 이번 제품은 생각보다 사용감이 좋았습니다.\n정말 정말 좋은 제품이라서 적극 추천드립니다.\n정말 좋은 선택이고 정말 좋은 경험이며 정말 좋은 결과입니다.\n정말 좋은 문장이라 정말 좋은 표현을 반복해서 정말 좋은 예시를 만듭니다.\n\n자주 묻는 질문 (FAQ)';
 const PANEL_SHEET_BREAKPOINT=980;
-const MAX_TEXT_FILE_BYTES=20*1024*1024;
-function notifyTextChanged(kind){const detail={kind};eventBus.emit('text:changed',detail);try{document.dispatchEvent(new CustomEvent('ai-cleaner:text-changed',{detail}));}catch(_){}}
+function notifyTextChanged(kind){textStateStore.touch();const detail={kind,revision:textStateStore.revision};eventBus.emit('text:changed',detail);try{document.dispatchEvent(new CustomEvent('ai-cleaner:text-changed',{detail}));}catch(_){}}
 
 
 function historySnapshot(label=''){
@@ -147,10 +122,8 @@ function renderDiff(){
   list.innerHTML=hunks.slice(0,120).map((h,i)=>{const bv=h.before.join('\n'),av=h.after.join('\n'),mk=commonEdgeMarkup(bv,av);return `<div class="diffItem"><div class="diffLabel">변경 ${i+1} · ${h.line}줄 근처</div><div class="diffRow before"><span class="diffSide">이전</span><div class="diffText">${mk.before||'<span class="sub">없음</span>'}</div></div><div class="diffRow after"><span class="diffSide">현재</span><div class="diffText">${mk.after||'<span class="sub">없음</span>'}</div></div></div>`;}).join('')+(hunks.length>120?`<div class="empty">변경이 많아 앞의 120곳만 표시했습니다.</div>`:'');
 }
 
-function restoreUpdateDraft(){
-  let draft=null;try{draft=JSON.parse(sessionStorage.getItem(UPDATE_DRAFT_KEY)||'null');}catch(_){}
-  if(!draft||Date.now()-Number(draft.savedAt||0)>30*60*1000)return;
-  try{sessionStorage.removeItem(UPDATE_DRAFT_KEY);}catch(_){}
+function restoreUpdateDraftData(draft){
+  if(!draft)return false;
   const s=draft.settings||{};if($('#cleanProfile'))$('#cleanProfile').value=s.profile||'standard';if($('#norm'))$('#norm').checked=!!s.norm;if($('#repeat'))$('#repeat').checked=s.repeat!==false;if($('#length'))$('#length').checked=s.length!==false;if($('#liveScan'))$('#liveScan').checked=s.liveScan!==false;
   if($('#input'))$('#input').value=draft.input||'';
   if((draft.input||'').trim()){
@@ -160,11 +133,10 @@ function restoreUpdateDraft(){
   }
   if(draft.resultTab)activateResultTab(draft.resultTab);
   if(draft.activeTool){const b=document.querySelector(`[data-tool="${draft.activeTool}"]`);if(b)b.click();}
-  showToast('새 버전을 적용하고 작성 중이던 내용을 복원했습니다.');
+  showToast('새 버전을 적용하고 작성 중이던 내용을 복원했습니다.');return true;
 }
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const hex = (cp) => 'U+' + cp.toString(16).toUpperCase().padStart(4,'0');
 
 function configureEditors(root=document){
   root.querySelectorAll('textarea').forEach(el=>{
@@ -179,106 +151,24 @@ function configureEditors(root=document){
   });
 }
 
-function info(ch,pos,profile){
-  const cp=ch.codePointAt(0), code=hex(cp);
-  if(specialSpaces.has(cp)) return {pos,code,name:'SPECIAL SPACE',type:'특수 공백',auto:profile==='standard',action:profile==='standard'?'일반 공백':'보존',replace:' '};
-  if(removable.has(cp)||((cp<32&&ch!=='\n'&&ch!=='\t')||cp===127)) return {pos,code,name:'INVISIBLE / CONTROL',type:'숨은 문자',auto:profile!=='inspect',action:profile==='inspect'?'보존':'삭제',replace:''};
-  if(sensitive.has(cp)||(cp>=0xFE00&&cp<=0xFE0F)||(cp>=0xE0100&&cp<=0xE01EF)||(cp>=0xE0000&&cp<=0xE007F)) {
-    return {pos,code,name:'MEANING-SENSITIVE UNICODE',type:'의미 민감 문자',auto:false,action:'보존',replace:ch,risk:'문자 결합·이모지·표현에 영향을 줄 수 있어 기본 보존'};
-  }
-  return null;
-}
-
-function scan(text){
-  const profile=$('#cleanProfile').value;
-  let clean='', all=[], auto=[], i=0;
-  for(const ch of text){
-    const x=info(ch,i,profile);
-    if(x){
-      all.push({...x,char:ch});
-      if(x.auto){auto.push({...x,char:ch});clean+=x.replace}else clean+=ch;
-    } else clean+=ch;
-    i+=ch.length;
-  }
-  return {clean,all,auto};
-}
-
-function homoglyphs(text){
-  let out=[],i=0;
-  for(const ch of text){
-    if(lookalike[ch]) out.push({pos:i,char:ch,code:hex(ch.codePointAt(0)),name:lookalike[ch]});
-    i+=ch.length;
-  }
-  return out;
-}
-
-function sentences(text){
-  let out=[],start=0,buf='';
-  for(let i=0;i<text.length;i++){
-    buf+=text[i];
-    if(/[.!?。！？]/.test(text[i])||text[i]==='\n'){
-      const t=buf.trim();
-      if(t.length>=4){const lead=buf.indexOf(t);out.push({start:start+Math.max(0,lead),end:start+Math.max(0,lead)+t.length,text:t});}
-      start=i+1;buf='';
-    }
-  }
-  const t=buf.trim();
-  if(t.length>=4){const lead=buf.indexOf(t);out.push({start:start+Math.max(0,lead),end:start+Math.max(0,lead)+t.length,text:t});}
-  return out;
-}
-
-function issues(text){
-  let out=[],id=0;
-  const add=(cat,reason,before,after=null,kind='read',start=-1,end=-1,extra={})=>{
-    out.push({id:'i'+(++id),cat,reason,before,after,kind,start,end,applicable:typeof after==='string',...extra});
-  };
-  const rules=[
-    [/자주 묻는 질문\s*\(FAQ\)/g,'정형 템플릿','의도한 구성인지 확인하세요.','자주 물어보시더라고요','style'],
-    [/결론적으로|요약하자면|정리하자면|마무리하자면/g,'정형 전환어','문맥상 꼭 필요한 연결어인지 확인하세요.','그래서','style'],
-    [/\*\*([^*\n]+)\*\*/g,'마크다운 **','굵게 표시 기호가 남아 있습니다.',null,'format'],
-    [/^(#{1,6})\s+(.+)$/gm,'마크다운 제목','제목 기호가 남아 있습니다.',null,'format']
-  ];
-  for(const [re,cat,reason,repl,kind] of rules){
-    let m;
-    while((m=re.exec(text))){
-      const after=cat==='마크다운 **'?m[1]:cat==='마크다운 제목'?m[2]:repl;
-      add(cat,reason,m[0],after,kind,m.index,m.index+m[0].length);
-    }
-  }
-  for(const m of text.matchAll(/\n{3,}/g)) add('연속 빈 줄','빈 줄을 줄이면 읽기 흐름이 좋아집니다.',m[0],'\n\n','read',m.index,m.index+m[0].length);
-
-  if($('#repeat').checked){
-    const re=/[가-힣A-Za-z0-9]{2,}/g, counts=new Map();
-    let m;
-    while((m=re.exec(text))) counts.set(m[0],(counts.get(m[0])||0)+1);
-    [...counts.entries()].filter(([,n])=>n>=6).sort((a,b)=>b[1]-a[1]).slice(0,6).forEach(([w,n])=>{
-      add('반복 단어',`“${w}”가 ${n}회 반복됩니다. 돋보기로 위치를 순서대로 확인해보세요.`,`${w} × ${n}`,null,'read',-1,-1,{word:w});
-    });
-  }
-  return out;
-}
-
-function sentenceSignals(text){
-  const reasons=[];
-  if(/자주 묻는 질문\s*\(FAQ\)/.test(text))reasons.push('정형 템플릿');
-  if(/결론적으로|요약하자면|정리하자면|마무리하자면/.test(text))reasons.push('정형 전환어');
-  if(/\*\*[^*\n]+\*\*/.test(text)||/^#{1,6}\s+/m.test(text))reasons.push('마크다운 서식');
-  return reasons;
-}
-
-function hygiene(text,all,hom){
-  const md=(text.match(/\*\*|^#{1,6}\s/gm)||[]).length;
-  return Math.max(0,100-Math.min(60,all.length*4)-Math.min(20,hom.length*4)-Math.min(20,md*2));
-}
+const scan=text=>textEngine.scan(text,{profile:$('#cleanProfile').value});
+const homoglyphs=text=>textEngine.homoglyphs(text);
+const sentences=text=>textEngine.sentences(text);
+const issues=text=>textEngine.issues(text,{repeat:$('#repeat').checked});
+const sentenceSignals=text=>textEngine.sentenceSignals(text);
+const hygiene=(text,all,hom)=>textEngine.hygiene(text,all,hom);
+const codePointLength=text=>textEngine.codePointLength(text);
+const reviewSuggestion=text=>textEngine.reviewSuggestion(text);
+const countIssuesLight=text=>textEngine.countIssuesLight(text,{repeat:$('#repeat').checked});
 
 function syncOriginalMetadata(source){
-  const t0=performance.now(),sc=scan(source);let base=sc.clean;if($('#norm').checked)base=base.normalize('NFKC');
-  const hom=homoglyphs(base);state.original=source;state.base=base;state.chars=sc.auto;state.allChars=sc.all;state.homoglyphs=hom;state.score=hygiene(source,sc.all,hom);state.analyzeMs=performance.now()-t0;state.techUnread=(sc.all.length+hom.length)>0;inputDirty=false;
+  const t0=performance.now(),result=textEngine.analyze(source,{profile:$('#cleanProfile').value,nfkc:$('#norm').checked,repeat:$('#repeat').checked}),sc=result.scan,hom=result.homoglyphs;
+  state.original=source;state.base=result.base;state.chars=sc.auto;state.allChars=sc.all;state.homoglyphs=hom;state.score=result.score;state.analyzeMs=performance.now()-t0;state.techUnread=(sc.all.length+hom.length)>0;inputDirty=false;
   $('#textPerf').textContent=`${state.analyzeMs.toFixed(state.analyzeMs<10?1:0)}ms`;renderStats();renderTech();notifyTextChanged('original');
 }
 function clearTextAnalysis({keepInput=true,clearRewrite=false,announce=false}={}){
   if(window.__AI_CLEANER_TYPEWRITER_BUSY__)stopTypingPreview({restore:false,silent:true});
-  clearTimeout(timer);inputDirty=false;state=makeEmptyTextState();manualEditBaseline='';
+  clearTimeout(timer);inputDirty=false;textStateStore.reset();manualEditBaseline='';
   if(!keepInput)$('#input').value='';$('#input').readOnly=false;$('#input').scrollTop=0;$('#output').value='';$('#output').scrollTop=0;$('#output').readOnly=true;$('#editResult').textContent='✎ 직접 수정';delete $('#output').dataset.typewriterVerified;const details=$('#detailDiagnostics');if(details)details.open=false;
   closeAllPanels();activateResultTab('cleaned');renderAll({preserveOutput:true});renderDiff();$('#textPerf').textContent='대기';resetHistory('빈 상태');
   if(clearRewrite){try{sessionStorage.removeItem(REWRITE_SESSION_KEY);}catch(_){}try{window.AICleanerRewriteStudio?.resetSession?.();}catch(_){}}
@@ -295,18 +185,15 @@ function analyze(silent=false){
   const prevReviewCount=state.reviews.filter(r=>r.score>=1).length;
   const prevTechCount=state.allChars.length+state.homoglyphs.length;
   const hadOriginal=!!state.original;
-  const sc=scan(input);
-  let base=sc.clean;
-  if($('#norm').checked)base=base.normalize('NFKC');
-  const hom=homoglyphs(base), foundIssues=issues(base);
-  state={
+  const result=textEngine.analyze(input,{profile:$('#cleanProfile').value,nfkc:$('#norm').checked,repeat:$('#repeat').checked}),sc=result.scan,base=result.base,hom=result.homoglyphs,foundIssues=result.issues;
+  textStateStore.replace({
     original:input,base,issueBase:base,working:base,chars:sc.auto,allChars:sc.all,issues:foundIssues,applied:new Set(),manual:false,
-    homoglyphs:hom,reviews:[],score:hygiene(input,sc.all,hom),focusCycles:Object.create(null),
+    homoglyphs:hom,reviews:[],score:result.score,focusCycles:Object.create(null),
     issueUnread:foundIssues.length>0&&(!hadOriginal||foundIssues.length!==prevIssueCount),
     reviewUnread:false,
     techUnread:(sc.all.length+hom.length)>0&&(!hadOriginal||(sc.all.length+hom.length)!==prevTechCount),
     analyzeMs:0,reviewOverflow:0
-  };
+  });
   $('#output').readOnly=true;
   $('#editResult').textContent='✎ 직접 수정';
   renderAll();
@@ -428,7 +315,6 @@ function renderTech(){
   $('#techSummary').innerHTML=[`<span class="techChip">숨은 문자 <b>${hidden}</b></span>`,`<span class="techChip">특수 공백 <b>${spaces}</b></span>`,`<span class="techChip">보존 항목 <b>${kept}</b></span>`,`<span class="techChip">유사문자 <b>${state.homoglyphs.length}</b></span>`].join('');
 }
 
-function codePointLength(t){let n=0;for(const _ of t)n++;return n;}
 let statsFrame=0,statsTimer=0;
 function queueStats(){
   const len=($('#input').value||'').length;
@@ -441,15 +327,6 @@ function renderStats(){
   const t=$('#input').value||'',words=(t.match(/[가-힣A-Za-z0-9]{2,}/g)||[]).length,lines=t?t.split(/\r?\n/).length:0;
   $('#textStats').innerHTML=`<span class="statpill">문자 <b>${codePointLength(t)}</b></span><span class="statpill">단어 <b>${words}</b></span><span class="statpill">줄 <b>${lines}</b></span>`;
   const analyzed=!!t&&state.original===t&&!inputDirty;$('#cleanScore').textContent=analyzed?`텍스트 위생 ${state.score}`:(t?'텍스트 위생 재분석 대기':'텍스트 위생 --');
-}
-
-function reviewSuggestion(text){
-  let s=text;
-  s=s.replace(/자주 묻는 질문\s*\(FAQ\)/g,'자주 물어보시더라고요');
-  s=s.replace(/결론적으로|요약하자면|정리하자면|마무리하자면/g,'그래서');
-  s=s.replace(/\*\*([^*\n]+)\*\*/g,'$1');
-  s=s.replace(/^(#{1,6})\s+(.+)$/gm,'$2');
-  return s===text?'':s;
 }
 
 function buildReviews(){
@@ -478,17 +355,6 @@ function updateReviewApplyState(){
   const badge=$('#reviewEditCount'),button=$('#v62ApplyReviews');
   if(badge){badge.textContent=`수정됨 ${changed}개`;badge.classList.toggle('ready',changed>0);}
   if(button)button.disabled=changed===0;
-}
-
-function countIssuesLight(text){
-  let n=0;
-  n+=(text.match(/자주 묻는 질문\s*\(FAQ\)/g)||[]).length;
-  n+=(text.match(/결론적으로|요약하자면|정리하자면|마무리하자면/g)||[]).length;
-  n+=(text.match(/\*\*[^*\n]+\*\*/g)||[]).length;
-  n+=(text.match(/^#{1,6}\s+.+$/gm)||[]).length;
-  n+=(text.match(/\n{3,}/g)||[]).length;
-  if($('#repeat').checked){const words=text.match(/[가-힣A-Za-z0-9]{2,}/g)||[],f=new Map();for(const w of words)f.set(w,(f.get(w)||0)+1);n+=[...f.values()].filter(v=>v>=6).length;}
-  return n;
 }
 
 function renderCompare(){
@@ -669,25 +535,19 @@ $('#editResult').onclick=()=>{if(!state.original)return;if($('#output').readOnly
 $('#output').addEventListener('input',()=>{if(!$('#output').readOnly){state.working=$('#output').value;state.manual=true;queueCompare();}});
 $('#v62ApplyReviews').onclick=applyReviews;
 
-function rtfToText(raw){
-  let text=raw.replace(/\\u(-?\d+)\??/g,(_,n)=>{let cp=Number(n);if(cp<0)cp+=65536;return String.fromCharCode(cp);});
-  return text.replace(/\\par[d]?\b ?/g,'\n').replace(/\\tab\b ?/g,'\t').replace(/\\'[0-9a-fA-F]{2}/g,m=>String.fromCharCode(parseInt(m.slice(2),16))).replace(/\\[a-zA-Z]+-?\d* ?/g,'').replace(/[{}]/g,'').replace(/\\([\\{}])/g,'$1');
-}
-function importedText(name,raw){
-  if(/\.html?$/i.test(name)){const d=new DOMParser().parseFromString(raw,'text/html');return (d.body&&d.body.innerText)||d.documentElement.textContent||'';}
-  if(/\.xml$/i.test(name)){try{const d=new DOMParser().parseFromString(raw,'application/xml');if(!d.querySelector('parsererror'))return d.documentElement.textContent||raw;}catch(_){}return raw;}
-  if(/\.rtf$/i.test(name))return rtfToText(raw);
-  return raw;
-}
-function looksBinaryText(raw){if(!raw)return false;const sample=raw.slice(0,65536);let nul=0,ctrl=0;for(const ch of sample){const cp=ch.charCodeAt(0);if(cp===0)nul++;else if(cp<9||(cp>13&&cp<32))ctrl++;}return nul>0||ctrl>Math.max(12,sample.length*.02);}
-$('#textFileInput').addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{if(f.size>MAX_TEXT_FILE_BYTES){showToast('20MB가 넘는 텍스트 파일은 브라우저가 느려질 수 있어 열지 않았습니다. 파일을 나눠서 사용해 주세요.');return;}const raw=await f.text();if(looksBinaryText(raw)){showToast('바이너리 데이터가 많은 파일이라 텍스트로 열지 않았습니다.');return;}const s=importedText(f.name,raw);$('#input').value=s;inputDirty=true;notifyTextChanged('original');analyze(true);showToast(`${f.name} 파일을 열었습니다.`);}catch(err){showToast('파일을 읽지 못했습니다. 텍스트 기반 파일인지 확인해 주세요.');}finally{e.target.value='';}});
+$('#textFileInput').addEventListener('change',async e=>{
+  const f=e.target.files&&e.target.files[0];if(!f)return;
+  try{const imported=await fileImport.read(f);$('#input').value=imported.text;inputDirty=true;notifyTextChanged('original');analyze(true);showToast(`${imported.name} 파일을 열었습니다.`);}
+  catch(err){if(err?.code==='FILE_TOO_LARGE')showToast('20MB가 넘는 텍스트 파일은 브라우저가 느려질 수 있어 열지 않았습니다. 파일을 나눠서 사용해 주세요.');else if(err?.code==='BINARY_TEXT')showToast('바이너리 데이터가 많은 파일이라 텍스트로 열지 않았습니다.');else showToast('파일을 읽지 못했습니다. 텍스트 기반 파일인지 확인해 주세요.');}
+  finally{e.target.value='';}
+});
 
 $$('[data-resulttab]').forEach(t=>t.onclick=()=>activateResultTab(t.dataset.resulttab));
 
 $$('[data-tool]').forEach(b=>b.onclick=()=>{$$('[data-tool]').forEach(x=>x.classList.toggle('active',x===b));$('#textTool').classList.toggle('hidden',b.dataset.tool!=='text');$('#imageTool').classList.toggle('hidden',b.dataset.tool!=='image');syncWidgets();});
 
 window.AICleanerApp={
-  version:APP_VERSION,assetVersion:ASSET_VERSION,showToast,configureEditors,eventBus,workLock,historyStore,panelManager,typewriterEngine,
+  version:APP_VERSION,assetVersion:ASSET_VERSION,showToast,configureEditors,eventBus,workLock,historyStore,textStateStore,textEngine,fileImport,updateManager,panelManager,typewriterEngine,
   getText(kind='output'){if(kind==='original')return $('#input').value||'';if(!$('#output').value&&$('#input').value.trim())analyze(true);return $('#output').value||state.working||'';},
   commitProgressiveResult(text,label='자동작성 원본 새로쓰기'){
     const next=String(text??''),out=$('#output');if(out.value!==next)return false;
@@ -712,6 +572,6 @@ $('#openImage').onclick=()=>fi.click();dz.onclick=e=>{if(!e.target.closest('#ope
 ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('drag');}));['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('drag');}));
 dz.addEventListener('drop',e=>{const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(f)runImage(f);});
 
-applyVersionUi();configureEditors();renderStats();syncWidgets();restoreUpdateDraft();
-setTimeout(checkForAppUpdate,5000);window.addEventListener('online',checkForAppUpdate);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkForAppUpdate();});setInterval(checkForAppUpdate,120000);
+applyVersionUi();configureEditors();renderStats();syncWidgets();updateManager.restorePending();
+updateManager.start({initialDelay:5000,interval:120000});
 })();

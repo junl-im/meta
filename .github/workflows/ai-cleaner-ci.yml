@@ -64,7 +64,11 @@ jobs:
           node --check ai-cleaner/js/core/history-store.js
           node --check ai-cleaner/js/core/work-lock.js
           node --check ai-cleaner/js/core/text-utils.js
+          node --check ai-cleaner/js/core/state-store.js
+          node --check ai-cleaner/js/core/text-engine.js
+          node --check ai-cleaner/js/services/update-manager.js
           node --check ai-cleaner/js/ui/panel-manager.js
+          node --check ai-cleaner/js/features/file-import.js
           node --check ai-cleaner/js/features/typewriter-engine.js
           node --check ai-cleaner/js/app.js
           node --check ai-cleaner/js/rewrite-studio.js
