@@ -144,5 +144,7 @@ test('long live analysis runs through worker-safe adapter', async ({ page }) => 
   }));
   if(info.supported)expect(info.stats.workerSuccess).toBeGreaterThanOrEqual(1);
   else expect(info.stats.fallbackRuns).toBeGreaterThanOrEqual(1);
+  expect(info.stats.pending).toBe(0);
+  expect(info.stats.workerTimeouts).toBe(0);
   await expect(page.locator('#output')).not.toHaveValue(/\u200B/);
 });

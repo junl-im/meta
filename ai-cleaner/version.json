@@ -1,6 +1,6 @@
 {
-  "version": "1.4.0",
-  "assetVersion": "140",
+  "version": "1.4.1",
+  "assetVersion": "141",
   "channel": "stable",
-  "updateMode": "worker-safe-live-analysis-adapter-with-main-thread-fallback"
+  "updateMode": "worker-stability-timeout-cooldown-stale-event-isolation"
 }

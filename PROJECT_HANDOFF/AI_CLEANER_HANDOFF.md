@@ -316,3 +316,17 @@
 - Module unit checks, all JavaScript syntax checks, and GitHub Actions YAML parse pass.
 - Browser E2E now includes a >6,000-character live-analysis case that verifies Worker success when supported and fallback otherwise.
 - Local Playwright was not claimed as passed: `npm install --ignore-scripts --no-audit --no-fund` timed out at 120 seconds in this build environment. `node_modules` and `package-lock.json` were removed; verify `browser-smoke` after push.
+
+## 1.4.1 Worker Stability Audit
+- Patch baseline is the actually delivered `AI_Cleaner_1_4_0_FULL_PROJECT_HANDOFF.zip`.
+- `analysis-worker-adapter.js` now has a 20,000ms job timeout. A Worker that stops responding is terminated and its pending analysis is recovered through the existing main-thread executor.
+- Worker infrastructure failures enter a 15,000ms circuit-breaker cooldown so a broken Worker is not recreated on every long live-analysis attempt. User-driven supersede/cancel does not trigger cooldown.
+- Worker handlers are bound to the concrete Worker instance and detached before termination. Late `error` events from an old Worker cannot affect a newer replacement instance.
+- `messageerror` is handled as an infrastructure failure and falls back safely. `postMessage` failures use the same terminate/fallback recovery path.
+- Fallback calls are Promise-wrapped so synchronous exceptions are surfaced as rejected analysis Promises instead of escaping `analyze()` unexpectedly.
+- `analysis-coordinator.js` now clears idle state even without `cancelIdleCallback` and runs immediately if `requestIdleCallback` scheduling throws.
+- Worker threshold remains 6,000 UTF-16 code units. Manual immediate analysis remains on the synchronous main-thread path; only scheduled live analysis uses the Worker adapter.
+- No UI contract changes: mobile compact panels, widget labels, visible-text `자동작성 원본 새로쓰기`, text hygiene counters, and old-v6 Layer A safe policy are unchanged.
+- Validation: module checks PASS, static/architecture 120 passed / 0 failed, JavaScript syntax PASS, workflow YAML PASS. Local browser smoke is not claimed until Playwright dependencies install successfully; verify GitHub Actions `browser-smoke` after push.
+- Next recommended structural step: 1.5.0 large-document performance/Worker tuning after 1.4.1 browser-smoke is green.
+- Local browser validation note: `npm install --ignore-scripts --no-audit --no-fund` timed out at the 120-second execution limit in this environment. It was not retried; any partial `node_modules` / `package-lock.json` was removed. Do not claim local Chromium E2E passed.

@@ -67,17 +67,29 @@ function assert(ok,msg){if(!ok)throw new Error(msg);}
     terminate(){this.terminated=true;}
     respond(index,result){const msg=this.messages[index];this.onmessage?.({data:{id:msg.id,ok:true,result}});}
     fail(index,message='boom'){const msg=this.messages[index];this.onmessage?.({data:{id:msg.id,ok:false,error:message}});}
+    crash(){this.onerror?.({message:'worker crash'});}
+    messageError(){this.onmessageerror?.({data:null});}
   }
-  let fallbackCalls=0;
-  const adapter=M.createAnalysisWorkerAdapter({workerUrl:'worker.js?v=140',WorkerCtor:FakeWorker,minChars:5,fallbackExecutor:text=>{fallbackCalls++;return{text,from:'main'};}});
+  let fallbackCalls=0,clock=1000,timerSeq=0;const timers=new Map();
+  const setFakeTimer=(fn,ms)=>{const id=++timerSeq;timers.set(id,{fn,ms});return id;};
+  const clearFakeTimer=id=>timers.delete(id);
+  const adapter=M.createAnalysisWorkerAdapter({workerUrl:'worker.js?v=141',WorkerCtor:FakeWorker,minChars:5,jobTimeoutMs:20,failureCooldownMs:50,setTimer:setFakeTimer,clearTimer:clearFakeTimer,now:()=>clock,fallbackExecutor:text=>{fallbackCalls++;return{text,from:'main'};}});
   const short=await adapter.analyze('abc');assert(short.from==='main'&&fallbackCalls===1,'short analysis should stay on main fallback path');
-  const pending=adapter.analyze('123456');const fw=FakeWorker.instances[0];assert(fw&&fw.messages.length===1&&adapter.pendingCount===1,'long analysis should be posted to worker');fw.respond(0,{text:'123456',from:'worker'});const workerResult=await pending;assert(workerResult.from==='worker'&&adapter.getStats().workerSuccess===1,'worker result routing failed');
+  const pending=adapter.analyze('12345');const fw=FakeWorker.instances[0];assert(fw&&fw.messages.length===1&&adapter.pendingCount===1,'threshold-length analysis should be posted to worker');fw.respond(0,{text:'12345',from:'worker'});const workerResult=await pending;assert(workerResult.from==='worker'&&adapter.getStats().workerSuccess===1,'worker result routing failed');assert(timers.size===0,'worker completion must clear timeout timer');
   const fallbackPending=adapter.analyze('abcdef');fw.fail(1);const fallbackResult=await fallbackPending;assert(fallbackResult.from==='main'&&adapter.getStats().workerErrors===1,'worker message failure should fall back to main executor');
-  const cancelled=adapter.analyze('ghijkl').catch(e=>e.code);assert(adapter.cancelPending()===true,'pending worker job should be cancellable');assert(await cancelled==='ANALYSIS_CANCELLED'&&fw.terminated,'worker cancel should terminate in-flight worker');
+  const timeoutPending=adapter.analyze('timeout');const timeoutJob=[...timers.values()][0];assert(timeoutJob?.ms===20,'worker timeout should be armed');timeoutJob.fn();const timeoutResult=await timeoutPending;assert(timeoutResult.from==='main'&&fw.terminated,'timed-out worker must terminate and fall back');let st=adapter.getStats();assert(st.workerTimeouts===1&&st.coolingDown,'timeout should enter worker cooldown');
+  const startsBefore=FakeWorker.instances.length;const cooldownResult=await adapter.analyze('cooldn');assert(cooldownResult.from==='main'&&FakeWorker.instances.length===startsBefore,'cooldown should avoid immediate worker recreation');assert(adapter.getStats().cooldownFallbacks>=1,'cooldown fallback should be counted');
+  clock+=60;const afterCooldown=adapter.analyze('resume');const fw2=FakeWorker.instances.at(-1);assert(fw2!==fw&&!fw2.terminated&&fw2.messages.length===1,'worker should recreate after cooldown');fw2.respond(0,{text:'resume',from:'worker'});assert((await afterCooldown).from==='worker','worker should recover after cooldown');
+  const oldError=fw2.onerror;const cancelled=adapter.analyze('cancel').catch(e=>e.code);assert(adapter.cancelPending()===true,'pending worker job should be cancellable');assert(await cancelled==='ANALYSIS_CANCELLED'&&fw2.terminated,'worker cancel should terminate in-flight worker');
+  const fresh=adapter.analyze('fresh!');const fw3=FakeWorker.instances.at(-1);oldError?.({message:'late old worker error'});assert(!fw3.terminated,'late event from old worker must not terminate replacement worker');fw3.respond(0,{text:'fresh!',from:'worker'});assert((await fresh).from==='worker','replacement worker should remain usable after stale event');
+  const messagePending=adapter.analyze('msgerr');const fw4=FakeWorker.instances.at(-1);fw4.messageError();assert((await messagePending).from==='main','messageerror should fall back to main executor');assert(adapter.getStats().messageErrors===1,'messageerror should be tracked');
+  const throwing=M.createAnalysisWorkerAdapter({WorkerCtor:null,minChars:5,fallbackExecutor:()=>{throw new Error('fallback boom');}});let rejected=false;try{await throwing.analyze('abc');}catch(e){rejected=e.message==='fallback boom';}assert(rejected,'sync fallback exceptions must become rejected analysis Promises');
 }
+
 {
   const scheduled=[];let now=0,results=[];
   const c=M.createAnalysisCoordinator({executor:async text=>text.toUpperCase(),syncExecutor:text=>text.toUpperCase(),setTimer:fn=>(scheduled.push(fn),scheduled.length),clearTimer:()=>{},idle:null,now:()=>++now});
   c.schedule('old',{}, {onResult:r=>results.push(r)});c.schedule('new',{}, {onResult:r=>results.push(r)});scheduled[0]?.();scheduled[1]?.();await new Promise(r=>setTimeout(r,0));assert(results.length===1&&results[0]==='NEW','async analysis coordinator must discard stale schedule');const sync=c.runNow('sync');assert(sync.result==='SYNC'&&!c.pending,'analysis coordinator runNow failed');
+  const idleScheduled=[];let idleResult='';const idleFallback=M.createAnalysisCoordinator({executor:async t=>t+'!',syncExecutor:t=>t,setTimer:fn=>(idleScheduled.push(fn),1),clearTimer:()=>{},idle:()=>{throw new Error('idle unavailable');},now:()=>0});idleFallback.schedule('idle',{}, {onResult:r=>{idleResult=r;}});idleScheduled[0]();await new Promise(r=>setTimeout(r,0));assert(idleResult==='idle!'&&!idleFallback.pending,'idle scheduling failure should execute analysis immediately');
 }
-console.log('PASS modular core phase 4 worker-safe analysis + stability + text hygiene unit checks');
+console.log('PASS modular core phase 4 worker stability audit + text hygiene unit checks');

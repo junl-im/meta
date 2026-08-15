@@ -22,7 +22,9 @@ const ASSET_VERSION=encodeURIComponent(String(APP_META.assetVersion||APP_META.ve
 const analysisWorker=Modules.createAnalysisWorkerAdapter({
   workerUrl:`js/workers/text-analysis-worker.js?v=${ASSET_VERSION}`,
   fallbackExecutor:(text,options)=>textEngine.analyze(text,options),
-  minChars:6000
+  minChars:6000,
+  jobTimeoutMs:20000,
+  failureCooldownMs:15000
 });
 const analysisCoordinator=Modules.createAnalysisCoordinator({
   executor:(text,options)=>analysisWorker.analyze(text,options),
