@@ -287,3 +287,15 @@
 - Static/architecture: 100 passed / 0 failed.
 - Module unit checks and JS syntax pass.
 - Local Playwright was not claimed as passed: npm dependency installation timed out in the build environment. Re-check `browser-smoke` after pushing.
+
+
+## 1.3.1 Stability Audit
+- 패치 기준선은 직전 실제 전달물 `AI_Cleaner_1_3_0_FULL_PROJECT_HANDOFF.zip`이다. 중간 작업 폴더를 기준으로 패치를 만들지 않는다.
+- Update Manager는 Semantic Versioning으로 비교해 현재보다 큰 버전만 적용한다. stale `version.json`이 1.2.x를 반환해도 1.3.1에서 다운그레이드성 reload를 하지 않는다.
+- rewrite/image lazy-load 실패는 캐시에서 제거되어 같은 세션에서 재시도 가능하다.
+- Typewriter pause는 rAF idle 상태가 되며 resume 시 frame 하나만 다시 예약한다. visible-text projection 및 residue 0 검증 정책은 그대로다.
+- 업데이트 draft의 직접 수정 결과는 suggestion baseline과 편집 상태를 함께 복원한다.
+- 커스텀 우클릭 메뉴는 textarea/text input에서만 사용한다. 일반 페이지 영역은 브라우저 기본 context menu/선택/drag 동작을 방해하지 않는다. direct typing verifier의 별도 입력 차단은 유지한다.
+- pagehide에서 live analysis 예약과 update polling을 정리한다.
+- PROJECT_STATE runtime/handoff 버전 consistency를 static-check에서 검사한다.
+- 다음 구조 단계는 1.4.0 Worker-safe Analysis Adapter. 먼저 1.3.1 browser-smoke를 확인한다.

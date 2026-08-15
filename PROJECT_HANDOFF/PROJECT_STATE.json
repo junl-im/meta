@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "date": "2026-08-15",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -34,15 +34,18 @@
     "ai-cleaner/js/core/state-store.js",
     "ai-cleaner/js/core/text-engine.js",
     "ai-cleaner/js/services/update-manager.js",
-    "ai-cleaner/js/features/file-import.js"
+    "ai-cleaner/js/features/file-import.js",
+    "ai-cleaner/js/core/diff-engine.js",
+    "ai-cleaner/js/services/analysis-coordinator.js",
+    "ai-cleaner/js/ui/diff-view.js"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.2.2",
-  "asset_version": "122",
+  "current_version": "1.3.1",
+  "asset_version": "131",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.2.2 old-v6 Layer A shared hygiene inventory + four-way technical audit",
+  "latestPatch": "1.3.1 stability audit: semver update guard + lazy retry + idle typewriter pause + lifecycle cleanup",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -114,14 +117,14 @@
     "ciPanelSwitchFix": true,
     "hiddenControlE2EFix": true
   },
-  "nextPhase": "1.3.0 modular core phase 3 after 1.2.2 browser-smoke validation",
+  "nextPhase": "1.4.0 worker-safe analysis adapter after 1.3.1 browser-smoke validation",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
     "scheme": "semantic versioning"
   },
   "modularCore": {
-    "phase": 2,
+    "phase": 3,
     "uiContract": "1.0.0 preserved",
     "bootOrder": [
       "core/event-bus",
@@ -130,8 +133,11 @@
       "core/text-utils",
       "core/state-store",
       "core/text-engine",
+      "core/diff-engine",
+      "services/analysis-coordinator",
       "services/update-manager",
       "ui/panel-manager",
+      "ui/diff-view",
       "features/file-import",
       "features/typewriter-engine",
       "app"
@@ -167,7 +173,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "130",
+  "assetVersion": "131",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -176,10 +182,21 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "100 passed / 0 failed",
+    "staticChecks": "107 passed / 0 failed",
     "moduleChecks": "PASS",
     "jsSyntax": "PASS",
     "workflowYaml": "PASS",
     "localBrowserSmoke": "NOT_RUN_INSTALL_TIMEOUT"
+  },
+  "stabilityAudit131": {
+    "updateOnlyWhenSemverNewer": true,
+    "staleVersionDowngradeBlocked": true,
+    "invalidRemoteVersionIgnored": true,
+    "lazyToolLoadRetryable": true,
+    "typewriterPauseNoRafSpin": true,
+    "updateDraftManualEditRestored": true,
+    "nativeContextMenuOutsideEditors": true,
+    "pagehideCleanup": true,
+    "delivered130UsedAsPatchBaseline": true
   }
 }
