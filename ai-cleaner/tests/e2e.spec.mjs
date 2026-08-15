@@ -5,11 +5,15 @@ const BASE='http://127.0.0.1:4173/ai-cleaner/';
 const versionData=JSON.parse(fs.readFileSync(new URL('../version.json',import.meta.url),'utf8'));
 const APP_VERSION=String(versionData.version);
 
+test.beforeEach(async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+});
+
 test('original auto typewriter writes into result and verifies exact equality', async ({ page }) => {
   await page.goto(BASE,{waitUntil:'domcontentloaded'});
   const source='가나다\nABC🙂e\u0301';
   await page.locator('#input').fill(source);
-  await page.locator('#typingPreviewSpeed').selectOption('0');
+  await page.locator('#typingPreviewSpeed').evaluate(el=>{el.value='0';el.dispatchEvent(new Event('change',{bubbles:true}));});
   await page.locator('#typingPreviewButton').click();
   await expect(page.locator('#input')).toHaveJSProperty('readOnly',true);
   await expect(page.locator('#cleanProfile')).toBeDisabled();
@@ -40,7 +44,7 @@ test('foundation flow keeps state, layout and rewrite tools coherent', async ({ 
   await page.locator('#undoStep').click();await expect(output).toHaveValue(/결론적으로/);
   await page.locator('#redoStep').click();await expect(output).toHaveValue(/그래서/);
 
-  await page.locator('#rewriteWidget').click();await expect(page.locator('#rewritePanel')).toBeVisible();
+  await page.locator('#rewriteWidget').click();await expect(page.locator('#rewritePanel')).toBeVisible();await expect(page.locator('#issuesPanel')).toBeHidden();
   await expect.poll(async()=>page.locator('#rewritePanel').evaluate(el=>getComputedStyle(el).resize)).toBe('none');
   await page.locator('#rewriteGenerate').click();await expect(page.locator('#rewriteDraft')).not.toHaveValue('');
   await expect(page.locator('#rewriteDraft')).toHaveValue(/19,900원/);await expect(page.locator('#rewriteFactSummary')).toContainText('잠금');await expect(page.locator('#rewriteApply')).toBeEnabled();
@@ -87,4 +91,27 @@ test('layout bridge floats between two cards without reserving a desktop column'
   await page.setViewportSize({width:820,height:900});
   await expect.poll(async()=>page.locator('.bridgeAction').evaluate(el=>getComputedStyle(el).position)).toBe('relative');
   await expect.poll(async()=>page.locator('#typingPreviewButton').evaluate(el=>getComputedStyle(el).flexDirection)).toBe('row');
+});
+
+
+test('mobile compact panels open small and expand on demand', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(BASE,{waitUntil:'domcontentloaded'});
+  await expect(page.locator('.pill')).toContainText(APP_VERSION);
+  await page.locator('#input').fill('모바일 팝업 테스트입니다. 하지만 문장이 길어지면 검토 제안이 표시될 수 있습니다. 그리고 결과도 확인합니다.');
+  await page.locator('#analyze').evaluate(el => el.click());
+  await page.locator('#rewriteWidget').click();
+  const panel=page.locator('#rewritePanel');
+  await expect(panel).toBeVisible();
+  const compact=await panel.evaluate(el=>({h:el.getBoundingClientRect().height,vh:innerHeight,expanded:el.classList.contains('mobileExpanded')}));
+  expect(compact.expanded).toBeFalsy();
+  expect(compact.h).toBeLessThan(compact.vh*0.6);
+  const size=panel.locator('[data-panel-size="rewritePanel"]');
+  await expect(size).toBeVisible();
+  await size.click();
+  const expanded=await panel.evaluate(el=>({h:el.getBoundingClientRect().height,vh:innerHeight,expanded:el.classList.contains('mobileExpanded')}));
+  expect(expanded.expanded).toBeTruthy();
+  expect(expanded.h).toBeGreaterThan(compact.h+120);
+  await size.click();
+  await expect(panel).not.toHaveClass(/mobileExpanded/);
 });

@@ -571,10 +571,14 @@ function clampPanelToViewport(panel){
   panel.style.left=left+'px';panel.style.top=top+'px';panel.style.right='auto';panel.style.bottom='auto';
 }
 const FLOAT_PANEL_IDS=['issuesPanel','reviewPanel','rewritePanel','techPanel'];
-function closeAllPanels(except=''){for(const pid of FLOAT_PANEL_IDS){if(pid!==except){const p=$('#'+pid);if(p)p.hidden=true;}}}
+function setMobilePanelExpanded(panel,expanded){
+  if(!panel)return;expanded=!!expanded;panel.classList.toggle('mobileExpanded',expanded);
+  const b=panel.querySelector('[data-panel-size]');if(b){b.setAttribute('aria-expanded',String(expanded));b.setAttribute('aria-label',expanded?'작게 보기':'크게 보기');b.textContent=expanded?'⌄':'↕';}
+}
+function closeAllPanels(except=''){for(const pid of FLOAT_PANEL_IDS){if(pid!==except){const p=$('#'+pid);if(p){p.hidden=true;setMobilePanelExpanded(p,false);}}}}
 function openPanel(id){
   closeAllPanels(id);
-  const panel=$('#'+id);panel.hidden=false;
+  const panel=$('#'+id);panel.hidden=false;if(innerWidth<=PANEL_SHEET_BREAKPOINT)setMobilePanelExpanded(panel,false);
   if(panel.dataset.defaultPosition==='pending'){positionPanelDefault(panel);panel.dataset.defaultPosition='done';}
   if(id==='issuesPanel'){state.issueUnread=false;$('#issuesWidget').classList.remove('attention');}
   if(id==='reviewPanel'){state.reviewUnread=false;$('#reviewWidget').classList.remove('attention');}
@@ -761,7 +765,8 @@ window.AICleanerApp={
 };
 $('#rewriteWidget').onclick=async()=>{try{showToast('재작성 스튜디오를 여는 중…');const studio=await ensureRewriteStudio();openPanel('rewritePanel');studio.open();}catch(err){console.error(err);showToast('재작성 도구를 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.');}};
 $('#issuesWidget').onclick=()=>openPanel('issuesPanel');$('#reviewWidget').onclick=()=>openPanel('reviewPanel');$('#techWidget').onclick=()=>openPanel('techPanel');
-$$('[data-close-panel]').forEach(b=>b.onclick=()=>{$('#'+b.dataset.closePanel).hidden=true;});
+$$('[data-close-panel]').forEach(b=>b.onclick=()=>{const p=$('#'+b.dataset.closePanel);p.hidden=true;setMobilePanelExpanded(p,false);});
+$$('[data-panel-size]').forEach(b=>b.onclick=(e)=>{e.stopPropagation();const p=$('#'+b.dataset.panelSize);if(!p||innerWidth>PANEL_SHEET_BREAKPOINT)return;setMobilePanelExpanded(p,!p.classList.contains('mobileExpanded'));requestAnimationFrame(()=>p.querySelector('.floatBody')?.scrollTo({top:0,behavior:'smooth'}));});
 makeDraggable($('#issuesPanel'));makeDraggable($('#reviewPanel'));makeDraggable($('#rewritePanel'));makeDraggable($('#techPanel'));
 
 const dz=$('#dropzone'),fi=$('#imageInput');

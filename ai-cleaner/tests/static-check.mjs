@@ -52,6 +52,19 @@ if(!failures.length){
  /v6\.8\.6 UI \/ layout stabilization/.test(css)&&/grid-template-columns:minmax\(0,1fr\) minmax\(0,1fr\)/.test(css)&&/\.bridgeAction\{position:absolute;left:50%;top:52px/.test(css)&&/typingBridgeStatus/.test(html+app)?pass('two-card floating bridge layout','desktop has no reserved bridge column + live bridge status'):fail('two-card floating bridge layout','layout stabilization contract missing');
  /layout bridge floats between two cards/.test(e2e)&&/bridgePosition/.test(e2e)&&/workspaceCenter/.test(e2e)?pass('browser layout regression coverage','desktop floating bridge + tablet inline bridge'):fail('browser layout regression coverage','layout E2E missing');
 
+ const mobileChecks=[
+  ['mobile compact panel CSS exists',css.includes('1.0.0 mobile compact panels')&&css.includes('46dvh')&&css.includes('mobileExpanded')],
+  ['mobile panel size controls exist',html.includes('data-panel-size="issuesPanel"')&&html.includes('data-panel-size="rewritePanel"')&&html.includes('aria-expanded="false"')],
+  ['mobile panel expand logic exists',app.includes('setMobilePanelExpanded')&&app.includes("$$('[data-panel-size]')")],
+  ['mobile compact mode hides secondary text',css.includes('.floatPanel:not(.mobileExpanded) .floatHead .sub')],
+  ['floating dock stays switchable above panels',css.includes('floatingDock{position:fixed')&&css.includes('z-index:520')],
+  ['e2e hidden typewriter speed setup',e2e.includes("typingPreviewSpeed').evaluate")&&!e2e.includes("typingPreviewSpeed').selectOption")],
+  ['e2e panel switch coverage',e2e.includes("issuesPanel')).toBeHidden")],
+  ['product semver baseline',String(ver.version)==='1.0.0'&&String(pkg.version)==='1.0.0']
+ ];
+ for(const [name,ok] of mobileChecks)ok?pass(name):fail(name);
+
 }
-for(const p of passes)console.log(`PASS ${p.n}${p.d?` — ${p.d}`:''}`);for(const f of failures)console.error(`FAIL ${f.n}${f.d?` — ${f.d}`:''}`);console.log(`\nSummary: ${passes.length} passed, ${failures.length} failed`);if(failures.length)process.exit(1);
+for(const p of passes)console.log(`PASS ${p.n}${p.d?` — ${p.d}`:''}`);for(const f of failures)console.error(`FAIL ${f.n}${f.d?` — ${f.d}`:''}`);
+console.log(`\nSummary: ${passes.length} passed, ${failures.length} failed`);if(failures.length)process.exit(1);
 
