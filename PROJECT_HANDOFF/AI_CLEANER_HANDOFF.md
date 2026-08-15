@@ -1,6 +1,6 @@
 # AI Cleaner 프로젝트 인수인계 메모리
 
-업데이트: 2026-08-15 · 현재 패키지: 1.0.0
+업데이트: 2026-08-15 · 현재 패키지: 1.1.1
 
 ## 새 채팅에서 가장 먼저 읽을 것
 이 폴더를 새 채팅에 업로드한 뒤 `PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md 읽고 이어서 개발하자`라고 요청한다. 이 문서는 프로젝트의 결정사항, 보호 경로, UX 방향, 안전 제약, 배포 방식, 알려진 이슈를 보존하기 위한 인수인계 메모리다.
@@ -212,3 +212,29 @@
 - 1.0.0은 모바일 compact panel + UI/layout freeze + CI 회귀수정까지 포함한 모듈화 전 최종 기준선이다.
 - 다음 구조개편 목표 버전은 1.1.0 Modular Core이며 1.0.0의 사용자 UI 계약을 유지한다.
 - browser-smoke에서 발견된 회귀: 숨겨진 Typewriter 속도 select를 Playwright가 직접 조작해 timeout, 열린 교정 패널이 rewrite widget 포인터를 가로막는 문제. 1.0.0에서는 테스트 순서를 수정하고 floating dock을 패널보다 위에 유지해 실제 패널 전환도 보장한다.
+
+
+## 1.1.0 Modular Core · Phase 1
+- 1.0.0의 UI/레이아웃 계약을 그대로 유지하고 내부 책임만 분리한다. 화면 재디자인이나 사용자 플로우 변경은 하지 않는다.
+- 부팅 순서: `core/event-bus.js` → `core/history-store.js` → `core/work-lock.js` → `core/text-utils.js` → `ui/panel-manager.js` → `features/typewriter-engine.js` → `app.js`. 모든 코어 파일은 assetVersion 쿼리를 공유한다.
+- `history-store.js`: Undo/Redo entries/index/restoring/limit/중복 snapshot 판정을 소유한다. app.js는 화면 상태 snapshot/restore만 연결한다.
+- `work-lock.js`: 장기 작업 충돌 잠금의 공통 경계. 1차에서는 Typewriter와 자동 업데이트 충돌 방지에 사용한다.
+- `event-bus.js`: 내부 `text:changed` 이벤트를 제공한다. 기존 `ai-cleaner:text-changed` DOM CustomEvent는 rewrite-studio 호환을 위해 계속 브리지한다.
+- `panel-manager.js`: 패널 open/close/top-close, 모바일 compact/expanded 상태, viewport clamp, drag/resize 위치 저장을 소유한다.
+- `typewriter-engine.js`: grapheme 단위 작성 scheduler/rAF/pause/resume/complete 상태를 소유한다. 실제 결과 textarea 적용/검증/히스토리 commit은 app.js의 UI 연결 계층에 남긴다.
+- `text-utils.js`: `Intl.Segmenter` 기반 grapheme 분리를 공통 유틸로 이동. Diff와 Typewriter가 동일한 분리 규칙을 사용한다.
+- 재작성 엔진과 이미지 분석 엔진은 기존처럼 lazy-load를 유지한다. 모듈화 때문에 초기 로딩에 무거운 엔진을 포함하지 않는다.
+- `tests/module-check.mjs`를 추가해 Event Bus, History Store, Work Lock, grapheme 재조립, Typewriter scheduler를 브라우저 없이 단위 검사한다. GitHub Actions static-checks에서 이 검사를 별도 실행한다.
+- 1.1.0은 Strangler 방식 1차 분리다. `app.js`의 분석/파일/업데이트/렌더 상태를 한 번에 옮기지 않는다. 다음 단계에서 text engine/file import/update manager/state boundary를 순차 분리한다.
+- 외부 앱/사이트에 합성 키 입력을 보내는 기능은 계속 포함하지 않는다. 내부 Typewriter의 안전 경계는 1.0.0과 동일하다.
+
+
+## 1.1.1 Visible Text Write / Widget Clarity
+- X-ray 결과 탭을 제거한다. 숨은 Unicode 진단은 기술 정보 패널에만 남기고, 사용자가 별도 X-ray 화면을 오갈 필요가 없게 한다.
+- `자동작성 원본 새로쓰기`는 원본 문자열을 무조건 100% 복제하지 않는다. `sanitizeVisibleTypingSource()`를 먼저 거쳐 U+200B, BOM, BIDI formatting controls, 일반 control 문자처럼 안전하게 제거 가능한 숨은 문자를 제외하고 작성한다.
+- NBSP 및 특수 폭 공백은 일반 ASCII space로 정리한 뒤 새로 쓴다.
+- ZWJ/ZWNJ/WORD JOINER/Variation Selector/Unicode Tags처럼 문자 결합·이모지 표현 등에 영향을 줄 수 있는 의미 민감 Unicode는 기본 보존한다. 무조건 삭제 금지.
+- Typewriter 완료 검증 기준은 원본 raw string이 아니라 위 visible-text projection이다. 원본 진단 metadata는 raw 원문 기준을 유지한다.
+- 모바일 420px 이하에서도 floating widget의 이름을 숨기지 않는다. badge만 숨기고 아이콘 + `새 글 재작성` / `교정 제안` / `문장 검토` / `기술 정보` 명칭은 계속 표시한다.
+- 중앙 브리지 메뉴명은 `자동작성 원본 새로쓰기`로 고정한다.
+- 모바일 compact panel 정책은 1.0.0/1.1.0 계약을 그대로 유지한다.

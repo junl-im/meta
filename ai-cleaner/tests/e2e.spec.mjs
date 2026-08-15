@@ -9,15 +9,17 @@ test.beforeEach(async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
 });
 
-test('original auto typewriter writes into result and verifies exact equality', async ({ page }) => {
+test('original auto typewriter writes visible text and removes safe hidden characters', async ({ page }) => {
   await page.goto(BASE,{waitUntil:'domcontentloaded'});
-  const source='가나다\nABC🙂e\u0301';
+  const source='가\u200B나다\nABC🙂e\u0301\u00A0끝';
+  const expected='가나다\nABC🙂e\u0301 끝';
   await page.locator('#input').fill(source);
   await page.locator('#typingPreviewSpeed').evaluate(el=>{el.value='0';el.dispatchEvent(new Event('change',{bubbles:true}));});
   await page.locator('#typingPreviewButton').click();
   await expect(page.locator('#input')).toHaveJSProperty('readOnly',true);
   await expect(page.locator('#cleanProfile')).toBeDisabled();
-  await expect(page.locator('#output')).toHaveValue(source,{timeout:7000});
+  await expect(page.locator('#output')).toHaveValue(expected,{timeout:7000});
+  await expect(page.locator('#output')).not.toHaveValue(/\u200B|\u00A0/);
   await expect(page.locator('#output')).toHaveAttribute('data-typewriter-verified','true',{timeout:7000});
   await expect(page.locator('#input')).toHaveJSProperty('readOnly',false);
   await expect(page.locator('#cleanProfile')).toBeEnabled();
@@ -26,6 +28,14 @@ test('original auto typewriter writes into result and verifies exact equality', 
 test('foundation flow keeps state, layout and rewrite tools coherent', async ({ page }) => {
   await page.goto(BASE,{waitUntil:'domcontentloaded'});
   await expect(page.locator('#versionBadge')).toHaveText('v'+APP_VERSION);
+  const modules=await page.evaluate(()=>({
+    history:!!window.AICleanerApp?.historyStore,
+    lock:!!window.AICleanerApp?.workLock,
+    panels:!!window.AICleanerApp?.panelManager,
+    typewriter:!!window.AICleanerApp?.typewriterEngine,
+    bus:!!window.AICleanerApp?.eventBus
+  }));
+  expect(modules).toEqual({history:true,lock:true,panels:true,typewriter:true,bus:true});
   await expect(page.locator('#detailDiagnostics')).not.toHaveAttribute('open','');
   await page.setViewportSize({width:820,height:900});
   await expect.poll(async()=>page.locator('#typingPreviewButton small').evaluate(el=>getComputedStyle(el).transform)).toBe('none');
@@ -61,8 +71,9 @@ test('foundation flow keeps state, layout and rewrite tools coherent', async ({ 
   await expect(page.locator('#directTyped')).toHaveValue('');
 
   await page.locator('[data-close-panel="rewritePanel"]').click();
-  await input.fill('앞\u200B뒤');await page.locator('#analyze').evaluate(el=>el.click());await page.locator('[data-resulttab="xray"]').click();
-  const marker=page.locator('#xrayView [data-xpos]').first();await expect(marker).toBeVisible();await marker.click();await expect.poll(()=>input.evaluate(el=>el.selectionStart)).toBe(1);
+  await input.fill('앞\u200B뒤\u00A0끝');await page.locator('#analyze').evaluate(el=>el.click());
+  await expect(output).toHaveValue('앞뒤 끝');
+  await expect(page.locator('[data-resulttab="xray"]')).toHaveCount(0);
 
   await input.fill('');
   await expect(output).toHaveValue('');

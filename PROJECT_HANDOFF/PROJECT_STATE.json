@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "date": "2026-08-15",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -21,18 +21,24 @@
     "ai-cleaner/index.html",
     "ai-cleaner/css/app.css",
     "ai-cleaner/js/app.js",
+    "ai-cleaner/js/core/event-bus.js",
+    "ai-cleaner/js/core/history-store.js",
+    "ai-cleaner/js/core/work-lock.js",
+    "ai-cleaner/js/core/text-utils.js",
+    "ai-cleaner/js/ui/panel-manager.js",
+    "ai-cleaner/js/features/typewriter-engine.js",
     "ai-cleaner/js/rewrite-studio.js",
     "ai-cleaner/js/image-analyzer.js",
     "ai-cleaner/version.json",
     ".github/workflows/ai-cleaner-ci.yml"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.0.0",
-  "asset_version": "100",
+  "current_version": "1.1.1",
+  "asset_version": "111",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.0.0 mobile compact panels + pre-modular regression baseline",
+  "latestPatch": "1.1.1 visible-text write: X-ray UI removed, safe hidden Unicode auto-clean, widget labels restored, typewriter renamed",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -60,12 +66,15 @@
     ]
   },
   "internalTypewriter": {
-    "source": "original",
+    "source": "visible-text projection of original",
     "target": "result textarea",
     "clipboard": false,
     "syntheticKeyboardEvents": false,
     "incrementalSetRangeText": true,
-    "exactVerification": true
+    "exactVerification": true,
+    "safeHiddenAutoRemoval": true,
+    "specialSpaceNormalization": true,
+    "meaningSensitiveUnicodePreserved": true
   },
   "foundationAudit": {
     "duplicateIssueRuleFixed": true,
@@ -98,10 +107,32 @@
     "ciPanelSwitchFix": true,
     "hiddenControlE2EFix": true
   },
-  "nextPhase": "1.1.0 modular core",
+  "nextPhase": "1.2.0 modular core phase 2 after 1.1.1 UI/text-policy stabilization",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
     "scheme": "semantic versioning"
+  },
+  "modularCore": {
+    "phase": 1,
+    "uiContract": "1.0.0 preserved",
+    "bootOrder": [
+      "core/event-bus",
+      "core/history-store",
+      "core/work-lock",
+      "core/text-utils",
+      "ui/panel-manager",
+      "features/typewriter-engine",
+      "app"
+    ],
+    "eventBus": true,
+    "historyStore": true,
+    "workLock": true,
+    "panelManager": true,
+    "typewriterEngine": true,
+    "sharedTextUtils": true,
+    "rewriteLazyLoaded": true,
+    "imageLazyLoaded": true,
+    "moduleUnitChecks": true
   }
 }

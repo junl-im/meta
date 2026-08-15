@@ -1,11 +1,12 @@
 {
   "name": "ai-cleaner-browser-checks",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.1",
   "devDependencies": {
     "@playwright/test": "1.62.1"
   },
   "scripts": {
-    "test:e2e": "playwright test ai-cleaner/tests/e2e.spec.mjs --browser=chromium --workers=1"
+    "test:e2e": "playwright test ai-cleaner/tests/e2e.spec.mjs --browser=chromium --workers=1",
+    "test:modules": "node ai-cleaner/tests/module-check.mjs"
   }
 }

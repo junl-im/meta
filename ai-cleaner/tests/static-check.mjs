@@ -2,11 +2,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 const here=path.dirname(fileURLToPath(import.meta.url)),root=path.resolve(here,'..'),repo=path.resolve(root,'..');
-const files={html:path.join(root,'index.html'),app:path.join(root,'js','app.js'),rewrite:path.join(root,'js','rewrite-studio.js'),image:path.join(root,'js','image-analyzer.js'),css:path.join(root,'css','app.css'),version:path.join(root,'version.json'),regression:path.join(root,'tests','regression.js'),e2e:path.join(root,'tests','e2e.spec.mjs'),previewPs1:path.join(root,'tests','preview.ps1'),previewCmd:path.join(root,'tests','START-PREVIEW.cmd'),package:path.join(repo,'package.json')};
+const files={html:path.join(root,'index.html'),app:path.join(root,'js','app.js'),rewrite:path.join(root,'js','rewrite-studio.js'),image:path.join(root,'js','image-analyzer.js'),css:path.join(root,'css','app.css'),version:path.join(root,'version.json'),regression:path.join(root,'tests','regression.js'),e2e:path.join(root,'tests','e2e.spec.mjs'),moduleCheck:path.join(root,'tests','module-check.mjs'),eventBus:path.join(root,'js','core','event-bus.js'),historyStore:path.join(root,'js','core','history-store.js'),workLock:path.join(root,'js','core','work-lock.js'),textUtils:path.join(root,'js','core','text-utils.js'),panelManager:path.join(root,'js','ui','panel-manager.js'),typewriterEngine:path.join(root,'js','features','typewriter-engine.js'),previewPs1:path.join(root,'tests','preview.ps1'),previewCmd:path.join(root,'tests','START-PREVIEW.cmd'),package:path.join(repo,'package.json')};
 const failures=[],passes=[];const pass=(n,d='')=>passes.push({n,d}),fail=(n,d='')=>failures.push({n,d});
 for(const [n,f] of Object.entries(files))fs.existsSync(f)?pass(`required file: ${n}`,path.relative(root,f)):fail(`required file: ${n}`,`missing ${f}`);
 if(!failures.length){
- const html=fs.readFileSync(files.html,'utf8'),app=fs.readFileSync(files.app,'utf8'),rewrite=fs.readFileSync(files.rewrite,'utf8'),image=fs.readFileSync(files.image,'utf8'),css=fs.readFileSync(files.css,'utf8'),ver=JSON.parse(fs.readFileSync(files.version,'utf8')),e2e=fs.readFileSync(files.e2e,'utf8'),pkg=JSON.parse(fs.readFileSync(files.package,'utf8'));
+ const html=fs.readFileSync(files.html,'utf8'),app=fs.readFileSync(files.app,'utf8'),rewrite=fs.readFileSync(files.rewrite,'utf8'),image=fs.readFileSync(files.image,'utf8'),css=fs.readFileSync(files.css,'utf8'),eventBus=fs.readFileSync(files.eventBus,'utf8'),historyStore=fs.readFileSync(files.historyStore,'utf8'),workLock=fs.readFileSync(files.workLock,'utf8'),textUtils=fs.readFileSync(files.textUtils,'utf8'),panelManager=fs.readFileSync(files.panelManager,'utf8'),typewriterEngine=fs.readFileSync(files.typewriterEngine,'utf8'),ver=JSON.parse(fs.readFileSync(files.version,'utf8')),e2e=fs.readFileSync(files.e2e,'utf8'),pkg=JSON.parse(fs.readFileSync(files.package,'utf8'));
  const ids=[...html.matchAll(/\bid=["']([^"']+)["']/g)].map(m=>m[1]),seen=new Set(),dup=[...new Set(ids.filter(id=>seen.has(id)||!seen.add(id)))];dup.length?fail('duplicate HTML ids',dup.join(', ')):pass('duplicate HTML ids',`0 duplicates across ${ids.length} ids`);
  const idSet=new Set(ids),refs=new Set();for(const src of [app,rewrite,image])for(const re of [/(?:\$|q)\(["']#([A-Za-z][\w:-]*)["']\)/g,/getElementById\(["']([A-Za-z][\w:-]*)["']\)/g])for(const m of src.matchAll(re))refs.add(m[1]);const miss=[...refs].filter(x=>!idSet.has(x)).sort();miss.length?fail('JavaScript DOM id references',miss.join(', ')):pass('JavaScript DOM id references',`${refs.size} referenced ids all exist`);
  String(ver.version)===String(pkg.version)&&String(ver.assetVersion)===String(ver.version).replace(/\D/g,'')?pass('version.json source',`${ver.version} / ${ver.assetVersion}`):fail('version.json source',JSON.stringify({ver,pkg:pkg.version}));
@@ -22,7 +22,7 @@ if(!failures.length){
  ['0x200C','0x200D','0x2060'].every(t=>app.includes(t))?pass('meaning-sensitive Unicode guard','ZWJ/ZWNJ/WORD JOINER'):fail('meaning-sensitive Unicode guard','missing');
  /trainedAlgorithmicMedia/.test(image)&&/digitalCapture/.test(image)?pass('C2PA source-type distinction','present'):fail('C2PA source-type distinction','missing');
  /@playwright\/test/.test(e2e)&&pkg.devDependencies?.['@playwright/test']==='1.62.1'?pass('Playwright browser pin','1.62.1'):fail('Playwright browser pin','expected 1.62.1');
- /rewriteWidget/.test(e2e)&&/rewriteFactSummary/.test(e2e)&&/undoStep/.test(e2e)&&/data-xpos/.test(e2e)?pass('browser smoke coverage','rewrite + Fact Lock + history + X-ray'):fail('browser smoke coverage','missing');
+ /rewriteWidget/.test(e2e)&&/rewriteFactSummary/.test(e2e)&&/undoStep/.test(e2e)&&/visible text/.test(e2e)?pass('browser smoke coverage','rewrite + Fact Lock + history + visible-text typewriter'):fail('browser smoke coverage','missing');
  /keyboardEvent|dispatchEvent\(new KeyboardEvent|execCommand\(['"]insertText/.test(app+'\n'+rewrite)?fail('no synthetic external typing automation','synthetic input found'):pass('no synthetic external typing automation','direct verifier + internal result typewriter only');
  /v6\.8\.1 precision UI polish/.test(css)&&/transform:none!important/.test(css)?pass('precision responsive controls','legacy control alignment guards retained'):fail('precision responsive controls','polish guards missing');
  /queueStats/.test(app)&&/targetChars\(\)/.test(rewrite)&&/queueDirectCompare/.test(rewrite)?pass('long-text UI batching','stats + direct verifier batched/cached'):fail('long-text UI batching','performance batching missing');
@@ -37,7 +37,7 @@ if(!failures.length){
  /MAX_TEXT_FILE_BYTES=20\*1024\*1024/.test(app)?pass('large text import guard','20MB cap'):fail('large text import guard','missing');
  /revealAppliedResult\(`✓ \${done}개 문장을 결과에 반영했습니다/.test(app)?pass('review apply focus flow','review apply reveals result'):fail('review apply focus flow','missing');
  /원본 직접 쓰기/.test(html)&&/insertFromPaste/.test(rewrite)&&/e\.isTrusted/.test(rewrite)&&/directTrustedValue/.test(rewrite)&&/\['paste','drop','copy','cut'\]/.test(rewrite)&&/원본 직접 작성/.test(rewrite)?pass('original direct-write guard','original-only + clipboard/drop/synthetic input blocked + verified typed result apply'):fail('original direct-write guard','missing');
- /setRangeText\(piece/.test(app)&&/commitProgressiveResult/.test(app)&&/splitGraphemesExact/.test(app)&&/out\.value===typingPreview\.source/.test(app)?pass('internal result typewriter','grapheme incremental write + exact verification'):fail('internal result typewriter','missing');
+ /append:piece=>\{out\.setRangeText\(piece/.test(app)&&/commitProgressiveResult/.test(app)&&/createTypewriterEngine/.test(typewriterEngine)&&/splitGraphemesExact/.test(textUtils)&&/sanitizeVisibleTypingSource/.test(textUtils)&&/out\.value===source/.test(app)?pass('internal result typewriter','visible-text sanitizer + modular grapheme writer + exact verification'):fail('internal result typewriter','missing');
  /setRangeText\(piece/.test(app)&&!/dispatchEvent\(new KeyboardEvent/.test(app)&&!/new KeyboardEvent/.test(app)?pass('typewriter safety boundary','internal textarea insertion only; no synthetic keyboard events'):fail('typewriter safety boundary','unsafe or missing typewriter path');
  /data:image\/(png|jpeg|webp);base64,/i.test(html)?fail('embedded base64 image bloat','found'):pass('embedded base64 image bloat','none');
 
@@ -52,6 +52,19 @@ if(!failures.length){
  /v6\.8\.6 UI \/ layout stabilization/.test(css)&&/grid-template-columns:minmax\(0,1fr\) minmax\(0,1fr\)/.test(css)&&/\.bridgeAction\{position:absolute;left:50%;top:52px/.test(css)&&/typingBridgeStatus/.test(html+app)?pass('two-card floating bridge layout','desktop has no reserved bridge column + live bridge status'):fail('two-card floating bridge layout','layout stabilization contract missing');
  /layout bridge floats between two cards/.test(e2e)&&/bridgePosition/.test(e2e)&&/workspaceCenter/.test(e2e)?pass('browser layout regression coverage','desktop floating bridge + tablet inline bridge'):fail('browser layout regression coverage','layout E2E missing');
 
+
+ const modularBoot=['js/core/event-bus.js','js/core/history-store.js','js/core/work-lock.js','js/core/text-utils.js','js/ui/panel-manager.js','js/features/typewriter-engine.js'].every(x=>html.includes(x));
+ modularBoot&&html.indexOf('js/core/event-bus.js')<html.indexOf('js/app.js')?pass('modular boot order','core/ui/feature modules load before app'):fail('modular boot order','module load order missing');
+ /createHistoryStore/.test(historyStore)&&/historyStore\.record/.test(app)&&!/let historyState=/.test(app)?pass('history store ownership','history state moved out of app.js'):fail('history store ownership','history still coupled to app');
+ /createWorkLock/.test(workLock)&&/workLock\.acquire\('typewriter'\)/.test(app)&&/workLock\.isLocked\('typewriter'\)/.test(app)?pass('work lock ownership','typewriter/update coordination uses shared lock'):fail('work lock ownership','missing shared work lock');
+ /createPanelManager/.test(panelManager)&&/panelManager\.open/.test(app)&&/panelManager\.makeDraggable/.test(app)?pass('panel manager ownership','open/close/drag/clamp extracted'):fail('panel manager ownership','panel logic still coupled');
+ /createTypewriterEngine/.test(typewriterEngine)&&/typewriterEngine\.start/.test(app)&&/typewriterEngine\.togglePause/.test(app)?pass('typewriter engine ownership','scheduler state extracted from app'):fail('typewriter engine ownership','typewriter scheduler still coupled');
+ /createEventBus/.test(eventBus)&&/eventBus\.emit\('text:changed'/.test(app)&&/ai-cleaner:text-changed/.test(app+rewrite)?pass('event bus compatibility bridge','internal bus + DOM compatibility event'):fail('event bus compatibility bridge','event bridge missing');
+ /splitGraphemesExact/.test(textUtils)&&!/function splitGraphemesExact\(/.test(app)?pass('shared text utilities','grapheme logic extracted'):fail('shared text utilities','grapheme helper duplicated');
+ !/data-resulttab="xray"/.test(html)&&!/id="xrayPane"/.test(html)?pass('X-ray UI removal','diagnostic tab removed; technical info remains'):fail('X-ray UI removal','legacy X-ray UI still present');
+ /sanitizeVisibleTypingSource/.test(textUtils)&&/AUTO_REMOVE_HIDDEN/.test(textUtils)&&/SPECIAL_SPACES/.test(textUtils)&&/preservedSensitive/.test(textUtils)?pass('visible-text sanitizer policy','safe hidden removal + space normalization + sensitive preservation'):fail('visible-text sanitizer policy','missing');
+ /자동작성 원본 새로쓰기/.test(html+app)?pass('typewriter menu naming','자동작성 원본 새로쓰기'):fail('typewriter menu naming','missing');
+ /@media\(max-width:420px\)[\s\S]*floatWidget>span:not\(\.widgetIcon\)\{display:inline/.test(css)?pass('mobile widget labels visible','names stay visible on narrow phones'):fail('mobile widget labels visible','labels still hidden');
  const mobileChecks=[
   ['mobile compact panel CSS exists',css.includes('1.0.0 mobile compact panels')&&css.includes('46dvh')&&css.includes('mobileExpanded')],
   ['mobile panel size controls exist',html.includes('data-panel-size="issuesPanel"')&&html.includes('data-panel-size="rewritePanel"')&&html.includes('aria-expanded="false"')],
@@ -60,7 +73,7 @@ if(!failures.length){
   ['floating dock stays switchable above panels',css.includes('floatingDock{position:fixed')&&css.includes('z-index:520')],
   ['e2e hidden typewriter speed setup',e2e.includes("typingPreviewSpeed').evaluate")&&!e2e.includes("typingPreviewSpeed').selectOption")],
   ['e2e panel switch coverage',e2e.includes("issuesPanel')).toBeHidden")],
-  ['product semver baseline',String(ver.version)==='1.0.0'&&String(pkg.version)==='1.0.0']
+  ['product semver baseline',String(ver.version)==='1.1.1'&&String(pkg.version)==='1.1.1']
  ];
  for(const [name,ok] of mobileChecks)ok?pass(name):fail(name);
 
