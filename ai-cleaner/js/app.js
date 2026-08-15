@@ -4,7 +4,7 @@
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 const Modules=window.AICleanerModules||{};
-const requiredModules=['createEventBus','createHistoryStore','createWorkLock','splitGraphemesExact','sanitizeVisibleTypingSource','classifyTextCodePoint','createTextStateStore','createTextEngine','createFileImportService','createUpdateManager','createPanelManager','createTypewriterEngine'];
+const requiredModules=['createEventBus','createHistoryStore','createWorkLock','splitGraphemesExact','sanitizeVisibleTypingSource','classifyTextCodePoint','createTextStateStore','createTextEngine','createDiffEngine','createAnalysisCoordinator','createFileImportService','createUpdateManager','createPanelManager','createDiffView','createTypewriterEngine'];
 const missingModules=requiredModules.filter(name=>typeof Modules[name]!=='function');
 if(missingModules.length)throw new Error('AI Cleaner core modules missing: '+missingModules.join(', '));
 const eventBus=Modules.createEventBus();
@@ -15,6 +15,7 @@ const textStateStore=Modules.createTextStateStore();
 const state=textStateStore.state;
 const textEngine=Modules.createTextEngine();
 const fileImport=Modules.createFileImportService();
+const analysisCoordinator=Modules.createAnalysisCoordinator({executor:(text,options)=>textEngine.analyze(text,options)});
 
 const APP_META=window.__AI_CLEANER_VERSION__||{};
 const APP_VERSION=String(APP_META.version||'local');
@@ -85,42 +86,10 @@ function restoreHistoryIndex(nextIndex,{announce=true}={}){
 function undoHistory(){restoreHistoryIndex(historyStore.index-1);}
 function redoHistory(){restoreHistoryIndex(historyStore.index+1);}
 
-function commonEdgeMarkup(before,after){
-  const a=splitGraphemesExact(before),b=splitGraphemesExact(after);
-  let p=0;while(p<a.length&&p<b.length&&a[p]===b[p])p++;
-  let s=0;while(s<a.length-p&&s<b.length-p&&a[a.length-1-s]===b[b.length-1-s])s++;
-  const render=(parts,start,end)=>esc(parts.slice(0,start).join(''))+(end>start?`<mark class="diffChange">${esc(parts.slice(start,end).join(''))}</mark>`:'')+esc(parts.slice(end).join(''));
-  return {before:render(a,p,a.length-s),after:render(b,p,b.length-s)};
-}
-function lineDiff(before,after){
-  const a=before.split('\n'),b=after.split('\n'),ops=[];
-  if(a.length*b.length<=50000&&a.length<=240&&b.length<=240){
-    const m=b.length,dp=Array.from({length:a.length+1},()=>new Uint16Array(m+1));
-    for(let i=a.length-1;i>=0;i--)for(let j=m-1;j>=0;j--)dp[i][j]=a[i]===b[j]?dp[i+1][j+1]+1:Math.max(dp[i+1][j],dp[i][j+1]);
-    let i=0,j=0;
-    while(i<a.length||j<b.length){
-      if(i<a.length&&j<b.length&&a[i]===b[j]){ops.push({type:'same',text:a[i]});i++;j++;}
-      else if(j>=b.length||(i<a.length&&dp[i+1][j]>=dp[i][j+1])){ops.push({type:'del',text:a[i++]});}
-      else{ops.push({type:'add',text:b[j++]});}
-    }
-  }else{
-    const n=Math.max(a.length,b.length);for(let i=0;i<n;i++){if(a[i]===b[i])ops.push({type:'same',text:a[i]||''});else{if(i<a.length)ops.push({type:'del',text:a[i]});if(i<b.length)ops.push({type:'add',text:b[i]});}}
-  }
-  const hunks=[];let cur=null,line=1;
-  for(const op of ops){
-    if(op.type==='same'){if(cur){hunks.push(cur);cur=null;}line++;continue;}
-    if(!cur)cur={line,before:[],after:[]};(op.type==='del'?cur.before:cur.after).push(op.text);if(op.type==='del')line++;
-  }
-  if(cur)hunks.push(cur);return hunks;
-}
-function renderDiff(){
-  const list=$('#diffList'),count=$('#diffCount');if(!list||!count)return;
-  const before=state.base||'',after=$('#output')?.value||state.working||'';
-  if(!before&&!after){count.textContent='변경 0곳';list.innerHTML='<div class="empty">분석 후 변경된 부분을 확인할 수 있습니다.</div>';return;}
-  if(before===after){count.textContent='변경 0곳';list.innerHTML='<div class="empty">자동 정리 결과에서 추가로 달라진 내용이 없습니다.</div>';return;}
-  const hunks=lineDiff(before,after);count.textContent=`변경 ${hunks.length}곳`;
-  list.innerHTML=hunks.slice(0,120).map((h,i)=>{const bv=h.before.join('\n'),av=h.after.join('\n'),mk=commonEdgeMarkup(bv,av);return `<div class="diffItem"><div class="diffLabel">변경 ${i+1} · ${h.line}줄 근처</div><div class="diffRow before"><span class="diffSide">이전</span><div class="diffText">${mk.before||'<span class="sub">없음</span>'}</div></div><div class="diffRow after"><span class="diffSide">현재</span><div class="diffText">${mk.after||'<span class="sub">없음</span>'}</div></div></div>`;}).join('')+(hunks.length>120?`<div class="empty">변경이 많아 앞의 120곳만 표시했습니다.</div>`:'');
-}
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const diffEngine=Modules.createDiffEngine({splitGraphemes:splitGraphemesExact});
+const diffView=Modules.createDiffView({engine:diffEngine,escapeHtml:esc});
+function renderDiff(){return diffView.render(state.base||'', $('#output')?.value||state.working||'');}
 
 function restoreUpdateDraftData(draft){
   if(!draft)return false;
@@ -135,8 +104,6 @@ function restoreUpdateDraftData(draft){
   if(draft.activeTool){const b=document.querySelector(`[data-tool="${draft.activeTool}"]`);if(b)b.click();}
   showToast('새 버전을 적용하고 작성 중이던 내용을 복원했습니다.');return true;
 }
-
-const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 function configureEditors(root=document){
   root.querySelectorAll('textarea').forEach(el=>{
@@ -162,13 +129,13 @@ const reviewSuggestion=text=>textEngine.reviewSuggestion(text);
 const countIssuesLight=text=>textEngine.countIssuesLight(text,{repeat:$('#repeat').checked});
 
 function syncOriginalMetadata(source){
-  const t0=performance.now(),result=textEngine.analyze(source,{profile:$('#cleanProfile').value,nfkc:$('#norm').checked,repeat:$('#repeat').checked}),sc=result.scan,hom=result.homoglyphs;
-  state.original=source;state.base=result.base;state.chars=sc.auto;state.allChars=sc.all;state.homoglyphs=hom;state.score=result.score;state.analyzeMs=performance.now()-t0;state.techUnread=(sc.all.length+hom.length)>0;inputDirty=false;
+  const run=analysisCoordinator.runNow(source,{profile:$('#cleanProfile').value,nfkc:$('#norm').checked,repeat:$('#repeat').checked}),result=run.result,sc=result.scan,hom=result.homoglyphs;
+  state.original=source;state.base=result.base;state.chars=sc.auto;state.allChars=sc.all;state.homoglyphs=hom;state.score=result.score;state.analyzeMs=run.durationMs;state.techUnread=(sc.all.length+hom.length)>0;inputDirty=false;
   $('#textPerf').textContent=`${state.analyzeMs.toFixed(state.analyzeMs<10?1:0)}ms`;renderStats();renderTech();notifyTextChanged('original');
 }
 function clearTextAnalysis({keepInput=true,clearRewrite=false,announce=false}={}){
   if(window.__AI_CLEANER_TYPEWRITER_BUSY__)stopTypingPreview({restore:false,silent:true});
-  clearTimeout(timer);inputDirty=false;textStateStore.reset();manualEditBaseline='';
+  analysisCoordinator.cancel();inputDirty=false;textStateStore.reset();manualEditBaseline='';
   if(!keepInput)$('#input').value='';$('#input').readOnly=false;$('#input').scrollTop=0;$('#output').value='';$('#output').scrollTop=0;$('#output').readOnly=true;$('#editResult').textContent='✎ 직접 수정';delete $('#output').dataset.typewriterVerified;const details=$('#detailDiagnostics');if(details)details.open=false;
   closeAllPanels();activateResultTab('cleaned');renderAll({preserveOutput:true});renderDiff();$('#textPerf').textContent='대기';resetHistory('빈 상태');
   if(clearRewrite){try{sessionStorage.removeItem(REWRITE_SESSION_KEY);}catch(_){}try{window.AICleanerRewriteStudio?.resetSession?.();}catch(_){}}
@@ -176,34 +143,31 @@ function clearTextAnalysis({keepInput=true,clearRewrite=false,announce=false}={}
 }
 function resetTextWorkspace(){clearTextAnalysis({keepInput:false,clearRewrite:true,announce:true});queueStats();notifyTextChanged('original');}
 
-function analyze(silent=false){
-  const t0=performance.now();
-  const input=$('#input').value;
-  if(!input.trim()){clearTextAnalysis({keepInput:true});if(!silent)showToast('먼저 글을 입력해 주세요.');return;}
+function analysisOptions(){return{profile:$('#cleanProfile').value,nfkc:$('#norm').checked,repeat:$('#repeat').checked};}
+function applyAnalysisResult(input,result,{silent=true,durationMs=0}={}){
+  if(String($('#input').value)!==String(input))return false;
   inputDirty=false;
-  const prevIssueCount=state.issues.length;
-  const prevReviewCount=state.reviews.filter(r=>r.score>=1).length;
-  const prevTechCount=state.allChars.length+state.homoglyphs.length;
-  const hadOriginal=!!state.original;
-  const result=textEngine.analyze(input,{profile:$('#cleanProfile').value,nfkc:$('#norm').checked,repeat:$('#repeat').checked}),sc=result.scan,base=result.base,hom=result.homoglyphs,foundIssues=result.issues;
+  const prevIssueCount=state.issues.length,prevReviewCount=state.reviews.filter(r=>r.score>=1).length,prevTechCount=state.allChars.length+state.homoglyphs.length,hadOriginal=!!state.original;
+  const sc=result.scan,base=result.base,hom=result.homoglyphs,foundIssues=result.issues;
   textStateStore.replace({
     original:input,base,issueBase:base,working:base,chars:sc.auto,allChars:sc.all,issues:foundIssues,applied:new Set(),manual:false,
     homoglyphs:hom,reviews:[],score:result.score,focusCycles:Object.create(null),
-    issueUnread:foundIssues.length>0&&(!hadOriginal||foundIssues.length!==prevIssueCount),
-    reviewUnread:false,
-    techUnread:(sc.all.length+hom.length)>0&&(!hadOriginal||(sc.all.length+hom.length)!==prevTechCount),
-    analyzeMs:0,reviewOverflow:0
+    issueUnread:foundIssues.length>0&&(!hadOriginal||foundIssues.length!==prevIssueCount),reviewUnread:false,
+    techUnread:(sc.all.length+hom.length)>0&&(!hadOriginal||(sc.all.length+hom.length)!==prevTechCount),analyzeMs:durationMs,reviewOverflow:0
   });
-  $('#output').readOnly=true;
-  $('#editResult').textContent='✎ 직접 수정';
-  renderAll();
-  const reviewCount=state.reviews.filter(r=>r.score>=1).length;
-  state.reviewUnread=reviewCount>0&&(!hadOriginal||reviewCount!==prevReviewCount);
-  state.analyzeMs=performance.now()-t0;
-  $('#textPerf').textContent=`${state.analyzeMs.toFixed(state.analyzeMs<10?1:0)}ms`;
-  syncWidgets();
-  notifyTextChanged('output');
-  if(!historyStore.restoring)resetHistory('분석 결과');
+  $('#output').readOnly=true;$('#editResult').textContent='✎ 직접 수정';renderAll();
+  const reviewCount=state.reviews.filter(r=>r.score>=1).length;state.reviewUnread=reviewCount>0&&(!hadOriginal||reviewCount!==prevReviewCount);
+  $('#textPerf').textContent=`${durationMs.toFixed(durationMs<10?1:0)}ms`;syncWidgets();notifyTextChanged('output');if(!historyStore.restoring)resetHistory('분석 결과');
+  eventBus.emit('analysis:completed',{revision:textStateStore.revision,durationMs,silent});return true;
+}
+function analyze(silent=false){
+  const input=$('#input').value;if(!input.trim()){clearTextAnalysis({keepInput:true});if(!silent)showToast('먼저 글을 입력해 주세요.');return false;}
+  const run=analysisCoordinator.runNow(input,analysisOptions());return applyAnalysisResult(input,run.result,{silent,durationMs:run.durationMs});
+}
+function queueLiveAnalysis(){
+  const input=$('#input').value;if(!input.trim()||!$('#liveScan').checked)return analysisCoordinator.cancel();
+  const delay=liveDelay(input.length),options=analysisOptions();eventBus.emit('analysis:scheduled',{revision:textStateStore.revision,delay});
+  analysisCoordinator.schedule(input,options,{delay,idleTimeout:Math.max(250,delay),onResult:(result,meta)=>applyAnalysisResult(input,result,{silent:true,durationMs:meta.durationMs}),onError:(error)=>{console.error(error);$('#textPerf').textContent='오류';}});
 }
 
 function rebuild(){
@@ -513,7 +477,7 @@ function startTypingPreview(){
   const rawSource=$('#input').value;if(!rawSource)return showToast('먼저 원본 글을 입력해 주세요.');
   const prepared=sanitizeVisibleTypingSource(rawSource),source=prepared.text;
   if(!source)return showToast('새로 쓸 수 있는 보이는 글씨가 없습니다.');
-  clearTimeout(timer);if(!$('#output').readOnly)$('#editResult').click();syncOriginalMetadata(rawSource);if(historyStore.index<0)resetHistory('자동 작성 전');
+  analysisCoordinator.cancel();if(!$('#output').readOnly)$('#editResult').click();syncOriginalMetadata(rawSource);if(historyStore.index<0)resetHistory('자동 작성 전');
   closeAllPanels();activateResultTab('cleaned');
   typingPreview={source,rawSource,historyIndex:historyStore.index,inputWasReadOnly:$('#input').readOnly,bridgePct:-1,removedHidden:prepared.removed.length,normalizedSpaces:prepared.normalizedSpaces.length,preservedSensitive:prepared.preservedSensitive.length};
   const out=$('#output');delete out.dataset.typewriterVerified;out.readOnly=true;out.value='';out.scrollTop=0;$('#input').readOnly=true;openPanel('typingPreviewPanel');
@@ -536,10 +500,9 @@ $('#typingPreviewPause').onclick=()=>{
   $('#typingPreviewPause').textContent=paused?'계속':'일시정지';typewriterBridgeStatus(paused?'일시정지':pct+'%');typewriterStatus(paused?`일시정지 · ${snap.index.toLocaleString()} / ${snap.chars.length.toLocaleString()}`:`작성 계속 · ${snap.index.toLocaleString()} / ${snap.chars.length.toLocaleString()}`);
 };
 
-let timer;
-$('#input').addEventListener('input',()=>{inputDirty=true;queueStats();syncWidgets();notifyTextChanged('original');if(!$('#input').value.trim()){clearTextAnalysis({keepInput:true});return;}if($('#liveScan').checked){clearTimeout(timer);timer=setTimeout(()=>analyze(true),liveDelay($('#input').value.length));}});
+$('#input').addEventListener('input',()=>{inputDirty=true;queueStats();syncWidgets();notifyTextChanged('original');if(!$('#input').value.trim()){clearTextAnalysis({keepInput:true});return;}queueLiveAnalysis();});
 $('#analyze').onclick=()=>analyze(false);$('#sample').onclick=()=>{$('#input').value=sample;inputDirty=true;notifyTextChanged('original');analyze(true);};$('#reset').onclick=resetTextWorkspace;
-['norm','repeat','length','liveScan','cleanProfile'].forEach(id=>$('#'+id).addEventListener('change',()=>{if($('#input').value.trim()&&id!=='liveScan')analyze(true);}));
+['norm','repeat','length','liveScan','cleanProfile'].forEach(id=>$('#'+id).addEventListener('change',()=>{if(!$('#input').value.trim())return;if(id==='liveScan'){if($('#liveScan').checked)queueLiveAnalysis();else analysisCoordinator.cancel();return;}analyze(true);}));
 
 $('#copy').onclick=async()=>{if(!$('#output').value)return;try{await navigator.clipboard.writeText($('#output').value);showToast('결과를 복사했습니다.');}catch(_){showToast('클립보드 권한이 없어 복사하지 못했습니다. 결과창에서 직접 선택해 주세요.');}};
 $('#downloadTxt').onclick=()=>$('#output').value&&download(`cleaned-v${APP_VERSION}.txt`,$('#output').value,'text/plain;charset=utf-8');
@@ -562,7 +525,7 @@ $$('[data-resulttab]').forEach(t=>t.onclick=()=>activateResultTab(t.dataset.resu
 $$('[data-tool]').forEach(b=>b.onclick=()=>{$$('[data-tool]').forEach(x=>x.classList.toggle('active',x===b));$('#textTool').classList.toggle('hidden',b.dataset.tool!=='text');$('#imageTool').classList.toggle('hidden',b.dataset.tool!=='image');syncWidgets();});
 
 window.AICleanerApp={
-  version:APP_VERSION,assetVersion:ASSET_VERSION,showToast,configureEditors,eventBus,workLock,historyStore,textStateStore,textEngine,fileImport,updateManager,panelManager,typewriterEngine,
+  version:APP_VERSION,assetVersion:ASSET_VERSION,showToast,configureEditors,eventBus,workLock,historyStore,textStateStore,textEngine,diffEngine,diffView,analysisCoordinator,fileImport,updateManager,panelManager,typewriterEngine,
   getText(kind='output'){if(kind==='original')return $('#input').value||'';if(!$('#output').value&&$('#input').value.trim())analyze(true);return $('#output').value||state.working||'';},
   commitProgressiveResult(text,label='자동작성 원본 새로쓰기'){
     const next=String(text??''),out=$('#output');if(out.value!==next)return false;

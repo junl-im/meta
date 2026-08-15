@@ -7,8 +7,8 @@ const here=path.dirname(fileURLToPath(import.meta.url));
 const root=path.resolve(here,'..');
 const files=[
   'js/core/event-bus.js','js/core/history-store.js','js/core/work-lock.js','js/core/text-utils.js',
-  'js/core/state-store.js','js/core/text-engine.js','js/services/update-manager.js',
-  'js/ui/panel-manager.js','js/features/file-import.js','js/features/typewriter-engine.js'
+  'js/core/state-store.js','js/core/text-engine.js','js/core/diff-engine.js','js/services/analysis-coordinator.js','js/services/update-manager.js',
+  'js/ui/panel-manager.js','js/ui/diff-view.js','js/features/file-import.js','js/features/typewriter-engine.js'
 ];
 const queue=[];
 const context={
@@ -47,9 +47,16 @@ function assert(ok,msg){if(!ok)throw new Error(msg);}
   const importer=M.createFileImportService({maxBytes:10});assert(importer.rtfToText('{\\rtf1\\ansi 테스트\\par 다음}').includes('테스트\n다음'),'RTF import failed');assert(importer.looksBinary('abc\u0000def'),'binary text detection failed');assert(importer.parse('a.txt','plain')==='plain','plain import failed');let tooLarge=false;try{await importer.read({name:'a.txt',size:11,text:async()=> 'hello'});}catch(e){tooLarge=e.code==='FILE_TOO_LARGE';}assert(tooLarge,'file size guard failed');const ok=await importer.read({name:'a.txt',size:5,text:async()=> 'hello'});assert(ok.text==='hello','file read failed');
 }
 {
-  const mem=new Map(),storage={getItem:k=>mem.get(k)||null,setItem:(k,v)=>mem.set(k,v),removeItem:k=>mem.delete(k)};let replaced='',captured='';const manager=M.createUpdateManager({currentVersion:'1.2.2',storage,locationObj:{href:'http://example.test/ai-cleaner/',replace:u=>{replaced=u;}},fetchImpl:async()=>({ok:true,json:async()=>({version:'1.2.3'})}),captureDraft:v=>(captured=v,{savedAt:100,targetVersion:v,input:'x'}),restoreDraft:()=>{},now:()=>100});const changed=await manager.check();assert(changed&&captured==='1.2.3'&&replaced.includes('__appv=1.2.3'),'update manager reload preparation failed');const draft=manager.takeDraft({maxAgeMs:1000});assert(draft?.input==='x','update draft take failed');
+  const mem=new Map(),storage={getItem:k=>mem.get(k)||null,setItem:(k,v)=>mem.set(k,v),removeItem:k=>mem.delete(k)};let replaced='',captured='';const manager=M.createUpdateManager({currentVersion:'1.3.0',storage,locationObj:{href:'http://example.test/ai-cleaner/',replace:u=>{replaced=u;}},fetchImpl:async()=>({ok:true,json:async()=>({version:'1.3.1'})}),captureDraft:v=>(captured=v,{savedAt:100,targetVersion:v,input:'x'}),restoreDraft:()=>{},now:()=>100});const changed=await manager.check();assert(changed&&captured==='1.3.1'&&replaced.includes('__appv=1.3.1'),'update manager reload preparation failed');const draft=manager.takeDraft({maxAgeMs:1000});assert(draft?.input==='x','update draft take failed');
 }
 {
   const out=[];let completed=null;const engine=M.createTypewriterEngine({split:M.splitGraphemesExact,raf:fn=>{queue.push(fn);return queue.length;},caf:()=>{}});engine.start('가🙂',{getDelay:()=>0,append:p=>out.push(p),onComplete:s=>completed=s});let ts=0,guard=0;while(queue.length&&engine.running&&guard++<20){const fn=queue.shift();fn(ts+=16);}assert(out.join('')==='가🙂','typewriter incremental append failed');assert(completed&&completed.completed===true&&completed.index===completed.chars.length,'typewriter completion failed');
 }
-console.log('PASS modular core phase 2 + text hygiene inventory unit checks');
+
+{
+  const d=M.createDiffEngine({splitGraphemes:M.splitGraphemesExact,maxHunks:2});const same=d.build('가🙂','가🙂');assert(same.mode==='same'&&same.count===0,'diff same-state failed');const changed=d.build('가🙂\n둘','가😺\n둘\n셋');assert(changed.count>=1&&changed.displayHunks.length<=2,'diff hunk build failed');const parts=d.edgeParts('가🙂나다','가😺나다');assert(parts.before.change==='🙂'&&parts.after.change==='😺','grapheme-safe diff edge failed');
+}
+{
+  const scheduled=[];const cleared=[];let now=0,results=[];const c=M.createAnalysisCoordinator({executor:(text)=>text.toUpperCase(),setTimer:fn=>(scheduled.push(fn),scheduled.length),clearTimer:id=>cleared.push(id),idle:null,now:()=>++now});c.schedule('old',{}, {onResult:r=>results.push(r)});c.schedule('new',{}, {onResult:r=>results.push(r)});scheduled[0]?.();scheduled[1]?.();assert(results.length===1&&results[0]==='NEW','analysis coordinator must discard stale schedule');const sync=c.runNow('sync');assert(sync.result==='SYNC'&&!c.pending,'analysis coordinator runNow failed');
+}
+console.log('PASS modular core phase 3 + text hygiene inventory unit checks');

@@ -274,3 +274,16 @@
 - 진단 JSON에도 정책 버전과 동일 audit를 내보낸다.
 - old-v6 Layer B의 문체 패턴/생성형 표현 휴리스틱은 실제 삽입 워터마크로 간주해 자동 삭제하지 않는다. 텍스트 위생과 문체 편집을 분리한다.
 - 자동작성 원본 새로쓰기는 계속 `raw 원본 → visible-text projection → grapheme 단위 setRangeText → 결과 residue 0 검사` 순서다. 외부 키 이벤트/합성 입력은 사용하지 않는다.
+
+
+## 1.3.0 Modular Core Phase 3
+- 외부 UI 계약은 1.2.2와 동일합니다.
+- 신규 경계: `core/diff-engine.js`, `services/analysis-coordinator.js`, `ui/diff-view.js`.
+- 라이브 분석은 가장 최근 입력만 적용합니다. Worker는 아직 활성화하지 않았으며 Coordinator executor를 다음 단계에서 Worker adapter로 교체할 수 있습니다.
+- Diff 계산은 DOM에서 분리되었고 최대 LCS 범위를 넘는 대형 문서는 선형 fallback을 사용합니다.
+- 다음 권장 단계: 1.3.x 안정화 후 1.4.0에서 worker-safe analysis kernel 또는 dedicated Worker adapter 도입.
+
+### 1.3.0 validation note
+- Static/architecture: 100 passed / 0 failed.
+- Module unit checks and JS syntax pass.
+- Local Playwright was not claimed as passed: npm dependency installation timed out in the build environment. Re-check `browser-smoke` after pushing.

@@ -32,8 +32,8 @@
     document.documentElement.classList.add('boot-ready');
     const coreScripts=[
       'js/core/event-bus.js','js/core/history-store.js','js/core/work-lock.js','js/core/text-utils.js',
-      'js/core/state-store.js','js/core/text-engine.js','js/services/update-manager.js',
-      'js/ui/panel-manager.js','js/features/file-import.js','js/features/typewriter-engine.js'
+      'js/core/state-store.js','js/core/text-engine.js','js/core/diff-engine.js','js/services/analysis-coordinator.js','js/services/update-manager.js',
+      'js/ui/panel-manager.js','js/ui/diff-view.js','js/features/file-import.js','js/features/typewriter-engine.js'
     ];
     for(const src of coreScripts)await loadScript(src+'?v='+av);
     await loadScript('js/app.js?v='+av);

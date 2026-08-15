@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "date": "2026-08-15",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -166,5 +166,20 @@
     ],
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
+  },
+  "assetVersion": "130",
+  "modularCorePhase3": {
+    "diffEngine": true,
+    "analysisCoordinator": true,
+    "diffView": true,
+    "workerEnabled": false,
+    "latestOnlyLiveAnalysis": true
+  },
+  "validation": {
+    "staticChecks": "100 passed / 0 failed",
+    "moduleChecks": "PASS",
+    "jsSyntax": "PASS",
+    "workflowYaml": "PASS",
+    "localBrowserSmoke": "NOT_RUN_INSTALL_TIMEOUT"
   }
 }
