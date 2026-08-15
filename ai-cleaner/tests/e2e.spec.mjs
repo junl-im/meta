@@ -1,9 +1,12 @@
 import { test, expect } from '@playwright/test';
 
-test('AI Cleaner v6.8 core browser flow', async ({ page }) => {
+test('AI Cleaner v6.8.1 core browser flow', async ({ page }) => {
   await page.goto('http://127.0.0.1:4173/ai-cleaner/', { waitUntil: 'domcontentloaded' });
-  await expect(page.locator('#versionBadge')).toHaveText('v6.8');
+  await expect(page.locator('#versionBadge')).toHaveText('v6.8.1');
   await expect(page.locator('#detailDiagnostics')).not.toHaveAttribute('open', '');
+  await page.setViewportSize({ width: 820, height: 900 });
+  await expect.poll(async () => page.locator('#typingPreviewButton small').evaluate(el => getComputedStyle(el).transform)).toBe('none');
+  await expect.poll(async () => page.locator('#typingPreviewButton').evaluate(el => getComputedStyle(el).flexDirection)).toBe('row');
 
   const input = page.locator('#input');
   const output = page.locator('#output');

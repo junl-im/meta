@@ -1,6 +1,6 @@
 {
-  "version": "6.8",
-  "assetVersion": "68",
+  "version": "6.8.1",
+  "assetVersion": "681",
   "channel": "stable",
-  "updateMode": "version-json-boot-session-restore-lazy-tools"
+  "updateMode": "version-json-boot-session-restore-lazy-tools-ui-polish"
 }

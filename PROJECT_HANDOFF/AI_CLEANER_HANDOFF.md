@@ -1,6 +1,6 @@
 # AI Cleaner 프로젝트 인수인계 메모리
 
-업데이트: 2026-08-14 · 현재 패키지: v6.6
+업데이트: 2026-08-15 · 현재 패키지: v6.8.1
 
 ## 새 채팅에서 가장 먼저 읽을 것
 이 폴더를 새 채팅에 업로드한 뒤 `PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md 읽고 이어서 개발하자`라고 요청한다. 이 문서는 프로젝트의 결정사항, 보호 경로, UX 방향, 안전 제약, 배포 방식, 알려진 이슈를 보존하기 위한 인수인계 메모리다.
@@ -104,7 +104,7 @@
 - Synthetic keystroke/retyping automation remains intentionally excluded; typing preview is visual-only.
 
 
-## v6.8 재작성 스튜디오
+## v6.8.1 재작성 스튜디오
 - 기존 원본/결과 중심 UI를 유지하고 `✦ 새 글 재작성` 플로팅 위젯을 추가.
 - `rewrite-studio.js`는 위젯을 누를 때만 lazy-load. 이미지 분석 엔진도 파일 선택 시 lazy-load.
 - 로컬 재작성 엔진: 가볍게/구조/새 초안, 문체 방향, 길이 옵션. 의미 기반 원격 AI 모델은 사용하지 않으며 새로운 사실을 임의 생성하지 않음.
@@ -112,3 +112,11 @@
 - 직접 작성 검증: 사용자가 앱 내부 textarea에 물리 키보드로 입력한 내용을 code point 기준 비교. 한글 IME composition 대응. paste/drop 차단.
 - 외부 사이트/앱으로 합성 키 입력을 보내는 매크로/재타이핑 자동화는 구현하지 않음.
 - 재작성 결과 적용은 기존 Undo/Redo 및 변경 비교 히스토리에 기록.
+
+
+## v6.8.1 precision patch
+- Unified control heights/alignment and custom checkbox rendering.
+- Fixed responsive bridge text rotation and bridge/grid width mismatch.
+- Batched long-text statistics rendering; cached direct typing target arrays.
+- Fact Lock extended to Korean dates, times, phone numbers and hashtags.
+- Rewrite panel reports elapsed generation time.

@@ -415,6 +415,14 @@ function renderXray(){
 }
 
 function codePointLength(t){let n=0;for(const _ of t)n++;return n;}
+let statsFrame=0,statsTimer=0;
+function queueStats(){
+  const len=($('#input').value||'').length;
+  if(statsFrame){cancelAnimationFrame(statsFrame);statsFrame=0;}
+  clearTimeout(statsTimer);
+  if(len<12000){statsFrame=requestAnimationFrame(()=>{statsFrame=0;renderStats();});}
+  else{statsTimer=setTimeout(renderStats,len>100000?180:100);}
+}
 function renderStats(){
   const t=state.original||$('#input').value||'',words=(t.match(/[가-힣A-Za-z0-9]{2,}/g)||[]).length,lines=t?t.split(/\r?\n/).length:0;
   $('#textStats').innerHTML=`<span class="statpill">문자 <b>${codePointLength(t)}</b></span><span class="statpill">단어 <b>${words}</b></span><span class="statpill">줄 <b>${lines}</b></span>`;
@@ -600,7 +608,7 @@ function startTypingPreview(){
 $('#typingPreviewButton').onclick=startTypingPreview;$('#typingPreviewClose').onclick=stopTypingPreview;$('#typingPreviewPause').onclick=()=>{if(!typingPreview.running)return;typingPreview.paused=!typingPreview.paused;$('#typingPreviewPause').textContent=typingPreview.paused?'계속':'일시정지';};
 
 let timer;
-$('#input').addEventListener('input',()=>{renderStats();syncWidgets();if($('#liveScan').checked){clearTimeout(timer);timer=setTimeout(()=>analyze(true),liveDelay($('#input').value.length));}});
+$('#input').addEventListener('input',()=>{queueStats();syncWidgets();if($('#liveScan').checked){clearTimeout(timer);timer=setTimeout(()=>analyze(true),liveDelay($('#input').value.length));}});
 $('#analyze').onclick=()=>analyze(false);$('#sample').onclick=()=>{$('#input').value=sample;analyze(true);};$('#reset').onclick=()=>location.reload();
 ['norm','repeat','length','liveScan','cleanProfile'].forEach(id=>$('#'+id).addEventListener('change',()=>{if($('#input').value.trim()&&id!=='liveScan')analyze(true);}));
 
