@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "6.8.5",
+  "version": "6.8.6",
   "date": "2026-08-15",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -27,12 +27,12 @@
     ".github/workflows/ai-cleaner-ci.yml"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "6.8.5",
-  "asset_version": "685",
+  "current_version": "6.8.6",
+  "asset_version": "686",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "v6.8.5 foundation audit: correctness, blank-state reset, typewriter conflict locks, CI/E2E repair, layout and import/image guards",
+  "latestPatch": "v6.8.6 UI/layout stabilization: equal two-card workspace + floating auto-write bridge + responsive layout contract",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -80,5 +80,14 @@
     "imageResourceGuard": true,
     "e2eVersionDerived": true,
     "e2eAbsolutePreviewUrl": true
+  },
+  "layoutStabilization": {
+    "desktopWorkspace": "two equal columns",
+    "reservedBridgeColumn": false,
+    "desktopBridge": "floating at card header/body boundary",
+    "mobileBridge": "inline between source/result",
+    "bridgeProgressStatus": true,
+    "layoutRegressionE2E": true,
+    "uiContractForModularization": true
   }
 }

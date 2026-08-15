@@ -315,3 +315,34 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
 #directTarget:disabled{opacity:1;color:var(--ink);background:#f8f4ef;cursor:default}
 @media(max-width:620px){.resultActions{grid-template-columns:repeat(2,minmax(0,1fr))}.resultHead{align-items:flex-start}.resultHead .tabs{width:100%;margin-left:0;justify-content:flex-start}.tab{padding-left:9px;padding-right:9px}}
 @media(max-width:420px){.top{flex-wrap:wrap}.toptools{width:100%}.toolnav{width:100%;display:grid;grid-template-columns:1fr 1fr}.toolnav button{width:100%}.resultActions{grid-template-columns:1fr}.hero{padding-top:16px}.hero h1{font-size:21px}}
+
+
+/* ===== v6.8.6 UI / layout stabilization ===== */
+.workspace{position:relative;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:stretch}
+.workspace>.card{min-width:0;height:100%}
+.workspace>.card>.head{height:52px;min-height:52px;min-width:0}
+.workspace>.card:first-child>.head{padding-right:70px}
+.workspace>.card:nth-of-type(2)>.head{padding-left:70px}
+.workspace>.card>.body{min-width:0;padding-top:20px}
+.bridgeAction{position:absolute;left:50%;top:52px;transform:translate(-50%,-50%);z-index:18;min-width:0;min-height:0;padding:0;overflow:visible;pointer-events:none}
+.bridgeAction:before{content:"";position:absolute;left:50%;top:50%;width:46px;height:2px;transform:translate(-50%,-50%);background:linear-gradient(90deg,rgba(255,122,0,.18),rgba(255,122,0,.58),rgba(255,122,0,.18));pointer-events:none}
+.bridgeBtn,.bridgeBtn.previewBridge{position:relative;pointer-events:auto;width:auto;min-width:122px;max-width:none;height:40px;min-height:40px;padding:0 12px;border:1px solid #ffaf62;border-radius:999px;flex-direction:row;gap:6px;text-align:center;white-space:nowrap;background:linear-gradient(180deg,#ff8b24,#ff7205);box-shadow:0 0 0 5px rgba(255,248,240,.96),0 8px 20px rgba(255,122,0,.24)}
+.bridgeBtn span{font-size:13px;line-height:1}.bridgeBtn b{display:block;max-width:none;font-size:10.5px;line-height:1;white-space:nowrap;word-break:normal}.bridgeBtn.previewBridge small,.bridgeBtn small{display:block;font-size:8px;line-height:1;white-space:nowrap;writing-mode:horizontal-tb;transform:none;opacity:.9}
+.bridgeBtn:hover{transform:translateY(-1px);box-shadow:0 0 0 5px rgba(255,248,240,.96),0 11px 25px rgba(255,122,0,.30)}
+#typingPreviewButton.typewriterRunning{min-width:128px;opacity:.94;box-shadow:0 0 0 5px rgba(255,248,240,.96),0 10px 26px rgba(255,122,0,.34)}
+.workspace .textarea,.workspace .resultarea{display:block;max-width:100%}
+.workspace .head>*{min-width:0}.resultHead .tabs{min-width:0}.tab{white-space:nowrap}
+.textarea,.resultarea,.xray,.floatBody,.diffList{scrollbar-gutter:stable}
+.sub,.v6note,.notice,.rewriteValidation,.directInputBadge span{overflow-wrap:anywhere}
+@media(max-width:1180px) and (min-width:981px){.workspace{gap:20px}.bridgeBtn,.bridgeBtn.previewBridge{min-width:112px;padding-left:10px;padding-right:10px}.workspace>.card:first-child>.head{padding-right:64px}.workspace>.card:nth-of-type(2)>.head{padding-left:64px}}
+@media(max-width:980px){
+  .workspace{grid-template-columns:1fr;gap:12px}
+  .workspace>.card>.head{height:auto;min-height:52px}.workspace>.card:first-child>.head,.workspace>.card:nth-of-type(2)>.head{padding-left:16px;padding-right:16px}.workspace>.card>.body{padding-top:14px}
+  .bridgeAction{position:relative;left:auto;top:auto;transform:none;z-index:2;min-height:54px;padding:1px 0;display:flex;align-items:center;justify-content:center;pointer-events:auto}
+  .bridgeAction:before{width:min(420px,78vw);height:1px;background:linear-gradient(90deg,transparent,rgba(255,122,0,.25) 22%,rgba(255,122,0,.25) 78%,transparent)}
+  .bridgeBtn,.bridgeBtn.previewBridge{width:min(330px,84vw);min-width:0;max-width:84vw;height:46px;min-height:46px;padding:0 16px;border-radius:999px;flex-direction:row;gap:9px;box-shadow:0 0 0 4px rgba(255,248,240,.98),0 7px 18px rgba(255,122,0,.20)}
+  .bridgeBtn b{font-size:11px}.bridgeBtn.previewBridge small,.bridgeBtn small{font-size:8.5px}
+}
+@media(max-width:620px){.workspace{gap:10px}.bridgeAction{min-height:50px}.bridgeBtn,.bridgeBtn.previewBridge{width:min(300px,88vw);max-width:88vw;height:44px;min-height:44px}.workspace>.card>.head{gap:8px}}
+@media(max-width:420px){.bridgeBtn,.bridgeBtn.previewBridge{width:min(280px,90vw);max-width:90vw;padding:0 12px}.bridgeBtn.previewBridge small{font-size:8px}.workspace>.card>.head{padding-left:12px;padding-right:12px}}
+@media(prefers-reduced-motion:reduce){.bridgeBtn:hover{transform:none}}

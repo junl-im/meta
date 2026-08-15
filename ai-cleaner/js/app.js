@@ -653,7 +653,7 @@ document.addEventListener('keydown',(e)=>{
 });
 window.addEventListener('resize',()=>{for(const id of FLOAT_PANEL_IDS)clampPanelToViewport($('#'+id));});
 
-let typingPreview={running:false,paused:false,completed:false,chars:[],index:0,frame:0,last:0,source:'',historyIndex:-1,inputWasReadOnly:false};
+let typingPreview={running:false,paused:false,completed:false,chars:[],index:0,frame:0,last:0,source:'',historyIndex:-1,inputWasReadOnly:false,bridgePct:-1};
 function splitGraphemesExact(text){
   if(typeof Intl!=='undefined'&&Intl.Segmenter){try{return [...new Intl.Segmenter(undefined,{granularity:'grapheme'}).segment(text)].map(x=>x.segment);}catch(_){}}
   return Array.from(text);
@@ -670,29 +670,30 @@ function setTypewriterBusy(busy){
   $('#output').classList.toggle('typewriterActive',!!busy);$('#output').setAttribute('aria-busy',busy?'true':'false');
 }
 function typewriterStatus(text){const el=$('#typingPreviewText');if(el)el.textContent=text;}
+function typewriterBridgeStatus(text='원본 → 결과'){const el=$('#typingBridgeStatus');if(el)el.textContent=text;}
 function stopTypingPreview({restore=true,silent=false}={}){
   cancelAnimationFrame(typingPreview.frame);const wasRunning=typingPreview.running&&!typingPreview.completed;
   typingPreview.running=false;typingPreview.paused=false;window.__AI_CLEANER_TYPEWRITER_BUSY__=false;
-  $('#typingPreviewOverlay').hidden=true;$('#typingPreviewPause').textContent='일시정지';
+  $('#typingPreviewOverlay').hidden=true;$('#typingPreviewPause').textContent='일시정지';typewriterBridgeStatus();
   $('#input').readOnly=typingPreview.inputWasReadOnly;setTypewriterBusy(false);
   if(restore&&wasRunning&&typingPreview.historyIndex>=0){restoreHistoryIndex(typingPreview.historyIndex,{announce:false});if(!silent)showToast('자동 작성을 중지하고 이전 결과로 복원했습니다.');}
 }
 function finishTypingPreview(){
   const out=$('#output'),exact=out.value===typingPreview.source;
   typingPreview.running=false;typingPreview.completed=exact;window.__AI_CLEANER_TYPEWRITER_BUSY__=false;$('#input').readOnly=typingPreview.inputWasReadOnly;setTypewriterBusy(false);
-  if(!exact){typewriterStatus(`일치 검증 실패 · 원본 ${typingPreview.source.length} UTF-16 / 결과 ${out.value.length} UTF-16`);$('#typingPreviewPause').textContent='오류';if(typingPreview.historyIndex>=0)restoreHistoryIndex(typingPreview.historyIndex,{announce:false});$('#typingPreviewOverlay').hidden=true;showToast('자동 작성 검증에 실패해 이전 결과로 복원했습니다.');return;}
+  if(!exact){typewriterStatus(`일치 검증 실패 · 원본 ${typingPreview.source.length} UTF-16 / 결과 ${out.value.length} UTF-16`);$('#typingPreviewPause').textContent='오류';if(typingPreview.historyIndex>=0)restoreHistoryIndex(typingPreview.historyIndex,{announce:false});$('#typingPreviewOverlay').hidden=true;typewriterBridgeStatus();showToast('자동 작성 검증에 실패해 이전 결과로 복원했습니다.');return;}
   typewriterStatus(`100% 일치 확인 ✓ · ${typingPreview.chars.length.toLocaleString()} 글자 단위 · ${typingPreview.source.length.toLocaleString()} UTF-16`);
-  $('#typingPreviewProgress').textContent='100%';$('#typingPreviewPause').textContent='완료';out.dataset.typewriterVerified='true';
-  if(window.AICleanerApp.commitProgressiveResult(typingPreview.source,'원본 자동 작성')){setTimeout(()=>{$('#typingPreviewOverlay').hidden=true;},650);}
+  $('#typingPreviewProgress').textContent='100%';$('#typingPreviewPause').textContent='완료';typewriterBridgeStatus('완료');out.dataset.typewriterVerified='true';
+  if(window.AICleanerApp.commitProgressiveResult(typingPreview.source,'원본 자동 작성')){setTimeout(()=>{$('#typingPreviewOverlay').hidden=true;typewriterBridgeStatus();},850);}
 }
 function startTypingPreview(){
   if(typingPreview.running)return;
   const source=$('#input').value;if(!source)return showToast('먼저 원본 글을 입력해 주세요.');
   clearTimeout(timer);if(!$('#output').readOnly)$('#editResult').click();syncOriginalMetadata(source);if(historyState.index<0)resetHistory('자동 작성 전');
   closeAllPanels();activateResultTab('cleaned');
-  cancelAnimationFrame(typingPreview.frame);typingPreview={running:true,paused:false,completed:false,chars:splitGraphemesExact(source),index:0,frame:0,last:0,source,historyIndex:historyState.index,inputWasReadOnly:$('#input').readOnly};
+  cancelAnimationFrame(typingPreview.frame);typingPreview={running:true,paused:false,completed:false,chars:splitGraphemesExact(source),index:0,frame:0,last:0,source,historyIndex:historyState.index,inputWasReadOnly:$('#input').readOnly,bridgePct:-1};
   const out=$('#output'),overlay=$('#typingPreviewOverlay');delete out.dataset.typewriterVerified;out.readOnly=true;out.value='';out.scrollTop=0;$('#input').readOnly=true;overlay.hidden=false;
-  $('#typingPreviewPause').textContent='일시정지';$('#typingPreviewProgress').textContent='0%';typewriterStatus(`원본 ${typingPreview.chars.length.toLocaleString()} 글자 단위를 결과창에 순서대로 작성합니다.`);setTypewriterBusy(true);
+  $('#typingPreviewPause').textContent='일시정지';$('#typingPreviewProgress').textContent='0%';typewriterBridgeStatus('0%');typewriterStatus(`원본 ${typingPreview.chars.length.toLocaleString()} 글자 단위를 결과창에 순서대로 작성합니다.`);setTypewriterBusy(true);
   const step=(ts)=>{
     if(!typingPreview.running)return;
     if(typingPreview.paused){typingPreview.frame=requestAnimationFrame(step);return;}
@@ -700,7 +701,7 @@ function startTypingPreview(){
     if(!typingPreview.last||ts-typingPreview.last>=delay){
       const piece=typingPreview.chars[typingPreview.index];
       if(piece!==undefined){out.setRangeText(piece,out.value.length,out.value.length,'end');typingPreview.index++;typingPreview.last=ts;out.scrollTop=out.scrollHeight;}
-      const pct=Math.round((typingPreview.index/Math.max(1,typingPreview.chars.length))*100);$('#typingPreviewProgress').textContent=pct+'%';
+      const pct=Math.round((typingPreview.index/Math.max(1,typingPreview.chars.length))*100);$('#typingPreviewProgress').textContent=pct+'%';if(pct!==typingPreview.bridgePct){typingPreview.bridgePct=pct;typewriterBridgeStatus(pct+'%');}
       if(typingPreview.index===1||typingPreview.index%50===0||typingPreview.index===typingPreview.chars.length)typewriterStatus(`작성 중 · ${typingPreview.index.toLocaleString()} / ${typingPreview.chars.length.toLocaleString()} 글자 단위 · ${pct}%`);
     }
     if(typingPreview.index>=typingPreview.chars.length){finishTypingPreview();return;}
@@ -710,7 +711,7 @@ function startTypingPreview(){
 }
 $('#typingPreviewButton').onclick=startTypingPreview;
 $('#typingPreviewClose').onclick=()=>stopTypingPreview({restore:true});
-$('#typingPreviewPause').onclick=()=>{if(!typingPreview.running)return;typingPreview.paused=!typingPreview.paused;$('#typingPreviewPause').textContent=typingPreview.paused?'계속':'일시정지';typewriterStatus(typingPreview.paused?`일시정지 · ${typingPreview.index.toLocaleString()} / ${typingPreview.chars.length.toLocaleString()}`:`작성 계속 · ${typingPreview.index.toLocaleString()} / ${typingPreview.chars.length.toLocaleString()}`);};
+$('#typingPreviewPause').onclick=()=>{if(!typingPreview.running)return;typingPreview.paused=!typingPreview.paused;$('#typingPreviewPause').textContent=typingPreview.paused?'계속':'일시정지';const pct=Math.round((typingPreview.index/Math.max(1,typingPreview.chars.length))*100);typewriterBridgeStatus(typingPreview.paused?'일시정지':pct+'%');typewriterStatus(typingPreview.paused?`일시정지 · ${typingPreview.index.toLocaleString()} / ${typingPreview.chars.length.toLocaleString()}`:`작성 계속 · ${typingPreview.index.toLocaleString()} / ${typingPreview.chars.length.toLocaleString()}`);};
 
 let timer;
 $('#input').addEventListener('input',()=>{inputDirty=true;queueStats();syncWidgets();notifyTextChanged('original');if(!$('#input').value.trim()){clearTextAnalysis({keepInput:true});return;}if($('#liveScan').checked){clearTimeout(timer);timer=setTimeout(()=>analyze(true),liveDelay($('#input').value.length));}});

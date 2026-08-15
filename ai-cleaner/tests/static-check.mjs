@@ -24,7 +24,7 @@ if(!failures.length){
  /@playwright\/test/.test(e2e)&&pkg.devDependencies?.['@playwright/test']==='1.62.1'?pass('Playwright browser pin','1.62.1'):fail('Playwright browser pin','expected 1.62.1');
  /rewriteWidget/.test(e2e)&&/rewriteFactSummary/.test(e2e)&&/undoStep/.test(e2e)&&/data-xpos/.test(e2e)?pass('browser smoke coverage','rewrite + Fact Lock + history + X-ray'):fail('browser smoke coverage','missing');
  /keyboardEvent|dispatchEvent\(new KeyboardEvent|execCommand\(['"]insertText/.test(app+'\n'+rewrite)?fail('no synthetic external typing automation','synthetic input found'):pass('no synthetic external typing automation','direct verifier + internal result typewriter only');
- /v6\.8\.1 precision UI polish/.test(css)&&/grid-template-columns:minmax\(0,1fr\) 92px minmax\(0,1fr\)/.test(css)&&/transform:none!important/.test(css)?pass('precision responsive controls','bridge + mobile text alignment guard'):fail('precision responsive controls','polish guards missing');
+ /v6\.8\.1 precision UI polish/.test(css)&&/transform:none!important/.test(css)?pass('precision responsive controls','legacy control alignment guards retained'):fail('precision responsive controls','polish guards missing');
  /queueStats/.test(app)&&/targetChars\(\)/.test(rewrite)&&/queueDirectCompare/.test(rewrite)?pass('long-text UI batching','stats + direct verifier batched/cached'):fail('long-text UI batching','performance batching missing');
  /전화번호/.test(rewrite)&&/해시태그/.test(rewrite)&&/시간/.test(rewrite)?pass('Fact Lock coverage','phone + hashtag + time protected'):fail('Fact Lock coverage','extended locks missing');
  /revealAppliedResult/.test(app)&&/closeAllPanels/.test(app)&&/refreshSuggestionBaseline/.test(app)&&/resultApplied/.test(css)?pass('apply focus flow','close panel + refresh suggestions + reveal result'):fail('apply focus flow','missing focus-flow guards');
@@ -49,6 +49,8 @@ if(!failures.length){
  /countOccurrences/.test(rewrite)&&/required=Math\.max/.test(rewrite)?pass('Fact Lock multiplicity','repeated facts require repeated preservation'):fail('Fact Lock multiplicity','count-aware validation missing');
  /id="directTarget" disabled/.test(html)&&!/option value="output"/.test(html.match(/<select id="directTarget"[\s\S]*?<\/select>/)?.[0]||'')?pass('direct write target lock','original-only selector is immutable'):fail('direct write target lock','direct verifier target can drift');
  /\\\\u\(-\?\\d\+\)/.test(app)||/\\\\u\(-\?\\d\+/.test(app)?pass('RTF unicode import','RTF unicode escape conversion present'):fail('RTF unicode import','unicode escape conversion missing');
+ /v6\.8\.6 UI \/ layout stabilization/.test(css)&&/grid-template-columns:minmax\(0,1fr\) minmax\(0,1fr\)/.test(css)&&/\.bridgeAction\{position:absolute;left:50%;top:52px/.test(css)&&/typingBridgeStatus/.test(html+app)?pass('two-card floating bridge layout','desktop has no reserved bridge column + live bridge status'):fail('two-card floating bridge layout','layout stabilization contract missing');
+ /layout bridge floats between two cards/.test(e2e)&&/bridgePosition/.test(e2e)&&/workspaceCenter/.test(e2e)?pass('browser layout regression coverage','desktop floating bridge + tablet inline bridge'):fail('browser layout regression coverage','layout E2E missing');
 
 }
 for(const p of passes)console.log(`PASS ${p.n}${p.d?` — ${p.d}`:''}`);for(const f of failures)console.error(`FAIL ${f.n}${f.d?` — ${f.d}`:''}`);console.log(`\nSummary: ${passes.length} passed, ${failures.length} failed`);if(failures.length)process.exit(1);

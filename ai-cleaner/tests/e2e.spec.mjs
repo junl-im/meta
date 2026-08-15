@@ -65,3 +65,26 @@ test('foundation flow keeps state, layout and rewrite tools coherent', async ({ 
   await expect(page.locator('#issuesWidget')).toBeHidden();
   await expect(page.locator('#detailSummary')).toHaveText('분석 전');
 });
+
+
+test('layout bridge floats between two cards without reserving a desktop column', async ({ page }) => {
+  await page.setViewportSize({width:1280,height:900});
+  await page.goto(BASE,{waitUntil:'domcontentloaded'});
+  const geo=await page.locator('.workspace').evaluate((ws)=>{
+    const cards=[...ws.querySelectorAll(':scope > .card')];
+    const bridge=ws.querySelector('.bridgeAction');
+    const a=cards[0].getBoundingClientRect(),b=cards[1].getBoundingClientRect(),w=ws.getBoundingClientRect(),br=bridge.getBoundingClientRect();
+    const style=getComputedStyle(ws),bs=getComputedStyle(bridge);
+    return {columns:style.gridTemplateColumns,gap:parseFloat(style.columnGap),cardGap:b.left-a.right,widthDelta:Math.abs(a.width-b.width),bridgePosition:bs.position,bridgeCenter:br.left+br.width/2,workspaceCenter:w.left+w.width/2};
+  });
+  expect(geo.columns.trim().split(/\s+/)).toHaveLength(2);
+  expect(geo.gap).toBeLessThanOrEqual(26);
+  expect(geo.cardGap).toBeLessThanOrEqual(26);
+  expect(geo.widthDelta).toBeLessThan(3);
+  expect(geo.bridgePosition).toBe('absolute');
+  expect(Math.abs(geo.bridgeCenter-geo.workspaceCenter)).toBeLessThan(2);
+
+  await page.setViewportSize({width:820,height:900});
+  await expect.poll(async()=>page.locator('.bridgeAction').evaluate(el=>getComputedStyle(el).position)).toBe('relative');
+  await expect.poll(async()=>page.locator('#typingPreviewButton').evaluate(el=>getComputedStyle(el).flexDirection)).toBe('row');
+});
