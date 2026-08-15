@@ -1,6 +1,6 @@
 {
-  "version": "6.8.4",
-  "assetVersion": "684",
+  "version": "6.8.5",
+  "assetVersion": "685",
   "channel": "stable",
-  "updateMode": "version-json-boot-session-restore-lazy-tools-focus-flow-cohesion-internal-typewriter"
+  "updateMode": "version-json-boot-session-restore-lazy-tools-focus-flow-cohesion-internal-typewriter-foundation-audit"
 }

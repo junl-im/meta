@@ -3,6 +3,8 @@
 
 const C2PA_VERSION='0.13.4';
 const C2PA_ESM=`https://cdn.jsdelivr.net/npm/@contentauth/c2pa-web@${C2PA_VERSION}/+esm`;
+const MAX_IMAGE_FILE_BYTES=50*1024*1024;
+const MAX_IMAGE_PIXELS=60_000_000;
 const C2PA_WASM=`https://cdn.jsdelivr.net/npm/@contentauth/c2pa-web@${C2PA_VERSION}/dist/resources/c2pa_bg.wasm`;
 const EXIF_VERSION='4.42.0';
 const EXIF_URL=`https://cdn.jsdelivr.net/npm/exifreader@${EXIF_VERSION}/dist/exif-reader.js`;
@@ -269,17 +271,22 @@ window.loadImage=async function loadImageStrong(file){
   const seq=++analysisSeq,t0=performance.now();
   const allowed=/^image\/(png|jpeg|webp)$/i.test(file.type)||/\.(png|jpe?g|webp)$/i.test(file.name||'');
   if(!allowed){alert('PNG, JPG, WebP만 지원합니다.');return;}
+  if(file.size>MAX_IMAGE_FILE_BYTES){alert('50MB가 넘는 이미지는 브라우저 메모리 보호를 위해 열지 않습니다.');return;}
   setText('imageLoadStatus','파일 읽는 중…');setText('imagePerf','준비');
+  let nextObjectUrl='';
   try{
     const binaryPromise=scanBinaryFile(file);
-    if(currentObjectUrl)URL.revokeObjectURL(currentObjectUrl);currentObjectUrl=URL.createObjectURL(file);
-    const img=new Image(),loaded=new Promise((resolve,reject)=>{img.onload=()=>resolve(img);img.onerror=()=>reject(new Error('브라우저에서 이미지를 디코딩하지 못했습니다.'));});img.src=currentObjectUrl;
-    const [image,binary,exif,c2pa]=await Promise.all([loaded,binaryPromise,inspectExif(file),inspectC2pa(file)]);if(seq!==analysisSeq)return;
-    setText('imageLoadStatus','픽셀 분석 중…');await new Promise(resolve=>requestAnimationFrame(resolve));if(seq!==analysisSeq)return;
-    const visual=analyzePixels(image);if(seq!==analysisSeq)return;
+    nextObjectUrl=URL.createObjectURL(file);
+    const img=new Image(),loaded=new Promise((resolve,reject)=>{img.onload=()=>resolve(img);img.onerror=()=>reject(new Error('브라우저에서 이미지를 디코딩하지 못했습니다.'));});img.src=nextObjectUrl;
+    const [image,binary,exif,c2pa]=await Promise.all([loaded,binaryPromise,inspectExif(file),inspectC2pa(file)]);if(seq!==analysisSeq){URL.revokeObjectURL(nextObjectUrl);return;}
+    if(image.naturalWidth*image.naturalHeight>MAX_IMAGE_PIXELS)throw new Error('이미지 해상도가 너무 큽니다. 6천만 픽셀 이하 이미지를 사용해 주세요.');
+    setText('imageLoadStatus','픽셀 분석 중…');await new Promise(resolve=>requestAnimationFrame(resolve));if(seq!==analysisSeq){URL.revokeObjectURL(nextObjectUrl);return;}
+    const visual=analyzePixels(image);if(seq!==analysisSeq){URL.revokeObjectURL(nextObjectUrl);return;}
+    if(currentObjectUrl)URL.revokeObjectURL(currentObjectUrl);currentObjectUrl=nextObjectUrl;nextObjectUrl='';
     renderResults(file,image,binary,exif,c2pa,visual);
     const ms=performance.now()-t0;setText('imagePerf',`${ms.toFixed(0)}ms`);setText('imageLoadStatus','완료 · 메타데이터 + C2PA + 시각 통계');
   }catch(err){
+    if(nextObjectUrl)URL.revokeObjectURL(nextObjectUrl);
     if(seq!==analysisSeq)return;
     console.error(err);setText('imagePerf','오류');setText('imageLoadStatus',`분석 오류 · ${String(err&&err.message?err.message:err)}`);
   }

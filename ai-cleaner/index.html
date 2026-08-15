@@ -90,10 +90,10 @@
       </div>
     </section>
 
-    <div class="bridgeAction" aria-label="원본을 결과에 한 글자씩 자동 작성"><button class="bridgeBtn previewBridge" id="typingPreviewButton" type="button" title="클립보드나 키보드 이벤트 없이 원본을 결과창에 한 글자씩 새로 작성합니다."><span>▶</span><b>원본 자동 작성</b><small>한 글자씩</small></button><button id="analyze" type="button" hidden aria-hidden="true">다듬기</button></div>
+    <div class="bridgeAction" aria-label="원본을 결과에 한 글자씩 자동 작성"><button class="bridgeBtn previewBridge" id="typingPreviewButton" type="button" aria-controls="typingPreviewOverlay" aria-expanded="false" title="클립보드나 키보드 이벤트 없이 원본을 결과창에 한 글자씩 새로 작성합니다."><span>▶</span><b>원본 자동 작성</b><small>한 글자씩</small></button><button id="analyze" type="button" hidden aria-hidden="true">다듬기</button></div>
 
     <section class="card">
-      <div class="head">
+      <div class="head resultHead">
         <b>결과</b>
         <div class="tabs">
           <button class="tab active" data-resulttab="cleaned">정리본</button>
@@ -109,7 +109,7 @@
             <div class="typingPreviewControls"><button class="mini passive" id="typingPreviewPause" type="button">일시정지</button><label class="sub">속도 <select id="typingPreviewSpeed" class="miniSelect"><option value="85">느리게</option><option value="35" selected>보통</option><option value="0">빠르게</option></select></label><span class="locateStatus" id="typingPreviewProgress">0%</span></div>
           </div>
           <textarea id="output" class="resultarea" readonly spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false" placeholder="다듬기를 실행하면 결과가 표시됩니다."></textarea>
-          <div class="actions">
+          <div class="actions resultActions">
             <button class="btn primary" id="copy">결과 복사</button>
             <button class="btn" id="downloadTxt">TXT 저장</button>
             <button class="btn" id="editResult">✎ 직접 수정</button>
@@ -312,14 +312,14 @@
     <div id="rewriteVerifyPane" hidden>
       <div class="rewriteNote directOriginalNote"><b>⌨ 원본 직접 쓰기</b><span>원본을 보면서 실제 키보드로 직접 입력하는 별도 검증 모드입니다. 붙여넣기·드롭·합성 입력은 사용하지 않습니다.</span></div>
       <div class="directToolbar">
-        <label><span>작성 대상</span><select id="directTarget"><option value="original" selected>원본 그대로</option><option value="output">현재 결과</option><option value="rewrite">재작성 초안</option></select></label>
+        <label><span>작성 대상</span><select id="directTarget" disabled aria-label="작성 대상은 원본으로 고정"><option value="original" selected>원본 그대로 · 고정</option></select></label>
         <label class="check directHide"><input type="checkbox" id="directHideTarget"> 목표 글 가리기</label>
       </div>
       <div class="directInputBadge" id="directInputBadge" role="status" aria-live="polite"><b>직접 입력 전용</b><span>붙여넣기 · 드롭 · 복사 · 잘라내기 차단</span></div>
       <div class="directGuide" id="directGuide"><span class="sub">원본을 보고 아래 입력창에서 직접 타이핑하세요.</span></div>
       <textarea id="directTyped" class="directTyped" data-direct-typing="true" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false" placeholder="원본을 보면서 여기에 직접 입력하세요. 붙여넣기는 사용할 수 없습니다."></textarea>
       <div class="directStats"><span id="directProgress">0 / 0</span><span id="directAccuracy">정확도 —</span><span id="directStatus">대기</span></div>
-      <div class="rewriteActionRow"><button class="btn" id="directReset" type="button">처음부터</button><button class="btn primary" id="directCopy" type="button" disabled>100% 일치 확인</button></div>
+      <div class="rewriteActionRow"><button class="btn" id="directReset" type="button">처음부터</button><button class="btn primary" id="directCopy" type="button" disabled>100% 일치 후 결과 반영</button></div>
     </div>
   </div>
 </section>

@@ -302,3 +302,16 @@ img{-webkit-user-drag:none;user-drag:none}
 .typingPreviewControls{padding:7px 10px}.resultarea.typewriterActive{outline:2px solid rgba(255,122,0,.26);box-shadow:0 0 0 4px rgba(255,122,0,.08) inset;caret-color:transparent}
 #typingPreviewButton.typewriterRunning{cursor:progress;opacity:.82}
 @media(max-width:980px){.typingPreviewOverlay{position:absolute;left:8px;right:8px;top:8px;bottom:auto;width:auto;max-width:none;border-radius:14px}.typingPreviewHead .sub{display:block}.typingPreviewText{font-size:9.5px}.bridgeBtn.previewBridge small{display:block}}
+
+
+/* ===== v6.8.5 foundation audit ===== */
+.v6toolbar{grid-template-columns:auto minmax(0,1fr)}
+.resultHead{flex-wrap:wrap}.resultHead .tabs{margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
+.resultActions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:center}
+.resultActions .btn{width:100%;min-width:0;padding-left:10px;padding-right:10px;white-space:nowrap}
+button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid rgba(22,131,248,.22);outline-offset:2px}
+.filelabel:has(input:disabled){opacity:.46;cursor:not-allowed}.filelabel:has(input:disabled) input{cursor:not-allowed}
+.check input[type="checkbox"]:disabled{opacity:.55;cursor:not-allowed}.check:has(input:disabled){opacity:.58}
+#directTarget:disabled{opacity:1;color:var(--ink);background:#f8f4ef;cursor:default}
+@media(max-width:620px){.resultActions{grid-template-columns:repeat(2,minmax(0,1fr))}.resultHead{align-items:flex-start}.resultHead .tabs{width:100%;margin-left:0;justify-content:flex-start}.tab{padding-left:9px;padding-right:9px}}
+@media(max-width:420px){.top{flex-wrap:wrap}.toptools{width:100%}.toolnav{width:100%;display:grid;grid-template-columns:1fr 1fr}.toolnav button{width:100%}.resultActions{grid-template-columns:1fr}.hero{padding-top:16px}.hero h1{font-size:21px}}

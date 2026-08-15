@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "6.8.4",
+  "version": "6.8.5",
   "date": "2026-08-15",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -27,12 +27,12 @@
     ".github/workflows/ai-cleaner-ci.yml"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "6.8.4",
-  "asset_version": "684",
+  "current_version": "6.8.5",
+  "asset_version": "685",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "v6.8.4 internal result typewriter: original -> result one grapheme at a time, exact verification",
+  "latestPatch": "v6.8.5 foundation audit: correctness, blank-state reset, typewriter conflict locks, CI/E2E repair, layout and import/image guards",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -66,5 +66,19 @@
     "syntheticKeyboardEvents": false,
     "incrementalSetRangeText": true,
     "exactVerification": true
+  },
+  "foundationAudit": {
+    "duplicateIssueRuleFixed": true,
+    "blankInputClearsState": true,
+    "liveStatsUseCurrentInput": true,
+    "typewriterCancelsPendingAnalysis": true,
+    "typewriterLocksConflictingControls": true,
+    "typewriterFailureRestoresPreviousResult": true,
+    "directWriteTarget": "original-only",
+    "factLockMultiplicity": true,
+    "rtfUnicodeImport": true,
+    "imageResourceGuard": true,
+    "e2eVersionDerived": true,
+    "e2eAbsolutePreviewUrl": true
   }
 }
