@@ -37,6 +37,29 @@ test('original auto typewriter writes visible text and removes safe hidden chara
   await expect(page.locator('#cleanProfile')).toBeEnabled();
 });
 
+test('mobile typewriter completion button closes the panel and navigates to the result card', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});await gotoReady(page);
+  await page.locator('#input').fill('모바일 자동작성 완료 버튼 테스트입니다. 결과 위치로 바로 이동해야 합니다.');
+  await page.locator('#typingPreviewSpeed').evaluate(el=>{el.value='0';el.dispatchEvent(new Event('change',{bubbles:true}));});
+  await page.locator('#typingPreviewButton').click();await expect(page.locator('#typingPreviewPanel')).toBeVisible();
+  await expect(page.locator('#typingPreviewPause')).toHaveText('완료 · 결과 보기',{timeout:7000});
+  await page.locator('#typingPreviewPause').click();await expect(page.locator('#typingPreviewPanel')).toBeHidden();
+  await expect(page.locator('#output')).toHaveAttribute('data-typewriter-verified','true');
+  await expect.poll(async()=>page.locator('#resultCard').evaluate(el=>{const r=el.getBoundingClientRect(),h=document.querySelector('.top')?.getBoundingClientRect().bottom||0;return Math.round(r.top-h);})).toBeGreaterThanOrEqual(0);
+  await expect.poll(async()=>page.locator('#resultCard').evaluate(el=>{const r=el.getBoundingClientRect(),h=document.querySelector('.top')?.getBoundingClientRect().bottom||0;return Math.round(r.top-h);})).toBeLessThanOrEqual(30);
+});
+
+test('mobile typewriter completion auto-navigates when the result button is not tapped', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});await gotoReady(page);
+  await page.locator('#input').fill('모바일 자동 이동 테스트입니다. 완료 뒤 결과 카드가 헤더 아래에 보여야 합니다.');
+  await page.locator('#typingPreviewSpeed').evaluate(el=>{el.value='0';el.dispatchEvent(new Event('change',{bubbles:true}));});
+  await page.locator('#typingPreviewButton').click();
+  await expect(page.locator('#typingPreviewPanel')).toBeHidden({timeout:9000});
+  await expect(page.locator('#output')).toHaveAttribute('data-typewriter-verified','true');
+  const landing=await page.locator('#resultCard').evaluate(el=>{const r=el.getBoundingClientRect(),h=document.querySelector('.top')?.getBoundingClientRect().bottom||0;return{delta:Math.round(r.top-h),pulse:el.classList.contains('resultDestinationPulse')};});
+  expect(landing.delta).toBeGreaterThanOrEqual(0);expect(landing.delta).toBeLessThanOrEqual(30);expect(landing.pulse).toBeTruthy();
+});
+
 test('boot readiness blocks interaction until app wiring is complete', async ({ page }) => {
   await gotoReady(page);
   const ready=await page.evaluate(()=>({
@@ -200,6 +223,12 @@ test('mobile compact panels open small and expand on demand', async ({ page }) =
   expect(expanded.h).toBeGreaterThan(compact.h+120);
   await size.click();
   await expect(panel).not.toHaveClass(/mobileExpanded/);
+});
+
+test('narrow mobile header and result actions avoid vertical crowding', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});await gotoReady(page);
+  const geo=await page.evaluate(()=>{const top=document.querySelector('.top').getBoundingClientRect(),hero=document.querySelector('.hero').getBoundingClientRect(),actions=getComputedStyle(document.querySelector('.resultActions'));return{headerHeight:top.height,headerBottom:top.bottom,heroTop:hero.top,resultColumns:actions.gridTemplateColumns.trim().split(/\s+/).length};});
+  expect(geo.headerHeight).toBeGreaterThan(68);expect(geo.heroTop).toBeGreaterThanOrEqual(geo.headerBottom);expect(geo.resultColumns).toBe(2);
 });
 
 test('long live analysis runs through worker-safe adapter', async ({ page }) => {

@@ -364,3 +364,13 @@
 - 패치 기준선은 실제 전달된 `AI_Cleaner_1_5_1_FULL_PROJECT_HANDOFF.zip`이며 `OPTION/**`은 계속 보호한다.
 - 1.5.2 로컬 검증: static 142/0, module PASS, JS/MJS syntax PASS, workflow YAML PASS. Playwright 의존성 설치는 120초 제한에서 timeout되어 재시도하지 않았고 부분 설치 파일을 제거했다. Push 후 GitHub Actions `browser-smoke`에서 11개 테스트를 최종 확인한다.
 
+
+
+## 1.6.0 UX Navigation & Visual Comfort
+- 패치 기준선은 실제 전달된 `AI_Cleaner_1_5_2_FULL_PROJECT_HANDOFF.zip`이다.
+- 모바일 `자동작성 원본 새로쓰기` 완료 시 floating panel이 결과를 가리지 않도록 완료 후 결과 카드로 자동 이동한다. 이동 목표는 textarea 중앙이 아니라 `#resultCard`이며 sticky top header 아래에 카드 제목이 보이도록 scroll margin을 둔다.
+- Typewriter 완료 시 `일시정지` 버튼은 `완료 · 결과 보기` 액션으로 바뀐다. 사용자가 누르면 자동 이동 타이머를 취소하고 즉시 패널을 닫은 뒤 결과 위치로 이동한다. 누르지 않으면 짧은 완료 확인 시간 후 자동 이동한다.
+- 완료 패널과 결과 도착 카드에 성공 상태 시각 피드백을 추가하되 `prefers-reduced-motion`에서는 이동/강조 모션을 줄인다.
+- Typewriter sanitation/verification, Worker, Rewrite Studio, Fact Lock, stale-result/update lifecycle 정책은 변경하지 않는다.
+- Browser E2E는 완료 버튼 수동 이동과 자동 이동을 별도로 검증하며 sticky header 아래 결과 카드 착지 위치도 검사한다. 420px 이하 wrapped header의 실제 높이와 결과 액션 2열 밀도도 함께 회귀검사한다.
+- 완료 후 다른 floating panel을 사용자가 먼저 열면 pending result-navigation timer를 취소해 사용자 의도를 우선한다. 로컬 Playwright 설치는 120초 제한 timeout으로 미실행이며 GitHub browser-smoke를 최종 검증으로 사용한다.

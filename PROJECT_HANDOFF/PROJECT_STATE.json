@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.5.2",
+  "version": "1.6.0",
   "date": "2026-08-16",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -43,12 +43,12 @@
     "ai-cleaner/js/workers/text-analysis-worker.js"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.5.2",
-  "asset_version": "152",
+  "current_version": "1.6.0",
+  "asset_version": "160",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.5.2 browser regression alignment: completed rewrite stale-lock and in-flight source-change cancellation are tested as separate async transactions",
+  "latestPatch": "1.6.0 UX navigation: mobile Typewriter completion now closes the popup and lands the result card below the sticky header, with an actionable completion button and visual destination cue",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -87,7 +87,10 @@
     "meaningSensitiveUnicodePreserved": true,
     "standaloneFloatingPanel": true,
     "postWriteSafeResidueAudit": true,
-    "policyVersion": "old-v6-layer-a-safe-1.2.2"
+    "policyVersion": "old-v6-layer-a-safe-1.2.2",
+    "completionButtonResultView": true,
+    "mobileCompletionAutoNavigation": true,
+    "resultLandingBelowStickyHeader": true
   },
   "foundationAudit": {
     "duplicateIssueRuleFixed": true,
@@ -120,7 +123,7 @@
     "ciPanelSwitchFix": true,
     "hiddenControlE2EFix": true
   },
-  "nextPhase": "1.6.0 next feature phase after 1.5.2 GitHub browser-smoke validation",
+  "nextPhase": "1.6.1 UX/navigation stability audit after 1.6.0 GitHub browser-smoke validation",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -181,7 +184,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "152",
+  "assetVersion": "160",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -190,7 +193,7 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "142 passed / 0 failed",
+    "staticChecks": "146 passed / 0 failed",
     "moduleChecks": "PASS",
     "jsSyntax": "PASS",
     "workflowYaml": "PASS",
@@ -286,5 +289,17 @@
     "inFlightSourceChangeCancellationCovered": true,
     "asyncTransactionAssertionsSeparated": true,
     "delivered151UsedAsPatchBaseline": true
+  },
+  "uxNavigation160": {
+    "mobileTypewriterCompletionAutoNavigation": true,
+    "completionButtonResultNavigation": true,
+    "resultCardAnchor": true,
+    "stickyHeaderAwareLanding": true,
+    "reducedMotionAwareScroll": true,
+    "resultDestinationPulse": true,
+    "completionVisualState": true,
+    "runtimeSafetyPolicyChanged": false,
+    "expectedBrowserSmokeTests": 14,
+    "patchBaseline": "AI_Cleaner_1_5_2_FULL_PROJECT_HANDOFF.zip"
   }
 }
