@@ -1,7 +1,7 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.5.0",
-  "date": "2026-08-15",
+  "version": "1.5.1",
+  "date": "2026-08-16",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
   "appPath": "ai-cleaner/",
@@ -43,12 +43,12 @@
     "ai-cleaner/js/workers/text-analysis-worker.js"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.5.0",
-  "asset_version": "150",
+  "current_version": "1.5.1",
+  "asset_version": "151",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.5.0 large-document performance: adaptive live-analysis governor + lazy hidden diagnostics rendering",
+  "latestPatch": "1.5.1 cohesion & integrity stability audit: stale-result freshness boundary, rewrite transactions, BFCache/panel lifecycle, manual analyze UX",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -120,7 +120,7 @@
     "ciPanelSwitchFix": true,
     "hiddenControlE2EFix": true
   },
-  "nextPhase": "1.5.1 performance stability audit after 1.5.0 browser-smoke validation",
+  "nextPhase": "1.6.0 next feature phase after 1.5.1 GitHub browser-smoke validation",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -181,7 +181,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "150",
+  "assetVersion": "151",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -190,7 +190,7 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "129 passed / 0 failed",
+    "staticChecks": "140 passed / 0 failed",
     "moduleChecks": "PASS",
     "jsSyntax": "PASS",
     "workflowYaml": "PASS",
@@ -259,5 +259,24 @@
     "workerThresholdChars": 6000,
     "uiContract": "1.4.2 preserved",
     "delivered142UsedAsPatchBaseline": true
+  },
+  "cohesionIntegrityAudit151": {
+    "visibleManualAnalyzeAction": true,
+    "dirtyResultFreshnessBoundary": true,
+    "staleResultActionsGuarded": true,
+    "updateDraftInputOutputCoherence": true,
+    "pendingAnalysisBlocksUpdateReload": true,
+    "bfcacheSuspendResume": true,
+    "toastTimerIsolation": true,
+    "rewriteGenerationTransactionToken": true,
+    "rewriteSourceDependencyInvalidation": true,
+    "rewriteLongDocumentHashDeferred": true,
+    "typewriterDirtySourceSyncBeforeStart": true,
+    "escapeStopsTypewriterAndRestores": true,
+    "panelCloseCancelsRewriteGeneration": true,
+    "desktopPanelTopBottomClamp": true,
+    "panelTriggerAriaExpandedSync": true,
+    "lazyReviewCountRenderCohesion": true,
+    "delivered150UsedAsPatchBaseline": true
   }
 }

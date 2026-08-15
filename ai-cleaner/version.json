@@ -1,6 +1,6 @@
 {
-  "version": "1.5.0",
-  "assetVersion": "150",
+  "version": "1.5.1",
+  "assetVersion": "151",
   "channel": "stable",
-  "updateMode": "adaptive-live-analysis-lazy-diagnostics-long-document-performance"
+  "updateMode": "cohesion-freshness-rewrite-transaction-lifecycle-audit"
 }

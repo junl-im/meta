@@ -49,6 +49,44 @@ test('boot readiness blocks interaction until app wiring is complete', async ({ 
   expect(ready).toEqual({flag:true,classReady:true,busy:'false',inert:false,appReady:true});
 });
 
+test('dirty input cannot use stale result and manual analyze restores coherence', async ({ page }) => {
+  await gotoReady(page);
+  const input=page.locator('#input'),output=page.locator('#output');
+  await input.fill('첫 결과입니다.');await page.locator('#analyze').click();await expect(output).toHaveValue('첫 결과입니다.');
+  await page.locator('#liveScan').uncheck();await input.fill('새 원본​ 입니다.');
+  await expect(page.locator('#resultFreshness')).toBeVisible();await expect(page.locator('#resultFreshness')).toContainText('지금 다듬기 필요');
+  await expect(output).toHaveClass(/resultStale/);
+  for(const id of ['copy','downloadTxt','editResult','undoAll'])await expect(page.locator('#'+id)).toBeDisabled();
+  await expect(page.locator('[data-resulttab="diff"]')).toBeDisabled();await expect(page.locator('#analyze')).toBeEnabled();
+  await page.locator('#analyze').click();await expect(output).toHaveValue('새 원본 입니다.');
+  await expect(page.locator('#resultFreshness')).toBeHidden();await expect(output).not.toHaveClass(/resultStale/);await expect(page.locator('#copy')).toBeEnabled();
+  await input.fill('재작성 직전 최신 원본입니다.');await expect(page.locator('#resultFreshness')).toBeVisible();
+  await page.locator('#rewriteWidget').click();await expect(page.locator('#rewritePanel')).toBeVisible();await expect(output).toHaveValue('재작성 직전 최신 원본입니다.');await expect(page.locator('#resultFreshness')).toBeHidden();
+});
+
+test('typewriter started from dirty input restores the current input result when cancelled', async ({ page }) => {
+  await gotoReady(page);const input=page.locator('#input'),output=page.locator('#output');
+  await input.fill('이전 결과입니다.');await page.locator('#analyze').click();await expect(output).toHaveValue('이전 결과입니다.');
+  await page.locator('#liveScan').uncheck();await input.fill('현재​ 원본입니다.');await expect(output).toHaveValue('이전 결과입니다.');
+  await page.locator('#typingPreviewSpeed').evaluate(el=>{el.value='40';el.dispatchEvent(new Event('change',{bubbles:true}));});
+  await page.locator('#typingPreviewButton').click();await expect(page.locator('#typingPreviewPanel')).toBeVisible();await page.keyboard.press('Escape');
+  await expect(page.locator('#typingPreviewPanel')).toBeHidden();await expect(input).toHaveJSProperty('readOnly',false);await expect(output).toHaveValue('현재 원본입니다.');await expect(page.locator('#resultFreshness')).toBeHidden();
+});
+
+test('rewrite generation reset cancels an in-flight draft transaction', async ({ page }) => {
+  await gotoReady(page);await page.locator('#input').fill('결론적으로 재작성 취소 테스트입니다. 가격은 19,900원입니다.');await page.locator('#analyze').click();
+  await page.locator('#rewriteWidget').click();await expect(page.locator('#rewritePanel')).toBeVisible();
+  const during=await page.evaluate(async()=>{const p=window.AICleanerRewriteStudio.generate();const disabled=document.querySelector('#rewriteSource').disabled;window.AICleanerRewriteStudio.resetSession();await p;return{disabled,draft:document.querySelector('#rewriteDraft').value,busy:document.querySelector('#rewritePanel').getAttribute('aria-busy')};});
+  expect(during.disabled).toBeTruthy();expect(during.draft).toBe('');expect(during.busy).toBe('false');
+});
+
+test('rewrite draft locks immediately when original changes behind current-result source', async ({ page }) => {
+  await gotoReady(page);const input=page.locator('#input');await input.fill('결론적으로 기존 원본입니다. 가격은 19,900원입니다.');await page.locator('#analyze').click();
+  await page.locator('#rewriteWidget').click();await page.locator('#rewriteGenerate').click();await expect(page.locator('#rewriteDraft')).not.toHaveValue('');await expect(page.locator('#rewriteApply')).toBeEnabled();
+  await page.locator('#liveScan').uncheck();await input.fill('결론적으로 바뀐 원본입니다. 가격은 19,900원입니다.');
+  await expect(page.locator('#rewriteApply')).toBeDisabled();await expect(page.locator('#rewriteValidation')).toContainText('기준 글이');
+});
+
 test('foundation flow keeps state, layout and rewrite tools coherent', async ({ page }) => {
   await gotoReady(page);
   await expect(page.locator('#versionBadge')).toHaveText('v'+APP_VERSION);
@@ -67,14 +105,14 @@ test('foundation flow keeps state, layout and rewrite tools coherent', async ({ 
 
   const input=page.locator('#input'),output=page.locator('#output');
   await input.fill('결론적으로 이 문장을 테스트합니다. 가격은 19,900원입니다.\u200B\u00A0');
-  await page.locator('#analyze').evaluate(el=>el.click());
+  await page.locator('#analyze').click();
   await expect(output).not.toHaveValue('');
   await expect(output).not.toHaveValue(/\u200B/);
   await expect(page.locator('#issueCount')).toHaveText('1');
   await expect(page.locator('#v62ReviewList [data-review-card]')).toHaveCount(0);
-  await page.locator('#reviewWidget').click();await expect(page.locator('#reviewPanel')).toBeVisible();await expect(page.locator('#v62ReviewList [data-review-card]')).toHaveCount(1);
+  await page.locator('#reviewWidget').click();await expect(page.locator('#reviewPanel')).toBeVisible();await expect(page.locator('#reviewWidget')).toHaveAttribute('aria-expanded','true');await expect(page.locator('#v62ReviewList [data-review-card]')).toHaveCount(1);
 
-  await page.locator('#issuesWidget').click();await expect(page.locator('#reviewPanel')).toBeHidden();
+  await page.locator('#issuesWidget').click();await expect(page.locator('#reviewPanel')).toBeHidden();await expect(page.locator('#reviewWidget')).toHaveAttribute('aria-expanded','false');await expect(page.locator('#issuesWidget')).toHaveAttribute('aria-expanded','true');
   const apply=page.locator('#issuesPanel [data-apply]').first();
   await expect(apply).toBeVisible();await apply.click();await expect(output).toHaveValue(/그래서/);
   await page.locator('#undoStep').click();await expect(output).toHaveValue(/결론적으로/);
@@ -97,7 +135,7 @@ test('foundation flow keeps state, layout and rewrite tools coherent', async ({ 
   await expect(page.locator('#directTyped')).toHaveValue('');
 
   await page.locator('[data-close-panel="rewritePanel"]').click();
-  await input.fill('앞\u200B뒤\u00A0끝');await page.locator('#analyze').evaluate(el=>el.click());
+  await input.fill('앞\u200B뒤\u00A0끝');await page.locator('#analyze').click();
   await expect(output).toHaveValue('앞뒤 끝');
   await expect(page.locator('[data-resulttab="xray"]')).toHaveCount(0);
 
@@ -136,7 +174,7 @@ test('mobile compact panels open small and expand on demand', async ({ page }) =
   await gotoReady(page);
   await expect(page.locator('.pill')).toContainText(APP_VERSION);
   await page.locator('#input').fill('모바일 팝업 테스트입니다. 하지만 문장이 길어지면 검토 제안이 표시될 수 있습니다. 그리고 결과도 확인합니다.');
-  await page.locator('#analyze').evaluate(el => el.click());
+  await page.locator('#analyze').click();
   await page.locator('#rewriteWidget').click();
   const panel=page.locator('#rewritePanel');
   await expect(panel).toBeVisible();

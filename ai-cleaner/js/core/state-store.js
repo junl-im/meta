@@ -4,7 +4,7 @@ const ns=window.AICleanerModules=window.AICleanerModules||{};
 function emptyState(){
   return {
     original:'',base:'',issueBase:'',working:'',chars:[],allChars:[],issues:[],applied:new Set(),
-    manual:false,homoglyphs:[],reviews:[],reviewCount:0,reviewsDirty:false,score:100,focusCycles:Object.create(null),
+    manual:false,homoglyphs:[],reviews:[],reviewCount:0,reviewVisibleCount:0,reviewTotalSentences:0,reviewsDirty:false,score:100,focusCycles:Object.create(null),
     issueUnread:false,reviewUnread:false,techUnread:false,analyzeMs:0,reviewOverflow:0
   };
 }

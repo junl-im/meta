@@ -406,3 +406,14 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
   .typingPreviewPanel:not(.mobileExpanded) .typingVisiblePolicy span{display:none}.typingPreviewPanel .typingPreviewText{font-size:9.5px;max-height:72px}
 }
 @media(max-width:620px){.floatPanel.typingPreviewPanel{left:6px!important;right:6px!important;height:min(38dvh,320px)!important;max-height:min(38dvh,320px)!important}.floatPanel.typingPreviewPanel.mobileExpanded{height:min(70dvh,580px)!important;max-height:min(70dvh,580px)!important}}
+
+/* ===== 1.5.1 coherence / freshness / lifecycle audit ===== */
+.resultTitle{display:flex;align-items:center;gap:8px;min-width:0}.resultFreshness{display:inline-flex;align-items:center;min-height:24px;padding:3px 8px;border:1px solid #f0c78b;border-radius:999px;background:#fff5d8;color:#7a4a00;font-size:9px;font-weight:850;white-space:nowrap}
+.resultarea.resultStale{border-style:dashed;border-color:#e0a956;background:#fffaf1}.detailDiagnostics.analysisPending .detailBody{opacity:.58}.detailDiagnostics.analysisPending>summary{background:#fffaf1}.tab:disabled{opacity:.42;cursor:not-allowed}.sourceActions .btn,.sourceActions .filelabel{justify-content:center;align-items:center}
+@media(max-width:620px){.sourceActions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.sourceActions>.btn,.sourceActions>.filelabel{width:100%;min-width:0}.resultTitle{width:100%;justify-content:space-between}.resultFreshness{max-width:68%;overflow:hidden;text-overflow:ellipsis}}
+@media(max-width:420px){.resultFreshness{font-size:8.5px;max-width:72%}}
+@media(prefers-reduced-motion:reduce){.resultarea.resultStale{transition:none}}
+.workspace>.card:first-child .actions.sourceActions{grid-template-columns:92px minmax(126px,1fr) minmax(104px,1fr) 92px}
+@media(max-width:760px){.workspace>.card:first-child .actions.sourceActions{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:360px){.workspace>.card:first-child .actions.sourceActions{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}}
+.rewriteTabs button:disabled{opacity:.46;cursor:not-allowed}

@@ -1,6 +1,6 @@
 # AI Cleaner 프로젝트 인수인계 메모리
 
-업데이트: 2026-08-15 · 현재 패키지: 1.5.0
+업데이트: 2026-08-16 · 현재 패키지: 1.5.1
 
 ## 새 채팅에서 가장 먼저 읽을 것
 이 폴더를 새 채팅에 업로드한 뒤 `PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md 읽고 이어서 개발하자`라고 요청한다. 이 문서는 프로젝트의 결정사항, 보호 경로, UX 방향, 안전 제약, 배포 방식, 알려진 이슈를 보존하기 위한 인수인계 메모리다.
@@ -353,3 +353,4 @@
 - Unicode hygiene, visible-text `자동작성 원본 새로쓰기`, 모바일 compact panel, rewrite/image lazy-load UI 계약도 변경하지 않는다.
 - 1.5.0 로컬 정적/모듈 기준: static 129/0, module PASS. 최종 브라우저 확인은 Push 후 GitHub Actions `browser-smoke`. 로컬 Playwright 의존성 설치는 120초 실행 제한에서 timeout되어 재시도하지 않았고 부분 설치 파일은 제거했다.
 - 다음 권장 단계: 1.5.1에서 성능 Governor/lazy rendering의 실브라우저 안정성만 점검한 뒤 다음 기능 단계로 이동한다.
+\n\n## 1.5.1 Cohesion & Integrity Stability Audit\n- 패치 기준선은 실제 전달된 `AI_Cleaner_1_5_0_FULL_PROJECT_HANDOFF.zip`이다. 중간 작업 폴더가 아니라 직전 전달물을 기준으로 diff/패치를 만든다.\n- 원본이 수정되어 자동분석이 대기 중인 상태를 명시적인 **stale result boundary**로 취급한다. 결과에 `원본 변경됨` 상태를 표시하고 복사/TXT/직접수정/전체되돌리기/Diff/Undo/Redo처럼 이전 분석 결과를 소비하는 액션을 최신 분석 전까지 잠근다.\n- `입력 중 자동 분석`을 끈 사용자도 결과를 갱신할 수 있도록 원본 카드에 보이는 `지금 다듬기` 버튼을 복구했다. 재작성 도구가 최신 결과가 필요할 때는 방어적으로 동기 분석한다.\n- Update Manager는 분석 예약/실행 중 버전 reload를 시작하지 않는다. draft에는 `analysisFresh`와 `outputBasis`를 저장하며, 복원 시 새 원본과 짝이 맞지 않는 오래된 결과는 버리고 최신 원본을 다시 분석한다.\n- `pagehide`에서 Worker/예약 분석/update polling/Typewriter를 정리하고, BFCache `pageshow.persisted` 복원 시 패널 위치, update polling, dirty live-analysis/stat 갱신을 다시 연결한다.\n- Rewrite Studio는 generation token을 사용한다. 새 생성/reset/기준 글 변경/패널 종료가 이전 비동기 generation보다 우선하며, 오래된 작업은 초안을 뒤늦게 쓰지 못한다. 생성 중 옵션/탭은 잠그고 이전 progress hide timer도 격리한다.\n- 재작성 기준이 `현재 결과`여도 원본이 바뀌면 결과가 곧 갱신될 종속 관계를 감안해 기존 초안을 즉시 stale-lock한다. 장문 입력 이벤트에서는 매 키마다 전체 source hash를 다시 계산하지 않고 가벼운 invalidation만 수행하며, 실제 hash 검증은 open/apply/validation 같은 명시 경로에 남긴다.\n- Typewriter는 dirty 원본에서 시작하기 전에 최신 동기 분석을 먼저 확정한다. 진행 중 `Esc`로 자동작성 패널을 닫으면 창만 사라지는 것이 아니라 작업도 중지하고 현재 원본의 직전 결과로 복원한다. Rewrite 패널을 Esc/닫기/다른 패널 전환으로 닫을 때도 진행 중 generation을 취소한다.\n- 데스크톱 floating panel clamp는 `topMin` 예약 영역과 화면 하단을 동시에 고려한다. 저장된 큰 패널/resize/drag가 화면 아래로 탈출하는 경우를 줄였다. 패널 위젯의 `aria-controls`/`aria-expanded`도 실제 패널 visibility와 동기화한다.\n- 연속 toast의 이전 hide timer가 새 toast를 가리지 않도록 timer를 분리했다. 1.5.0 lazy review rendering은 전체 후보 수와 실제 렌더 subset 수를 별도로 유지해 위젯 숫자와 패널 DOM이 어긋나지 않도록 보강했다.\n- 1.5.1 최종 로컬 검증: static 140/0, module/integration PASS, 전체 JS/MJS syntax PASS, workflow YAML PASS. 로컬 Playwright 의존성 설치는 120초 실행 제한에서 timeout되어 재시도하지 않았고 부분 설치 파일을 제거했다. Push 후 GitHub Actions `browser-smoke`를 실제 Chromium 최종 검증으로 사용한다.\n
