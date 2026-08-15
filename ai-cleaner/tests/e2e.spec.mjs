@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 
-test('AI Cleaner v6.8.1 core browser flow', async ({ page }) => {
+test('AI Cleaner v6.8.2 core browser flow', async ({ page }) => {
   await page.goto('http://127.0.0.1:4173/ai-cleaner/', { waitUntil: 'domcontentloaded' });
-  await expect(page.locator('#versionBadge')).toHaveText('v6.8.1');
+  await expect(page.locator('#versionBadge')).toHaveText('v6.8.2');
   await expect(page.locator('#detailDiagnostics')).not.toHaveAttribute('open', '');
   await page.setViewportSize({ width: 820, height: 900 });
   await expect.poll(async () => page.locator('#typingPreviewButton small').evaluate(el => getComputedStyle(el).transform)).toBe('none');
@@ -34,7 +34,12 @@ test('AI Cleaner v6.8.1 core browser flow', async ({ page }) => {
   await expect(page.locator('#rewriteApply')).toBeEnabled();
   await page.locator('#rewriteApply').click();
   await expect(output).toHaveValue(/19,900원/);
+  await expect(page.locator('#rewritePanel')).toBeHidden();
+  await expect(page.locator('[data-resulttab="cleaned"]')).toHaveClass(/active/);
+  await expect(output).toBeVisible();
 
+  await page.locator('#rewriteWidget').click();
+  await expect(page.locator('#rewritePanel')).toBeVisible();
   await page.locator('[data-rewrite-tab="verify"]').click();
   await page.locator('#directTarget').selectOption('output');
   const target = await output.inputValue();

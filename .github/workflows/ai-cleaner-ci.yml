@@ -19,6 +19,10 @@ on:
       - 'OPTION/**'
       - '.github/workflows/ai-cleaner-ci.yml'
 
+concurrency:
+  group: ai-cleaner-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -43,9 +47,11 @@ jobs:
           if [ -z "$BASE_SHA" ] || echo "$BASE_SHA" | grep -Eq '^0+$'; then BASE_SHA="$(git rev-parse HEAD^ 2>/dev/null || true)"; fi
           if [ -z "$BASE_SHA" ]; then echo 'No comparable parent commit; skipping OPTION diff guard for this initial commit.'; exit 0; fi
           CHANGED="$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")"
-          if printf '%s
-' "$CHANGED" | grep -q '^OPTION/'; then echo 'ERROR: OPTION/** is a protected path and must not be changed.'; printf '%s
-' "$CHANGED" | grep '^OPTION/'; exit 1; fi
+          if printf '%s\n' "$CHANGED" | grep -q '^OPTION/'; then
+            echo 'ERROR: OPTION/** is a protected path and must not be changed.'
+            printf '%s\n' "$CHANGED" | grep '^OPTION/'
+            exit 1
+          fi
           echo 'OPTION/** unchanged.'
       - name: Setup Node
         uses: actions/setup-node@v6
@@ -84,5 +90,11 @@ jobs:
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/ai-cleaner-http.log 2>&1 &
           echo $! > /tmp/ai-cleaner-http.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ai-cleaner/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/ai-cleaner-http.log
+          exit 1
       - name: Browser smoke test
         run: npm run test:e2e

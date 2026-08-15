@@ -62,7 +62,7 @@ const sensitive = new Set([0x200C,0x200D,0x2060]);
 const lookalike = {'а':'Cyrillic a','е':'Cyrillic e','о':'Cyrillic o','р':'Cyrillic er','с':'Cyrillic es','х':'Cyrillic ha','у':'Cyrillic u','і':'Cyrillic i'};
 
 let state = {
-  original:'', base:'', working:'', chars:[], allChars:[], issues:[], applied:new Set(),
+  original:'', base:'', issueBase:'', working:'', chars:[], allChars:[], issues:[], applied:new Set(),
   manual:false, homoglyphs:[], reviews:[], score:100, focusCycles:Object.create(null),
   issueUnread:false, reviewUnread:false, techUnread:false, analyzeMs:0, reviewOverflow:0
 };
@@ -72,9 +72,9 @@ let contextTarget = null;
 
 
 function historySnapshot(label=''){
-  return {label,output:$('#output')?.value||state.working||'',manual:!!state.manual,applied:[...state.applied]};
+  return {label,output:$('#output')?.value||state.working||'',manual:!!state.manual,applied:[...state.applied],issueBase:state.issueBase||state.base||''};
 }
-function historySignature(s){return JSON.stringify([s.output,s.manual,s.applied]);}
+function historySignature(s){return JSON.stringify([s.output,s.manual,s.applied,s.issueBase]);}
 function updateHistoryButtons(){
   const u=$('#undoStep'),r=$('#redoStep');if(u)u.disabled=historyState.index<=0;if(r)r.disabled=historyState.index<0||historyState.index>=historyState.entries.length-1;
 }
@@ -93,6 +93,7 @@ function recordHistory(label){
 function restoreHistoryIndex(nextIndex){
   if(nextIndex<0||nextIndex>=historyState.entries.length)return;
   const snap=historyState.entries[nextIndex];historyState.restoring=true;historyState.index=nextIndex;
+  state.issueBase=typeof snap.issueBase==='string'&&snap.issueBase?snap.issueBase:state.base;state.issues=issues(state.issueBase);state.reviews=[];state.focusCycles=Object.create(null);
   state.applied=new Set(snap.applied||[]);state.manual=!!snap.manual;state.working=snap.output||'';
   $('#output').readOnly=true;$('#editResult').textContent='✎ 직접 수정';
   renderAll();$('#output').value=snap.output||state.working;state.working=$('#output').value;
@@ -275,7 +276,7 @@ function analyze(silent=false){
   if($('#norm').checked)base=base.normalize('NFKC');
   const hom=homoglyphs(base), foundIssues=issues(base);
   state={
-    original:input,base,working:base,chars:sc.auto,allChars:sc.all,issues:foundIssues,applied:new Set(),manual:false,
+    original:input,base,issueBase:base,working:base,chars:sc.auto,allChars:sc.all,issues:foundIssues,applied:new Set(),manual:false,
     homoglyphs:hom,reviews:[],score:hygiene(input,sc.all,hom),focusCycles:Object.create(null),
     issueUnread:foundIssues.length>0&&(!hadOriginal||foundIssues.length!==prevIssueCount),
     reviewUnread:false,
@@ -294,12 +295,19 @@ function analyze(silent=false){
 }
 
 function rebuild(){
-  let text=state.base;
+  let text=state.issueBase||state.base;
   for(const x of state.issues.filter(x=>state.applied.has(x.id)&&x.applicable&&x.start>=0).sort((a,b)=>b.start-a.start)){
     text=text.slice(0,x.start)+x.after+text.slice(x.end);
   }
   if(!state.manual)state.working=text;
   $('#output').value=state.working;
+}
+
+function refreshSuggestionBaseline(text,{unread=true}={}){
+  const next=String(text||'');
+  state.issueBase=next;state.working=next;state.manual=false;state.applied=new Set();state.issues=issues(next);state.reviews=[];state.focusCycles=Object.create(null);
+  const reviewCandidates=sentences(next).filter(x=>{const sig=sentenceSignals(x.text);return ($('#length').checked&&x.text.length>72)||sig.length;}).length;
+  state.issueUnread=unread&&state.issues.length>0;state.reviewUnread=unread&&reviewCandidates>0;
 }
 
 function renderAll(){
@@ -498,7 +506,7 @@ function applyReviews(){
     if(idx>=0){text=text.slice(0,idx)+r.edit+text.slice(idx+r.text.length);done++;}
   }
   if(!done)return showToast('현재 결과에서 수정 대상 문장을 찾지 못했습니다. 다시 분석한 뒤 시도해 주세요.');
-  state.working=text;state.manual=true;$('#output').value=text;renderCompare();renderIssues();buildReviews();syncWidgets();flashOutput();recordHistory('문장 검토 반영');showToast(`${done}개 문장을 반영했습니다.`);
+  $('#output').value=text;refreshSuggestionBaseline(text,{unread:false});renderAll();flashOutput();recordHistory('문장 검토 반영');showToast(`${done}개 문장을 반영했습니다.`);
 }
 
 function download(name,data,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);}
@@ -525,7 +533,10 @@ function positionPanelDefault(panel){
   panel.style.left=left+'px';panel.style.top=top+'px';panel.style.right='auto';panel.style.bottom='auto';
 }
 
+const FLOAT_PANEL_IDS=['issuesPanel','reviewPanel','rewritePanel','techPanel'];
+function closeAllPanels(except=''){for(const pid of FLOAT_PANEL_IDS){if(pid!==except){const p=$('#'+pid);if(p)p.hidden=true;}}}
 function openPanel(id){
+  closeAllPanels(id);
   const panel=$('#'+id);panel.hidden=false;
   if(panel.dataset.defaultPosition==='pending'){positionPanelDefault(panel);panel.dataset.defaultPosition='done';}
   if(id==='issuesPanel'){state.issueUnread=false;$('#issuesWidget').classList.remove('attention');}
@@ -534,6 +545,17 @@ function openPanel(id){
   panel.style.zIndex=String(++openPanel.z);
 }
 openPanel.z=220;
+function revealAppliedResult(message='결과에 적용했습니다.'){
+  closeAllPanels();
+  const textButton=document.querySelector('[data-tool="text"]');if(textButton&&!textButton.classList.contains('active'))textButton.click();
+  activateResultTab('cleaned');
+  const out=$('#output');
+  requestAnimationFrame(()=>{
+    out.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});
+    setTimeout(()=>{out.classList.remove('resultApplied');void out.offsetWidth;out.classList.add('resultApplied');out.focus({preventScroll:true});try{out.setSelectionRange(0,0);}catch(_){}setTimeout(()=>out.classList.remove('resultApplied'),1300);},180);
+  });
+  showToast(message);
+}
 
 function makeDraggable(panel){
   const handle=panel.querySelector('[data-drag-handle]');if(!handle)return;let drag=null;const key='ai-cleaner-panel-'+panel.id,legacyKey='v66-pos-'+panel.id;
@@ -615,9 +637,9 @@ $('#analyze').onclick=()=>analyze(false);$('#sample').onclick=()=>{$('#input').v
 $('#copy').onclick=async()=>{if($('#output').value){await navigator.clipboard.writeText($('#output').value);showToast('결과를 복사했습니다.');}};
 $('#downloadTxt').onclick=()=>$('#output').value&&download(`cleaned-v${APP_VERSION}.txt`,$('#output').value,'text/plain;charset=utf-8');
 $('#downloadJson').onclick=()=>state.original&&download(`ai-clean-report-v${APP_VERSION}.json`,JSON.stringify({version:APP_VERSION,profile:$('#cleanProfile').value,hygieneScore:state.score,analysisMs:state.analyzeMs,autoProcessed:state.chars,preserved:state.allChars.filter(x=>!x.auto),homoglyphs:state.homoglyphs,suggestions:state.issues},null,2),'application/json;charset=utf-8');
-$('#undoAll').onclick=()=>{if(!state.original)return;state.applied.clear();state.manual=false;state.working=state.base;renderAll();flashOutput();recordHistory('처음 결과');};
+$('#undoAll').onclick=()=>{if(!state.original)return;state.issueBase=state.base;state.issues=issues(state.base);state.reviews=[];state.applied.clear();state.manual=false;state.working=state.base;renderAll();flashOutput();recordHistory('처음 결과');};
 $('#undoStep').onclick=undoHistory;$('#redoStep').onclick=redoHistory;
-$('#editResult').onclick=()=>{if(!state.original)return;if($('#output').readOnly){manualEditBaseline=$('#output').value;$('#output').readOnly=false;$('#output').focus();$('#editResult').textContent='✓ 수정 완료';}else{$('#output').readOnly=true;state.working=$('#output').value;state.manual=true;$('#editResult').textContent='✎ 직접 수정';renderCompare();renderDiff();flashOutput();if($('#output').value!==manualEditBaseline)recordHistory('직접 수정');manualEditBaseline='';}};
+$('#editResult').onclick=()=>{if(!state.original)return;if($('#output').readOnly){manualEditBaseline=$('#output').value;$('#output').readOnly=false;$('#output').focus();$('#editResult').textContent='✓ 수정 완료';}else{$('#output').readOnly=true;const edited=$('#output').value;$('#editResult').textContent='✎ 직접 수정';if(edited!==manualEditBaseline){refreshSuggestionBaseline(edited,{unread:false});renderAll();flashOutput();recordHistory('직접 수정');}else{state.working=edited;state.manual=false;}manualEditBaseline='';}};
 $('#output').addEventListener('input',()=>{if(!$('#output').readOnly){state.working=$('#output').value;state.manual=true;queueCompare();}});
 $('#v62ApplyReviews').onclick=applyReviews;
 
@@ -640,8 +662,12 @@ $$('[data-tool]').forEach(b=>b.onclick=()=>{$$('[data-tool]').forEach(x=>x.class
 window.AICleanerApp={
   version:APP_VERSION,assetVersion:ASSET_VERSION,showToast,configureEditors,
   getText(kind='output'){if(kind==='original')return $('#input').value||'';if(!$('#output').value&&$('#input').value.trim())analyze(true);return $('#output').value||state.working||'';},
-  applyRewrite(text,label='새 글 재작성'){if(!String(text||'').trim())return false;state.working=String(text);state.manual=true;$('#output').readOnly=true;$('#output').value=state.working;$('#editResult').textContent='✎ 직접 수정';renderCompare();renderDiff();flashOutput();recordHistory(label);syncWidgets();return true;},
-  openPanel
+  applyRewrite(text,label='새 글 재작성'){
+    const next=String(text||'');if(!next.trim())return false;
+    $('#output').readOnly=true;$('#output').value=next;$('#editResult').textContent='✎ 직접 수정';
+    refreshSuggestionBaseline(next,{unread:false});renderAll();recordHistory(label);revealAppliedResult('✓ 새 글을 결과에 적용했습니다.');return true;
+  },
+  openPanel,closeAllPanels,revealAppliedResult
 };
 $('#rewriteWidget').onclick=async()=>{try{showToast('재작성 스튜디오를 여는 중…');const studio=await ensureRewriteStudio();openPanel('rewritePanel');studio.open();}catch(err){console.error(err);showToast('재작성 도구를 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.');}};
 $('#issuesWidget').onclick=()=>openPanel('issuesPanel');$('#reviewWidget').onclick=()=>openPanel('reviewPanel');$('#techWidget').onclick=()=>openPanel('techPanel');

@@ -84,7 +84,7 @@ async function generate(variantBump=false){
     const elapsed=Math.max(0,performance.now()-started);$('#rewritePanelStatus').textContent=`완료 · ${elapsed<100?elapsed.toFixed(0):Math.round(elapsed)}ms · Fact Lock ${state.locks.length}개`;setTimeout(()=>{$('#rewriteProgress').hidden=true;},900);app.showToast(variantBump?'다른 초안을 만들었습니다.':'새 초안을 만들었습니다.');resetDirect();
   }finally{state.generating=false;$('#rewriteGenerate').disabled=false;$('#rewriteVariant').disabled=!state.draft;}
 }
-function applyDraft(){renderValidation();if($('#rewriteApply').disabled)return;const text=$('#rewriteDraft').value.trim();if(app.applyRewrite(text,'새 글 재작성')){app.showToast('새 초안을 결과에 적용했습니다.');$('#directTarget').value='output';resetDirect();}}
+function applyDraft(){renderValidation();if($('#rewriteApply').disabled)return;const text=$('#rewriteDraft').value.trim();if(app.applyRewrite(text,'새 글 재작성')){$('#directTarget').value='output';resetDirect();}}
 
 function targetText(){const v=$('#directTarget').value;if(v==='original')return app.getText('original');if(v==='rewrite')return $('#rewriteDraft').value||state.draft||app.getText('output');return app.getText('output');}
 function targetChars(){const text=targetText();if(text!==state.directTargetText){state.directTargetText=text;state.directTargetChars=Array.from(text);}return state.directTargetChars;}
