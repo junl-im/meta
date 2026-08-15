@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "6.8.1",
+  "version": "6.8.3",
   "date": "2026-08-15",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -27,16 +27,36 @@
     ".github/workflows/ai-cleaner-ci.yml"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "6.8.1",
-  "asset_version": "681",
+  "current_version": "6.8.3",
+  "asset_version": "683",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "v6.8.1 UI precision polish + long-text batching + extended Fact Lock",
+  "latestPatch": "v6.8.3 Cohesion & Integrity + original direct-write verified-result mode",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
     "externalSyntheticTyping": false,
-    "lazyLoaded": true
+    "lazyLoaded": true,
+    "staleDraftGuard": true,
+    "sessionRecovery": true,
+    "factLockLimit": 240,
+    "detectorEvasionOptimization": false,
+    "originalDirectWrite": true,
+    "directWriteTarget": "original-only",
+    "clipboardBlockedInDirectWrite": true,
+    "syntheticInputBlockedInDirectWrite": true,
+    "verifiedTypedResultApply": true,
+    "exactOriginalAutoClone": false
+  },
+  "artifactDelivery": {
+    "alwaysProvide": [
+      "FULL_PROJECT_HANDOFF.zip",
+      "Patch.zip"
+    ],
+    "patchIncludesOnlyChangedFiles": true,
+    "protectedPathsExcluded": [
+      "OPTION/**"
+    ]
   }
 }

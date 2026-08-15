@@ -9,7 +9,7 @@ if(!failures.length){
  const html=fs.readFileSync(files.html,'utf8'),app=fs.readFileSync(files.app,'utf8'),rewrite=fs.readFileSync(files.rewrite,'utf8'),image=fs.readFileSync(files.image,'utf8'),css=fs.readFileSync(files.css,'utf8'),ver=JSON.parse(fs.readFileSync(files.version,'utf8')),e2e=fs.readFileSync(files.e2e,'utf8'),pkg=JSON.parse(fs.readFileSync(files.package,'utf8'));
  const ids=[...html.matchAll(/\bid=["']([^"']+)["']/g)].map(m=>m[1]),seen=new Set(),dup=[...new Set(ids.filter(id=>seen.has(id)||!seen.add(id)))];dup.length?fail('duplicate HTML ids',dup.join(', ')):pass('duplicate HTML ids',`0 duplicates across ${ids.length} ids`);
  const idSet=new Set(ids),refs=new Set();for(const src of [app,rewrite,image])for(const re of [/(?:\$|q)\(["']#([A-Za-z][\w:-]*)["']\)/g,/getElementById\(["']([A-Za-z][\w:-]*)["']\)/g])for(const m of src.matchAll(re))refs.add(m[1]);const miss=[...refs].filter(x=>!idSet.has(x)).sort();miss.length?fail('JavaScript DOM id references',miss.join(', ')):pass('JavaScript DOM id references',`${refs.size} referenced ids all exist`);
- String(ver.version)==='6.8.2'&&String(ver.assetVersion)==='682'?pass('version.json source','6.8.2 / 682'):fail('version.json source',JSON.stringify(ver));
+ String(ver.version)==='6.8.3'&&String(ver.assetVersion)==='683'?pass('version.json source','6.8.3 / 683'):fail('version.json source',JSON.stringify(ver));
  /fetch\(['"]version\.json\?ts=/.test(html)&&/window\.__AI_CLEANER_VERSION__/.test(html)&&/css\/app\.css\?v=/.test(html)&&/js\/app\.js\?v=/.test(html)?pass('version-driven asset boot','version.json drives core CSS/JS'):fail('version-driven asset boot','dynamic boot missing');
  !/loadScript\(['"]js\/image-analyzer\.js/.test(html)&&/ensureImageAnalyzer/.test(app)&&/ensureRewriteStudio/.test(app)?pass('lazy heavy tools','image + rewrite engines load on demand'):fail('lazy heavy tools','eager or missing lazy loader');
  /const APP_VERSION=String\(APP_META\.version/.test(app)&&!/const APP_VERSION=['"]6\.8/.test(app)?pass('no hard-coded app version','APP_VERSION comes from boot metadata'):fail('no hard-coded app version','hard-coded app version found');
@@ -17,7 +17,7 @@ if(!failures.length){
  /undoHistory/.test(app)&&/redoHistory/.test(app)&&/renderDiff/.test(app)&&/id="undoStep"/.test(html)&&/id="diffPane"/.test(html)?pass('history and diff UI','undo/redo + diff'):fail('history and diff UI','missing');
  /<details class="card detailDiagnostics"/.test(html)&&/id="detailSummary"/.test(html)?pass('progressive diagnostics','details collapsed by default'):fail('progressive diagnostics','missing');
  /extractFactLocks/.test(rewrite)&&/protectFacts/.test(rewrite)&&/validateFacts/.test(rewrite)&&/id="rewriteFactSummary"/.test(html)?pass('Fact Lock rewrite guard','extract + protect + validate'):fail('Fact Lock rewrite guard','missing');
- /data-direct-typing="true"/.test(html)&&/compositionstart/.test(rewrite)&&/compositionend/.test(rewrite)&&/\['paste','drop'\]/.test(rewrite)?pass('direct typing verifier','IME aware + paste/drop blocked'):fail('direct typing verifier','missing');
+ /data-direct-typing="true"/.test(html)&&/compositionstart/.test(rewrite)&&/compositionend/.test(rewrite)&&/insertFromPaste/.test(rewrite)&&/directTrustedValue/.test(rewrite)?pass('direct typing verifier','IME aware + paste/drop/synthetic insert guarded'):fail('direct typing verifier','missing');
  /EXIF_VERSION\s*=\s*['"]4\.42\.0['"]/.test(image)&&/C2PA_VERSION\s*=\s*['"]0\.13\.4['"]/.test(image)?pass('image dependency pins','ExifReader 4.42.0 + C2PA 0.13.4'):fail('image dependency pins','missing');
  ['0x200C','0x200D','0x2060'].every(t=>app.includes(t))?pass('meaning-sensitive Unicode guard','ZWJ/ZWNJ/WORD JOINER'):fail('meaning-sensitive Unicode guard','missing');
  /trainedAlgorithmicMedia/.test(image)&&/digitalCapture/.test(image)?pass('C2PA source-type distinction','present'):fail('C2PA source-type distinction','missing');
@@ -29,6 +29,15 @@ if(!failures.length){
  /전화번호/.test(rewrite)&&/해시태그/.test(rewrite)&&/시간/.test(rewrite)?pass('Fact Lock coverage','phone + hashtag + time protected'):fail('Fact Lock coverage','extended locks missing');
  /revealAppliedResult/.test(app)&&/closeAllPanels/.test(app)&&/refreshSuggestionBaseline/.test(app)&&/resultApplied/.test(css)?pass('apply focus flow','close panel + refresh suggestions + reveal result'):fail('apply focus flow','missing focus-flow guards');
  /rewritePanel.*toBeHidden|toBeHidden\(\)/.test(e2e)?pass('browser apply-close coverage','rewrite apply closes panel'):fail('browser apply-close coverage','missing');
+
+ /generatedSourceStamp/.test(rewrite)&&/기준 글이 초안을 만든 뒤 바뀌었습니다/.test(rewrite)&&/ai-cleaner:text-changed/.test(app+rewrite)?pass('stale rewrite guard','source changes lock old draft'):fail('stale rewrite guard','missing');
+ /SESSION_KEY='ai-cleaner-rewrite-session-v3'/.test(rewrite)&&/saveSession/.test(rewrite)&&/restoreSession/.test(rewrite)?pass('rewrite session recovery','draft + options survive reload'):fail('rewrite session recovery','missing');
+ /FACT_LOCK_LIMIT=240/.test(rewrite)&&/모델\/코드/.test(rewrite)&&/uniqueFactToken/.test(rewrite)?pass('Fact Lock integrity','model codes + collision-safe tokens + cap'):fail('Fact Lock integrity','missing');
+ /PANEL_SHEET_BREAKPOINT=980/.test(app)&&/clampPanelToViewport/.test(app)&&/@media\(max-width:980px\)[\s\S]*floatPanel/.test(css)?pass('panel viewport cohesion','tablet sheet + viewport clamp'):fail('panel viewport cohesion','missing');
+ /MAX_TEXT_FILE_BYTES=20\*1024\*1024/.test(app)?pass('large text import guard','20MB cap'):fail('large text import guard','missing');
+ /revealAppliedResult\(`✓ \${done}개 문장을 결과에 반영했습니다/.test(app)?pass('review apply focus flow','review apply reveals result'):fail('review apply focus flow','missing');
+ /원본 그대로 쓰기/.test(html)&&/insertFromPaste/.test(rewrite)&&/e\.isTrusted/.test(rewrite)&&/directTrustedValue/.test(rewrite)&&/\['paste','drop','copy','cut'\]/.test(rewrite)&&/원본 직접 작성/.test(rewrite)?pass('original direct-write guard','original-only + clipboard/drop/synthetic input blocked + verified typed result apply'):fail('original direct-write guard','missing');
+ !/applyExactOriginal|directApplyExact/.test(app+rewrite+html)?pass('no automatic exact-original clone','manual direct-write only'):fail('no automatic exact-original clone','automatic clone path found');
  /data:image\/(png|jpeg|webp);base64,/i.test(html)?fail('embedded base64 image bloat','found'):pass('embedded base64 image bloat','none');
 }
 for(const p of passes)console.log(`PASS ${p.n}${p.d?` — ${p.d}`:''}`);for(const f of failures)console.error(`FAIL ${f.n}${f.d?` — ${f.d}`:''}`);console.log(`\nSummary: ${passes.length} passed, ${failures.length} failed`);if(failures.length)process.exit(1);

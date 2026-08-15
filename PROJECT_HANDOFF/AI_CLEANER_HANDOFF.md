@@ -1,6 +1,6 @@
 # AI Cleaner 프로젝트 인수인계 메모리
 
-업데이트: 2026-08-15 · 현재 패키지: v6.8.1
+업데이트: 2026-08-15 · 현재 패키지: v6.8.2
 
 ## 새 채팅에서 가장 먼저 읽을 것
 이 폴더를 새 채팅에 업로드한 뒤 `PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md 읽고 이어서 개발하자`라고 요청한다. 이 문서는 프로젝트의 결정사항, 보호 경로, UX 방향, 안전 제약, 배포 방식, 알려진 이슈를 보존하기 위한 인수인계 메모리다.
@@ -75,11 +75,11 @@
 ## CI
 - `.github/workflows/ai-cleaner-ci.yml`: checkout@v7, setup-node@v6, Node 24.
 - JS syntax, static-check, OPTION 보호를 검사한다.
-- 2026-08-14 v6.5.1 기준 Actions와 Pages 둘 다 Success 확인됨.
+- v6.8.3은 static-check + Playwright browser-smoke workflow를 포함한다. 실제 GitHub Actions 성공 여부는 Push 후 확인한다.
 
 ## 다음 개선 후보
 - PDF/DOCX 안전한 로컬 파일 import.
-- 실제 브라우저 회귀 테스트를 CI에서 headless browser로 자동화(현재 정적 검사가 중심).
+- Playwright browser-smoke 범위를 모바일/태블릿·팝업 focus flow·직접 작성 모드까지 계속 확장.
 - 접근성: 키보드 focus trap, ESC로 팝업 닫기, aria-live 알림 정교화.
 - 긴 문서에서 위치 네비게이션/문장검토 벤치마크.
 - 이미지 픽셀 계산을 Web Worker/OffscreenCanvas로 이동할 수 있는지 검토.
@@ -90,7 +90,7 @@
 3. `node ai-cleaner/tests/static-check.mjs` 통과.
 4. HTML ID 중복/DOM 참조 누락 0.
 5. `version.json`, HTML app-version, APP_VERSION 일치.
-6. 모바일 760px 이하에서 팝업은 하단 시트, 본문 overflow 정상.
+6. 태블릿/모바일 980px 이하에서 팝업은 하단 시트, 본문 overflow 정상.
 7. GitHub Pages 루트 주소에서 `/ai-cleaner/` 진입 정상.
 
 
@@ -120,3 +120,40 @@
 - Batched long-text statistics rendering; cached direct typing target arrays.
 - Fact Lock extended to Korean dates, times, phone numbers and hashtags.
 - Rewrite panel reports elapsed generation time.
+
+
+## v6.8.2 Focus Flow
+- 재작성 결과 적용 성공 시 재작성 팝업을 자동으로 닫고 정리본 결과로 이동한다.
+- 결과 textarea를 화면 중앙에 노출하고 짧은 적용 강조 애니메이션과 완료 토스트를 표시한다.
+- 한 번에 하나의 플로팅 패널만 열리도록 하여 팝업 겹침을 줄였다.
+- 재작성/문장검토/직접수정 뒤 교정 제안 기준을 현재 결과로 갱신해 오래된 제안이 새 결과를 덮어쓰지 않게 했다.
+- History snapshot에 suggestion baseline(issueBase)을 포함해 Undo/Redo 시 교정 기준도 함께 복원한다.
+- GitHub Actions YAML의 깨진 printf 줄바꿈을 복구하고 concurrency + preview readiness check를 추가했다.
+
+
+## v6.8.3 Cohesion & Integrity
+- 재작성 초안을 만든 뒤 기준 원본/결과가 바뀌면 stale draft로 판정하고 `결과에 적용`을 잠근다. 새 초안을 다시 생성해야 적용 가능하다.
+- 재작성 초안/옵션은 sessionStorage에 보관해 새로고침·버전 전환 뒤에도 복원하고, 기준 글이 달라졌으면 보존하되 적용은 잠근다.
+- Fact Lock에 모델/코드(M60 같은 영숫자 코드)를 추가하고, 충돌 가능성이 낮은 고유 임시 토큰을 사용한다. 240개를 초과하면 사실 보호를 위해 적용을 잠그고 문서 분할을 안내한다.
+- 로컬 재작성은 탐지기 우회 최적화가 아니라 사실 보존 + 문장/문단 구조 재설계 + 중복 정리를 목표로 한다. 특정 AI detector를 속이는 점수/목표는 만들지 않는다.
+- 구조 재작성/새 초안 모드는 고정 블록(해시태그/목록)을 보존하면서 일반 문장을 순서 보존 상태로 새 문단 크기로 재구성한다.
+- 태블릿 포함 980px 이하에서는 모든 플로팅 도구를 하단 시트로 통일하고 drag/resize를 끈다. 데스크톱 저장 위치가 화면 밖으로 나가면 viewport 안으로 자동 보정한다.
+- 문장 검토 다중 반영도 적용 후 팝업을 닫고 결과 정리본으로 이동한다.
+- 20MB 초과 텍스트 파일과 20만 자 초과 로컬 재작성은 브라우저 정지 위험을 줄이기 위해 분할 사용을 안내한다.
+- ESC는 컨텍스트 메뉴/작성 미리보기/가장 위의 플로팅 패널을 닫는다. Toast/재작성 검증은 aria-live를 사용한다.
+- CI는 `package-lock.json`이 있으면 `npm ci`, 없으면 `npm install`을 사용하고 browser-smoke 실패 시 preview server 진단을 로그로 남긴다.
+
+## 결과물 전달 규칙 (사용자 고정 선호)
+- 앞으로 개발 결과를 전달할 때 최종 답변 **하단에 항상 2개 파일을 제공한다.**
+- 1) `FULL_PROJECT_HANDOFF.zip`: 현재 전체 프로젝트 + PROJECT_HANDOFF를 포함하는 통 파일. 새 채팅/복구/기준본 용도.
+- 2) `Patch.zip`: 직전 기준본 위에 그대로 덮어쓸 실제 변경 파일 묶음. 평소 GitHub Desktop 작업용.
+- 두 ZIP 모두 `OPTION/**`을 절대 포함하거나 변경하지 않는다.
+- 패치 ZIP에 의미 없는 README/설명 파일은 넣지 않는다. 단, 사용자가 인수인계 갱신을 요청했거나 PROJECT_HANDOFF 자체가 변경된 버전은 변경된 PROJECT_HANDOFF 파일을 패치에도 포함한다.
+
+
+## v6.8.3 원본 그대로 쓰기
+- 재작성 스튜디오의 두 번째 핵심 탭은 `⌨ 원본 그대로 쓰기`. 작성 대상은 원본으로 고정한다.
+- 사용자가 앱 내부 textarea에서 실제 키보드로 입력한 문자열만 code point 기준으로 원본과 비교한다. 자동 키 입력/외부 앱 매크로/사람 입력 시뮬레이션은 구현하지 않는다.
+- paste/drop/copy/cut, Ctrl/Cmd+V/C/X, Shift+Insert, beforeinput의 paste/drop 계열, 비신뢰(synthetic) input 이벤트를 차단한다. 한글 IME composition, Backspace, 방향키, 선택 수정은 허용한다.
+- 원본과 100% 일치한 경우에만 **사용자가 직접 작성한 입력 문자열**을 결과에 반영한다. 원본 변수에서 자동 복제해서 결과를 채우는 경로는 제공하지 않는다.
+- 브라우저 환경에서 물리 하드웨어 입력을 암호학적으로 증명할 수는 없으므로, 표준 웹 입력 경로에서 자동 삽입을 최대한 차단하는 best-effort 검증 모드로 설명한다.

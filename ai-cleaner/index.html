@@ -6,6 +6,7 @@
 <title>곰같은여우의 AI 흔적 지우개</title>
 <meta name="description" content="브라우저에서 로컬로 동작하는 글 다듬기·이미지 출처 신호 검사 도구">
 <meta name="theme-color" content="#fff8f0">
+<meta name="referrer" content="no-referrer">
 <style id="bootCritical">html:not(.boot-ready) body{visibility:hidden}html{background:#fff8f0}</style>
 <script>
 (() => {
@@ -281,7 +282,7 @@
   <div class="floatBody rewriteBody">
     <div class="rewriteTabs" role="tablist" aria-label="재작성 도구">
       <button class="active" type="button" data-rewrite-tab="draft">✦ 새 초안</button>
-      <button type="button" data-rewrite-tab="verify">⌨ 직접 작성 검증</button>
+      <button type="button" data-rewrite-tab="verify">⌨ 원본 그대로 쓰기</button>
     </div>
 
     <div id="rewriteDraftPane">
@@ -294,7 +295,7 @@
       </div>
 
       <div class="factLockCard">
-        <div class="factLockHead"><div><b>🔒 Fact Lock</b><span class="sub">숫자·날짜·URL·이메일·인용구를 먼저 잠급니다.</span></div><span id="rewriteFactSummary" class="factStatus">잠금 준비</span></div>
+        <div class="factLockHead"><div><b>🔒 Fact Lock</b><span class="sub">숫자·날짜·URL·이메일·모델명 등 중요한 사실값을 먼저 잠급니다.</span></div><span id="rewriteFactSummary" class="factStatus">잠금 준비</span></div>
         <div id="rewriteFacts" class="factChips"><span class="sub">초안을 만들면 보호 항목을 확인할 수 있습니다.</span></div>
       </div>
 
@@ -305,19 +306,20 @@
       </div>
       <div class="rewriteProgress" id="rewriteProgress" hidden><div class="rewriteProgressTop"><span id="rewriteStage">준비</span><b id="rewritePercent">0%</b></div><div class="rewriteProgressTrack"><div id="rewriteProgressBar"></div></div></div>
       <textarea id="rewriteDraft" class="rewriteDraft" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false" placeholder="새 초안을 만들면 여기에 표시됩니다. 직접 수정한 뒤 결과에 적용할 수도 있습니다."></textarea>
-      <div id="rewriteValidation" class="rewriteValidation">아직 만든 초안이 없습니다.</div>
+      <div id="rewriteValidation" class="rewriteValidation" aria-live="polite">아직 만든 초안이 없습니다.</div>
     </div>
 
     <div id="rewriteVerifyPane" hidden>
-      <div class="rewriteNote"><b>직접 작성 검증</b><span>여기서는 실제로 사용자가 키보드로 입력한 내용만 원문과 비교합니다. 붙여넣기와 드롭은 차단됩니다.</span></div>
+      <div class="rewriteNote directOriginalNote"><b>⌨ 원본 그대로 쓰기</b><span>원본을 보면서 실제 키보드로 직접 입력합니다. 복사·붙여넣기·드롭·합성 입력은 차단하며, 100% 일치한 직접 작성본만 결과에 반영할 수 있습니다.</span></div>
       <div class="directToolbar">
-        <label><span>검증할 글</span><select id="directTarget"><option value="rewrite">재작성 초안</option><option value="output" selected>현재 결과</option><option value="original">원본</option></select></label>
+        <label><span>작성 대상</span><select id="directTarget" aria-label="작성 대상"><option value="original" selected>원본 그대로</option></select></label>
         <label class="check directHide"><input type="checkbox" id="directHideTarget"> 목표 글 가리기</label>
       </div>
-      <div class="directGuide" id="directGuide"><span class="sub">검증할 글을 선택하고 아래 입력창에서 직접 타이핑하세요.</span></div>
-      <textarea id="directTyped" class="directTyped" data-direct-typing="true" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false" placeholder="여기를 클릭하고 실제 키보드로 입력하세요."></textarea>
+      <div class="directInputBadge" id="directInputBadge" role="status" aria-live="polite"><b>직접 입력 전용</b><span>붙여넣기 · 드롭 · 복사 · 잘라내기 차단</span></div>
+      <div class="directGuide" id="directGuide"><span class="sub">원본을 보고 아래 입력창에서 직접 타이핑하세요.</span></div>
+      <textarea id="directTyped" class="directTyped" data-direct-typing="true" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false" placeholder="원본을 보면서 여기에 직접 입력하세요. 붙여넣기는 사용할 수 없습니다."></textarea>
       <div class="directStats"><span id="directProgress">0 / 0</span><span id="directAccuracy">정확도 —</span><span id="directStatus">대기</span></div>
-      <div class="rewriteActionRow"><button class="btn" id="directReset" type="button">처음부터</button><button class="btn primary" id="directCopy" type="button" disabled>검증 완료 & 복사</button></div>
+      <div class="rewriteActionRow"><button class="btn" id="directReset" type="button">처음부터</button><button class="btn primary" id="directCopy" type="button" disabled>직접 작성본 결과에 반영</button></div>
     </div>
   </div>
 </section>
@@ -344,7 +346,7 @@
   <button type="button" data-context-action="paste">붙여넣기</button>
   <button type="button" data-context-action="append">이어 붙여넣기</button>
 </div>
-<div class="appToast" id="appToast" hidden></div>
+<div class="appToast" id="appToast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
 
 </body>
 </html>

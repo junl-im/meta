@@ -7,6 +7,11 @@ test('AI Cleaner v6.8.2 core browser flow', async ({ page }) => {
   await page.setViewportSize({ width: 820, height: 900 });
   await expect.poll(async () => page.locator('#typingPreviewButton small').evaluate(el => getComputedStyle(el).transform)).toBe('none');
   await expect.poll(async () => page.locator('#typingPreviewButton').evaluate(el => getComputedStyle(el).flexDirection)).toBe('row');
+  await page.locator('#rewriteWidget').evaluate(el => { el.hidden=false; });
+  await page.locator('#rewriteWidget').click();
+  await expect(page.locator('#rewritePanel')).toBeVisible();
+  await expect.poll(async () => page.locator('#rewritePanel').evaluate(el => getComputedStyle(el).resize)).toBe('none');
+  await page.locator('[data-close-panel="rewritePanel"]').click();
 
   const input = page.locator('#input');
   const output = page.locator('#output');
@@ -32,6 +37,15 @@ test('AI Cleaner v6.8.2 core browser flow', async ({ page }) => {
   await expect(page.locator('#rewriteDraft')).toHaveValue(/19,900원/);
   await expect(page.locator('#rewriteFactSummary')).toContainText('잠금');
   await expect(page.locator('#rewriteApply')).toBeEnabled();
+  await page.locator('#rewriteSource').selectOption('original');
+  await page.locator('#rewriteGenerate').click();
+  await expect(page.locator('#rewriteApply')).toBeEnabled();
+  await input.fill('결론적으로 이 문장을 테스트합니다. 가격은 19,900원입니다. 모델은 M60입니다. 변경됨');
+  await expect(page.locator('#rewriteApply')).toBeDisabled();
+  await expect(page.locator('#rewriteValidation')).toContainText('기준 글이');
+  await page.locator('#rewriteGenerate').click();
+  await expect(page.locator('#rewriteDraft')).toHaveValue(/M60/);
+  await expect(page.locator('#rewriteApply')).toBeEnabled();
   await page.locator('#rewriteApply').click();
   await expect(output).toHaveValue(/19,900원/);
   await expect(page.locator('#rewritePanel')).toBeHidden();
@@ -41,6 +55,11 @@ test('AI Cleaner v6.8.2 core browser flow', async ({ page }) => {
   await page.locator('#rewriteWidget').click();
   await expect(page.locator('#rewritePanel')).toBeVisible();
   await page.locator('[data-rewrite-tab="verify"]').click();
+  // 원본 그대로 쓰기 defaults to original and blocks clipboard-style insertion.
+  await expect(page.locator('#directTarget')).toHaveValue('original');
+  await page.locator('#directTyped').focus();
+  await page.locator('#directTyped').evaluate(el => { const ev=new InputEvent('beforeinput',{bubbles:true,cancelable:true,inputType:'insertFromPaste',data:'PASTE'}); el.dispatchEvent(ev); });
+  await expect(page.locator('#directTyped')).toHaveValue('');
   await page.locator('#directTarget').selectOption('output');
   const target = await output.inputValue();
   await page.locator('#directTyped').pressSequentially(target.slice(0, Math.min(6,target.length)), { delay: 5 });

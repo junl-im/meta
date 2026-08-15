@@ -83,7 +83,13 @@ jobs:
           node-version: '24'
           package-manager-cache: false
       - name: Install Playwright test runner
-        run: npm install --ignore-scripts --no-audit --no-fund
+        shell: bash
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci --ignore-scripts --no-audit --no-fund
+          else
+            npm install --ignore-scripts --no-audit --no-fund
+          fi
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Start static preview
@@ -98,3 +104,10 @@ jobs:
           exit 1
       - name: Browser smoke test
         run: npm run test:e2e
+      - name: Preview diagnostics on failure
+        if: failure()
+        run: |
+          echo '--- preview server ---'
+          cat /tmp/ai-cleaner-http.log 2>/dev/null || true
+          echo '--- playwright output ---'
+          find test-results -maxdepth 3 -type f -print 2>/dev/null || true
