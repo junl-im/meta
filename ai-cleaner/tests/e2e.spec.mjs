@@ -87,6 +87,15 @@ test('rewrite draft locks immediately when original changes behind current-resul
   await expect(page.locator('#rewriteApply')).toBeDisabled();await expect(page.locator('#rewriteValidation')).toContainText('기준 글이');
 });
 
+test('rewrite source change cancels an in-flight draft transaction', async ({ page }) => {
+  await gotoReady(page);const input=page.locator('#input');await input.fill('결론적으로 생성 중 취소를 확인합니다. 가격은 19,900원입니다.');await page.locator('#analyze').click();
+  await page.locator('#rewriteWidget').click();await page.locator('#rewriteSource').selectOption('original');await page.locator('#rewriteGenerate').click();
+  await expect(page.locator('#rewritePanel')).toHaveAttribute('aria-busy','true');
+  await input.fill('결론적으로 생성 중 기준 글을 바꿨습니다. 가격은 19,900원입니다.');
+  await expect(page.locator('#rewritePanel')).toHaveAttribute('aria-busy','false');await expect(page.locator('#rewritePanelStatus')).toContainText('기준 글이 바뀌어 생성 작업을 취소했습니다.');
+  await expect(page.locator('#rewriteDraft')).toHaveValue('');await expect(page.locator('#rewriteApply')).toBeDisabled();
+});
+
 test('foundation flow keeps state, layout and rewrite tools coherent', async ({ page }) => {
   await gotoReady(page);
   await expect(page.locator('#versionBadge')).toHaveText('v'+APP_VERSION);
@@ -123,6 +132,8 @@ test('foundation flow keeps state, layout and rewrite tools coherent', async ({ 
   await page.locator('#rewriteGenerate').click();await expect(page.locator('#rewriteDraft')).not.toHaveValue('');
   await expect(page.locator('#rewriteDraft')).toHaveValue(/19,900원/);await expect(page.locator('#rewriteFactSummary')).toContainText('잠금');await expect(page.locator('#rewriteApply')).toBeEnabled();
   await page.locator('#rewriteSource').selectOption('original');await page.locator('#rewriteGenerate').click();
+  await expect(page.locator('#rewritePanel')).toHaveAttribute('aria-busy','true');await expect(page.locator('#rewritePanel')).toHaveAttribute('aria-busy','false');
+  await expect(page.locator('#rewriteDraft')).not.toHaveValue('');await expect(page.locator('#rewriteApply')).toBeEnabled();
   await input.fill('결론적으로 이 문장을 테스트합니다. 가격은 19,900원입니다. 모델은 M60입니다. 변경됨');
   await expect(page.locator('#rewriteApply')).toBeDisabled();await expect(page.locator('#rewriteValidation')).toContainText('기준 글이');
   await page.locator('#rewriteGenerate').click();await expect(page.locator('#rewriteDraft')).toHaveValue(/M60/);await expect(page.locator('#rewriteApply')).toBeEnabled();

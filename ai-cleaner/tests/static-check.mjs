@@ -126,6 +126,8 @@ if(!failures.length){
   ['floating dock stays switchable above panels',css.includes('floatingDock{position:fixed')&&css.includes('z-index:520')],
   ['e2e hidden typewriter speed setup',e2e.includes("typingPreviewSpeed').evaluate")&&!e2e.includes("typingPreviewSpeed').selectOption")],
   ['e2e panel switch coverage',e2e.includes("issuesPanel')).toBeHidden")],
+  ['e2e completed rewrite transaction wait',e2e.includes("#rewritePanel')).toHaveAttribute('aria-busy','true')")&&e2e.includes("#rewritePanel')).toHaveAttribute('aria-busy','false')")],
+  ['e2e in-flight rewrite source cancellation',e2e.includes('rewrite source change cancels an in-flight draft transaction')&&e2e.includes('기준 글이 바뀌어 생성 작업을 취소했습니다.')],
   ['product semver baseline',/^1\.\d+\.\d+$/.test(String(ver.version))&&String(ver.version)===String(pkg.version)]
  ];
  for(const [name,ok] of mobileChecks)ok?pass(name):fail(name);

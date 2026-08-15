@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "date": "2026-08-16",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -43,12 +43,12 @@
     "ai-cleaner/js/workers/text-analysis-worker.js"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.5.1",
-  "asset_version": "151",
+  "current_version": "1.5.2",
+  "asset_version": "152",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.5.1 cohesion & integrity stability audit: stale-result freshness boundary, rewrite transactions, BFCache/panel lifecycle, manual analyze UX",
+  "latestPatch": "1.5.2 browser regression alignment: completed rewrite stale-lock and in-flight source-change cancellation are tested as separate async transactions",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -120,7 +120,7 @@
     "ciPanelSwitchFix": true,
     "hiddenControlE2EFix": true
   },
-  "nextPhase": "1.6.0 next feature phase after 1.5.1 GitHub browser-smoke validation",
+  "nextPhase": "1.6.0 next feature phase after 1.5.2 GitHub browser-smoke validation",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -181,7 +181,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "151",
+  "assetVersion": "152",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -190,7 +190,7 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "140 passed / 0 failed",
+    "staticChecks": "142 passed / 0 failed",
     "moduleChecks": "PASS",
     "jsSyntax": "PASS",
     "workflowYaml": "PASS",
@@ -278,5 +278,13 @@
     "panelTriggerAriaExpandedSync": true,
     "lazyReviewCountRenderCohesion": true,
     "delivered150UsedAsPatchBaseline": true
+  },
+  "browserRegressionAlignment152": {
+    "runtimeLogicChanged": false,
+    "foundationWaitsForRewriteGenerationCompletion": true,
+    "completedDraftStaleLockCovered": true,
+    "inFlightSourceChangeCancellationCovered": true,
+    "asyncTransactionAssertionsSeparated": true,
+    "delivered151UsedAsPatchBaseline": true
   }
 }

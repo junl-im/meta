@@ -1,6 +1,6 @@
 {
-  "version": "1.5.1",
-  "assetVersion": "151",
+  "version": "1.5.2",
+  "assetVersion": "152",
   "channel": "stable",
-  "updateMode": "cohesion-freshness-rewrite-transaction-lifecycle-audit"
+  "updateMode": "browser-regression-alignment-rewrite-transaction-e2e"
 }
