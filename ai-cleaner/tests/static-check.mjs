@@ -30,6 +30,10 @@ if(!failures.length){
  /revealAppliedResult/.test(app)&&/closeAllPanels/.test(app)&&/refreshSuggestionBaseline/.test(app)&&/resultApplied/.test(css)?pass('apply focus flow','close panel + refresh suggestions + reveal result'):fail('apply focus flow','missing focus-flow guards');
  /rewritePanel.*toBeHidden|toBeHidden\(\)/.test(e2e)?pass('browser apply-close coverage','rewrite apply closes panel'):fail('browser apply-close coverage','missing');
 
+
+ /id="typingPreviewPanel"/.test(html)&&/class="floatPanel typingPreviewPanel"/.test(html)&&!/typingPreviewOverlay" id="typingPreview/.test(html)&&/FLOAT_PANEL_IDS=\['typingPreviewPanel'/.test(app)?pass('standalone typewriter panel','typewriter controls use shared floating panel system'):fail('standalone typewriter panel','result-local overlay still present or panel not registered');
+ /0x00AD/.test(textUtils+textEngine)&&/0x061C/.test(textUtils+textEngine)&&/결과 안전 제거 대상 0개/.test(app)?pass('visible-text post-write audit','SHY/ALM safe cleanup + zero-residue result audit'):fail('visible-text post-write audit','safe cleanup/audit missing');
+
  /generatedSourceStamp/.test(rewrite)&&/기준 글이 초안을 만든 뒤 바뀌었습니다/.test(rewrite)&&/ai-cleaner:text-changed/.test(app+rewrite)?pass('stale rewrite guard','source changes lock old draft'):fail('stale rewrite guard','missing');
  /SESSION_KEY='ai-cleaner-rewrite-session-v3'/.test(rewrite)&&/saveSession/.test(rewrite)&&/restoreSession/.test(rewrite)?pass('rewrite session recovery','draft + options survive reload'):fail('rewrite session recovery','missing');
  /FACT_LOCK_LIMIT=240/.test(rewrite)&&/모델\/코드/.test(rewrite)&&/uniqueFactToken/.test(rewrite)?pass('Fact Lock integrity','model codes + collision-safe tokens + cap'):fail('Fact Lock integrity','missing');
@@ -68,7 +72,10 @@ if(!failures.length){
  /revision:textStateStore\.revision/.test(app)&&/textStateStore\.touch\(\)/.test(app)?pass('state revision event boundary','text change events carry store revision'):fail('state revision event boundary','missing revision bridge');
  /splitGraphemesExact/.test(textUtils)&&!/function splitGraphemesExact\(/.test(app)?pass('shared text utilities','grapheme logic extracted'):fail('shared text utilities','grapheme helper duplicated');
  !/data-resulttab="xray"/.test(html)&&!/id="xrayPane"/.test(html)?pass('X-ray UI removal','diagnostic tab removed; technical info remains'):fail('X-ray UI removal','legacy X-ray UI still present');
- /sanitizeVisibleTypingSource/.test(textUtils)&&/AUTO_REMOVE_HIDDEN/.test(textUtils)&&/SPECIAL_SPACES/.test(textUtils)&&/preservedSensitive/.test(textUtils)?pass('visible-text sanitizer policy','safe hidden removal + space normalization + sensitive preservation'):fail('visible-text sanitizer policy','missing');
+ /sanitizeVisibleTypingSource/.test(textUtils)&&/LEGACY_V6_LAYER_A/.test(textUtils)&&/classifyTextCodePoint/.test(textUtils)&&/preservedSensitive/.test(textUtils)?pass('visible-text sanitizer policy','old-v6 Layer A inventory + safe cleanup + sensitive preservation'):fail('visible-text sanitizer policy','missing');
+ /ZERO WIDTH SPACE/.test(textUtils)&&/ZERO WIDTH NON-JOINER/.test(textUtils)&&/NO-BREAK SPACE/.test(textUtils)&&/old-v6-layer-a-safe-1\.2\.2/.test(textUtils)?pass('old-v6 Layer A inventory','named legacy entries absorbed into shared policy'):fail('old-v6 Layer A inventory','legacy inventory missing');
+ /textHygieneAudit/.test(app)&&/원본 발견/.test(app)&&/자동 정리/.test(app)&&/의미상 보존/.test(app)&&/결과 잔여/.test(app)?pass('technical hygiene audit counters','original / cleaned / preserved / residue split'):fail('technical hygiene audit counters','audit split missing');
+ /getTextHygienePolicy/.test(textUtils)&&/textHygieneAudit:audit/.test(app)?pass('JSON hygiene audit export','policy + audit included in report'):fail('JSON hygiene audit export','missing');
  /자동작성 원본 새로쓰기/.test(html+app)?pass('typewriter menu naming','자동작성 원본 새로쓰기'):fail('typewriter menu naming','missing');
  /@media\(max-width:420px\)[\s\S]*floatWidget>span:not\(\.widgetIcon\)\{display:inline/.test(css)?pass('mobile widget labels visible','names stay visible on narrow phones'):fail('mobile widget labels visible','labels still hidden');
  const mobileChecks=[
@@ -79,7 +86,7 @@ if(!failures.length){
   ['floating dock stays switchable above panels',css.includes('floatingDock{position:fixed')&&css.includes('z-index:520')],
   ['e2e hidden typewriter speed setup',e2e.includes("typingPreviewSpeed').evaluate")&&!e2e.includes("typingPreviewSpeed').selectOption")],
   ['e2e panel switch coverage',e2e.includes("issuesPanel')).toBeHidden")],
-  ['product semver baseline',String(ver.version)==='1.2.0'&&String(pkg.version)==='1.2.0']
+  ['product semver baseline',/^1\.\d+\.\d+$/.test(String(ver.version))&&String(ver.version)===String(pkg.version)]
  ];
  for(const [name,ok] of mobileChecks)ok?pass(name):fail(name);
 

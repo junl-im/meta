@@ -253,3 +253,24 @@
 - UI 변경 의도 없음: 모바일 compact panel, floating widget 명칭, `자동작성 원본 새로쓰기`, visible-text sanitizer 정책은 1.1.1과 동일하다.
 - 다음 구조 단계는 **1.3.0**에서 Diff/분석 계산의 Worker 경계를 준비하거나 render/controller 경계를 더 분리하는 방향. 먼저 1.2.0 browser-smoke가 실제 Push 환경에서 녹색인지 확인한다.
 - 결과물 전달 규칙은 계속 고정: 최종 답변 하단에 전체 통 프로젝트 ZIP + 직전 버전 기준 덮어쓰기 패치 ZIP 두 개를 제공하고 `OPTION/**`은 절대 포함/변경하지 않는다.
+
+
+## 1.2.1 Standalone Typewriter Panel / Visible-Text Result Audit
+- `자동작성 원본 새로쓰기` 진행 UI를 결과 카드 내부 overlay에서 제거하고 공통 `floatPanel` 시스템의 독립 `typingPreviewPanel`로 이동한다. 결과 textarea를 덮지 않으며 desktop drag/viewport clamp와 모바일 compact/expanded 정책을 공유한다.
+- Typewriter 실행 중 다른 floating widget을 잠가 작업 중 패널이 다른 도구로 바뀌는 충돌을 막는다. 닫기/ESC는 자동 작성을 중지하고 이전 결과를 복원한다.
+- 새로쓰기 source는 계속 raw 원본이 아니라 `sanitizeVisibleTypingSource()`의 visible-text projection이다. U+200B/BOM/BIDI controls뿐 아니라 U+00AD SOFT HYPHEN과 U+061C ARABIC LETTER MARK를 안전 제거 대상으로 포함한다.
+- NBSP 등 특수 공백은 일반 공백으로 정리한다. ZWJ/ZWNJ/WORD JOINER/Variation Selector/Unicode Tags처럼 실제 표시 형태에 영향을 줄 수 있는 의미 민감 문자는 계속 보존한다.
+- 완료 시 strict equality에 더해 결과를 visible sanitizer로 재검사하며, 안전 제거 대상/특수 공백 잔여가 0개일 때만 commit한다. 팝업에 `결과 안전 제거 대상 0개`를 표시해 원본 기술 진단과 최종 결과 상태를 구분한다.
+- `표준` 정리 강도는 안전한 숨은 표식 + 특수 공백 자동 정리가 기본이다. 이 기능은 특정 AI detector/provenance/watermark 우회용이 아니며 출처/보안 표식을 무조건 삭제하지 않는다.
+- 다음 구조 단계는 1.3.0 Modular Core Phase 3. UI 계약은 1.2.1을 기준으로 유지한다.
+
+
+## 1.2.2 Old-v6 Layer A Hygiene Inventory
+- 사용자 제공 `곰같은여우_ai_흔적지우개_v6.html`의 Layer A 문자 사전을 현재 공통 Unicode hygiene policy로 흡수한다. old-v6의 ZWSP/BOM/BIDI controls/특수 공백 항목명을 유지해 기술 정보에서 어떤 코드가 발견됐는지 명확히 보인다.
+- `core/text-utils.js`의 `classifyTextCodePoint()`가 단일 정책 소스다. Typewriter visible-text sanitizer와 `core/text-engine.js` 스캔이 같은 classifier를 사용해 서로 다른 정리 결과가 생기지 않게 한다.
+- old-v6는 ZWNJ/ZWJ/WORD JOINER/Variation Selector를 무조건 삭제했지만 1.2.2에서는 그렇게 하지 않는다. 문자 결합·이모지·줄바꿈 의미에 영향을 줄 수 있는 항목은 `의미 민감 문자`로 보존한다.
+- 안전 정리 대상은 ZWSP/BOM/BIDI formatting controls, SOFT HYPHEN, ARABIC LETTER MARK, 일반 비표시 control이며 특수 폭 공백은 ASCII space로 정규화한다. OGHAM SPACE MARK도 특수 공백 확장으로 포함한다.
+- 기술 정보 요약은 `원본 발견 / 자동 정리 / 의미상 보존 / 결과 잔여` 4개를 분리한다. `결과 잔여`는 현재 결과 문자열을 visible-text sanitizer로 다시 검사한 안전 제거/특수 공백 잔여 수다.
+- 진단 JSON에도 정책 버전과 동일 audit를 내보낸다.
+- old-v6 Layer B의 문체 패턴/생성형 표현 휴리스틱은 실제 삽입 워터마크로 간주해 자동 삭제하지 않는다. 텍스트 위생과 문체 편집을 분리한다.
+- 자동작성 원본 새로쓰기는 계속 `raw 원본 → visible-text projection → grapheme 단위 setRangeText → 결과 residue 0 검사` 순서다. 외부 키 이벤트/합성 입력은 사용하지 않는다.

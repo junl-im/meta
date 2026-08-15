@@ -1,18 +1,17 @@
 (() => {
 'use strict';
 const ns=window.AICleanerModules=window.AICleanerModules||{};
-const SPECIAL_SPACES=new Set([0xA0,0x1680,0x2000,0x2001,0x2002,0x2003,0x2004,0x2005,0x2006,0x2007,0x2008,0x2009,0x200A,0x202F,0x205F,0x3000]);
-const REMOVABLE=new Set([0x200B,0x200E,0x200F,0x202A,0x202B,0x202C,0x202D,0x202E,0x2066,0x2067,0x2068,0x2069,0xFEFF]);
-const SENSITIVE=new Set([0x200C,0x200D,0x2060]);
+if(typeof ns.classifyTextCodePoint!=='function')throw new Error('text-engine requires text-utils classifier');
 const LOOKALIKE={'а':'Cyrillic a','е':'Cyrillic e','о':'Cyrillic o','р':'Cyrillic er','с':'Cyrillic es','х':'Cyrillic ha','у':'Cyrillic u','і':'Cyrillic i'};
 const hex=cp=>'U+'+cp.toString(16).toUpperCase().padStart(4,'0');
 ns.createTextEngine=function createTextEngine(){
   function charInfo(ch,pos,profile='standard'){
-    const cp=ch.codePointAt(0),code=hex(cp);
-    if(SPECIAL_SPACES.has(cp))return{pos,code,name:'SPECIAL SPACE',type:'특수 공백',auto:profile==='standard',action:profile==='standard'?'일반 공백':'보존',replace:' '};
-    if(REMOVABLE.has(cp)||((cp<32&&ch!=='\n'&&ch!=='\t')||cp===127))return{pos,code,name:'INVISIBLE / CONTROL',type:'숨은 문자',auto:profile!=='inspect',action:profile==='inspect'?'보존':'삭제',replace:''};
-    if(SENSITIVE.has(cp)||(cp>=0xFE00&&cp<=0xFE0F)||(cp>=0xE0100&&cp<=0xE01EF)||(cp>=0xE0000&&cp<=0xE007F))return{pos,code,name:'MEANING-SENSITIVE UNICODE',type:'의미 민감 문자',auto:false,action:'보존',replace:ch,risk:'문자 결합·이모지·표현에 영향을 줄 수 있어 기본 보존'};
-    return null;
+    const info=ns.classifyTextCodePoint(ch);if(!info)return null;
+    const standard=profile==='standard',inspect=profile==='inspect';
+    const auto=!inspect&&(info.policy==='remove'||(standard&&info.policy==='space'));
+    const replace=info.policy==='space'?' ':info.policy==='remove'?'':ch;
+    let action='보존';if(auto)action=info.policy==='space'?'일반 공백':'삭제';
+    return{pos,code:info.code,name:info.name,type:info.type,auto,action,replace,policy:info.policy,legacyV6:!!info.legacyV6,risk:info.policy==='preserve'?info.reason:undefined};
   }
   function scan(text,{profile='standard'}={}){
     let clean='',all=[],auto=[],i=0;
@@ -21,7 +20,7 @@ ns.createTextEngine=function createTextEngine(){
       if(x){all.push({...x,char:ch});if(x.auto){auto.push({...x,char:ch});clean+=x.replace;}else clean+=ch;}else clean+=ch;
       i+=ch.length;
     }
-    return{clean,all,auto};
+    return{clean,all,auto,policyVersion:ns.TEXT_HYGIENE_POLICY_VERSION||'unknown'};
   }
   function homoglyphs(text){let out=[],i=0;for(const ch of String(text??'')){if(LOOKALIKE[ch])out.push({pos:i,char:ch,code:hex(ch.codePointAt(0)),name:LOOKALIKE[ch]});i+=ch.length;}return out;}
   function sentences(text){
@@ -47,7 +46,7 @@ ns.createTextEngine=function createTextEngine(){
   function reviewSuggestion(text){let s=String(text??'');s=s.replace(/자주 묻는 질문\s*\(FAQ\)/g,'자주 물어보시더라고요').replace(/결론적으로|요약하자면|정리하자면|마무리하자면/g,'그래서').replace(/\*\*([^*\n]+)\*\*/g,'$1').replace(/^(#{1,6})\s+(.+)$/gm,'$2');return s===text?'':s;}
   function countIssuesLight(text,{repeat=true}={}){text=String(text??'');let n=0;n+=(text.match(/자주 묻는 질문\s*\(FAQ\)/g)||[]).length;n+=(text.match(/결론적으로|요약하자면|정리하자면|마무리하자면/g)||[]).length;n+=(text.match(/\*\*[^*\n]+\*\*/g)||[]).length;n+=(text.match(/^#{1,6}\s+.+$/gm)||[]).length;n+=(text.match(/\n{3,}/g)||[]).length;if(repeat){const words=text.match(/[가-힣A-Za-z0-9]{2,}/g)||[],f=new Map();for(const w of words)f.set(w,(f.get(w)||0)+1);n+=[...f.values()].filter(v=>v>=6).length;}return n;}
   function codePointLength(text){let n=0;for(const _ of String(text??''))n++;return n;}
-  function analyze(text,{profile='standard',nfkc=false,repeat=true}={}){const source=String(text??''),sc=scan(source,{profile});let base=sc.clean;if(nfkc)base=base.normalize('NFKC');const hom=homoglyphs(base);return{source,scan:sc,base,homoglyphs:hom,issues:issues(base,{repeat}),score:hygiene(source,sc.all,hom)};}
+  function analyze(text,{profile='standard',nfkc=false,repeat=true}={}){const source=String(text??''),sc=scan(source,{profile});let base=sc.clean;if(nfkc)base=base.normalize('NFKC');const hom=homoglyphs(base);return{source,scan:sc,base,homoglyphs:hom,issues:issues(base,{repeat}),score:hygiene(source,sc.all,hom),policyVersion:sc.policyVersion};}
   return{charInfo,scan,homoglyphs,sentences,issues,sentenceSignals,hygiene,reviewSuggestion,countIssuesLight,codePointLength,analyze};
 };
 })();

@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "date": "2026-08-15",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -37,12 +37,12 @@
     "ai-cleaner/js/features/file-import.js"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.2.0",
-  "asset_version": "120",
+  "current_version": "1.2.2",
+  "asset_version": "122",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.2.0 modular core phase 2: stable state store, text engine, file import service, update manager extracted",
+  "latestPatch": "1.2.2 old-v6 Layer A shared hygiene inventory + four-way technical audit",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -78,7 +78,10 @@
     "exactVerification": true,
     "safeHiddenAutoRemoval": true,
     "specialSpaceNormalization": true,
-    "meaningSensitiveUnicodePreserved": true
+    "meaningSensitiveUnicodePreserved": true,
+    "standaloneFloatingPanel": true,
+    "postWriteSafeResidueAudit": true,
+    "policyVersion": "old-v6-layer-a-safe-1.2.2"
   },
   "foundationAudit": {
     "duplicateIssueRuleFixed": true,
@@ -111,7 +114,7 @@
     "ciPanelSwitchFix": true,
     "hiddenControlE2EFix": true
   },
-  "nextPhase": "1.3.0 modular core phase 3 / worker-ready computation boundary after 1.2.0 browser-smoke validation",
+  "nextPhase": "1.3.0 modular core phase 3 after 1.2.2 browser-smoke validation",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -147,5 +150,21 @@
     "textEngine": true,
     "fileImportService": true,
     "updateManager": true
+  },
+  "textHygiene": {
+    "policyVersion": "old-v6-layer-a-safe-1.2.2",
+    "oldV6LayerAInventory": true,
+    "sharedClassifier": true,
+    "safeHiddenAutoRemoval": true,
+    "specialSpaceNormalization": true,
+    "meaningSensitiveUnicodePreserved": true,
+    "technicalCounters": [
+      "originalFound",
+      "autoCleaned",
+      "meaningPreserved",
+      "resultResidue"
+    ],
+    "jsonAuditExport": true,
+    "layerBStylePatternsNotTreatedAsWatermarks": true
   }
 }

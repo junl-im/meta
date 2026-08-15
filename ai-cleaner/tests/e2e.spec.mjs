@@ -11,16 +11,21 @@ test.beforeEach(async ({ page }) => {
 
 test('original auto typewriter writes visible text and removes safe hidden characters', async ({ page }) => {
   await page.goto(BASE,{waitUntil:'domcontentloaded'});
-  const source='가\u200B나다\nABC🙂e\u0301\u00A0끝';
-  const expected='가나다\nABC🙂e\u0301 끝';
+  const source='가\u200B나다\u00AD\u061C\nABC🙂e\u0301\u00A0끝👩‍💻';
+  const expected='가나다\nABC🙂e\u0301 끝👩‍💻';
   await page.locator('#input').fill(source);
   await page.locator('#typingPreviewSpeed').evaluate(el=>{el.value='0';el.dispatchEvent(new Event('change',{bubbles:true}));});
   await page.locator('#typingPreviewButton').click();
+  await expect(page.locator('#typingPreviewPanel')).toBeVisible();
+  expect(await page.locator('#typingPreviewPanel').evaluate(el=>!!el.closest('#cleanedPane'))).toBeFalsy();
   await expect(page.locator('#input')).toHaveJSProperty('readOnly',true);
   await expect(page.locator('#cleanProfile')).toBeDisabled();
   await expect(page.locator('#output')).toHaveValue(expected,{timeout:7000});
-  await expect(page.locator('#output')).not.toHaveValue(/\u200B|\u00A0/);
+  await expect(page.locator('#output')).not.toHaveValue(/\u200B|\u00AD|\u061C|\u00A0/);
+  await expect(page.locator('#output')).toHaveValue(/👩‍💻$/);
+  await expect(page.locator('#typingPreviewText')).toContainText('결과 안전 제거 대상 0개',{timeout:7000});
   await expect(page.locator('#output')).toHaveAttribute('data-typewriter-verified','true',{timeout:7000});
+  await page.locator('#techWidget').click();await expect(page.locator('#techSummary')).toContainText('원본 발견');await expect(page.locator('#techSummary')).toContainText('결과 잔여 0');
   await expect(page.locator('#input')).toHaveJSProperty('readOnly',false);
   await expect(page.locator('#cleanProfile')).toBeEnabled();
 });
