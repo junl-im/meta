@@ -1,6 +1,7 @@
 (() => {
 'use strict';
-const ns=window.AICleanerModules=window.AICleanerModules||{};
+const root=typeof window!=='undefined'?window:globalThis;
+const ns=root.AICleanerModules=root.AICleanerModules||{};
 if(typeof ns.classifyTextCodePoint!=='function')throw new Error('text-engine requires text-utils classifier');
 const LOOKALIKE={'а':'Cyrillic a','е':'Cyrillic e','о':'Cyrillic o','р':'Cyrillic er','с':'Cyrillic es','х':'Cyrillic ha','у':'Cyrillic u','і':'Cyrillic i'};
 const hex=cp=>'U+'+cp.toString(16).toUpperCase().padStart(4,'0');

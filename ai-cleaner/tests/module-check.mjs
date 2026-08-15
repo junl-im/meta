@@ -7,7 +7,7 @@ const here=path.dirname(fileURLToPath(import.meta.url));
 const root=path.resolve(here,'..');
 const files=[
   'js/core/event-bus.js','js/core/history-store.js','js/core/work-lock.js','js/core/text-utils.js',
-  'js/core/state-store.js','js/core/text-engine.js','js/core/diff-engine.js','js/services/analysis-coordinator.js','js/services/update-manager.js',
+  'js/core/state-store.js','js/core/text-engine.js','js/core/diff-engine.js','js/services/analysis-worker-adapter.js','js/services/analysis-coordinator.js','js/services/update-manager.js',
   'js/ui/panel-manager.js','js/ui/diff-view.js','js/features/file-import.js','js/features/typewriter-engine.js'
 ];
 const queue=[];
@@ -60,6 +60,24 @@ function assert(ok,msg){if(!ok)throw new Error(msg);}
   const d=M.createDiffEngine({splitGraphemes:M.splitGraphemesExact,maxHunks:2});const same=d.build('가🙂','가🙂');assert(same.mode==='same'&&same.count===0,'diff same-state failed');const changed=d.build('가🙂\n둘','가😺\n둘\n셋');assert(changed.count>=1&&changed.displayHunks.length<=2,'diff hunk build failed');const parts=d.edgeParts('가🙂나다','가😺나다');assert(parts.before.change==='🙂'&&parts.after.change==='😺','grapheme-safe diff edge failed');
 }
 {
-  const scheduled=[];const cleared=[];let now=0,results=[];const c=M.createAnalysisCoordinator({executor:(text)=>text.toUpperCase(),setTimer:fn=>(scheduled.push(fn),scheduled.length),clearTimer:id=>cleared.push(id),idle:null,now:()=>++now});c.schedule('old',{}, {onResult:r=>results.push(r)});c.schedule('new',{}, {onResult:r=>results.push(r)});scheduled[0]?.();scheduled[1]?.();assert(results.length===1&&results[0]==='NEW','analysis coordinator must discard stale schedule');const sync=c.runNow('sync');assert(sync.result==='SYNC'&&!c.pending,'analysis coordinator runNow failed');
+  class FakeWorker{
+    static instances=[];
+    constructor(url){this.url=url;this.messages=[];this.terminated=false;FakeWorker.instances.push(this);}
+    postMessage(msg){this.messages.push(msg);}
+    terminate(){this.terminated=true;}
+    respond(index,result){const msg=this.messages[index];this.onmessage?.({data:{id:msg.id,ok:true,result}});}
+    fail(index,message='boom'){const msg=this.messages[index];this.onmessage?.({data:{id:msg.id,ok:false,error:message}});}
+  }
+  let fallbackCalls=0;
+  const adapter=M.createAnalysisWorkerAdapter({workerUrl:'worker.js?v=140',WorkerCtor:FakeWorker,minChars:5,fallbackExecutor:text=>{fallbackCalls++;return{text,from:'main'};}});
+  const short=await adapter.analyze('abc');assert(short.from==='main'&&fallbackCalls===1,'short analysis should stay on main fallback path');
+  const pending=adapter.analyze('123456');const fw=FakeWorker.instances[0];assert(fw&&fw.messages.length===1&&adapter.pendingCount===1,'long analysis should be posted to worker');fw.respond(0,{text:'123456',from:'worker'});const workerResult=await pending;assert(workerResult.from==='worker'&&adapter.getStats().workerSuccess===1,'worker result routing failed');
+  const fallbackPending=adapter.analyze('abcdef');fw.fail(1);const fallbackResult=await fallbackPending;assert(fallbackResult.from==='main'&&adapter.getStats().workerErrors===1,'worker message failure should fall back to main executor');
+  const cancelled=adapter.analyze('ghijkl').catch(e=>e.code);assert(adapter.cancelPending()===true,'pending worker job should be cancellable');assert(await cancelled==='ANALYSIS_CANCELLED'&&fw.terminated,'worker cancel should terminate in-flight worker');
 }
-console.log('PASS modular core phase 3 stability + text hygiene inventory unit checks');
+{
+  const scheduled=[];let now=0,results=[];
+  const c=M.createAnalysisCoordinator({executor:async text=>text.toUpperCase(),syncExecutor:text=>text.toUpperCase(),setTimer:fn=>(scheduled.push(fn),scheduled.length),clearTimer:()=>{},idle:null,now:()=>++now});
+  c.schedule('old',{}, {onResult:r=>results.push(r)});c.schedule('new',{}, {onResult:r=>results.push(r)});scheduled[0]?.();scheduled[1]?.();await new Promise(r=>setTimeout(r,0));assert(results.length===1&&results[0]==='NEW','async analysis coordinator must discard stale schedule');const sync=c.runNow('sync');assert(sync.result==='SYNC'&&!c.pending,'analysis coordinator runNow failed');
+}
+console.log('PASS modular core phase 4 worker-safe analysis + stability + text hygiene unit checks');

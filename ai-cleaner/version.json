@@ -1,6 +1,6 @@
 {
-  "version": "1.3.1",
-  "assetVersion": "131",
+  "version": "1.4.0",
+  "assetVersion": "140",
   "channel": "stable",
-  "updateMode": "modular-core-phase-3-stability-audit-semver-guard-lazy-retry-idle-pause"
+  "updateMode": "worker-safe-live-analysis-adapter-with-main-thread-fallback"
 }

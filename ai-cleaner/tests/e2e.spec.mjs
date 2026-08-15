@@ -131,3 +131,18 @@ test('mobile compact panels open small and expand on demand', async ({ page }) =
   await size.click();
   await expect(panel).not.toHaveClass(/mobileExpanded/);
 });
+
+test('long live analysis runs through worker-safe adapter', async ({ page }) => {
+  await page.goto(BASE,{waitUntil:'domcontentloaded'});
+  const longText=('긴 문장 자동 분석 테스트입니다. 숨은 문자\u200B도 정리합니다. ').repeat(180);
+  expect(longText.length).toBeGreaterThan(6000);
+  await page.locator('#input').fill(longText);
+  await expect(page.locator('#output')).not.toHaveValue('',{timeout:10000});
+  const info=await page.evaluate(()=>({
+    supported:window.AICleanerApp.analysisWorker.workerSupported,
+    stats:window.AICleanerApp.analysisWorker.getStats()
+  }));
+  if(info.supported)expect(info.stats.workerSuccess).toBeGreaterThanOrEqual(1);
+  else expect(info.stats.fallbackRuns).toBeGreaterThanOrEqual(1);
+  await expect(page.locator('#output')).not.toHaveValue(/\u200B/);
+});

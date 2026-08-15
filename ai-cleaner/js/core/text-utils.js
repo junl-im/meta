@@ -1,6 +1,7 @@
 (() => {
 'use strict';
-const ns=window.AICleanerModules=window.AICleanerModules||{};
+const root=typeof window!=='undefined'?window:globalThis;
+const ns=root.AICleanerModules=root.AICleanerModules||{};
 ns.splitGraphemesExact=function splitGraphemesExact(text){
   const value=String(text??'');
   if(typeof Intl!=='undefined'&&Intl.Segmenter){try{return[...new Intl.Segmenter(undefined,{granularity:'grapheme'}).segment(value)].map(x=>x.segment);}catch(_){}}

@@ -67,7 +67,9 @@ jobs:
           node --check ai-cleaner/js/core/state-store.js
           node --check ai-cleaner/js/core/text-engine.js
           node --check ai-cleaner/js/core/diff-engine.js
+          node --check ai-cleaner/js/services/analysis-worker-adapter.js
           node --check ai-cleaner/js/services/analysis-coordinator.js
+          node --check ai-cleaner/js/workers/text-analysis-worker.js
           node --check ai-cleaner/js/services/update-manager.js
           node --check ai-cleaner/js/ui/panel-manager.js
           node --check ai-cleaner/js/ui/diff-view.js

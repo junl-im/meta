@@ -299,3 +299,20 @@
 - pagehide에서 live analysis 예약과 update polling을 정리한다.
 - PROJECT_STATE runtime/handoff 버전 consistency를 static-check에서 검사한다.
 - 다음 구조 단계는 1.4.0 Worker-safe Analysis Adapter. 먼저 1.3.1 browser-smoke를 확인한다.
+
+## 1.4.0 Worker-safe Analysis
+- 외부 UI 계약은 1.3.1과 동일하다. 이번 버전은 장문 자동분석 계산 경계를 Worker로 실제 이전하는 성능/구조 패치다.
+- `services/analysis-worker-adapter.js`가 Worker lifecycle, request routing, cancel, main-thread fallback을 소유한다. 기본 Worker 임계값은 6,000자(UTF-16 length 기준)다.
+- `workers/text-analysis-worker.js`는 `core/text-utils.js`와 `core/text-engine.js`를 `importScripts()`로 재사용한다. Worker 전용 분석 규칙 복제본을 두지 않는다.
+- `text-utils.js`/`text-engine.js`는 `globalThis` 호환이다. 동일 Unicode hygiene policy와 교정 규칙이 window/Worker 양쪽에 적용된다.
+- `analysis-coordinator.js`는 async executor를 지원하며 token 기반 latest-only guard를 Promise 완료 후에도 검사한다. 이전 입력 결과가 새 입력을 덮지 않는다.
+- 입력 중 자동분석은 장문일 때 Worker를 사용한다. 수동 즉시 분석과 Typewriter 원본 metadata sync는 순서 의존성을 피하기 위해 sync executor를 유지한다.
+- Worker를 사용할 수 없거나 Worker가 실패하면 main-thread `textEngine.analyze()`로 자동 fallback한다. 기능 사용 자체가 Worker 지원 여부에 의존하지 않는다.
+- 새 입력으로 stale Worker 작업이 생기면 pending Worker를 terminate한다. pagehide에서도 Worker를 종료한다.
+- 다음 권장 단계는 1.4.1에서 실제 GitHub Actions browser-smoke 결과를 기준으로 Worker/브라우저 안정성 점검 후, 필요하면 threshold/상태 표시를 미세 조정한다.
+
+### 1.4.0 validation note
+- Static/architecture: 117 passed / 0 failed.
+- Module unit checks, all JavaScript syntax checks, and GitHub Actions YAML parse pass.
+- Browser E2E now includes a >6,000-character live-analysis case that verifies Worker success when supported and fallback otherwise.
+- Local Playwright was not claimed as passed: `npm install --ignore-scripts --no-audit --no-fund` timed out at 120 seconds in this build environment. `node_modules` and `package-lock.json` were removed; verify `browser-smoke` after push.

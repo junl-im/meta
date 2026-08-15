@@ -4,7 +4,7 @@
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 const Modules=window.AICleanerModules||{};
-const requiredModules=['createEventBus','createHistoryStore','createWorkLock','splitGraphemesExact','sanitizeVisibleTypingSource','classifyTextCodePoint','createTextStateStore','createTextEngine','createDiffEngine','createAnalysisCoordinator','createFileImportService','createUpdateManager','createPanelManager','createDiffView','createTypewriterEngine'];
+const requiredModules=['createEventBus','createHistoryStore','createWorkLock','splitGraphemesExact','sanitizeVisibleTypingSource','classifyTextCodePoint','createTextStateStore','createTextEngine','createDiffEngine','createAnalysisWorkerAdapter','createAnalysisCoordinator','createFileImportService','createUpdateManager','createPanelManager','createDiffView','createTypewriterEngine'];
 const missingModules=requiredModules.filter(name=>typeof Modules[name]!=='function');
 if(missingModules.length)throw new Error('AI Cleaner core modules missing: '+missingModules.join(', '));
 const eventBus=Modules.createEventBus();
@@ -15,11 +15,20 @@ const textStateStore=Modules.createTextStateStore();
 const state=textStateStore.state;
 const textEngine=Modules.createTextEngine();
 const fileImport=Modules.createFileImportService();
-const analysisCoordinator=Modules.createAnalysisCoordinator({executor:(text,options)=>textEngine.analyze(text,options)});
 
 const APP_META=window.__AI_CLEANER_VERSION__||{};
 const APP_VERSION=String(APP_META.version||'local');
 const ASSET_VERSION=encodeURIComponent(String(APP_META.assetVersion||APP_META.version||Date.now()));
+const analysisWorker=Modules.createAnalysisWorkerAdapter({
+  workerUrl:`js/workers/text-analysis-worker.js?v=${ASSET_VERSION}`,
+  fallbackExecutor:(text,options)=>textEngine.analyze(text,options),
+  minChars:6000
+});
+const analysisCoordinator=Modules.createAnalysisCoordinator({
+  executor:(text,options)=>analysisWorker.analyze(text,options),
+  syncExecutor:(text,options)=>textEngine.analyze(text,options),
+  onCancel:()=>analysisWorker.cancelPending()
+});
 const lazyScripts=new Map();
 function loadLazyScript(src){
   if(lazyScripts.has(src))return lazyScripts.get(src);
@@ -530,7 +539,7 @@ $$('[data-resulttab]').forEach(t=>t.onclick=()=>activateResultTab(t.dataset.resu
 $$('[data-tool]').forEach(b=>b.onclick=()=>{$$('[data-tool]').forEach(x=>x.classList.toggle('active',x===b));$('#textTool').classList.toggle('hidden',b.dataset.tool!=='text');$('#imageTool').classList.toggle('hidden',b.dataset.tool!=='image');syncWidgets();});
 
 window.AICleanerApp={
-  version:APP_VERSION,assetVersion:ASSET_VERSION,showToast,configureEditors,eventBus,workLock,historyStore,textStateStore,textEngine,diffEngine,diffView,analysisCoordinator,fileImport,updateManager,panelManager,typewriterEngine,
+  version:APP_VERSION,assetVersion:ASSET_VERSION,showToast,configureEditors,eventBus,workLock,historyStore,textStateStore,textEngine,diffEngine,diffView,analysisWorker,analysisCoordinator,fileImport,updateManager,panelManager,typewriterEngine,
   getText(kind='output'){if(kind==='original')return $('#input').value||'';if(!$('#output').value&&$('#input').value.trim())analyze(true);return $('#output').value||state.working||'';},
   commitProgressiveResult(text,label='자동작성 원본 새로쓰기'){
     const next=String(text??''),out=$('#output');if(out.value!==next)return false;
@@ -557,5 +566,5 @@ dz.addEventListener('drop',e=>{const f=e.dataTransfer&&e.dataTransfer.files&&e.d
 
 applyVersionUi();configureEditors();renderStats();syncWidgets();updateManager.restorePending();
 updateManager.start({initialDelay:5000,interval:120000});
-window.addEventListener('pagehide',()=>{analysisCoordinator.cancel();updateManager.stop();if(typewriterEngine.running)typewriterEngine.stop();});
+window.addEventListener('pagehide',()=>{analysisCoordinator.cancel();analysisWorker.terminate();updateManager.stop();if(typewriterEngine.running)typewriterEngine.stop();});
 })();
