@@ -92,3 +92,23 @@
 5. `version.json`, HTML app-version, APP_VERSION 일치.
 6. 모바일 760px 이하에서 팝업은 하단 시트, 본문 overflow 정상.
 7. GitHub Pages 루트 주소에서 `/ai-cleaner/` 진입 정상.
+
+
+## v6.7 completion patch
+- version.json is now the runtime version source; HTML boot loads CSS/JS assets with assetVersion.
+- open-page update checks preserve input/output/settings in sessionStorage before cache-busting reload, then restore them.
+- detailed diagnostics are collapsed by default.
+- result editing has step Undo/Redo history and an on-demand line-based diff tab.
+- Playwright browser smoke tests were added to GitHub Actions; Pages deployment remains branch-based and separate.
+- OPTION/** remains protected and must not be modified.
+- Synthetic keystroke/retyping automation remains intentionally excluded; typing preview is visual-only.
+
+
+## v6.8 재작성 스튜디오
+- 기존 원본/결과 중심 UI를 유지하고 `✦ 새 글 재작성` 플로팅 위젯을 추가.
+- `rewrite-studio.js`는 위젯을 누를 때만 lazy-load. 이미지 분석 엔진도 파일 선택 시 lazy-load.
+- 로컬 재작성 엔진: 가볍게/구조/새 초안, 문체 방향, 길이 옵션. 의미 기반 원격 AI 모델은 사용하지 않으며 새로운 사실을 임의 생성하지 않음.
+- Fact Lock: 숫자, 날짜, URL, 이메일, 인용구를 보호하고 초안에서 누락되면 결과 적용을 막음.
+- 직접 작성 검증: 사용자가 앱 내부 textarea에 물리 키보드로 입력한 내용을 code point 기준 비교. 한글 IME composition 대응. paste/drop 차단.
+- 외부 사이트/앱으로 합성 키 입력을 보내는 매크로/재타이핑 자동화는 구현하지 않음.
+- 재작성 결과 적용은 기존 Undo/Redo 및 변경 비교 히스토리에 기록.

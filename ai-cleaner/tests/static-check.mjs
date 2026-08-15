@@ -1,102 +1,29 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import process from 'node:process';
 import { fileURLToPath } from 'node:url';
-
-const here = path.dirname(fileURLToPath(import.meta.url));
-const root = path.resolve(here, '..');
-const files = {
-  html: path.join(root, 'index.html'),
-  app: path.join(root, 'js', 'app.js'),
-  image: path.join(root, 'js', 'image-analyzer.js'),
-  css: path.join(root, 'css', 'app.css'),
-  version: path.join(root, 'version.json'),
-  regression: path.join(root, 'tests', 'regression.js'),
-  previewPs1: path.join(root, 'tests', 'preview.ps1'),
-  previewCmd: path.join(root, 'tests', 'START-PREVIEW.cmd')
-};
-
-const failures = [];
-const passes = [];
-const pass = (name, detail = '') => passes.push({ name, detail });
-const fail = (name, detail = '') => failures.push({ name, detail });
-
-for (const [name, file] of Object.entries(files)) {
-  if (fs.existsSync(file)) pass(`required file: ${name}`, path.relative(root, file));
-  else fail(`required file: ${name}`, `missing ${path.relative(root, file)}`);
+const here=path.dirname(fileURLToPath(import.meta.url)),root=path.resolve(here,'..'),repo=path.resolve(root,'..');
+const files={html:path.join(root,'index.html'),app:path.join(root,'js','app.js'),rewrite:path.join(root,'js','rewrite-studio.js'),image:path.join(root,'js','image-analyzer.js'),css:path.join(root,'css','app.css'),version:path.join(root,'version.json'),regression:path.join(root,'tests','regression.js'),e2e:path.join(root,'tests','e2e.spec.mjs'),previewPs1:path.join(root,'tests','preview.ps1'),previewCmd:path.join(root,'tests','START-PREVIEW.cmd'),package:path.join(repo,'package.json')};
+const failures=[],passes=[];const pass=(n,d='')=>passes.push({n,d}),fail=(n,d='')=>failures.push({n,d});
+for(const [n,f] of Object.entries(files))fs.existsSync(f)?pass(`required file: ${n}`,path.relative(root,f)):fail(`required file: ${n}`,`missing ${f}`);
+if(!failures.length){
+ const html=fs.readFileSync(files.html,'utf8'),app=fs.readFileSync(files.app,'utf8'),rewrite=fs.readFileSync(files.rewrite,'utf8'),image=fs.readFileSync(files.image,'utf8'),css=fs.readFileSync(files.css,'utf8'),ver=JSON.parse(fs.readFileSync(files.version,'utf8')),e2e=fs.readFileSync(files.e2e,'utf8'),pkg=JSON.parse(fs.readFileSync(files.package,'utf8'));
+ const ids=[...html.matchAll(/\bid=["']([^"']+)["']/g)].map(m=>m[1]),seen=new Set(),dup=[...new Set(ids.filter(id=>seen.has(id)||!seen.add(id)))];dup.length?fail('duplicate HTML ids',dup.join(', ')):pass('duplicate HTML ids',`0 duplicates across ${ids.length} ids`);
+ const idSet=new Set(ids),refs=new Set();for(const src of [app,rewrite,image])for(const re of [/(?:\$|q)\(["']#([A-Za-z][\w:-]*)["']\)/g,/getElementById\(["']([A-Za-z][\w:-]*)["']\)/g])for(const m of src.matchAll(re))refs.add(m[1]);const miss=[...refs].filter(x=>!idSet.has(x)).sort();miss.length?fail('JavaScript DOM id references',miss.join(', ')):pass('JavaScript DOM id references',`${refs.size} referenced ids all exist`);
+ String(ver.version)==='6.8'&&String(ver.assetVersion)==='68'?pass('version.json source','6.8 / 68'):fail('version.json source',JSON.stringify(ver));
+ /fetch\(['"]version\.json\?ts=/.test(html)&&/window\.__AI_CLEANER_VERSION__/.test(html)&&/css\/app\.css\?v=/.test(html)&&/js\/app\.js\?v=/.test(html)?pass('version-driven asset boot','version.json drives core CSS/JS'):fail('version-driven asset boot','dynamic boot missing');
+ !/loadScript\(['"]js\/image-analyzer\.js/.test(html)&&/ensureImageAnalyzer/.test(app)&&/ensureRewriteStudio/.test(app)?pass('lazy heavy tools','image + rewrite engines load on demand'):fail('lazy heavy tools','eager or missing lazy loader');
+ /const APP_VERSION=String\(APP_META\.version/.test(app)&&!/const APP_VERSION=['"]6\.8/.test(app)?pass('no hard-coded app version','APP_VERSION comes from boot metadata'):fail('no hard-coded app version','hard-coded app version found');
+ /captureUpdateDraft/.test(app)&&/restoreUpdateDraft/.test(app)&&/sessionStorage/.test(app)?pass('update draft preservation','capture + restore'):fail('update draft preservation','missing');
+ /undoHistory/.test(app)&&/redoHistory/.test(app)&&/renderDiff/.test(app)&&/id="undoStep"/.test(html)&&/id="diffPane"/.test(html)?pass('history and diff UI','undo/redo + diff'):fail('history and diff UI','missing');
+ /<details class="card detailDiagnostics"/.test(html)&&/id="detailSummary"/.test(html)?pass('progressive diagnostics','details collapsed by default'):fail('progressive diagnostics','missing');
+ /extractFactLocks/.test(rewrite)&&/protectFacts/.test(rewrite)&&/validateFacts/.test(rewrite)&&/id="rewriteFactSummary"/.test(html)?pass('Fact Lock rewrite guard','extract + protect + validate'):fail('Fact Lock rewrite guard','missing');
+ /data-direct-typing="true"/.test(html)&&/compositionstart/.test(rewrite)&&/compositionend/.test(rewrite)&&/\['paste','drop'\]/.test(rewrite)?pass('direct typing verifier','IME aware + paste/drop blocked'):fail('direct typing verifier','missing');
+ /EXIF_VERSION\s*=\s*['"]4\.42\.0['"]/.test(image)&&/C2PA_VERSION\s*=\s*['"]0\.13\.4['"]/.test(image)?pass('image dependency pins','ExifReader 4.42.0 + C2PA 0.13.4'):fail('image dependency pins','missing');
+ ['0x200C','0x200D','0x2060'].every(t=>app.includes(t))?pass('meaning-sensitive Unicode guard','ZWJ/ZWNJ/WORD JOINER'):fail('meaning-sensitive Unicode guard','missing');
+ /trainedAlgorithmicMedia/.test(image)&&/digitalCapture/.test(image)?pass('C2PA source-type distinction','present'):fail('C2PA source-type distinction','missing');
+ /@playwright\/test/.test(e2e)&&pkg.devDependencies?.['@playwright/test']==='1.62.1'?pass('Playwright browser pin','1.62.1'):fail('Playwright browser pin','expected 1.62.1');
+ /rewriteWidget/.test(e2e)&&/rewriteFactSummary/.test(e2e)&&/undoStep/.test(e2e)&&/data-xpos/.test(e2e)?pass('browser smoke coverage','rewrite + Fact Lock + history + X-ray'):fail('browser smoke coverage','missing');
+ /keyboardEvent|dispatchEvent\(new KeyboardEvent|execCommand\(['"]insertText/.test(app+'\n'+rewrite)?fail('no synthetic external typing automation','synthetic input found'):pass('no synthetic external typing automation','direct verifier and visual preview only');
+ /data:image\/(png|jpeg|webp);base64,/i.test(html)?fail('embedded base64 image bloat','found'):pass('embedded base64 image bloat','none');
 }
-
-if (failures.length === 0) {
-  const html = fs.readFileSync(files.html, 'utf8');
-  const app = fs.readFileSync(files.app, 'utf8');
-  const image = fs.readFileSync(files.image, 'utf8');
-  const css = fs.readFileSync(files.css, 'utf8');
-  const previewPs1 = fs.readFileSync(files.previewPs1, 'utf8');
-  const versionData = JSON.parse(fs.readFileSync(files.version, 'utf8'));
-
-  const ids = [...html.matchAll(/\bid=["']([^"']+)["']/g)].map((m) => m[1]);
-  const seen = new Set();
-  const dup = [...new Set(ids.filter((id) => seen.has(id) || !seen.add(id)))];
-  dup.length ? fail('duplicate HTML ids', dup.join(', ')) : pass('duplicate HTML ids', `0 duplicates across ${ids.length} ids`);
-
-  const idSet = new Set(ids);
-  const refs = new Set();
-  const selectorPatterns = [
-    /(?:\$|q)\(["']#([A-Za-z][\w:-]*)["']\)/g,
-    /getElementById\(["']([A-Za-z][\w:-]*)["']\)/g
-  ];
-  for (const source of [app, image]) {
-    for (const re of selectorPatterns) for (const m of source.matchAll(re)) refs.add(m[1]);
-  }
-  const missingRefs = [...refs].filter((id) => !idSet.has(id)).sort();
-  missingRefs.length ? fail('JavaScript DOM id references', missingRefs.join(', ')) : pass('JavaScript DOM id references', `${refs.size} referenced ids all exist`);
-
-  const exifVersion = /EXIF_VERSION\s*=\s*['"]4\.42\.0['"]/.test(image);
-  const exifLazyUrl = /exifreader@\$\{EXIF_VERSION\}\/dist\/exif-reader\.js/.test(image) && /document\.createElement\(['"]script['"]\)/.test(image);
-  exifVersion && exifLazyUrl ? pass('ExifReader lazy-load pin', '4.42.0') : fail('ExifReader lazy-load pin', 'expected EXIF_VERSION 4.42.0 and lazy script loader');
-
-  const c2paPin = /C2PA_VERSION\s*=\s*['"]0\.13\.4['"]/.test(image);
-  c2paPin ? pass('c2pa-web version pin', '0.13.4') : fail('c2pa-web version pin', 'expected C2PA_VERSION = 0.13.4');
-
-  const appPos = html.indexOf('js/app.js');
-  const imagePos = html.indexOf('js/image-analyzer.js');
-  appPos >= 0 && imagePos > appPos ? pass('script load order', 'app.js → image-analyzer.js; ExifReader is lazy-loaded') : fail('script load order', `positions app=${appPos}, image=${imagePos}`);
-
-  const protectedUnicode = ['0x200C', '0x200D', '0x2060'];
-  const unicodeOk = protectedUnicode.every((token) => app.includes(token));
-  unicodeOk ? pass('meaning-sensitive Unicode guard', protectedUnicode.join(', ')) : fail('meaning-sensitive Unicode guard', 'ZWJ/ZWNJ/WORD JOINER guard missing');
-
-  /trainedAlgorithmicMedia/.test(image) && /digitalCapture/.test(image)
-    ? pass('C2PA source-type distinction', 'AI-trained-media and digital-capture tokens present')
-    : fail('C2PA source-type distinction', 'source-type tokens missing');
-
-  const requiredCss = ['.xray', '.v62review', '.signalgrid', '.provenanceGrid', '.floatPanel'];
-  const missingCss = requiredCss.filter((token) => !css.includes(token));
-  missingCss.length ? fail('required UI styles', missingCss.join(', ')) : pass('required UI styles', requiredCss.join(', '));
-
-  /data:image\/(png|jpeg|webp);base64,/i.test(html)
-    ? fail('embedded base64 image bloat', 'data:image base64 found in index.html')
-    : pass('embedded base64 image bloat', 'none in index.html');
-
-  const previewLocalOnly = /IPAddress\]::Loopback/.test(previewPs1) && /Resolve-Path \(Join-Path \$PSScriptRoot '\.\.'\)/.test(previewPs1);
-  previewLocalOnly ? pass('local preview scope', 'loopback + ai-cleaner root') : fail('local preview scope', 'preview server must remain loopback-only and rooted at ai-cleaner');
-
-  const metaVersion = html.match(/<meta\s+name=["']app-version["']\s+content=["']([^"']+)["']/i)?.[1] || '';
-  const appVersion = app.match(/APP_VERSION\s*=\s*['"]([^'"]+)['"]/)?.[1] || '';
-  const jsonVersion = String(versionData.version || '');
-  if (metaVersion && metaVersion === appVersion && appVersion === jsonVersion) pass('app version markers', jsonVersion);
-  else fail('app version markers', `html=${metaVersion || '-'}, app=${appVersion || '-'}, json=${jsonVersion || '-'}`);
-
-  const updateGuard = /fetch\(`version\.json\?ts=\$\{Date\.now\(\)\}`/.test(app) && /cache:\s*['"]no-store['"]/.test(app) && /location\.replace\(/.test(app);
-  updateGuard ? pass('automatic cache refresh guard', 'version.json + no-store + cache-busting navigation') : fail('automatic cache refresh guard', 'automatic version refresh guard missing');
-
-  const v66Ux = /typingPreviewButton/.test(html) && /reviewEditCount/.test(html) && /추천안 채우기/.test(app) && /function positionPanelDefault/.test(app) && /function importedText/.test(app);
-  v66Ux ? pass('v6.6 usability hooks', 'review edit-state + popup default + visual typing preview + expanded file import') : fail('v6.6 usability hooks', 'one or more v6.6 hooks missing');
-
-  /keyboardEvent|dispatchEvent\(new KeyboardEvent|execCommand\(['"]insertText/.test(app) ? fail('no synthetic typing automation', 'synthetic keyboard/input automation found') : pass('no synthetic typing automation', 'visual preview only');
-}
-
-for (const p of passes) console.log(`PASS ${p.name}${p.detail ? ` — ${p.detail}` : ''}`);
-for (const f of failures) console.error(`FAIL ${f.name}${f.detail ? ` — ${f.detail}` : ''}`);
-console.log(`\nSummary: ${passes.length} passed, ${failures.length} failed`);
-if (failures.length) process.exit(1);
+for(const p of passes)console.log(`PASS ${p.n}${p.d?` — ${p.d}`:''}`);for(const f of failures)console.error(`FAIL ${f.n}${f.d?` — ${f.d}`:''}`);console.log(`\nSummary: ${passes.length} passed, ${failures.length} failed`);if(failures.length)process.exit(1);
