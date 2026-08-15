@@ -71,8 +71,10 @@ test('foundation flow keeps state, layout and rewrite tools coherent', async ({ 
   await expect(output).not.toHaveValue('');
   await expect(output).not.toHaveValue(/\u200B/);
   await expect(page.locator('#issueCount')).toHaveText('1');
+  await expect(page.locator('#v62ReviewList [data-review-card]')).toHaveCount(0);
+  await page.locator('#reviewWidget').click();await expect(page.locator('#reviewPanel')).toBeVisible();await expect(page.locator('#v62ReviewList [data-review-card]')).toHaveCount(1);
 
-  await page.locator('#issuesWidget').click();
+  await page.locator('#issuesWidget').click();await expect(page.locator('#reviewPanel')).toBeHidden();
   const apply=page.locator('#issuesPanel [data-apply]').first();
   await expect(apply).toBeVisible();await apply.click();await expect(output).toHaveValue(/그래서/);
   await page.locator('#undoStep').click();await expect(output).toHaveValue(/결론적으로/);
@@ -159,11 +161,13 @@ test('long live analysis runs through worker-safe adapter', async ({ page }) => 
   await expect(page.locator('#output')).not.toHaveValue('',{timeout:10000});
   const info=await page.evaluate(()=>({
     supported:window.AICleanerApp.analysisWorker.workerSupported,
-    stats:window.AICleanerApp.analysisWorker.getStats()
+    stats:window.AICleanerApp.analysisWorker.getStats(),
+    governor:window.AICleanerApp.analysisPerformance.getStats()
   }));
   if(info.supported)expect(info.stats.workerSuccess).toBeGreaterThanOrEqual(1);
   else expect(info.stats.fallbackRuns).toBeGreaterThanOrEqual(1);
   expect(info.stats.pending).toBe(0);
   expect(info.stats.workerTimeouts).toBe(0);
+  expect(info.governor.completed).toBeGreaterThanOrEqual(1);
   await expect(page.locator('#output')).not.toHaveValue(/\u200B/);
 });

@@ -1,6 +1,6 @@
 # AI Cleaner 프로젝트 인수인계 메모리
 
-업데이트: 2026-08-15 · 현재 패키지: 1.2.0
+업데이트: 2026-08-15 · 현재 패키지: 1.5.0
 
 ## 새 채팅에서 가장 먼저 읽을 것
 이 폴더를 새 채팅에 업로드한 뒤 `PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md 읽고 이어서 개발하자`라고 요청한다. 이 문서는 프로젝트의 결정사항, 보호 경로, UX 방향, 안전 제약, 배포 방식, 알려진 이슈를 보존하기 위한 인수인계 메모리다.
@@ -60,8 +60,8 @@
 
 ## 성능 결정
 - 기술 정보는 최대 표시량을 제한하고, 핵심 텍스트 분석은 1.2.0의 `core/text-engine.js`에서 DOM과 분리해 계산한다.
-- 실시간 텍스트 분석은 문서 길이에 따라 debounce 증가.
-- 문장 검토 UI는 최대 400문장.
+- 1.5.0부터 실시간 텍스트 분석은 문서 길이 + 빠른 연속 입력 + 최근 실제 분석시간을 반영하는 adaptive governor로 debounce를 조절한다.
+- 문장 검토 UI는 최대 400문장. 숨겨진 교정/문장검토/기술정보 패널은 1.5.0부터 실제로 열 때 DOM을 만든다.
 - 이미지 연속 선택 시 analysis sequence token으로 오래된 비동기 결과가 새 이미지 결과를 덮지 못하게 함.
 - C2PA WASM 인스턴스 재사용.
 - 큰 이미지 바이너리 문자열 스캔은 전체 복사 대신 필요한 앞/뒤 구간 위주.
@@ -340,3 +340,16 @@
 - No Worker tuning or UI contract change in 1.4.2; this is a boot lifecycle correctness patch.
 
 - 1.4.2 validation: module checks PASS, static/architecture 124 passed / 0 failed, JavaScript syntax PASS, workflow YAML PASS. Local Playwright/Chromium setup timed out at the 120-second execution limit and was not retried; partial install/test artifacts were removed. GitHub Actions `browser-smoke` remains the final browser verification.
+
+
+## 1.5.0 Large-document Performance Governor
+- 1.4.2 GitHub Actions `browser-smoke` green을 기준선으로 사용한다. 패치는 실제 전달된 `AI_Cleaner_1_4_2_FULL_PROJECT_HANDOFF.zip`에서 만든다.
+- 신규 `services/analysis-performance-governor.js`가 live-analysis debounce를 소유한다. 문서 길이, 빠른 연속 입력 burst, 최근 실제 분석시간 EMA를 조합해 다음 자동분석 대기시간을 조절한다.
+- 수동 `분석`은 기존처럼 즉시 main-thread sync 분석이다. Governor는 입력 중 자동분석에만 적용한다.
+- `core/text-engine.js`는 분석 결과에 가벼운 `reviewMeta` 요약을 포함한다. Worker 결과만으로 문장 검토 후보 수와 overflow를 먼저 알 수 있어, 숨겨진 리뷰 패널 DOM을 즉시 만들 필요가 없다.
+- 자동분석 결과 적용 시 `교정 제안`, `문장 검토`, `기술 정보` 패널이 닫혀 있으면 내부 DOM 렌더를 지연한다. 사용자가 해당 위젯을 열 때 최신 상태로 생성한다.
+- 접힌 `상세 진단`의 전/후 비교는 접힌 동안 장문 전체를 재스캔하지 않고, 펼칠 때 최신값을 계산한다. 입력 통계는 기존 batch 경로로 갱신한다.
+- Worker threshold 6,000자, 20초 timeout, 15초 cooldown, stale-result guard, 1.4.2 app-ready 계약은 변경하지 않는다.
+- Unicode hygiene, visible-text `자동작성 원본 새로쓰기`, 모바일 compact panel, rewrite/image lazy-load UI 계약도 변경하지 않는다.
+- 1.5.0 로컬 정적/모듈 기준: static 129/0, module PASS. 최종 브라우저 확인은 Push 후 GitHub Actions `browser-smoke`. 로컬 Playwright 의존성 설치는 120초 실행 제한에서 timeout되어 재시도하지 않았고 부분 설치 파일은 제거했다.
+- 다음 권장 단계: 1.5.1에서 성능 Governor/lazy rendering의 실브라우저 안정성만 점검한 뒤 다음 기능 단계로 이동한다.

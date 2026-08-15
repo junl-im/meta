@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.4.2",
+  "version": "1.5.0",
   "date": "2026-08-15",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -36,18 +36,19 @@
     "ai-cleaner/js/services/update-manager.js",
     "ai-cleaner/js/features/file-import.js",
     "ai-cleaner/js/core/diff-engine.js",
+    "ai-cleaner/js/services/analysis-performance-governor.js",
     "ai-cleaner/js/services/analysis-coordinator.js",
     "ai-cleaner/js/ui/diff-view.js",
     "ai-cleaner/js/services/analysis-worker-adapter.js",
     "ai-cleaner/js/workers/text-analysis-worker.js"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.4.2",
-  "asset_version": "142",
+  "current_version": "1.5.0",
+  "asset_version": "150",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.4.2 Boot Readiness: app-ready contract, pre-ready interaction lock, readiness-aware browser smoke",
+  "latestPatch": "1.5.0 large-document performance: adaptive live-analysis governor + lazy hidden diagnostics rendering",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -119,14 +120,14 @@
     "ciPanelSwitchFix": true,
     "hiddenControlE2EFix": true
   },
-  "nextPhase": "1.5.0 large-document performance/worker tuning after 1.4.2 browser-smoke validation",
+  "nextPhase": "1.5.1 performance stability audit after 1.5.0 browser-smoke validation",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
     "scheme": "semantic versioning"
   },
   "modularCore": {
-    "phase": 4,
+    "phase": 5,
     "uiContract": "1.0.0 preserved",
     "bootOrder": [
       "core/event-bus",
@@ -137,6 +138,7 @@
       "core/text-engine",
       "core/diff-engine",
       "services/analysis-worker-adapter",
+      "services/analysis-performance-governor",
       "services/analysis-coordinator",
       "services/update-manager",
       "ui/panel-manager",
@@ -160,7 +162,8 @@
     "fileImportService": true,
     "updateManager": true,
     "analysisWorkerAdapter": true,
-    "workerSafeTextCore": true
+    "workerSafeTextCore": true,
+    "analysisPerformanceGovernor": true
   },
   "textHygiene": {
     "policyVersion": "old-v6-layer-a-safe-1.2.2",
@@ -178,7 +181,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "142",
+  "assetVersion": "150",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -187,7 +190,7 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "124 passed / 0 failed",
+    "staticChecks": "129 passed / 0 failed",
     "moduleChecks": "PASS",
     "jsSyntax": "PASS",
     "workflowYaml": "PASS",
@@ -239,5 +242,22 @@
     "foundationModuleRaceFixed": true,
     "longWorkerInputRaceFixed": true,
     "delivered141UsedAsPatchBaseline": true
+  },
+  "largeDocumentPerformance150": {
+    "adaptiveLiveDelay": true,
+    "delayInputs": [
+      "document length",
+      "typing burst",
+      "recent analysis duration"
+    ],
+    "workerReviewSummary": true,
+    "hiddenReviewRenderOnDemand": true,
+    "hiddenIssuesRenderOnDemand": true,
+    "hiddenTechnicalRenderOnDemand": true,
+    "collapsedCompareRenderOnDemand": true,
+    "manualImmediateAnalysisUnchanged": true,
+    "workerThresholdChars": 6000,
+    "uiContract": "1.4.2 preserved",
+    "delivered142UsedAsPatchBaseline": true
   }
 }

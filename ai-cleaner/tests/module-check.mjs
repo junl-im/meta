@@ -7,7 +7,7 @@ const here=path.dirname(fileURLToPath(import.meta.url));
 const root=path.resolve(here,'..');
 const files=[
   'js/core/event-bus.js','js/core/history-store.js','js/core/work-lock.js','js/core/text-utils.js',
-  'js/core/state-store.js','js/core/text-engine.js','js/core/diff-engine.js','js/services/analysis-worker-adapter.js','js/services/analysis-coordinator.js','js/services/update-manager.js',
+  'js/core/state-store.js','js/core/text-engine.js','js/core/diff-engine.js','js/services/analysis-worker-adapter.js','js/services/analysis-performance-governor.js','js/services/analysis-coordinator.js','js/services/update-manager.js',
   'js/ui/panel-manager.js','js/ui/diff-view.js','js/features/file-import.js','js/features/typewriter-engine.js'
 ];
 const queue=[];
@@ -41,7 +41,7 @@ function assert(ok,msg){if(!ok)throw new Error(msg);}
   const store=M.createTextStateStore();const ref=store.state;store.replace({original:'abc',base:'abc',issueBase:'abc',working:'abc',chars:[],allChars:[],issues:[],applied:new Set(),manual:false,homoglyphs:[],reviews:[],score:99,focusCycles:Object.create(null),issueUnread:false,reviewUnread:false,techUnread:false,analyzeMs:1,reviewOverflow:0});assert(store.state===ref&&store.state.original==='abc','state store must keep stable object identity');const rev=store.revision;store.touch();assert(store.revision===rev+1,'state store revision touch failed');store.reset();assert(store.state===ref&&store.state.original===''&&store.state.score===100,'state store reset failed');
 }
 {
-  const engine=M.createTextEngine();const named=engine.scan('\u200B\u200C\u00A0',{profile:'standard'});assert(named.all[0].name==='ZERO WIDTH SPACE'&&named.all[1].name==='ZERO WIDTH NON-JOINER'&&named.all[2].name==='NO-BREAK SPACE','shared named inventory failed');assert(named.auto.length===2&&named.all[1].auto===false,'shared safe/preserve policy failed');const result=engine.analyze('앞\u200B\u00AD\u061C뒤\u00A0끝👩‍💻',{profile:'standard',repeat:true});assert(result.base==='앞뒤 끝👩‍💻','text engine standard sanitation failed');assert(result.scan.auto.length===4,'text engine auto action count failed');assert(result.scan.all.some(x=>x.type==='의미 민감 문자'),'meaning-sensitive Unicode should be reported');const inspect=engine.scan('A\u200BB',{profile:'inspect'});assert(inspect.clean==='A\u200BB'&&inspect.auto.length===0,'inspect profile should preserve hidden characters');const found=engine.issues('결론적으로 테스트입니다.\n\n\n다음',{repeat:false});assert(found.some(x=>x.cat==='정형 전환어')&&found.some(x=>x.cat==='연속 빈 줄'),'text issue rules failed');assert(engine.reviewSuggestion('결론적으로 **좋습니다**.')==='그래서 좋습니다.','review suggestion failed');assert(engine.codePointLength('가🙂')===2,'code point length failed');
+  const engine=M.createTextEngine();const meta=engine.reviewMeta(('짧은 문장입니다. '+('가'.repeat(80))+'. 결론적으로 테스트입니다.'),{length:true});assert(meta.candidateCount===2&&meta.totalSentences===3,'review metadata summary failed');const named=engine.scan('\u200B\u200C\u00A0',{profile:'standard'});assert(named.all[0].name==='ZERO WIDTH SPACE'&&named.all[1].name==='ZERO WIDTH NON-JOINER'&&named.all[2].name==='NO-BREAK SPACE','shared named inventory failed');assert(named.auto.length===2&&named.all[1].auto===false,'shared safe/preserve policy failed');const result=engine.analyze('앞\u200B\u00AD\u061C뒤\u00A0끝👩‍💻',{profile:'standard',repeat:true});assert(result.base==='앞뒤 끝👩‍💻','text engine standard sanitation failed');assert(result.scan.auto.length===4,'text engine auto action count failed');assert(result.scan.all.some(x=>x.type==='의미 민감 문자'),'meaning-sensitive Unicode should be reported');const inspect=engine.scan('A\u200BB',{profile:'inspect'});assert(inspect.clean==='A\u200BB'&&inspect.auto.length===0,'inspect profile should preserve hidden characters');const found=engine.issues('결론적으로 테스트입니다.\n\n\n다음',{repeat:false});assert(found.some(x=>x.cat==='정형 전환어')&&found.some(x=>x.cat==='연속 빈 줄'),'text issue rules failed');assert(engine.reviewSuggestion('결론적으로 **좋습니다**.')==='그래서 좋습니다.','review suggestion failed');assert(engine.codePointLength('가🙂')===2,'code point length failed');
 }
 {
   const importer=M.createFileImportService({maxBytes:10});assert(importer.rtfToText('{\\rtf1\\ansi 테스트\\par 다음}').includes('테스트\n다음'),'RTF import failed');assert(importer.looksBinary('abc\u0000def'),'binary text detection failed');assert(importer.parse('a.txt','plain')==='plain','plain import failed');let tooLarge=false;try{await importer.read({name:'a.txt',size:11,text:async()=> 'hello'});}catch(e){tooLarge=e.code==='FILE_TOO_LARGE';}assert(tooLarge,'file size guard failed');const ok=await importer.read({name:'a.txt',size:5,text:async()=> 'hello'});assert(ok.text==='hello','file read failed');
@@ -86,10 +86,20 @@ function assert(ok,msg){if(!ok)throw new Error(msg);}
   const throwing=M.createAnalysisWorkerAdapter({WorkerCtor:null,minChars:5,fallbackExecutor:()=>{throw new Error('fallback boom');}});let rejected=false;try{await throwing.analyze('abc');}catch(e){rejected=e.message==='fallback boom';}assert(rejected,'sync fallback exceptions must become rejected analysis Promises');
 }
 
+
+{
+  let clock=1000;const g=M.createAnalysisPerformanceGovernor({now:()=>clock});
+  const shortDelay=g.noteInput(1000);assert(shortDelay>=260&&shortDelay<600,'short analysis governor delay failed');
+  clock+=40;const burstDelay=g.noteInput(7000);assert(burstDelay>430,'typing burst should increase live-analysis delay');
+  g.noteCompleted(1200);const slowDelay=g.getDelay(7000);assert(slowDelay>burstDelay,'slow analysis should add adaptive backoff');
+  const stats=g.getStats();assert(stats.completed===1&&stats.scheduled===2&&stats.emaMs===1200,'analysis governor telemetry failed');
+  g.reset();assert(g.getStats().completed===0&&g.getStats().burst===0,'analysis governor reset failed');
+}
+
 {
   const scheduled=[];let now=0,results=[];
   const c=M.createAnalysisCoordinator({executor:async text=>text.toUpperCase(),syncExecutor:text=>text.toUpperCase(),setTimer:fn=>(scheduled.push(fn),scheduled.length),clearTimer:()=>{},idle:null,now:()=>++now});
   c.schedule('old',{}, {onResult:r=>results.push(r)});c.schedule('new',{}, {onResult:r=>results.push(r)});scheduled[0]?.();scheduled[1]?.();await new Promise(r=>setTimeout(r,0));assert(results.length===1&&results[0]==='NEW','async analysis coordinator must discard stale schedule');const sync=c.runNow('sync');assert(sync.result==='SYNC'&&!c.pending,'analysis coordinator runNow failed');
   const idleScheduled=[];let idleResult='';const idleFallback=M.createAnalysisCoordinator({executor:async t=>t+'!',syncExecutor:t=>t,setTimer:fn=>(idleScheduled.push(fn),1),clearTimer:()=>{},idle:()=>{throw new Error('idle unavailable');},now:()=>0});idleFallback.schedule('idle',{}, {onResult:r=>{idleResult=r;}});idleScheduled[0]();await new Promise(r=>setTimeout(r,0));assert(idleResult==='idle!'&&!idleFallback.pending,'idle scheduling failure should execute analysis immediately');
 }
-console.log('PASS modular core phase 4 worker stability audit + text hygiene unit checks');
+console.log('PASS modular core phase 5 long-document performance + worker stability unit checks');

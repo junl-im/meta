@@ -1,6 +1,6 @@
 {
-  "version": "1.4.2",
-  "assetVersion": "142",
+  "version": "1.5.0",
+  "assetVersion": "150",
   "channel": "stable",
-  "updateMode": "boot-readiness-app-ready-browser-smoke-fix"
+  "updateMode": "adaptive-live-analysis-lazy-diagnostics-long-document-performance"
 }
