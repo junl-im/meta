@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "date": "2026-08-16",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -43,12 +43,12 @@
     "ai-cleaner/js/workers/text-analysis-worker.js"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.6.0",
-  "asset_version": "160",
+  "current_version": "1.6.1",
+  "asset_version": "161",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.6.0 UX navigation: mobile Typewriter completion now closes the popup and lands the result card below the sticky header, with an actionable completion button and visual destination cue",
+  "latestPatch": "1.6.1 mobile viewport exception audit: visualViewport-aware panel sizing, safe-area coverage, breakpoint reset, focused-control retention, and user-intent cancellation of delayed result navigation",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -121,9 +121,13 @@
     "safeArea": true,
     "resetOnOpen": true,
     "ciPanelSwitchFix": true,
-    "hiddenControlE2EFix": true
+    "hiddenControlE2EFix": true,
+    "visualViewportAware": true,
+    "keyboardVisibleHeightGuard": true,
+    "breakpointExpansionReset": true,
+    "safeAreaViewportFitCover": true
   },
-  "nextPhase": "1.6.1 UX/navigation stability audit after 1.6.0 GitHub browser-smoke validation",
+  "nextPhase": "1.7.0 feature/UX stage after 1.6.1 GitHub browser-smoke is green; use 1.6.2 only for discovered edge regressions",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -184,7 +188,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "160",
+  "assetVersion": "161",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -193,7 +197,7 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "146 passed / 0 failed",
+    "staticChecks": "153 passed / 0 failed",
     "moduleChecks": "PASS",
     "jsSyntax": "PASS",
     "workflowYaml": "PASS",
@@ -301,5 +305,18 @@
     "runtimeSafetyPolicyChanged": false,
     "expectedBrowserSmokeTests": 14,
     "patchBaseline": "AI_Cleaner_1_5_2_FULL_PROJECT_HANDOFF.zip"
+  },
+  "uxExceptionAudit161": {
+    "visualViewportCssHeightSync": true,
+    "mobileKeyboardViewportClass": true,
+    "focusedPanelControlRetention": true,
+    "viewportFitCoverSafeArea": true,
+    "landscapeSideSafeArea": true,
+    "breakpointExpansionReset": true,
+    "desktopDefaultPositionAfterMobileOpen": true,
+    "resultAutoNavigationUserOverride": true,
+    "pagehideNavigationTimerCleanup": true,
+    "expectedBrowserSmokeTests": 17,
+    "patchBaseline": "AI_Cleaner_1_6_0_FULL_PROJECT_HANDOFF.zip"
   }
 }

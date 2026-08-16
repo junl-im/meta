@@ -103,4 +103,12 @@ function assert(ok,msg){if(!ok)throw new Error(msg);}
   c.schedule('old',{}, {onResult:r=>results.push(r)});c.schedule('new',{}, {onResult:r=>results.push(r)});scheduled[0]?.();scheduled[1]?.();await new Promise(r=>setTimeout(r,0));assert(results.length===1&&results[0]==='NEW','async analysis coordinator must discard stale schedule');const sync=c.runNow('sync');assert(sync.result==='SYNC'&&!c.pending,'analysis coordinator runNow failed');
   const idleScheduled=[];let idleResult='';const idleFallback=M.createAnalysisCoordinator({executor:async t=>t+'!',syncExecutor:t=>t,setTimer:fn=>(idleScheduled.push(fn),1),clearTimer:()=>{},idle:()=>{throw new Error('idle unavailable');},now:()=>0});idleFallback.schedule('idle',{}, {onResult:r=>{idleResult=r;}});idleScheduled[0]();await new Promise(r=>setTimeout(r,0));assert(idleResult==='idle!'&&!idleFallback.pending,'idle scheduling failure should execute analysis immediately');
 }
-console.log('PASS 1.6.0 UX navigation + browser regression / cohesion integration unit checks');
+
+{
+  const classes=new Set(['mobileExpanded']),style={},button={attrs:{},setAttribute(k,v){this.attrs[k]=v;},textContent:''};
+  const panel={id:'panel',hidden:false,dataset:{defaultPosition:'done'},style,offsetWidth:300,offsetHeight:300,classList:{toggle(n,on){if(on)classes.add(n);else classes.delete(n);}},querySelector(sel){return sel==='[data-panel-size]'?button:null;},getBoundingClientRect(){return{left:8,top:80,width:300,height:300,right:308,bottom:380};}};
+  context.document={getElementById:id=>id==='panel'?panel:null};context.innerWidth=390;context.innerHeight=844;
+  const pm=M.createPanelManager({ids:['panel'],breakpoint:980,anchor:()=>panel});pm.setMobileExpanded(panel,true);assert(classes.has('mobileExpanded'),'mobile panel expansion setup failed');
+  context.innerWidth=1100;context.innerHeight=700;pm.handleResize();assert(!classes.has('mobileExpanded'),'breakpoint transition must clear stale mobile expansion');assert(button.attrs['aria-expanded']==='false','panel size aria state must reset with breakpoint transition');
+}
+console.log('PASS 1.6.1 mobile viewport + safe-area exception audit unit checks');

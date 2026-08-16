@@ -433,3 +433,33 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
 }
 @media(max-width:420px){.resultCard{scroll-margin-top:82px}}
 @media(prefers-reduced-motion:reduce){.resultCard{transition:none}.resultCard.resultDestinationPulse{animation:none;border-color:#92cf9d;box-shadow:0 0 0 3px #187a2b14}}
+
+/* ===== 1.6.1 mobile viewport / safe-area exception audit ===== */
+:root{--app-visual-height:100dvh;--app-visual-offset-top:0px}
+.wrap{padding-left:max(22px,env(safe-area-inset-left));padding-right:max(22px,env(safe-area-inset-right));padding-bottom:max(54px,calc(env(safe-area-inset-bottom) + 46px))}
+.top{height:calc(68px + env(safe-area-inset-top));padding-top:env(safe-area-inset-top)}
+.appToast{bottom:max(26px,calc(env(safe-area-inset-bottom) + 16px));max-width:calc(100vw - max(24px,env(safe-area-inset-left)) - max(24px,env(safe-area-inset-right)));text-align:center}
+@media(max-width:980px){
+  .floatPanel,.floatPanel.reviewPanel,.floatPanel.techPanel,.floatPanel.rewritePanel{
+    left:max(8px,env(safe-area-inset-left))!important;right:max(8px,env(safe-area-inset-right))!important;
+    height:min(46dvh,430px,calc(var(--app-visual-height) - 78px))!important;max-height:min(46dvh,430px,calc(var(--app-visual-height) - 78px))!important
+  }
+  .floatPanel.mobileExpanded,.floatPanel.reviewPanel.mobileExpanded,.floatPanel.techPanel.mobileExpanded,.floatPanel.rewritePanel.mobileExpanded{
+    height:min(84dvh,760px,calc(var(--app-visual-height) - 72px))!important;max-height:min(84dvh,760px,calc(var(--app-visual-height) - 72px))!important
+  }
+  .floatPanel.typingPreviewPanel{height:min(42dvh,350px,calc(var(--app-visual-height) - 78px))!important;max-height:min(42dvh,350px,calc(var(--app-visual-height) - 78px))!important}
+  .floatPanel.typingPreviewPanel.mobileExpanded{height:min(72dvh,610px,calc(var(--app-visual-height) - 72px))!important;max-height:min(72dvh,610px,calc(var(--app-visual-height) - 72px))!important}
+  .floatingDock{right:max(8px,env(safe-area-inset-right));bottom:max(8px,env(safe-area-inset-bottom))}
+  html.mobile-keyboard-visible .floatPanel,html.mobile-keyboard-visible .floatPanel.reviewPanel,html.mobile-keyboard-visible .floatPanel.techPanel,html.mobile-keyboard-visible .floatPanel.rewritePanel{
+    height:min(68dvh,430px,calc(var(--app-visual-height) - 72px))!important;max-height:min(68dvh,430px,calc(var(--app-visual-height) - 72px))!important
+  }
+  html.mobile-keyboard-visible .floatPanel.typingPreviewPanel{height:min(62dvh,350px,calc(var(--app-visual-height) - 72px))!important;max-height:min(62dvh,350px,calc(var(--app-visual-height) - 72px))!important}
+}
+@media(max-width:620px){
+  .floatPanel,.floatPanel.reviewPanel,.floatPanel.techPanel,.floatPanel.rewritePanel{left:max(6px,env(safe-area-inset-left))!important;right:max(6px,env(safe-area-inset-right))!important;height:min(43dvh,370px,calc(var(--app-visual-height) - 72px))!important;max-height:min(43dvh,370px,calc(var(--app-visual-height) - 72px))!important}
+  .floatPanel.mobileExpanded,.floatPanel.reviewPanel.mobileExpanded,.floatPanel.techPanel.mobileExpanded,.floatPanel.rewritePanel.mobileExpanded{height:min(86dvh,720px,calc(var(--app-visual-height) - 68px))!important;max-height:min(86dvh,720px,calc(var(--app-visual-height) - 68px))!important}
+  .floatPanel.typingPreviewPanel{left:max(6px,env(safe-area-inset-left))!important;right:max(6px,env(safe-area-inset-right))!important;height:min(38dvh,320px,calc(var(--app-visual-height) - 72px))!important;max-height:min(38dvh,320px,calc(var(--app-visual-height) - 72px))!important}
+  .floatPanel.typingPreviewPanel.mobileExpanded{height:min(70dvh,580px,calc(var(--app-visual-height) - 68px))!important;max-height:min(70dvh,580px,calc(var(--app-visual-height) - 68px))!important}
+}
+@media(max-width:420px){.top{height:auto;min-height:calc(68px + env(safe-area-inset-top));padding:calc(7px + env(safe-area-inset-top)) 0 7px}}
+@media(prefers-reduced-motion:reduce){html.mobile-keyboard-visible .floatPanel{transition:none!important}}

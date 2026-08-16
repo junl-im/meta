@@ -374,3 +374,15 @@
 - Typewriter sanitation/verification, Worker, Rewrite Studio, Fact Lock, stale-result/update lifecycle 정책은 변경하지 않는다.
 - Browser E2E는 완료 버튼 수동 이동과 자동 이동을 별도로 검증하며 sticky header 아래 결과 카드 착지 위치도 검사한다. 420px 이하 wrapped header의 실제 높이와 결과 액션 2열 밀도도 함께 회귀검사한다.
 - 완료 후 다른 floating panel을 사용자가 먼저 열면 pending result-navigation timer를 취소해 사용자 의도를 우선한다. 로컬 Playwright 설치는 120초 제한 timeout으로 미실행이며 GitHub browser-smoke를 최종 검증으로 사용한다.
+
+
+## 1.6.1 Mobile UI/UX Exception Audit
+- Baseline is the actually delivered `AI_Cleaner_1_6_0_FULL_PROJECT_HANDOFF.zip`; the user confirmed 1.6.0 GitHub `browser-smoke` green before this patch.
+- Mobile viewport handling now combines CSS `dvh` with runtime `visualViewport.height` (`--app-visual-height`). Floating panels are capped to the currently visible viewport during browser chrome/keyboard height changes.
+- `viewport-fit=cover` and safe-area insets are applied to the sticky header, page wrapper, floating panel sides/bottom, floating dock, and toast. Landscape left/right notch insets are included.
+- Near-1x visual viewport shrink detects the software-keyboard state. Panels use more of the remaining visible area and the focused field inside a floating panel is kept within its scroll body after viewport changes.
+- Panel Manager clears stale `mobileExpanded` state when crossing the mobile breakpoint. Mobile opens no longer falsely consume the pending desktop default-position state; a visible panel crossing to desktop can establish and clamp its anchor position correctly.
+- Delayed Typewriter result auto-navigation now yields to explicit user interaction. Pointer/wheel/keyboard activity or choosing another floating panel cancels the pending jump. Page suspension clears navigation/feedback timers as well.
+- E2E contract grows to 17 cases with user-intent cancellation, mobile visible-viewport bounds, and breakpoint expansion reset coverage.
+- Local static validation: 153/0; module/integration PASS; JS/MJS syntax PASS; workflow YAML PASS. The single local `npm install --ignore-scripts --no-audit --no-fund` attempt timed out at 120 seconds and was not retried; partial install/test artifacts were removed. GitHub `browser-smoke` is the final real-Chromium validation.
+- If 1.6.1 browser-smoke is green, the 1.6.x mobile exception/stability cycle can be closed and the next feature/UX phase can start at 1.7.0.

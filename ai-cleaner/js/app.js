@@ -421,10 +421,29 @@ const panelManager=Modules.createPanelManager({
   ids:FLOAT_PANEL_IDS,breakpoint:PANEL_SHEET_BREAKPOINT,anchor:()=>$('#input'),
   offsets:{typingPreviewPanel:[76,46],issuesPanel:[14,12],reviewPanel:[34,30],rewritePanel:[22,16],techPanel:[54,48]}
 });
+let viewportFrame=0;
+function viewportSnapshot(){
+  const vv=window.visualViewport;return{width:vv?.width||innerWidth,height:vv?.height||innerHeight,offsetTop:vv?.offsetTop||0,offsetLeft:vv?.offsetLeft||0,scale:vv?.scale||1};
+}
+function keepFocusedPanelControlVisible(){
+  const active=document.activeElement,panel=active?.closest?.('.floatPanel');if(!active||!panel||panel.hidden||innerWidth>PANEL_SHEET_BREAKPOINT)return;
+  const body=active.closest('.floatBody');if(!body)return;const ar=active.getBoundingClientRect(),br=body.getBoundingClientRect(),pad=10;
+  if(ar.bottom>br.bottom-pad)body.scrollTop+=ar.bottom-(br.bottom-pad);else if(ar.top<br.top+pad)body.scrollTop-=br.top+pad-ar.top;
+}
+function syncViewportMetrics(){
+  const v=viewportSnapshot(),root=document.documentElement,gap=Math.max(0,innerHeight-v.height-v.offsetTop),keyboard=innerWidth<=PANEL_SHEET_BREAKPOINT&&v.scale<=1.05&&gap>140;
+  root.style.setProperty('--app-visual-height',Math.max(1,Math.round(v.height))+'px');root.style.setProperty('--app-visual-offset-top',Math.max(0,Math.round(v.offsetTop))+'px');
+  root.classList.toggle('mobile-keyboard-visible',keyboard);panelManager.handleResize();if(innerWidth<=PANEL_SHEET_BREAKPOINT)requestAnimationFrame(keepFocusedPanelControlVisible);
+}
+function queueViewportSync(){if(viewportFrame)cancelAnimationFrame(viewportFrame);viewportFrame=requestAnimationFrame(()=>{viewportFrame=0;syncViewportMetrics();});}
+function dismissMobileKeyboard(){
+  if(innerWidth>PANEL_SHEET_BREAKPOINT)return;const active=document.activeElement;if(active&&/^(TEXTAREA|INPUT|SELECT)$/.test(active.tagName))try{active.blur();}catch(_){}
+}
 function setMobilePanelExpanded(panel,expanded){panelManager.setMobileExpanded(panel,expanded);}
 function closeAllPanels(except=''){if(except!=='rewritePanel'&&!$('#rewritePanel').hidden)window.AICleanerRewriteStudio?.cancelGeneration?.({status:'패널을 닫아 생성 작업을 취소했습니다.'});panelManager.closeAll(except);syncPanelAria();}
 function openPanel(id){
-  if(id!=='typingPreviewPanel'&&resultNavigationTimer){clearTimeout(resultNavigationTimer);resultNavigationTimer=0;}
+  if(innerWidth<=PANEL_SHEET_BREAKPOINT)dismissMobileKeyboard();
+  cancelResultNavigation();
   if(id!=='rewritePanel'&&!$('#rewritePanel').hidden)window.AICleanerRewriteStudio?.cancelGeneration?.({status:'다른 도구로 이동해 생성 작업을 취소했습니다.'});
   if(id==='issuesPanel')renderIssues();
   if(id==='reviewPanel'&&(state.reviewsDirty||!state.reviews.length))buildReviews();
@@ -437,6 +456,7 @@ function openPanel(id){
 }
 function clampPanelToViewport(panel){panelManager.clamp(panel);}
 let resultNavigationTimer=0;
+function cancelResultNavigation(){if(!resultNavigationTimer)return false;clearTimeout(resultNavigationTimer);resultNavigationTimer=0;return true;}
 function preferredScrollBehavior(){try{return matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth';}catch(_){return'auto';}}
 function pulseResultDestination(){
   const card=$('#resultCard');if(!card)return;clearTimeout(pulseResultDestination.timer);card.classList.remove('resultDestinationPulse');void card.offsetWidth;card.classList.add('resultDestinationPulse');pulseResultDestination.timer=setTimeout(()=>card.classList.remove('resultDestinationPulse'),1500);
@@ -444,7 +464,7 @@ function pulseResultDestination(){
 function scrollToResultDestination({focusOutput=false}={}){
   const textButton=document.querySelector('[data-tool="text"]');if(textButton&&!textButton.classList.contains('active'))textButton.click();
   activateResultTab('cleaned');
-  const out=$('#output'),mobile=innerWidth<=PANEL_SHEET_BREAKPOINT,target=mobile?($('#resultCard')||out):out;
+  const out=$('#output'),mobile=innerWidth<=PANEL_SHEET_BREAKPOINT,target=mobile?($('#resultCard')||out):out;if(mobile)dismissMobileKeyboard();
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     const behavior=preferredScrollBehavior();
     if(mobile){const headerHeight=document.querySelector('.top')?.getBoundingClientRect().height||0,targetY=scrollY+target.getBoundingClientRect().top-headerHeight-10;scrollTo({top:Math.max(0,targetY),behavior});}
@@ -461,7 +481,7 @@ function revealAppliedResult(message='결과에 적용했습니다.',{closePanel
   showToast(message);
 }
 function navigateTypewriterResult({announce=false}={}){
-  clearTimeout(resultNavigationTimer);resultNavigationTimer=0;
+  cancelResultNavigation();
   const panel=$('#typingPreviewPanel');panel.hidden=true;panel.classList.remove('typewriterComplete');setMobilePanelExpanded(panel,false);syncPanelAria();
   $('#typingPreviewPause').textContent='일시정지';$('#typingPreviewPause').removeAttribute('title');$('#typingPreviewPause').setAttribute('aria-label','자동작성 일시정지');typewriterBridgeStatus();
   typingPreview.completed=false;scrollToResultDestination({focusOutput:false});
@@ -495,16 +515,20 @@ document.addEventListener('contextmenu',(e)=>{
   if(!editor){hideContextMenu();return;}
   e.preventDefault();showContextMenu(e.clientX,e.clientY,editor);
 });
-document.addEventListener('pointerdown',(e)=>{if(!e.target.closest('#textContextMenu'))hideContextMenu();});
+document.addEventListener('pointerdown',(e)=>{if(resultNavigationTimer)cancelResultNavigation();if(!e.target.closest('#textContextMenu'))hideContextMenu();});
+document.addEventListener('wheel',()=>{if(resultNavigationTimer)cancelResultNavigation();},{passive:true});
 $('#textContextMenu').addEventListener('click',(e)=>{const b=e.target.closest('[data-context-action]');if(b&&!b.disabled)contextAction(b.dataset.contextAction);});
 
 document.addEventListener('keydown',(e)=>{
+  if(resultNavigationTimer)cancelResultNavigation();
   if(e.key!=='Escape')return;
   hideContextMenu();
   if(!$('#typingPreviewPanel').hidden){stopTypingPreview();return;}
   const closed=panelManager.closeTop();if(closed){if(closed.id==='typingPreviewPanel'&&typewriterEngine.running)stopTypingPreview({restore:true,silent:true});if(closed.id==='rewritePanel')window.AICleanerRewriteStudio?.cancelGeneration?.({status:'패널을 닫아 생성 작업을 취소했습니다.'});syncPanelAria();e.preventDefault();}
 });
-window.addEventListener('resize',()=>panelManager.handleResize());
+window.addEventListener('resize',queueViewportSync);window.addEventListener('orientationchange',queueViewportSync);
+if(window.visualViewport){window.visualViewport.addEventListener('resize',queueViewportSync);window.visualViewport.addEventListener('scroll',queueViewportSync);}
+queueViewportSync();
 $('#detailDiagnostics').addEventListener('toggle',()=>{if($('#detailDiagnostics').open){renderStats();renderCompare();}});
 
 const typewriterEngine=Modules.createTypewriterEngine({split:splitGraphemesExact});
@@ -523,7 +547,7 @@ function setTypewriterBusy(busy){
 function typewriterStatus(text){const el=$('#typingPreviewText');if(el)el.textContent=text;}
 function typewriterBridgeStatus(text='보이는 글씨만'){const el=$('#typingBridgeStatus');if(el)el.textContent=text;}
 function stopTypingPreview({restore=true,silent=false}={}){
-  clearTimeout(resultNavigationTimer);resultNavigationTimer=0;
+  cancelResultNavigation();
   const snap=typewriterEngine.snapshot(),wasRunning=snap.running&&!snap.completed;typewriterEngine.stop();
   const panel=$('#typingPreviewPanel');panel.hidden=true;panel.classList.remove('typewriterComplete');setMobilePanelExpanded(panel,false);syncPanelAria();$('#typingPreviewPause').textContent='일시정지';$('#typingPreviewPause').removeAttribute('title');$('#typingPreviewPause').setAttribute('aria-label','자동작성 일시정지');typewriterBridgeStatus();
   typingPreview.completed=false;$('#input').readOnly=typingPreview.inputWasReadOnly;setTypewriterBusy(false);
@@ -549,7 +573,7 @@ function startTypingPreview(){
   closeAllPanels();activateResultTab('cleaned');
   typingPreview={source,rawSource,historyIndex:historyStore.index,inputWasReadOnly:$('#input').readOnly,bridgePct:-1,removedHidden:prepared.removed.length,normalizedSpaces:prepared.normalizedSpaces.length,preservedSensitive:prepared.preservedSensitive.length,completed:false};
   const out=$('#output');delete out.dataset.typewriterVerified;out.readOnly=true;out.value='';out.scrollTop=0;$('#input').readOnly=true;openPanel('typingPreviewPanel');
-  clearTimeout(resultNavigationTimer);resultNavigationTimer=0;$('#typingPreviewPanel').classList.remove('typewriterComplete');$('#typingPreviewPause').textContent='일시정지';$('#typingPreviewPause').removeAttribute('title');$('#typingPreviewPause').setAttribute('aria-label','자동작성 일시정지');$('#typingPreviewProgress').textContent='0%';typewriterBridgeStatus('0%');setTypewriterBusy(true);
+  cancelResultNavigation();$('#typingPreviewPanel').classList.remove('typewriterComplete');$('#typingPreviewPause').textContent='일시정지';$('#typingPreviewPause').removeAttribute('title');$('#typingPreviewPause').setAttribute('aria-label','자동작성 일시정지');$('#typingPreviewProgress').textContent='0%';typewriterBridgeStatus('0%');setTypewriterBusy(true);
   typewriterEngine.start(source,{
     getDelay:()=>Math.max(0,Number($('#typingPreviewSpeed').value)||0),
     append:piece=>{out.setRangeText(piece,out.value.length,out.value.length,'end');out.scrollTop=out.scrollHeight;},
@@ -619,12 +643,14 @@ $('#openImage').onclick=()=>fi.click();dz.onclick=e=>{if(!e.target.closest('#ope
 dz.addEventListener('drop',e=>{const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(f)runImage(f);});
 
 function suspendPageWork(){
-  analysisCoordinator.cancel();analysisWorker.terminate();updateManager.stop();
+  analysisCoordinator.cancel();analysisWorker.terminate();updateManager.stop();cancelResultNavigation();clearTimeout(pulseResultDestination.timer);clearTimeout(showToast.timer);clearTimeout(showToast.hideTimer);
+  const toast=$('#appToast');if(toast){toast.classList.remove('show');toast.hidden=true;}const resultCard=$('#resultCard');if(resultCard)resultCard.classList.remove('resultDestinationPulse');
+  if(viewportFrame){cancelAnimationFrame(viewportFrame);viewportFrame=0;}
   if(typewriterEngine.running||window.__AI_CLEANER_TYPEWRITER_BUSY__)stopTypingPreview({restore:true,silent:true});
   if(statsFrame){cancelAnimationFrame(statsFrame);statsFrame=0;}clearTimeout(statsTimer);statsTimer=0;clearTimeout(compareTimer);
 }
 function resumePageWork(event){
-  if(!event?.persisted)return;panelManager.handleResize();configureEditors();syncWidgets();
+  if(!event?.persisted)return;queueViewportSync();configureEditors();syncWidgets();
   updateManager.start({initialDelay:1200,interval:120000});
   if(inputDirty&&$('#input').value.trim()&&$('#liveScan').checked)queueLiveAnalysis();else{queueStats();if($('#detailDiagnostics').open)queueCompare();}
 }

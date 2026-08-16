@@ -1,6 +1,6 @@
 {
-  "version": "1.6.0",
-  "assetVersion": "160",
+  "version": "1.6.1",
+  "assetVersion": "161",
   "channel": "stable",
-  "updateMode": "ux-navigation-mobile-typewriter-result-landing-visual-comfort"
+  "updateMode": "mobile-visual-viewport-safe-area-orientation-user-intent-audit"
 }

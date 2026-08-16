@@ -60,6 +60,37 @@ test('mobile typewriter completion auto-navigates when the result button is not 
   expect(landing.delta).toBeGreaterThanOrEqual(0);expect(landing.delta).toBeLessThanOrEqual(30);expect(landing.pulse).toBeTruthy();
 });
 
+test('mobile user gesture cancels pending automatic result navigation', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});await gotoReady(page);
+  await page.locator('#input').fill('사용자가 완료 팝업을 확인하는 동안 자동 이동이 화면을 끌고 가면 안 됩니다.');
+  await page.locator('#typingPreviewSpeed').evaluate(el=>{el.value='0';el.dispatchEvent(new Event('change',{bubbles:true}));});
+  await page.locator('#typingPreviewButton').click();
+  await expect(page.locator('#typingPreviewPause')).toHaveText('완료 · 결과 보기',{timeout:7000});
+  await page.locator('#typingPreviewText').dispatchEvent('pointerdown',{button:0});
+  await page.waitForTimeout(1300);
+  await expect(page.locator('#typingPreviewPanel')).toBeVisible();
+  await page.locator('#typingPreviewPause').click();await expect(page.locator('#typingPreviewPanel')).toBeHidden();
+});
+
+test('mobile visual viewport resize keeps expanded panels inside the visible viewport', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});await gotoReady(page);
+  await page.locator('#input').fill('모바일 가시 영역 변화 테스트입니다. 결과와 팝업 위치를 확인합니다.');await page.locator('#analyze').click();
+  await page.locator('#rewriteWidget').click();const panel=page.locator('#rewritePanel');await expect(panel).toBeVisible();
+  await panel.locator('[data-panel-size="rewritePanel"]').click();await expect(panel).toHaveClass(/mobileExpanded/);
+  await page.setViewportSize({width:390,height:520});
+  await expect.poll(async()=>page.evaluate(()=>Math.round(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--app-visual-height'))))).toBe(520);
+  const geo=await panel.evaluate(el=>{const r=el.getBoundingClientRect(),h=window.visualViewport?.height||innerHeight;return{top:r.top,bottom:r.bottom,height:r.height,viewport:h};});
+  expect(geo.top).toBeGreaterThanOrEqual(0);expect(geo.bottom).toBeLessThanOrEqual(geo.viewport+1);expect(geo.height).toBeLessThan(geo.viewport);
+});
+
+test('panel expansion state resets when crossing the mobile breakpoint', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});await gotoReady(page);
+  await page.locator('#input').fill('회전 및 breakpoint 전환 테스트입니다.');await page.locator('#analyze').click();await page.locator('#rewriteWidget').click();
+  const panel=page.locator('#rewritePanel');await panel.locator('[data-panel-size="rewritePanel"]').click();await expect(panel).toHaveClass(/mobileExpanded/);
+  await page.setViewportSize({width:1100,height:700});await expect(panel).not.toHaveClass(/mobileExpanded/);
+  await page.setViewportSize({width:390,height:844});await expect(panel).not.toHaveClass(/mobileExpanded/);
+});
+
 test('boot readiness blocks interaction until app wiring is complete', async ({ page }) => {
   await gotoReady(page);
   const ready=await page.evaluate(()=>({
