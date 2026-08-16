@@ -430,3 +430,13 @@
 - On mobile, Sample / File / Reset stay on one compact row. Result `정리본 / 변경 비교` tabs stay on the same header row at the right, including while the stale/freshness status is visible.
 - Local validation: static 179/0, module PASS, JS/MJS syntax PASS, workflow YAML PASS. Browser E2E is configured for 30 cases; GitHub `browser-smoke` is the final Chromium validation after push. A direct system-Chromium file-render attempt did not complete within 20 seconds in this execution environment.
 - Next planned patch after green CI: 1.6.6 UX Priority & Completion Flow Audit.
+
+
+## 1.6.6 UX Priority & Completion Flow Audit
+- Baseline is the actually delivered `AI_Cleaner_1_6_5_FULL_PROJECT_HANDOFF.zip`; `OPTION/**` remains protected/excluded.
+- Source-stage visual priority is explicit: while a source is present and `자동작성 원본 새로쓰기` is still the recommended next step, the floating Rewrite Studio widget remains available but does not compete with its `rewriteReady` attention cue. After a verified Typewriter completion, Rewrite Studio may surface as the next optional action.
+- Result cards now include a compact state-aware next-step guide for analysis pending, normal result ready, Typewriter writing, and verified Typewriter completion. It points users toward copy/TXT save and optional rewrite without adding another duplicate action button.
+- Result cleaned/diff controls use `tablist`/`tab`/`tabpanel` semantics and runtime `aria-selected` synchronization. The text-file action receives a visible `focus-within` ring for keyboard users.
+- TXT download now provides immediate visible feedback after the browser download is triggered. History actions are visually demoted relative to Copy/Save while retaining their existing positions and behavior.
+- Browser coverage adds staged priority and result-tab accessibility state checks, including left/right keyboard navigation. Worker, Unicode hygiene, Typewriter sanitation, Rewrite Fact Lock, image analysis, update lifecycle, and mobile viewport policies are unchanged.
+- The 1.6.5 baseline was verified green on GitHub Actions run `31954107010` (static-checks + browser-smoke) before finalizing this patch. 1.6.6 local validation: static 184/0, module PASS, all JS/MJS syntax PASS, workflow YAML PASS; browser E2E is configured for 31 cases and GitHub Actions remains the final Chromium gate.

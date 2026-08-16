@@ -495,3 +495,15 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
   .workspace>.card:first-child .actions.sourceActions>.btn,.workspace>.card:first-child .actions.sourceActions>.filelabel{height:34px;padding:0 4px;font-size:9.5px}
   .resultHead .tab{padding:6px 6px;font-size:8.5px}
 }
+
+
+/* ===== 1.6.6 UX priority + completion flow ===== */
+.resultNextStep{margin:9px 0 2px;padding:8px 10px;border:1px solid #eadfce;border-radius:12px;background:#fbf8f3;color:var(--muted);font-size:9.5px;font-weight:750;line-height:1.45}
+.resultNextStep[data-state=writing]{border-color:#ffc88f;background:#fff7ee;color:#8a4b0a}
+.resultNextStep[data-state=done]{border-color:#a9d9b1;background:#f2fbf4;color:#246332}
+.resultNextStep[data-state=pending]{border-style:dashed;background:#fffaf1;color:#7a4a00}
+.resultActions .historyBtn{background:#faf8f5;color:#6f6258}
+.filelabel:focus-within{outline:3px solid rgba(22,131,248,.22);outline-offset:2px}
+.tabs[role=tablist] .tab[aria-selected=true]{background:var(--ink);color:#fff}
+@media(max-width:620px){.resultNextStep{font-size:9px;margin-top:8px;padding:7px 9px}.resultActions .btn{height:38px}}
+@media(prefers-reduced-motion:reduce){.rewriteReady{animation:none!important}}

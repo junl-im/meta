@@ -52,6 +52,20 @@ test('source arrival highlights typewriter as the next step and start navigates 
 
 
 
+test('completion priority keeps rewrite quiet until auto typewriter finishes and result tabs expose state', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});await gotoReady(page);
+  const input=page.locator('#input'),rewrite=page.locator('#rewriteWidget'),next=page.locator('#resultNextStep');
+  await input.fill('원본 단계에서는 자동작성 버튼이 먼저 안내되고, 완료 뒤에 재작성과 결과 액션이 다음 단계가 되어야 합니다.');
+  await analyzeNow(page,{silent:true});
+  await expect(page.locator('#typingPreviewButton')).toHaveClass(/typewriterRecommended/);await expect(rewrite).not.toHaveClass(/rewriteReady/);
+  await expect(next).toContainText('결과 준비');
+  await expect(page.locator('#resultTabCleaned')).toHaveAttribute('aria-selected','true');await expect(page.locator('#resultTabDiff')).toHaveAttribute('aria-selected','false');
+  await page.locator('#resultTabCleaned').focus();await page.keyboard.press('ArrowRight');await expect(page.locator('#resultTabCleaned')).toHaveAttribute('aria-selected','false');await expect(page.locator('#resultTabDiff')).toHaveAttribute('aria-selected','true');await expect(page.locator('#resultTabDiff')).toBeFocused();
+  await page.keyboard.press('ArrowLeft');await expect(page.locator('#resultTabCleaned')).toHaveAttribute('aria-selected','true');await expect(page.locator('#resultTabCleaned')).toBeFocused();
+  await page.locator('#typingPreviewSpeed').evaluate(el=>{el.value='0';el.dispatchEvent(new Event('change',{bubbles:true}));});await page.locator('#typingPreviewButton').click();
+  await expect(page.locator('#output')).toHaveAttribute('data-typewriter-verified','true',{timeout:7000});await expect(next).toContainText('자동작성 완료');await expect(rewrite).toHaveClass(/rewriteReady/);
+});
+
 test('mobile source actions stay on one compact row and result tabs align to the right of the result title', async ({ page }) => {
   await page.setViewportSize({width:390,height:844});await gotoReady(page);
   const sourceGeometry=await page.locator('#sample, .sourceActions .filelabel, #reset').evaluateAll(nodes=>nodes.map(el=>{const r=el.getBoundingClientRect();return{top:Math.round(r.top),bottom:Math.round(r.bottom),height:Math.round(r.height)};}));

@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.6.5",
+  "version": "1.6.6",
   "date": "2026-08-16",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -43,12 +43,12 @@
     "ai-cleaner/js/workers/text-analysis-worker.js"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.6.5",
-  "asset_version": "165",
+  "current_version": "1.6.6",
+  "asset_version": "166",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.6.5 Async Intent & UX Guidance: invalidate stale rewrite lazy-open requests after newer navigation intent, align E2E textarea/state timing contracts, keep mobile source actions on one row, keep result tabs on the right of the result title, and clarify the internal result Typewriter flow in hero/reference copy",
+  "latestPatch": "1.6.6 UX Priority & Completion Flow Audit: keep Typewriter as the sole source-stage recommendation, add state-aware result next-step guidance, surface Rewrite Studio after verified completion, add accessible result tab semantics, file-picker keyboard focus, and TXT save feedback",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -127,7 +127,7 @@
     "breakpointExpansionReset": true,
     "safeAreaViewportFitCover": true
   },
-  "nextPhase": "1.6.6 UX Priority & Completion Flow Audit after 1.6.5 GitHub browser-smoke is green",
+  "nextPhase": "1.6.7 final 1.6.x UX exception sweep after 1.6.6 GitHub browser-smoke is green",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -188,7 +188,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "165",
+  "assetVersion": "166",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -197,12 +197,13 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "179 passed / 0 failed",
+    "staticChecks": "184 passed / 0 failed",
     "moduleChecks": "PASS",
     "jsSyntax": "PASS",
     "workflowYaml": "PASS",
-    "localBrowserSmoke": "SYSTEM_CHROMIUM_FILE_RENDER_TIMEOUT_20S",
-    "browserE2EConfigured": "30 cases"
+    "localBrowserSmoke": "NOT_RUN_LOCAL_ENVIRONMENT",
+    "browserE2EConfigured": "31 cases",
+    "baseline165GitHubRun": "31954107010 GREEN"
   },
   "stabilityAudit131": {
     "updateOnlyWhenSemverNewer": true,
@@ -379,5 +380,16 @@
     "typewriterGuidanceClarified": true,
     "imageLazyLoadToken": true,
     "toolSwitchInvalidatesPendingImageRun": true
+  },
+  "uxPriority166": {
+    "sourceStageTypewriterPriority": true,
+    "rewriteAttentionAfterVerifiedTypewriter": true,
+    "stateAwareResultNextStep": true,
+    "accessibleResultTablist": true,
+    "resultTabArrowKeyNavigation": true,
+    "filePickerFocusWithin": true,
+    "txtSaveFeedback": true,
+    "browserCoverageConfigured": 31,
+    "delivered165UsedAsPatchBaseline": true
   }
 }

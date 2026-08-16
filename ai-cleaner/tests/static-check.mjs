@@ -33,6 +33,11 @@ if(!failures.length){
  /queueStats/.test(app)&&/targetChars\(\)/.test(rewrite)&&/queueDirectCompare/.test(rewrite)?pass('long-text UI batching','stats + direct verifier batched/cached'):fail('long-text UI batching','performance batching missing');
  /전화번호/.test(rewrite)&&/해시태그/.test(rewrite)&&/시간/.test(rewrite)?pass('Fact Lock coverage','phone + hashtag + time protected'):fail('Fact Lock coverage','extended locks missing');
  /revealAppliedResult/.test(app)&&/closeAllPanels/.test(app)&&/refreshSuggestionBaseline/.test(app)&&/resultApplied/.test(css)?pass('apply focus flow','close panel + refresh suggestions + reveal result'):fail('apply focus flow','missing focus-flow guards');
+ /id="resultNextStep"/.test(html)&&/syncCompletionFlowUi/.test(app)&&/자동작성 완료/.test(app)?pass('result completion guidance','state-aware next-step guide'):fail('result completion guidance','completion guide missing');
+ /role="tablist"/.test(html)&&/aria-selected="true"/.test(html)&&/setAttribute\('aria-selected'/.test(app)&&/ArrowRight/.test(app)&&/tabIndex=active\?0:-1/.test(app)?pass('accessible result tabs','tablist + aria-selected + roving keyboard focus'):fail('accessible result tabs','result tab semantics/keyboard navigation missing');
+ /typewriterIsNext/.test(app)&&/hasFreshResult/.test(app)&&/rewriteReady/.test(app)?pass('next-step visual priority','rewrite cue waits behind typewriter recommendation'):fail('next-step visual priority','competing result/rewrite cue guard missing');
+ /filelabel:focus-within/.test(css)?pass('file action keyboard focus','visible focus-within ring'):fail('file action keyboard focus','file picker focus cue missing');
+ /TXT 파일 저장을 시작했습니다/.test(app)?pass('TXT save feedback','visible save feedback'):fail('TXT save feedback','save feedback missing');
  /rewritePanel.*toBeHidden|toBeHidden\(\)/.test(e2e)?pass('browser apply-close coverage','rewrite apply closes panel'):fail('browser apply-close coverage','missing');
 
 

@@ -114,14 +114,15 @@
     <section class="card resultCard" id="resultCard" aria-label="다듬어진 결과">
       <div class="head resultHead">
         <div class="resultTitle"><b>결과</b><span class="resultFreshness" id="resultFreshness" role="status" aria-live="polite" hidden>최신 결과</span></div>
-        <div class="tabs">
-          <button class="tab active" type="button" data-resulttab="cleaned">정리본</button>
-          <button class="tab" type="button" data-resulttab="diff">변경 비교</button>
+        <div class="tabs" role="tablist" aria-label="결과 보기">
+          <button class="tab active" id="resultTabCleaned" type="button" role="tab" aria-selected="true" aria-controls="cleanedPane" tabindex="0" data-resulttab="cleaned">정리본</button>
+          <button class="tab" id="resultTabDiff" type="button" role="tab" aria-selected="false" aria-controls="diffPane" tabindex="-1" data-resulttab="diff">변경 비교</button>
         </div>
       </div>
       <div class="body">
-        <div id="cleanedPane">
+        <div id="cleanedPane" role="tabpanel" aria-labelledby="resultTabCleaned">
           <textarea id="output" class="resultarea" readonly spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false" placeholder="다듬기를 실행하면 결과가 표시됩니다."></textarea>
+          <div class="resultNextStep" id="resultNextStep" role="status" aria-live="polite" hidden></div>
           <div class="actions resultActions">
             <button class="btn primary" id="copy" type="button">결과 복사</button>
             <button class="btn" id="downloadTxt" type="button">TXT 저장</button>
@@ -131,7 +132,7 @@
             <button class="btn danger" id="undoAll" type="button">처음 결과</button>
           </div>
         </div>
-        <div id="diffPane" class="hidden">
+        <div id="diffPane" class="hidden" role="tabpanel" aria-labelledby="resultTabDiff">
           <div class="diffHead"><div><b>변경 비교</b><span class="sub">자동 정리 이후 현재 결과에서 달라진 부분만 보여줍니다.</span></div><span class="diffCount" id="diffCount">변경 0곳</span></div>
           <div id="diffList" class="diffList"><div class="empty">아직 달라진 내용이 없습니다.</div></div>
         </div>
