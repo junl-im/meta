@@ -185,6 +185,46 @@ test('mobile text input intent cancels a pending automatic result jump without r
   await page.locator('#typingPreviewPause').click();await expect(page.locator('#typingPreviewPanel')).toBeHidden();
 });
 
+test('sample button replaces the source through the shared pipeline and analyzes immediately', async ({ page }) => {
+  await gotoReady(page);await page.locator('#liveScan').uncheck();
+  await page.locator('#input').fill('이전 원본');await page.locator('#analyze').click();
+  await page.locator('#sample').click();
+  await expect(page.locator('#input')).toHaveValue(/AI가\u200B 쓴 글에는/);
+  await expect(page.locator('#output')).toContainText('AI가 쓴 글에는');
+  await expect(page.locator('#output')).not.toHaveValue(/\u200B|\u200E|\u00A0/);
+  await expect(page.locator('#resultFreshness')).toBeHidden();await expect(page.locator('#appToast')).toContainText('샘플을 불러오고 바로 다듬었습니다.');
+});
+
+test('text file import uses the same source replacement and freshness pipeline', async ({ page }) => {
+  await gotoReady(page);await page.locator('#liveScan').uncheck();
+  await page.locator('#textFileInput').setInputFiles({name:'source.txt',mimeType:'text/plain',buffer:Buffer.from('파일\u200B 입력 테스트\u00A0끝','utf8')});
+  await expect(page.locator('#input')).toHaveValue('파일\u200B 입력 테스트\u00A0끝');
+  await expect(page.locator('#output')).toHaveValue('파일 입력 테스트 끝');
+  await expect(page.locator('#resultFreshness')).toBeHidden();await expect(page.locator('#appToast')).toContainText('source.txt 파일을 열고 바로 다듬었습니다.');
+});
+
+test('manual analysis failure keeps the source and exposes a recoverable UI state', async ({ page }) => {
+  await gotoReady(page);await page.locator('#liveScan').uncheck();await page.locator('#input').fill('분석 오류 경계 테스트');
+  await page.evaluate(()=>{window.__originalAnalyzeForTest=window.AICleanerApp.textEngine.analyze;window.AICleanerApp.textEngine.analyze=()=>{throw new Error('forced analysis failure');};});
+  await page.locator('#analyze').click();await expect(page.locator('#input')).toHaveValue('분석 오류 경계 테스트');await expect(page.locator('#resultFreshness')).toBeVisible();await expect(page.locator('#textPerf')).toHaveText('오류');await expect(page.locator('#appToast')).toContainText('분석 중 오류');
+  await page.evaluate(()=>{window.AICleanerApp.textEngine.analyze=window.__originalAnalyzeForTest;delete window.__originalAnalyzeForTest;});await page.locator('#analyze').click();await expect(page.locator('#resultFreshness')).toBeHidden();
+});
+
+test('rejected image input leaves a clear status and releases shared work locks', async ({ page }) => {
+  await gotoReady(page);await page.locator('[data-tool="image"]').click();
+  await page.locator('#imageInput').setInputFiles({name:'not-image.gif',mimeType:'image/gif',buffer:Buffer.from('GIF89a','ascii')});
+  await expect(page.locator('#imageLoadStatus')).toContainText('지원하지 않는 형식');
+  await expect.poll(async()=>page.evaluate(()=>window.AICleanerApp.workLock.isLocked())).toBeFalsy();
+});
+
+test('direct typing progress survives rewrite tab and panel round trips until the original changes', async ({ page }) => {
+  await gotoReady(page);await page.locator('#liveScan').uncheck();await page.locator('#input').fill('ABC123');await page.locator('#analyze').click();await page.locator('#rewriteWidget').click();await page.locator('[data-rewrite-tab="verify"]').click();
+  await page.locator('#directTyped').click();await page.keyboard.type('ABC');await expect(page.locator('#directTyped')).toHaveValue('ABC');await expect(page.locator('#directProgress')).toHaveText('3 / 6');
+  await page.locator('[data-rewrite-tab="draft"]').click();await page.locator('[data-rewrite-tab="verify"]').click();await expect(page.locator('#directTyped')).toHaveValue('ABC');
+  await page.locator('[data-close-panel="rewritePanel"]').click();await page.locator('#rewriteWidget').click();await expect(page.locator('#rewriteVerifyPane')).toBeVisible();await expect(page.locator('#directTyped')).toHaveValue('ABC');
+  await page.locator('#input').fill('XYZ');await expect(page.locator('#directTyped')).toHaveValue('');
+});
+
 test('foundation flow keeps state, layout and rewrite tools coherent', async ({ page }) => {
   await gotoReady(page);
   await expect(page.locator('#versionBadge')).toHaveText('v'+APP_VERSION);

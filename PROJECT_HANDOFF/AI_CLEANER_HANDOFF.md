@@ -397,3 +397,13 @@
 - Touch-capable devices use the OS-native editor context menu for normal text fields; the original-direct-write verifier keeps its independent paste/drop/synthetic-input blocking.
 - Transient result/rewrite visual timers are isolated and page suspension clears their classes/timers. JSON diagnostic export now refreshes stale analysis before producing a report.
 - Browser E2E configuration is 21 cases; static architecture checks are 163/0 and module checks PASS. The single local Playwright dependency-install attempt timed out at 120 seconds, was not retried, and partial install artifacts were removed. GitHub `browser-smoke` remains the final Chromium gate.
+
+## 1.6.3 Functional Wiring & Source Pipeline Audit
+- Baseline is the actually delivered `AI_Cleaner_1_6_2_FULL_PROJECT_HANDOFF.zip`; `OPTION/**` remains protected.
+- Sample, text-file import, update restore, and real input are routed through a shared source-mutation boundary so dirty/freshness state, result-navigation cancellation, statistics/widgets, rewrite invalidation, and analysis scheduling cannot drift between input origins. Sample has explicit browser regression coverage and success feedback.
+- Synchronous/manual analysis now has a recovery boundary: the source is retained, stale state remains actionable, performance shows `오류`, and the user gets a visible message if analysis throws.
+- All static buttons and dynamically rendered issue action buttons explicitly use `type="button"`.
+- Image analysis is awaited by the app, uses per-run shared Work Locks, can be cancelled on tool/page lifecycle changes, has decode/Exif/C2PA time bounds, and no longer leaves a stale “engine preparing” message for rejected files.
+- Direct-write verification keeps progress across Rewrite Studio tab/panel round trips while the original is unchanged, resets on original change, and blocks automatic update while trusted direct-typing progress exists because that progress is not serialized across reloads.
+- Browser E2E is configured for 26 cases. Local static 170/0, module PASS, JS/MJS syntax PASS, workflow YAML PASS. System Chromium cannot access local/private HTTP origins in this execution environment; GitHub Actions `browser-smoke` remains the final browser gate.
+

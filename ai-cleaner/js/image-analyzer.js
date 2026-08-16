@@ -15,7 +15,7 @@ let currentObjectUrl=null;
 let c2paModulePromise=null;
 let c2paInstancePromise=null;
 let exifScriptPromise=null;
-let analysisSeq=0;
+let analysisSeq=0,analysisBusy=false;
 
 const q=(s)=>document.querySelector(s);
 const setText=(id,value)=>{const el=q('#'+id);if(el)el.textContent=value==null||value===''?'—':String(value);};
@@ -35,6 +35,8 @@ const corr=(a,b)=>{
   const num=n*sab-sa*sb,da=n*saa-sa*sa,db=n*sbb-sb*sb;
   return num/Math.sqrt(Math.max(1e-12,da*db));
 };
+function withRejectTimeout(promise,ms,message){let timer;const timeout=new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(message)),ms);});return Promise.race([promise,timeout]).finally(()=>clearTimeout(timer));}
+function timeoutValue(promise,ms,value){let timer;const timeout=new Promise(resolve=>{timer=setTimeout(()=>resolve(value),ms);});return Promise.race([promise,timeout]).finally(()=>clearTimeout(timer));}
 
 function inferMime(file){
   if(file.type)return file.type;
@@ -267,28 +269,30 @@ function renderResults(file,img,binary,exif,c2pa,visual){
   if(!evidence.children.length)addEvidence(evidence,'ok','강한 명시적 출처 신호 미발견','메타데이터 부재만으로 사람이 만든 이미지라고 단정할 수는 없습니다.');
 }
 
+window.cancelImageAnalysis=function cancelImageAnalysis({status='이미지 분석을 중지했습니다.'}={}){if(!analysisBusy)return false;analysisSeq++;analysisBusy=false;setText('imageLoadStatus',status);setText('imagePerf','대기');return true;};
 window.loadImage=async function loadImageStrong(file){
-  const seq=++analysisSeq,t0=performance.now();
+  const t0=performance.now();if(analysisBusy){analysisSeq++;analysisBusy=false;}
   const allowed=/^image\/(png|jpeg|webp)$/i.test(file.type)||/\.(png|jpe?g|webp)$/i.test(file.name||'');
-  if(!allowed){alert('PNG, JPG, WebP만 지원합니다.');return;}
-  if(file.size>MAX_IMAGE_FILE_BYTES){alert('50MB가 넘는 이미지는 브라우저 메모리 보호를 위해 열지 않습니다.');return;}
-  setText('imageLoadStatus','파일 읽는 중…');setText('imagePerf','준비');
+  if(!allowed){setText('imageLoadStatus','지원하지 않는 형식 · PNG, JPG, WebP만 지원');setText('imagePerf','대기');window.AICleanerApp?.showToast?.('PNG, JPG, WebP 이미지만 열 수 있습니다.');return false;}
+  if(file.size>MAX_IMAGE_FILE_BYTES){setText('imageLoadStatus','파일이 너무 큼 · 50MB 이하 이미지를 사용해 주세요.');setText('imagePerf','대기');window.AICleanerApp?.showToast?.('50MB 이하 이미지를 사용해 주세요.');return false;}
+  const seq=++analysisSeq;analysisBusy=true;setText('imageLoadStatus','파일 읽는 중…');setText('imagePerf','준비');
   let nextObjectUrl='';
   try{
     const binaryPromise=scanBinaryFile(file);
     nextObjectUrl=URL.createObjectURL(file);
     const img=new Image(),loaded=new Promise((resolve,reject)=>{img.onload=()=>resolve(img);img.onerror=()=>reject(new Error('브라우저에서 이미지를 디코딩하지 못했습니다.'));});img.src=nextObjectUrl;
-    const [image,binary,exif,c2pa]=await Promise.all([loaded,binaryPromise,inspectExif(file),inspectC2pa(file)]);if(seq!==analysisSeq){URL.revokeObjectURL(nextObjectUrl);return;}
+    const exifPromise=timeoutValue(inspectExif(file),10000,{ok:false,error:'ExifReader 응답 시간 초과'}),c2paPromise=timeoutValue(inspectC2pa(file),12000,{ok:false,error:'C2PA 검사 응답 시간 초과'});
+    const [image,binary,exif,c2pa]=await Promise.all([withRejectTimeout(loaded,15000,'이미지 디코딩 시간이 너무 깁니다.'),binaryPromise,exifPromise,c2paPromise]);if(seq!==analysisSeq){URL.revokeObjectURL(nextObjectUrl);return false;}
     if(image.naturalWidth*image.naturalHeight>MAX_IMAGE_PIXELS)throw new Error('이미지 해상도가 너무 큽니다. 6천만 픽셀 이하 이미지를 사용해 주세요.');
-    setText('imageLoadStatus','픽셀 분석 중…');await new Promise(resolve=>requestAnimationFrame(resolve));if(seq!==analysisSeq){URL.revokeObjectURL(nextObjectUrl);return;}
-    const visual=analyzePixels(image);if(seq!==analysisSeq){URL.revokeObjectURL(nextObjectUrl);return;}
+    setText('imageLoadStatus','픽셀 분석 중…');await new Promise(resolve=>requestAnimationFrame(resolve));if(seq!==analysisSeq){URL.revokeObjectURL(nextObjectUrl);return false;}
+    const visual=analyzePixels(image);if(seq!==analysisSeq){URL.revokeObjectURL(nextObjectUrl);return false;}
     if(currentObjectUrl)URL.revokeObjectURL(currentObjectUrl);currentObjectUrl=nextObjectUrl;nextObjectUrl='';
     renderResults(file,image,binary,exif,c2pa,visual);
-    const ms=performance.now()-t0;setText('imagePerf',`${ms.toFixed(0)}ms`);setText('imageLoadStatus','완료 · 메타데이터 + C2PA + 시각 통계');
+    const ms=performance.now()-t0;setText('imagePerf',`${ms.toFixed(0)}ms`);setText('imageLoadStatus','완료 · 메타데이터 + C2PA + 시각 통계');return true;
   }catch(err){
     if(nextObjectUrl)URL.revokeObjectURL(nextObjectUrl);
-    if(seq!==analysisSeq)return;
-    console.error(err);setText('imagePerf','오류');setText('imageLoadStatus',`분석 오류 · ${String(err&&err.message?err.message:err)}`);
-  }
+    if(seq!==analysisSeq)return false;
+    console.error(err);setText('imagePerf','오류');setText('imageLoadStatus',`분석 오류 · ${String(err&&err.message?err.message:err)}`);return false;
+  }finally{if(seq===analysisSeq)analysisBusy=false;}
 };
 })();

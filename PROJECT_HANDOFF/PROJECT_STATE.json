@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "date": "2026-08-16",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -43,12 +43,12 @@
     "ai-cleaner/js/workers/text-analysis-worker.js"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.6.2",
-  "asset_version": "162",
+  "current_version": "1.6.3",
+  "asset_version": "163",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.6.2 deep integration/lifecycle safety audit: rewrite session one-time restore, generation work-lock/tool-switch/pagehide cleanup, abortable update checks with fail-closed draft persistence, input-intent result navigation guard, touch-native editor context menu, and transient visual timer isolation",
+  "latestPatch": "1.6.3 functional wiring/source pipeline audit: sample + file + update restore share source mutation flow, sync analysis error boundary, explicit button types, awaited/cancellable image analysis with work-lock and timeouts, and direct-typing continuity/update protection",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -127,7 +127,7 @@
     "breakpointExpansionReset": true,
     "safeAreaViewportFitCover": true
   },
-  "nextPhase": "1.7.0 feature/UX stage after 1.6.2 GitHub browser-smoke is green; use another 1.6.x patch only for a concrete regression",
+  "nextPhase": "1.7.0 feature/UX stage after 1.6.3 GitHub browser-smoke is green; use another 1.6.x patch only for a concrete regression",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -188,7 +188,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "162",
+  "assetVersion": "163",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -197,12 +197,12 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "163 passed / 0 failed",
+    "staticChecks": "170 passed / 0 failed",
     "moduleChecks": "PASS",
     "jsSyntax": "PASS",
     "workflowYaml": "PASS",
-    "localBrowserSmoke": "NOT_RUN_INSTALL_TIMEOUT",
-    "browserE2EConfigured": "21 cases"
+    "localBrowserSmoke": "NOT_RUN_SYSTEM_CHROMIUM_LOCALHOST_BLOCKED",
+    "browserE2EConfigured": "26 cases"
   },
   "stabilityAudit131": {
     "updateOnlyWhenSemverNewer": true,
@@ -338,5 +338,22 @@
     "jsonReportFreshnessGuard": true,
     "transientVisualTimersIsolated": true,
     "delivered161UsedAsPatchBaseline": true
+  },
+  "functionalWiringAudit163": {
+    "sharedSourceMutationPipeline": true,
+    "sampleButtonRegressionCoverage": true,
+    "fileImportSourcePipelineCoverage": true,
+    "manualAnalysisErrorBoundary": true,
+    "explicitButtonTypes": true,
+    "dynamicIssueButtonTypes": true,
+    "imageAnalysisAwaited": true,
+    "imageAnalysisWorkLock": true,
+    "imageAnalysisCancellation": true,
+    "imageDependencyTimeouts": true,
+    "rejectedImageStatusRecovery": true,
+    "directTypingTabPanelContinuity": true,
+    "directTypingOriginalChangeReset": true,
+    "directTypingBlocksAutoUpdate": true,
+    "delivered162UsedAsPatchBaseline": true
   }
 }
