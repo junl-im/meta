@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "date": "2026-08-16",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -43,12 +43,12 @@
     "ai-cleaner/js/workers/text-analysis-worker.js"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.6.1",
-  "asset_version": "161",
+  "current_version": "1.6.2",
+  "asset_version": "162",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.6.1 mobile viewport exception audit: visualViewport-aware panel sizing, safe-area coverage, breakpoint reset, focused-control retention, and user-intent cancellation of delayed result navigation",
+  "latestPatch": "1.6.2 deep integration/lifecycle safety audit: rewrite session one-time restore, generation work-lock/tool-switch/pagehide cleanup, abortable update checks with fail-closed draft persistence, input-intent result navigation guard, touch-native editor context menu, and transient visual timer isolation",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -127,7 +127,7 @@
     "breakpointExpansionReset": true,
     "safeAreaViewportFitCover": true
   },
-  "nextPhase": "1.7.0 feature/UX stage after 1.6.1 GitHub browser-smoke is green; use 1.6.2 only for discovered edge regressions",
+  "nextPhase": "1.7.0 feature/UX stage after 1.6.2 GitHub browser-smoke is green; use another 1.6.x patch only for a concrete regression",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -188,7 +188,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "161",
+  "assetVersion": "162",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -197,11 +197,12 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "153 passed / 0 failed",
+    "staticChecks": "163 passed / 0 failed",
     "moduleChecks": "PASS",
     "jsSyntax": "PASS",
     "workflowYaml": "PASS",
-    "localBrowserSmoke": "NOT_RUN_INSTALL_TIMEOUT"
+    "localBrowserSmoke": "NOT_RUN_INSTALL_TIMEOUT",
+    "browserE2EConfigured": "21 cases"
   },
   "stabilityAudit131": {
     "updateOnlyWhenSemverNewer": true,
@@ -318,5 +319,24 @@
     "pagehideNavigationTimerCleanup": true,
     "expectedBrowserSmokeTests": 17,
     "patchBaseline": "AI_Cleaner_1_6_0_FULL_PROJECT_HANDOFF.zip"
+  },
+  "deepIntegrationAudit162": {
+    "rewriteSessionRestoredOncePerLoadedStudio": true,
+    "rapidRewriteCloseReopenKeepsLatestDraft": true,
+    "rewriteGenerationUsesSharedWorkLock": true,
+    "toolSwitchCancelsRewriteGeneration": true,
+    "pagehideCancelsRewriteGeneration": true,
+    "pagehideFlushesRewriteSession": true,
+    "updateFetchAbortOnStop": true,
+    "updateLateResponseInvalidated": true,
+    "updateRechecksWorkBeforeReload": true,
+    "updateDraftPersistenceFailClosed": true,
+    "failedLocationReplaceCanRetry": true,
+    "inputEventCancelsPendingResultNavigation": true,
+    "touchEditorsUseNativeContextMenu": true,
+    "directTypingPasteGuardPreserved": true,
+    "jsonReportFreshnessGuard": true,
+    "transientVisualTimersIsolated": true,
+    "delivered161UsedAsPatchBaseline": true
   }
 }

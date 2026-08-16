@@ -91,6 +91,15 @@ test('panel expansion state resets when crossing the mobile breakpoint', async (
   await page.setViewportSize({width:390,height:844});await expect(panel).not.toHaveClass(/mobileExpanded/);
 });
 
+
+test('touch devices keep the native editor context menu while direct typing paste protection remains separate', async ({ page }) => {
+  await page.addInitScript(()=>{try{Object.defineProperty(navigator,'maxTouchPoints',{configurable:true,get:()=>5});}catch(_){}});await page.setViewportSize({width:390,height:844});await gotoReady(page);
+  const nativeAllowed=await page.locator('#input').evaluate(el=>el.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:30,clientY:30})));
+  expect(nativeAllowed).toBeTruthy();await expect(page.locator('#textContextMenu')).toBeHidden();
+  await page.locator('#input').fill('직접 쓰기 보호 확인');await page.locator('#analyze').click();await page.locator('#rewriteWidget').click();await page.locator('[data-rewrite-tab="verify"]').click();
+  await page.locator('#directTyped').evaluate(el=>{const ev=new InputEvent('beforeinput',{bubbles:true,cancelable:true,inputType:'insertFromPaste',data:'PASTE'});el.dispatchEvent(ev);});await expect(page.locator('#directTyped')).toHaveValue('');
+});
+
 test('boot readiness blocks interaction until app wiring is complete', async ({ page }) => {
   await gotoReady(page);
   const ready=await page.evaluate(()=>({
@@ -148,6 +157,32 @@ test('rewrite source change cancels an in-flight draft transaction', async ({ pa
   await input.fill('결론적으로 생성 중 기준 글을 바꿨습니다. 가격은 19,900원입니다.');
   await expect(page.locator('#rewritePanel')).toHaveAttribute('aria-busy','false');await expect(page.locator('#rewritePanelStatus')).toContainText('기준 글이 바뀌어 생성 작업을 취소했습니다.');
   await expect(page.locator('#rewriteDraft')).toHaveValue('');await expect(page.locator('#rewriteApply')).toBeDisabled();
+});
+
+
+test('rewrite draft survives an immediate close and reopen before debounce persistence', async ({ page }) => {
+  await gotoReady(page);await page.locator('#input').fill('재작성 세션 즉시 재열기 테스트입니다. 가격은 19,900원입니다.');await page.locator('#analyze').click();
+  await page.locator('#rewriteWidget').click();await page.locator('#rewriteGenerate').click();await expect(page.locator('#rewriteDraft')).not.toHaveValue('');
+  const latest='방금 직접 수정한 초안 19,900원';await page.locator('#rewriteDraft').fill(latest);
+  await page.locator('[data-close-panel="rewritePanel"]').click();await page.locator('#rewriteWidget').click();
+  await expect(page.locator('#rewriteDraft')).toHaveValue(latest);await expect(page.locator('#rewritePanel')).toBeVisible();
+});
+
+test('switching to image tool cancels an in-flight rewrite generation and releases the work lock', async ({ page }) => {
+  await gotoReady(page);await page.locator('#input').fill('다른 도구 이동 중 재작성 취소 테스트입니다. 가격은 19,900원입니다.');await page.locator('#analyze').click();await page.locator('#rewriteWidget').click();
+  await page.evaluate(()=>{document.querySelector('#rewriteGenerate').click();document.querySelector('[data-tool="image"]').click();});
+  await expect(page.locator('#imageTool')).toBeVisible();await expect(page.locator('#rewritePanel')).toBeHidden();await expect(page.locator('#rewritePanel')).toHaveAttribute('aria-busy','false');
+  const lock=await page.evaluate(()=>window.AICleanerApp.workLock.isLocked('rewrite-generation'));expect(lock).toBeFalsy();await expect(page.locator('#rewriteDraft')).toHaveValue('');
+});
+
+test('mobile text input intent cancels a pending automatic result jump without relying on keydown or pointer events', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});await gotoReady(page);const input=page.locator('#input');
+  await input.fill('음성 입력과 IME처럼 input 이벤트만 와도 자동 결과 이동 예약을 취소해야 합니다.');
+  await page.locator('#typingPreviewSpeed').evaluate(el=>{el.value='0';el.dispatchEvent(new Event('change',{bubbles:true}));});await page.locator('#typingPreviewButton').click();
+  await expect(page.locator('#typingPreviewPause')).toHaveText('완료 · 결과 보기',{timeout:7000});
+  await input.evaluate(el=>{el.value+=' 추가';el.dispatchEvent(new Event('input',{bubbles:true}));});await page.waitForTimeout(1300);
+  await expect(page.locator('#typingPreviewPanel')).toBeVisible();await expect(page.locator('#resultFreshness')).toBeVisible();
+  await page.locator('#typingPreviewPause').click();await expect(page.locator('#typingPreviewPanel')).toBeHidden();
 });
 
 test('foundation flow keeps state, layout and rewrite tools coherent', async ({ page }) => {

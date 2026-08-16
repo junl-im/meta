@@ -386,3 +386,14 @@
 - E2E contract grows to 17 cases with user-intent cancellation, mobile visible-viewport bounds, and breakpoint expansion reset coverage.
 - Local static validation: 153/0; module/integration PASS; JS/MJS syntax PASS; workflow YAML PASS. The single local `npm install --ignore-scripts --no-audit --no-fund` attempt timed out at 120 seconds and was not retried; partial install/test artifacts were removed. GitHub `browser-smoke` is the final real-Chromium validation.
 - If 1.6.1 browser-smoke is green, the 1.6.x mobile exception/stability cycle can be closed and the next feature/UX phase can start at 1.7.0.
+
+
+## 1.6.2 Deep Integration & Lifecycle Safety Audit
+- Baseline is the actually delivered `AI_Cleaner_1_6_1_FULL_PROJECT_HANDOFF.zip`; `OPTION/**` remains protected and excluded.
+- Rewrite Studio session recovery is now one-time per loaded Studio instance. Rapid close/reopen before the 120ms draft debounce can no longer reload an older session snapshot over the newest in-memory draft.
+- Rewrite generation acquires the shared `rewrite-generation` Work Lock. Switching to another top-level tool or suspending the page cancels in-flight generation, releases the lock, and flushes the latest rewrite session.
+- Update Manager now aborts/invalidate in-flight checks on `stop()`, re-checks active work after fetch and before reload, refuses automatic reload when captured-draft persistence fails, and clears the reload guard when `location.replace()` throws so a later check can retry.
+- Delayed Typewriter result navigation now yields to plain `input` events as well as pointer/wheel/keyboard intent. This covers IME/dictation/autofill-style input-only flows.
+- Touch-capable devices use the OS-native editor context menu for normal text fields; the original-direct-write verifier keeps its independent paste/drop/synthetic-input blocking.
+- Transient result/rewrite visual timers are isolated and page suspension clears their classes/timers. JSON diagnostic export now refreshes stale analysis before producing a report.
+- Browser E2E configuration is 21 cases; static architecture checks are 163/0 and module checks PASS. The single local Playwright dependency-install attempt timed out at 120 seconds, was not retried, and partial install artifacts were removed. GitHub `browser-smoke` remains the final Chromium gate.
