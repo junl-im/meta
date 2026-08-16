@@ -120,4 +120,4 @@ function assert(ok,msg){if(!ok)throw new Error(msg);}
   const pm=M.createPanelManager({ids:['panel'],breakpoint:980,anchor:()=>panel});pm.setMobileExpanded(panel,true);assert(classes.has('mobileExpanded'),'mobile panel expansion setup failed');
   context.innerWidth=1100;context.innerHeight=700;pm.handleResize();assert(!classes.has('mobileExpanded'),'breakpoint transition must clear stale mobile expansion');assert(button.attrs['aria-expanded']==='false','panel size aria state must reset with breakpoint transition');
 }
-console.log('PASS 1.6.3 functional wiring + lifecycle integration unit checks');
+console.log('PASS 1.6.4 UX flow simplification + typewriter navigation integration unit checks');

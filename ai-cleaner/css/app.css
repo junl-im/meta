@@ -414,7 +414,7 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
 @media(max-width:620px){.sourceActions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.sourceActions>.btn,.sourceActions>.filelabel{width:100%;min-width:0}.resultTitle{width:100%;justify-content:space-between}.resultFreshness{max-width:68%;overflow:hidden;text-overflow:ellipsis}}
 @media(max-width:420px){.resultFreshness{font-size:8.5px;max-width:72%}}
 @media(prefers-reduced-motion:reduce){.resultarea.resultStale{transition:none}}
-.workspace>.card:first-child .actions.sourceActions{grid-template-columns:92px minmax(126px,1fr) minmax(104px,1fr) 92px}
+.workspace>.card:first-child .actions.sourceActions{grid-template-columns:92px minmax(150px,1fr) 92px}
 @media(max-width:760px){.workspace>.card:first-child .actions.sourceActions{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:360px){.workspace>.card:first-child .actions.sourceActions{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}}
 .rewriteTabs button:disabled{opacity:.46;cursor:not-allowed}
@@ -463,3 +463,15 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
 }
 @media(max-width:420px){.top{height:auto;min-height:calc(68px + env(safe-area-inset-top));padding:calc(7px + env(safe-area-inset-top)) 0 7px}}
 @media(prefers-reduced-motion:reduce){html.mobile-keyboard-visible .floatPanel{transition:none!important}}
+
+
+/* ===== 1.6.4 simplified source -> typewriter result flow ===== */
+#typingPreviewButton.typewriterRecommended{border-color:#ff7a00;box-shadow:0 0 0 5px rgba(255,248,240,.98),0 0 0 8px rgba(255,122,0,.18),0 12px 28px rgba(255,122,0,.34);animation:typewriterRecommendCue 1.15s ease 3}
+#typingPreviewButton.typewriterRecommended b{font-size:11px}
+#typingPreviewButton.typewriterRecommended small{font-size:9px;font-weight:900;opacity:1}
+#typingPreviewButton:disabled:not(.typewriterRunning){filter:saturate(.45);opacity:.58;cursor:not-allowed;box-shadow:0 0 0 4px rgba(255,248,240,.96),0 5px 12px rgba(43,29,18,.10)}
+.resultCard.typewriterDestinationActive{border-color:#ffb36d;box-shadow:0 0 0 3px rgba(255,122,0,.12),var(--shadow)}
+.resultCard.typewriterDestinationActive .resultTitle>b:after{content:" · 자동작성 중";color:#b85b00;font-size:9px;font-weight:850}
+@keyframes typewriterRecommendCue{0%,100%{transform:translateY(0) scale(1)}42%{transform:translateY(-2px) scale(1.025);box-shadow:0 0 0 5px rgba(255,248,240,.98),0 0 0 12px rgba(255,122,0,.10),0 14px 30px rgba(255,122,0,.38)}}
+@media(max-width:980px){#typingPreviewButton.typewriterRecommended{width:min(330px,88vw)}.resultCard.typewriterDestinationActive{box-shadow:0 0 0 3px rgba(255,122,0,.11),var(--shadow)}}
+@media(prefers-reduced-motion:reduce){#typingPreviewButton.typewriterRecommended{animation:none;outline:3px solid rgba(255,122,0,.22);outline-offset:3px}}

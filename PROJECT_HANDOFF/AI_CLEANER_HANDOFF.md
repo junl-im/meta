@@ -407,3 +407,14 @@
 - Direct-write verification keeps progress across Rewrite Studio tab/panel round trips while the original is unchanged, resets on original change, and blocks automatic update while trusted direct-typing progress exists because that progress is not serialized across reloads.
 - Browser E2E is configured for 26 cases. Local static 170/0, module PASS, JS/MJS syntax PASS, workflow YAML PASS. System Chromium cannot access local/private HTTP origins in this execution environment; GitHub Actions `browser-smoke` remains the final browser gate.
 
+
+
+## 1.6.4 UX Flow Simplification / Typewriter Next-Step Navigation
+- Patch baseline is the actually delivered `AI_Cleaner_1_6_3_FULL_PROJECT_HANDOFF.zip`; `OPTION/**` remains protected/excluded.
+- The visible `지금 다듬기` button is removed from the source card. It duplicated live analysis and freshness-aware internal analysis paths. `analyze()` remains available internally through `AICleanerApp.analyzeNow()` and `ensureFreshAnalysis()` so stale-safe copy/rewrite/typewriter flows do not lose their refresh boundary.
+- When live analysis is disabled and the source becomes stale, the status now says `원본 변경됨 · 다음 작업에서 자동 갱신` instead of instructing the user to find a removed manual button.
+- `자동작성 원본 새로쓰기` is disabled while no source exists. As soon as source text arrives through typing/paste, Sample, file import, or update restore, it becomes a highlighted next-step action with `다음 단계 · 눌러서 새로쓰기`. The cue does not continually restart on every keystroke.
+- Source mutation immediately clears any previous `data-typewriter-verified` marker so a new source cannot temporarily inherit an old visible-text verification state.
+- Starting `자동작성 원본 새로쓰기` now opens the progress panel and immediately aligns the viewport to the result card, while keeping the progress panel open. The result card gets a temporary `자동작성 중` state so the user sees the output being written in place. Completion behavior (`완료 · 결과 보기`, mobile auto-close/navigation, user-intent cancellation) remains intact.
+- Browser coverage adds the source-arrival recommendation and immediate-start navigation case. Existing manual-analysis test paths now invoke the internal analysis API rather than depending on removed UI.
+- Local validation before packaging: static/architecture 173 passed / 0 failed, module PASS, JS/MJS syntax PASS, workflow YAML PASS. GitHub Actions `browser-smoke` remains the real Chromium gate after push.

@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "date": "2026-08-16",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -43,12 +43,12 @@
     "ai-cleaner/js/workers/text-analysis-worker.js"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.6.3",
-  "asset_version": "163",
+  "current_version": "1.6.4",
+  "asset_version": "164",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.6.3 functional wiring/source pipeline audit: sample + file + update restore share source mutation flow, sync analysis error boundary, explicit button types, awaited/cancellable image analysis with work-lock and timeouts, and direct-typing continuity/update protection",
+  "latestPatch": "1.6.4 UX flow simplification: remove redundant visible manual analyze button, preserve internal on-demand freshness analysis, highlight 자동작성 원본 새로쓰기 as the next step when source arrives, and navigate to the result card immediately when Typewriter starts while keeping the progress panel open",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -127,7 +127,7 @@
     "breakpointExpansionReset": true,
     "safeAreaViewportFitCover": true
   },
-  "nextPhase": "1.7.0 feature/UX stage after 1.6.3 GitHub browser-smoke is green; use another 1.6.x patch only for a concrete regression",
+  "nextPhase": "1.7.0 feature/UX stage after 1.6.4 GitHub browser-smoke is green; use another 1.6.x patch only for a concrete regression",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -188,7 +188,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "163",
+  "assetVersion": "164",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -355,5 +355,17 @@
     "directTypingOriginalChangeReset": true,
     "directTypingBlocksAutoUpdate": true,
     "delivered162UsedAsPatchBaseline": true
+  },
+  "uxFlowAudit164": {
+    "visibleManualAnalyzeRemoved": true,
+    "internalOnDemandAnalysisPreserved": true,
+    "typewriterDisabledWithoutSource": true,
+    "typewriterRecommendedOnSourceArrival": true,
+    "typewriterRecommendationCopy": "다음 단계 · 눌러서 새로쓰기",
+    "typewriterImmediateResultNavigationOnStart": true,
+    "progressPanelRemainsOpenDuringImmediateNavigation": true,
+    "staleTypewriterVerificationClearedOnSourceMutation": true,
+    "browserCoverageConfigured": 27,
+    "delivered163UsedAsPatchBaseline": true
   }
 }
