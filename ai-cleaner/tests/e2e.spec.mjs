@@ -50,6 +50,16 @@ test('source arrival highlights typewriter as the next step and start navigates 
   await expect(page.locator('#typingPreviewPanel')).toBeVisible();await page.keyboard.press('Escape');await expect(page.locator('#typingPreviewPanel')).toBeHidden();
 });
 
+
+
+test('mobile source actions stay on one compact row and result tabs align to the right of the result title', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});await gotoReady(page);
+  const sourceGeometry=await page.locator('#sample, .sourceActions .filelabel, #reset').evaluateAll(nodes=>nodes.map(el=>{const r=el.getBoundingClientRect();return{top:Math.round(r.top),bottom:Math.round(r.bottom),height:Math.round(r.height)};}));
+  expect(sourceGeometry).toHaveLength(3);expect(Math.max(...sourceGeometry.map(x=>x.top))-Math.min(...sourceGeometry.map(x=>x.top))).toBeLessThanOrEqual(2);expect(Math.max(...sourceGeometry.map(x=>x.height))).toBeLessThanOrEqual(38);
+  await page.locator('#liveScan').uncheck();await page.locator('#input').fill('결과 상태 안내가 보여도 탭은 같은 줄 오른쪽에 있어야 합니다.');await expect(page.locator('#resultFreshness')).toBeVisible();
+  const resultLayout=await page.locator('#resultCard').evaluate(card=>{const title=card.querySelector('.resultTitle').getBoundingClientRect(),tabs=card.querySelector('.tabs').getBoundingClientRect(),head=card.querySelector('.resultHead').getBoundingClientRect();return{titleTop:Math.round(title.top),tabsTop:Math.round(tabs.top),titleRight:Math.round(title.right),tabsLeft:Math.round(tabs.left),headRight:Math.round(head.right),tabsRight:Math.round(tabs.right)};});
+  expect(Math.abs(resultLayout.titleTop-resultLayout.tabsTop)).toBeLessThanOrEqual(8);expect(resultLayout.tabsLeft).toBeGreaterThanOrEqual(resultLayout.titleRight-4);expect(resultLayout.tabsRight).toBeLessThanOrEqual(resultLayout.headRight+1);
+});
 test('mobile typewriter completion button closes the panel and navigates to the result card', async ({ page }) => {
   await page.setViewportSize({width:390,height:844});await gotoReady(page);
   await page.locator('#input').fill('모바일 자동작성 완료 버튼 테스트입니다. 결과 위치로 바로 이동해야 합니다.');
@@ -183,9 +193,17 @@ test('rewrite draft survives an immediate close and reopen before debounce persi
 
 test('switching to image tool cancels an in-flight rewrite generation and releases the work lock', async ({ page }) => {
   await gotoReady(page);await page.locator('#input').fill('다른 도구 이동 중 재작성 취소 테스트입니다. 가격은 19,900원입니다.');await analyzeNow(page);await page.locator('#rewriteWidget').click();
-  await page.evaluate(()=>{document.querySelector('#rewriteGenerate').click();document.querySelector('[data-tool="image"]').click();});
+  await expect(page.locator('#rewritePanel')).toBeVisible();await page.locator('#rewriteGenerate').click();await expect(page.locator('#rewritePanel')).toHaveAttribute('aria-busy','true');
+  await page.locator('[data-tool="image"]').click();
   await expect(page.locator('#imageTool')).toBeVisible();await expect(page.locator('#rewritePanel')).toBeHidden();await expect(page.locator('#rewritePanel')).toHaveAttribute('aria-busy','false');
   const lock=await page.evaluate(()=>window.AICleanerApp.workLock.isLocked('rewrite-generation'));expect(lock).toBeFalsy();await expect(page.locator('#rewriteDraft')).toHaveValue('');
+});
+
+test('switching tools while rewrite lazy loading is pending cannot reopen the rewrite panel', async ({ page }) => {
+  await gotoReady(page);await page.locator('#input').fill('재작성 도구가 늦게 로드되어도 다른 도구 위에 다시 열리면 안 됩니다.');await analyzeNow(page);
+  await page.route('**/js/rewrite-studio.js*',async route=>{await new Promise(r=>setTimeout(r,280));await route.continue();});
+  await page.locator('#rewriteWidget').click();await page.locator('[data-tool="image"]').click();await expect(page.locator('#imageTool')).toBeVisible();
+  await expect.poll(async()=>page.evaluate(()=>!!window.AICleanerRewriteStudio),{timeout:5000}).toBeTruthy();await expect(page.locator('#rewritePanel')).toBeHidden();
 });
 
 test('mobile text input intent cancels a pending automatic result jump without relying on keydown or pointer events', async ({ page }) => {
@@ -194,7 +212,7 @@ test('mobile text input intent cancels a pending automatic result jump without r
   await page.locator('#typingPreviewSpeed').evaluate(el=>{el.value='0';el.dispatchEvent(new Event('change',{bubbles:true}));});await page.locator('#typingPreviewButton').click();
   await expect(page.locator('#typingPreviewPause')).toHaveText('완료 · 결과 보기',{timeout:7000});
   await input.evaluate(el=>{el.value+=' 추가';el.dispatchEvent(new Event('input',{bubbles:true}));});await page.waitForTimeout(1300);
-  await expect(page.locator('#typingPreviewPanel')).toBeVisible();await expect(page.locator('#resultFreshness')).toBeVisible();
+  await expect(page.locator('#typingPreviewPanel')).toBeVisible();await expect(input).toHaveValue(/추가$/);
   await page.locator('#typingPreviewPause').click();await expect(page.locator('#typingPreviewPanel')).toBeHidden();
 });
 
@@ -203,7 +221,7 @@ test('sample button replaces the source through the shared pipeline and analyzes
   await page.locator('#input').fill('이전 원본');await analyzeNow(page);
   await page.locator('#sample').click();
   await expect(page.locator('#input')).toHaveValue(/AI가\u200B 쓴 글에는/);
-  await expect(page.locator('#output')).toContainText('AI가 쓴 글에는');
+  await expect(page.locator('#output')).toHaveValue(/AI가 쓴 글에는/);
   await expect(page.locator('#output')).not.toHaveValue(/\u200B|\u200E|\u00A0/);
   await expect(page.locator('#resultFreshness')).toBeHidden();await expect(page.locator('#appToast')).toContainText('샘플을 불러오고 바로 다듬었습니다.');
 });
@@ -228,6 +246,16 @@ test('rejected image input leaves a clear status and releases shared work locks'
   await page.locator('#imageInput').setInputFiles({name:'not-image.gif',mimeType:'image/gif',buffer:Buffer.from('GIF89a','ascii')});
   await expect(page.locator('#imageLoadStatus')).toContainText('지원하지 않는 형식');
   await expect.poll(async()=>page.evaluate(()=>window.AICleanerApp.workLock.isLocked())).toBeFalsy();
+});
+
+test('switching away while image analyzer lazy loading is pending prevents hidden analysis and releases the work lock', async ({ page }) => {
+  await gotoReady(page);await page.locator('[data-tool="image"]').click();
+  await page.route('**/js/image-analyzer.js*',async route=>{await new Promise(r=>setTimeout(r,280));await route.continue();});
+  const pixel=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl2q9sAAAAASUVORK5CYII=','base64');
+  await page.locator('#imageInput').setInputFiles({name:'tiny.png',mimeType:'image/png',buffer:pixel});
+  await expect.poll(async()=>page.evaluate(()=>window.AICleanerApp.workLock.isLocked())).toBeTruthy();await page.locator('[data-tool="text"]').click();await expect(page.locator('#textTool')).toBeVisible();
+  await expect.poll(async()=>page.evaluate(()=>typeof window.loadImage==='function'),{timeout:5000}).toBeTruthy();await expect.poll(async()=>page.evaluate(()=>window.AICleanerApp.workLock.isLocked())).toBeFalsy();
+  await expect(page.locator('#imageResults')).toBeHidden();await expect(page.locator('#imageLoadStatus')).toContainText('중지');
 });
 
 test('direct typing progress survives rewrite tab and panel round trips until the original changes', async ({ page }) => {

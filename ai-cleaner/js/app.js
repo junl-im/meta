@@ -51,6 +51,8 @@ let inputDirty=false;
 let typewriterDisabledState=new Map();
 const REWRITE_SESSION_KEY='ai-cleaner-rewrite-session-v3';
 const PANEL_TRIGGER_IDS={typingPreviewPanel:'typingPreviewButton',issuesPanel:'issuesWidget',reviewPanel:'reviewWidget',rewritePanel:'rewriteWidget',techPanel:'techWidget'};
+let rewriteOpenSeq=0;
+function invalidatePendingRewriteOpen(){rewriteOpenSeq++;return rewriteOpenSeq;}
 
 function syncPanelAria(){
   for(const [panelId,triggerId] of Object.entries(PANEL_TRIGGER_IDS)){const panel=$('#'+panelId),trigger=$('#'+triggerId);if(trigger)trigger.setAttribute('aria-expanded',String(!!panel&&!panel.hidden));}
@@ -455,10 +457,11 @@ function dismissMobileKeyboard(){
   if(innerWidth>PANEL_SHEET_BREAKPOINT)return;const active=document.activeElement;if(active&&/^(TEXTAREA|INPUT|SELECT)$/.test(active.tagName))try{active.blur();}catch(_){}
 }
 function setMobilePanelExpanded(panel,expanded){panelManager.setMobileExpanded(panel,expanded);}
-function closeAllPanels(except=''){if(except!=='rewritePanel'&&!$('#rewritePanel').hidden)window.AICleanerRewriteStudio?.cancelGeneration?.({status:'패널을 닫아 생성 작업을 취소했습니다.'});panelManager.closeAll(except);syncPanelAria();}
+function closeAllPanels(except=''){if(except!=='rewritePanel')invalidatePendingRewriteOpen();if(except!=='rewritePanel'&&!$('#rewritePanel').hidden)window.AICleanerRewriteStudio?.cancelGeneration?.({status:'패널을 닫아 생성 작업을 취소했습니다.'});panelManager.closeAll(except);syncPanelAria();}
 function openPanel(id){
   if(innerWidth<=PANEL_SHEET_BREAKPOINT)dismissMobileKeyboard();
   cancelResultNavigation();
+  if(id!=='rewritePanel')invalidatePendingRewriteOpen();
   if(id!=='rewritePanel'&&!$('#rewritePanel').hidden)window.AICleanerRewriteStudio?.cancelGeneration?.({status:'다른 도구로 이동해 생성 작업을 취소했습니다.'});
   if(id==='issuesPanel')renderIssues();
   if(id==='reviewPanel'&&(state.reviewsDirty||!state.reviews.length))buildReviews();
@@ -648,8 +651,8 @@ $('#textFileInput').addEventListener('change',async e=>{
 $$('[data-resulttab]').forEach(t=>t.onclick=()=>activateResultTab(t.dataset.resulttab));
 
 $$('[data-tool]').forEach(b=>b.onclick=()=>{
-  if(b.dataset.tool!=='text'){try{window.AICleanerRewriteStudio?.saveSession?.();}catch(_){}window.AICleanerRewriteStudio?.cancelGeneration?.({status:'다른 도구로 이동해 생성 작업을 취소했습니다.'});closeAllPanels();}
-  if(b.dataset.tool!=='image')window.cancelImageAnalysis?.({status:'다른 도구로 이동해 이미지 분석을 중지했습니다.'});
+  if(b.dataset.tool!=='text'){invalidatePendingRewriteOpen();try{window.AICleanerRewriteStudio?.saveSession?.();}catch(_){}window.AICleanerRewriteStudio?.cancelGeneration?.({status:'다른 도구로 이동해 생성 작업을 취소했습니다.'});closeAllPanels();}
+  if(b.dataset.tool!=='image'){invalidatePendingImageRun({status:'다른 도구로 이동해 이미지 분석을 중지했습니다.'});window.cancelImageAnalysis?.({status:'다른 도구로 이동해 이미지 분석을 중지했습니다.'});}
   $$('[data-tool]').forEach(x=>x.classList.toggle('active',x===b));$('#textTool').classList.toggle('hidden',b.dataset.tool!=='text');$('#imageTool').classList.toggle('hidden',b.dataset.tool!=='image');syncWidgets();
 });
 
@@ -668,17 +671,18 @@ window.AICleanerApp={
   },
   openPanel,closeAllPanels,revealAppliedResult
 };
-$('#rewriteWidget').onclick=async()=>{try{showToast('재작성 스튜디오를 여는 중…');const studio=await ensureRewriteStudio();openPanel('rewritePanel');studio.open();}catch(err){console.error(err);showToast('재작성 도구를 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.');}};
+$('#rewriteWidget').onclick=async()=>{const request=++rewriteOpenSeq;try{showToast('재작성 스튜디오를 여는 중…');const studio=await ensureRewriteStudio();if(request!==rewriteOpenSeq||!document.querySelector('[data-tool="text"]')?.classList.contains('active'))return;openPanel('rewritePanel');if(request!==rewriteOpenSeq)return;studio.open();}catch(err){if(request!==rewriteOpenSeq)return;console.error(err);showToast('재작성 도구를 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.');}};
 $('#issuesWidget').onclick=()=>openPanel('issuesPanel');$('#reviewWidget').onclick=()=>openPanel('reviewPanel');$('#techWidget').onclick=()=>openPanel('techPanel');
 $$('[data-close-panel]').forEach(b=>b.onclick=()=>{const p=$('#'+b.dataset.closePanel);if(p?.id==='rewritePanel')window.AICleanerRewriteStudio?.cancelGeneration?.({status:'패널을 닫아 생성 작업을 취소했습니다.'});p.hidden=true;setMobilePanelExpanded(p,false);syncPanelAria();});
 $$('[data-panel-size]').forEach(b=>b.onclick=(e)=>{e.stopPropagation();const p=$('#'+b.dataset.panelSize);if(!p||innerWidth>PANEL_SHEET_BREAKPOINT)return;setMobilePanelExpanded(p,!p.classList.contains('mobileExpanded'));requestAnimationFrame(()=>p.querySelector('.floatBody')?.scrollTo({top:0,behavior:preferredScrollBehavior()}));});
 makeDraggable($('#typingPreviewPanel'));makeDraggable($('#issuesPanel'));makeDraggable($('#reviewPanel'));makeDraggable($('#rewritePanel'));makeDraggable($('#techPanel'));
 
 const dz=$('#dropzone'),fi=$('#imageInput');let imageRunSeq=0;
+function invalidatePendingImageRun({status='이미지를 선택하면 검사를 시작합니다.'}={}){imageRunSeq++;const el=$('#imageLoadStatus');if(el?.textContent==='이미지 검사 엔진 준비 중…')el.textContent=status;return imageRunSeq;}
 const runImage=async(f)=>{
-  if(!f)return false;const lockName=`image-analysis-${++imageRunSeq}`;workLock.acquire(lockName,{name:f.name||'image'});
-  try{$('#imageLoadStatus').textContent='이미지 검사 엔진 준비 중…';const loadImage=await ensureImageAnalyzer();return await loadImage(f);}
-  catch(err){console.error(err);$('#imageLoadStatus').textContent='이미지 검사 엔진을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.';showToast('이미지 검사 중 오류가 발생했습니다.');return false;}
+  if(!f)return false;const run=++imageRunSeq,lockName=`image-analysis-${run}`;workLock.acquire(lockName,{name:f.name||'image'});
+  try{$('#imageLoadStatus').textContent='이미지 검사 엔진 준비 중…';const loadImage=await ensureImageAnalyzer();if(run!==imageRunSeq||!document.querySelector('[data-tool="image"]')?.classList.contains('active'))return false;return await loadImage(f);}
+  catch(err){if(run!==imageRunSeq)return false;console.error(err);$('#imageLoadStatus').textContent='이미지 검사 엔진을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.';showToast('이미지 검사 중 오류가 발생했습니다.');return false;}
   finally{workLock.release(lockName);}
 };
 $('#openImage').onclick=()=>fi.click();dz.onclick=e=>{if(!e.target.closest('#openImage'))fi.click();};fi.onchange=()=>{const f=fi.files&&fi.files[0];if(f)runImage(f);fi.value='';};
@@ -686,6 +690,7 @@ $('#openImage').onclick=()=>fi.click();dz.onclick=e=>{if(!e.target.closest('#ope
 dz.addEventListener('drop',e=>{const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(f)runImage(f);});
 
 function suspendPageWork(){
+  invalidatePendingRewriteOpen();invalidatePendingImageRun({status:'페이지 이동으로 이미지 분석을 중지했습니다.'});
   try{window.AICleanerRewriteStudio?.cancelGeneration?.({status:'페이지 이동으로 생성 작업을 중지했습니다.'});window.AICleanerRewriteStudio?.saveSession?.();}catch(_){}
   try{window.cancelImageAnalysis?.({status:'페이지 이동으로 이미지 분석을 중지했습니다.'});}catch(_){}
   analysisCoordinator.cancel();analysisWorker.terminate();updateManager.stop();cancelResultNavigation();clearTimeout(pulseResultDestination.timer);clearTimeout(showToast.timer);clearTimeout(showToast.hideTimer);clearTimeout(flashOutput.timer);clearTimeout(scrollToResultDestination.resultAppliedTimer);clearTimeout(syncWidgets.rewriteReadyTimer);

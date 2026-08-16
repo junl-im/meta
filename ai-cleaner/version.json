@@ -1,6 +1,6 @@
 {
-  "version": "1.6.4",
-  "assetVersion": "164",
+  "version": "1.6.5",
+  "assetVersion": "165",
   "channel": "stable",
-  "updateMode": "ux-flow-simplification-typewriter-next-step-immediate-result-navigation"
+  "updateMode": "async-intent-regression-mobile-layout-guidance"
 }

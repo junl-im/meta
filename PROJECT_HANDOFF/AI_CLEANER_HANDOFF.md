@@ -418,3 +418,15 @@
 - Starting `자동작성 원본 새로쓰기` now opens the progress panel and immediately aligns the viewport to the result card, while keeping the progress panel open. The result card gets a temporary `자동작성 중` state so the user sees the output being written in place. Completion behavior (`완료 · 결과 보기`, mobile auto-close/navigation, user-intent cancellation) remains intact.
 - Browser coverage adds the source-arrival recommendation and immediate-start navigation case. Existing manual-analysis test paths now invoke the internal analysis API rather than depending on removed UI.
 - Local validation before packaging: static/architecture 173 passed / 0 failed, module PASS, JS/MJS syntax PASS, workflow YAML PASS. GitHub Actions `browser-smoke` remains the real Chromium gate after push.
+
+
+## 1.6.5 Async Intent & UX Guidance
+- Baseline is the actually delivered `AI_Cleaner_1_6_4_FULL_PROJECT_HANDOFF.zip`; `OPTION/**` remains protected/excluded.
+- GitHub Actions 1.6.4 browser-smoke exposed one real async navigation race and two stale test assumptions. Rewrite lazy-open is now tokenized: selecting another panel/tool or suspending the page invalidates an older pending `ensureRewriteStudio()` open request, so a late script load cannot reopen Rewrite Studio over newer navigation intent.
+- In-flight rewrite-generation E2E now waits for `aria-busy=true` before tool switching; a separate delayed-lazy-load test covers the pending-open race.
+- The mobile input-intent test no longer assumes the freshness pill stays visible after the automatic analysis window; it verifies the delayed result jump remains cancelled and the changed source remains intact. Sample textarea output uses a value matcher rather than DOM textContent.
+- Hero copy now explicitly tells users to press `자동작성 원본 새로쓰기` when they want the source to be written from the beginning in the result field. The footer explains that this is an internal result-textarea progressive-writing feature, not synthetic external keyboard input.
+- The same intent-token audit now covers image lazy loading. If a selected image is still waiting for `image-analyzer.js` and the user leaves the image tool, that pending run becomes stale, cannot begin hidden analysis after the script arrives, and releases its shared Work Lock.
+- On mobile, Sample / File / Reset stay on one compact row. Result `정리본 / 변경 비교` tabs stay on the same header row at the right, including while the stale/freshness status is visible.
+- Local validation: static 179/0, module PASS, JS/MJS syntax PASS, workflow YAML PASS. Browser E2E is configured for 30 cases; GitHub `browser-smoke` is the final Chromium validation after push. A direct system-Chromium file-render attempt did not complete within 20 seconds in this execution environment.
+- Next planned patch after green CI: 1.6.6 UX Priority & Completion Flow Audit.

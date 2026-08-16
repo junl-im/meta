@@ -475,3 +475,23 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
 @keyframes typewriterRecommendCue{0%,100%{transform:translateY(0) scale(1)}42%{transform:translateY(-2px) scale(1.025);box-shadow:0 0 0 5px rgba(255,248,240,.98),0 0 0 12px rgba(255,122,0,.10),0 14px 30px rgba(255,122,0,.38)}}
 @media(max-width:980px){#typingPreviewButton.typewriterRecommended{width:min(330px,88vw)}.resultCard.typewriterDestinationActive{box-shadow:0 0 0 3px rgba(255,122,0,.11),var(--shadow)}}
 @media(prefers-reduced-motion:reduce){#typingPreviewButton.typewriterRecommended{animation:none;outline:3px solid rgba(255,122,0,.22);outline-offset:3px}}
+
+
+/* ===== 1.6.5 async intent + compact mobile action flow ===== */
+.hero p b,.notice b{color:var(--ink)}
+.resultHead{flex-wrap:nowrap}.resultHead .tabs{margin-left:auto;flex:0 0 auto;flex-wrap:nowrap;justify-content:flex-end}
+@media(max-width:760px){
+  .workspace>.card:first-child .actions.sourceActions{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .workspace>.card:first-child .actions.sourceActions>.btn,.workspace>.card:first-child .actions.sourceActions>.filelabel{height:36px;padding:0 6px;font-size:10px}
+}
+@media(max-width:620px){
+  .resultHead{align-items:center;flex-wrap:nowrap}
+  .resultHead .resultTitle{width:auto;flex:1 1 auto;justify-content:flex-start;overflow:hidden}
+  .resultHead .tabs{width:auto;margin-left:auto;justify-content:flex-end;gap:2px}
+  .resultHead .tab{padding:6px 8px;font-size:9px}
+}
+@media(max-width:360px){
+  .workspace>.card:first-child .actions.sourceActions{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+  .workspace>.card:first-child .actions.sourceActions>.btn,.workspace>.card:first-child .actions.sourceActions>.filelabel{height:34px;padding:0 4px;font-size:9.5px}
+  .resultHead .tab{padding:6px 6px;font-size:8.5px}
+}
