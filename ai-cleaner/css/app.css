@@ -657,3 +657,17 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
   .osCompilerSummary{font-size:9px;padding:8px}
   .osCompareNote p{font-size:9.5px}
 }
+
+
+/* 1.8.3 AI Writing OS linkage + clarity UX */
+.osProvider.active::after{content:'내 AI';margin-left:6px;padding:2px 5px;border-radius:999px;background:rgba(255,255,255,.22);font-size:7px;font-weight:950;letter-spacing:-.02em}
+.osDeliveryPlan{display:flex;align-items:flex-start;gap:9px;margin-top:10px;padding:10px 11px;border:1px solid #eadfce;border-radius:12px;background:#fffaf4}
+.osDeliveryMark{display:grid;place-items:center;width:28px;height:28px;flex:0 0 28px;border-radius:9px;background:#fff;color:var(--orange);border:1px solid #efd5b6;font-size:14px;font-weight:950}
+.osDeliveryPlan>div{display:grid;gap:2px;min-width:0}.osDeliveryPlan b{font-size:10.5px}.osDeliveryPlan .sub{font-size:9.5px;line-height:1.55;color:#746556}
+.osPrimaryActions .osSendRaw{background:#fff;color:#746556}.osPrimaryActions .osSendRaw:hover{background:#fffaf4;color:var(--ink)}
+.osAppliedChips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 9px}.osAppliedChips span{display:inline-flex;align-items:center;min-height:25px;padding:4px 8px;border:1px solid #e7dac7;border-radius:999px;background:#fff;color:#655445;font-size:8.5px;font-weight:900}
+.osAfterSend{margin:0 0 10px;padding:8px 10px;border-left:3px solid var(--orange);border-radius:0 9px 9px 0;background:#fff;color:#6e5c4d;font-size:9.5px;line-height:1.55}
+.osExplainPoints{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:10px}.osExplainPoints span{display:grid;gap:3px;padding:9px 10px;border:1px solid #eee1d0;border-radius:11px;background:#fff}.osExplainPoints b{font-size:9.5px}.osExplainPoints small{color:#746556;font-size:8.8px;line-height:1.45;font-weight:700}
+.osSimpleHero p b{color:#4f3f31}
+@media(max-width:760px){.osExplainPoints{grid-template-columns:1fr}.osDeliveryPlan{padding:9px 10px}.osProvider.active::after{font-size:6.5px}}
+@media(max-width:420px){.osDeliveryPlan .sub{font-size:8.7px}.osDeliveryMark{width:25px;height:25px;flex-basis:25px}.osAppliedChips{gap:4px}.osAppliedChips span{min-height:23px;padding:3px 7px;font-size:8px}.osAfterSend{font-size:8.8px}.osProvider.active::after{display:none}}

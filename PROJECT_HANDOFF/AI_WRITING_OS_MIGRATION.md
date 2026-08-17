@@ -33,3 +33,9 @@ The 1.8.0 migration preserved most Hub concepts visibly, which was accurate but 
 The static GitHub Pages edition now treats the AI Writing OS primarily as a **Prompt Compiler**, not as a full OS-file transfer UI. `prompt-compiler.json` holds the compact common/channel/effort rules. The normal execution prompt includes only rules relevant to the current task and does not dump `00_OPEN_FIRST.md` or `07_STATE_AND_UPDATE.md` into every request.
 
 The default completion path is now `request -> preferred AI -> OS-enhanced send`. On touch/mobile environments the controller prefers the operating system share sheet through `navigator.share()` when available. Desktop uses clipboard + selected-provider launch. `원문 그대로 보내기` is retained as a comparison/control path. This is still a static handoff model: no fake Remote MCP or `/api/*` endpoint is exposed.
+
+
+## 1.8.3 linkage + clarity UX
+The runtime behavior remains a static Prompt Compiler, but the presentation now makes the handoff model explicit instead of implying a stronger third-party app connection than the browser can provide. Provider selection is presented as `내 기본 AI`. Desktop shows a provider-aware `copy prompt + open provider` plan. Mobile Web Share shows a system-share plan and explicitly tells the user to choose the preferred AI in the share sheet because the browser cannot force-target an arbitrary installed AI app.
+
+The primary CTA mirrors the real path (`공유하기`, provider-specific `열기`, or `복사하기`). After compilation, four compact rule chips explain what OS applied, and the result state reports the actual handoff outcome plus the next action. The raw-send path remains secondary for A/B comparison.

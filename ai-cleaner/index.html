@@ -252,40 +252,45 @@
 
 <main id="writingTool" class="hidden">
   <section class="hero osHero osSimpleHero">
-    <div class="osHeroBadges"><span class="tag orange">AI 글쓰기 OS</span><span class="perfPill" id="osStatus">Prompt Compiler 준비 중…</span></div>
-    <h1>말로 적으면, OS가 <span>AI용 명령으로 강화합니다.</span></h1>
-    <p>평소 말투로 원하는 일을 적으세요. AI Cleaner OS가 작업을 자동 분류하고 필요한 규칙만 골라 <b>짧고 강한 실행 프롬프트</b>로 만든 뒤 사용하는 AI로 전달합니다.</p>
+    <div class="osHeroBadges"><span class="tag orange">AI 글쓰기 OS</span><span class="perfPill" id="osStatus">내 기기에서 준비 중…</span></div>
+    <h1>하고 싶은 일을 적으면, <span>내 AI가 바로 일할 수 있게 바꿔드립니다.</span></h1>
+    <p>AI Cleaner OS는 새로운 AI가 아니라, <b>내 요청을 더 잘 전달하는 도구</b>입니다. 사용자의 말을 필요한 규칙·형식·검수 기준이 들어간 실행 프롬프트로 정리해 평소 쓰는 AI에 넘겨줍니다.</p>
     <div class="osSimpleSteps" aria-label="AI 글쓰기 OS 사용 순서">
-      <span><b>1</b> 원하는 일 적기</span><span><b>2</b> 평소 쓰는 AI 선택</span><span><b>3</b> OS로 강화해서 보내기</span>
+      <span><b>1</b> 원하는 일 적기</span><span><b>2</b> 내 AI 고르기</span><span><b>3</b> 강화해서 보내기</span>
     </div>
   </section>
 
   <div class="osSimpleWorkspace">
     <section class="card osCard osTaskCard osSimpleCard">
-      <div class="head"><div><b><span class="osStep">1</span> 무엇을 시키고 싶으세요?</b><span class="sub">블로그, 보고서, 인스타, 제품기획, 요약처럼 평범하게 적으면 됩니다.</span></div></div>
+      <div class="head"><div><b><span class="osStep">1</span> 무엇을 하고 싶으세요?</b><span class="sub">짧게 적어도 됩니다. OS가 작업 종류와 필요한 실행 조건을 알아서 보강합니다.</span></div></div>
       <div class="body">
-        <textarea id="osTask" class="osTask" rows="8" aria-label="AI 글쓰기 OS 작업 요청" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" placeholder="예: 부산 아이와 가볼만한곳 키워드로 네이버 블로그 글 써줘. 과장 없이 자연스러운 해요체로."></textarea>
+        <textarea id="osTask" class="osTask" rows="8" aria-label="AI 글쓰기 OS 작업 요청" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" placeholder="예: 부산 아이와 가볼 만한 곳으로 네이버 블로그 글 써줘. 과장 없이 자연스러운 해요체로."></textarea>
 
         <div class="osSimpleProviderBlock">
-          <div class="sectionMiniHead"><b><span class="osStep">2</span> 평소 쓰는 AI</b><span class="sub" id="osProviderHint">사용하는 AI를 하나 고르세요.</span></div>
-          <div class="osProviders" id="osProviders" role="group" aria-label="AI 제공자 선택"></div>
-          <p class="sub osDeliveryHint" id="osDeliveryHint">환경에 맞는 가장 간단한 전달 방식을 사용합니다.</p>
+          <div class="sectionMiniHead"><b><span class="osStep">2</span> 내 기본 AI</b><span class="sub" id="osProviderHint">사용하는 AI를 하나 고르세요. 이 브라우저에 기억됩니다.</span></div>
+          <div class="osProviders" id="osProviders" role="group" aria-label="내 기본 AI 선택"></div>
+          <div class="osDeliveryPlan" id="osDeliveryPlan" aria-live="polite">
+            <span class="osDeliveryMark" aria-hidden="true">↗</span>
+            <div><b id="osDeliveryTitle">현재 연결 방식</b><span class="sub osDeliveryHint" id="osDeliveryHint">환경에 맞는 가장 간단한 전달 방식을 사용합니다.</span></div>
+          </div>
         </div>
 
         <div class="osSendZone">
           <div class="osPrimaryActions">
-            <button class="btn orange osSendMain" id="osSendEnhanced" type="button" disabled><span aria-hidden="true">✦</span> OS로 강화해서 AI에 보내기</button>
-            <button class="btn soft osSendRaw" id="osSendRaw" type="button" disabled>원문 그대로 보내기</button>
+            <button class="btn orange osSendMain" id="osSendEnhanced" type="button" disabled><span aria-hidden="true">✦</span><span id="osSendEnhancedLabel">OS로 강화해서 AI에 보내기</span></button>
+            <button class="btn soft osSendRaw" id="osSendRaw" type="button" disabled>비교용 · 원문 그대로 보내기</button>
           </div>
-          <div class="osSendMeta"><span class="sub" id="osPrepareStatus">원하는 작업을 먼저 적어주세요.</span><button class="mini passive" id="osClearTask" type="button">비우기</button></div>
+          <div class="osSendMeta"><span class="sub" id="osPrepareStatus" aria-live="polite">원하는 작업을 먼저 적어주세요.</span><button class="mini passive" id="osClearTask" type="button">비우기</button></div>
         </div>
 
         <div class="osTaskPackResult osSimpleResult" id="osTaskPackResult" hidden>
-          <div class="osReadyState"><span class="tag green">OS 강화 완료</span><b id="osReadyMessage">선택한 AI에 전달할 강화 프롬프트가 준비됐습니다.</b></div>
+          <div class="osReadyState"><span class="tag green">OS 강화 완료</span><b id="osReadyMessage" aria-live="polite">강화 프롬프트가 준비됐습니다.</b></div>
+          <div class="osAppliedChips" id="osAppliedChips" aria-label="이번 요청에 적용된 OS 기준"></div>
           <div class="osCompilerSummary" id="osCompilerSummary"></div>
+          <p class="osAfterSend" id="osAfterSend">자동 전달이 막히면 아래 버튼으로 복사하거나 AI를 다시 열 수 있습니다.</p>
           <div class="actions osResultActions">
             <button class="btn primary" id="osCopyPack" type="button">강화 프롬프트 복사</button>
-            <button class="btn orange" id="osOpenAi" type="button">선택 AI 열기</button>
+            <button class="btn orange" id="osOpenAi" type="button">선택 AI 다시 열기</button>
           </div>
           <details class="osInlineDetails">
             <summary>OS가 만든 강화 프롬프트 보기 · 파일 저장</summary>
@@ -296,9 +301,13 @@
       </div>
     </section>
 
-    <section class="osCompareNote" aria-label="OS 강화 설명">
-      <div><span class="tag orange">Prompt Compiler</span><b>긴 OS 전체를 보내지 않습니다.</b></div>
-      <p>이번 요청에 필요한 공통 규칙 + 채널 규칙 + 품질 검수만 골라 실행 프롬프트로 압축합니다. 그래서 특정 AI에 종속되지 않고 ChatGPT, Claude, Gemini, Grok, Meta AI, 기타 AI 어디서든 같은 기준으로 사용할 수 있습니다.</p>
+    <section class="osCompareNote" aria-label="AI 글쓰기 OS가 해주는 일">
+      <div><span class="tag orange">OS가 해주는 일</span><b>내 말을 AI가 바로 실행할 수 있는 명령으로 정리합니다.</b></div>
+      <div class="osExplainPoints">
+        <span><b>작업 파악</b><small>블로그·SNS·기획·일반 작업을 자동 분류</small></span>
+        <span><b>규칙 보강</b><small>필요한 기준만 골라 짧고 강하게 추가</small></span>
+        <span><b>안전 검수</b><small>사실성·출력 형식·결과물 우선 기준 적용</small></span>
+      </div>
     </section>
 
     <details class="card osAdvanced" id="osAdvancedSettings">
@@ -331,7 +340,7 @@
     </details>
   </div>
 
-  <div class="notice osSimpleNotice"><b>가장 쉬운 사용법.</b> 원하는 일을 적고 → 평소 쓰는 AI를 고르고 → <b>OS로 강화해서 AI에 보내기</b>. 원하면 <b>원문 그대로 보내기</b>와 결과 차이도 바로 비교할 수 있습니다.</div>
+  <div class="notice osSimpleNotice"><b>한 줄이면 충분합니다.</b> 원하는 일을 적고 → 내 AI를 고르고 → 주황색 버튼을 누르세요. OS가 요청을 강화한 뒤 환경에 맞게 <b>공유하거나, 복사하면서 AI를 엽니다.</b></div>
 </main>
 
 <div class="footer">곰같은여우의 AI 흔적 지우개 <span id="footerVersion"></span> · 브라우저 로컬 처리</div>

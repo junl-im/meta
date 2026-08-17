@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.8.2",
+  "version": "1.8.3",
   "date": "2026-08-18",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -47,12 +47,12 @@
     "ai-cleaner/ai-writing-os/prompt-compiler.json"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.8.2",
-  "asset_version": "182",
+  "current_version": "1.8.3",
+  "asset_version": "183",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.8.2 AI Writing OS Prompt Compiler: task-aware compact prompt compilation, one-action enhanced send, mobile native-share / desktop copy+open delivery, raw-vs-OS comparison, provider memory, and six-provider fallback",
+  "latestPatch": "1.8.3 AI Writing OS linkage/clarity UX: simpler explanation, honest mobile share vs desktop copy+open plan, dynamic provider-aware CTA, applied-rule chips, and post-delivery guidance",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -131,7 +131,7 @@
     "breakpointExpansionReset": true,
     "safeAreaViewportFitCover": true
   },
-  "nextPhase": "1.8.3 AI Writing OS real-browser delivery audit after 1.8.2 GitHub browser-smoke validation",
+  "nextPhase": "1.8.4 AI Writing OS real-device delivery refinement after 1.8.3 GitHub browser-smoke validation",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -196,7 +196,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "182",
+  "assetVersion": "183",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -205,14 +205,14 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "219 passed / 0 failed",
-    "moduleChecks": "PASS including Prompt Compiler routing/rule selection/compact prompt generation",
+    "staticChecks": "223 passed / 0 failed",
+    "moduleChecks": "PASS including Prompt Compiler routing/rule selection/compact prompt generation + 1.8.3 linkage UX wiring",
     "jsSyntax": "PASS",
     "workflowYaml": "PASS",
     "json": "PASS",
-    "localBrowserSmoke": "BLOCKED_BY_CONTAINER_NETWORK/CHROMIUM: local 127.0.0.1 preview was unreachable and headless Chromium timed out; GitHub Actions browser-smoke remains final browser gate",
-    "browserE2EConfigured": "43 cases (OS coverage updated for compiler/delivery/provider-memory)",
-    "latestVisibleGitHubBaseline": "1.8.2 requires browser-smoke after push"
+    "localBrowserSmoke": "BLOCKED_BY_CONTAINER_BROWSER: local HTTP preview responds, but bundled Playwright Chromium is absent and system Chromium headless timed out in this container; GitHub Actions browser-smoke remains final browser gate",
+    "browserE2EConfigured": "44 cases (adds mocked native-share linkage/honesty path)",
+    "latestVisibleGitHubBaseline": "1.8.3 requires browser-smoke after push"
   },
   "stabilityAudit131": {
     "updateOnlyWhenSemverNewer": true,
@@ -503,6 +503,21 @@
       "meta-ai",
       "other"
     ],
+    "apiKeyRequired": false,
+    "remoteMcpLive": false
+  },
+  "aiWritingOs183": {
+    "scope": "AI Writing OS only; existing text/image engines preserved",
+    "heroExplanationSimplified": true,
+    "defaultAiTerminology": "내 기본 AI",
+    "deliveryPlanVisible": true,
+    "mobileShareTargetHonesty": true,
+    "desktopProviderAwareCta": true,
+    "providerChoiceRemembered": true,
+    "dynamicCta": true,
+    "appliedRuleChips": true,
+    "postDeliveryGuidance": true,
+    "rawComparisonSecondary": true,
     "apiKeyRequired": false,
     "remoteMcpLive": false
   }

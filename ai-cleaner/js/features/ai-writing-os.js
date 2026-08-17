@@ -122,7 +122,7 @@ ns.createAiWritingOsController=function createAiWritingOsController({
   function renderProviders(){
     const box=$('osProviders');if(!box)return;box.textContent='';
     for(const p of providers.filter(p=>['chatgpt','claude','gemini','grok','meta-ai','other'].includes(p.id))){
-      const b=document.createElement('button');b.type='button';b.className='osProvider'+(p.id===provider?' active':'');b.textContent=p.label;b.dataset.provider=p.id;b.setAttribute('aria-pressed',String(p.id===provider));
+      const b=document.createElement('button');b.type='button';b.className='osProvider'+(p.id===provider?' active':'');b.textContent=p.label;b.dataset.provider=p.id;b.setAttribute('aria-pressed',String(p.id===provider));b.setAttribute('aria-label',p.id===provider?`${p.label} · 내 기본 AI로 선택됨`:`${p.label}을 내 기본 AI로 선택`);
       b.onclick=()=>{provider=p.id;rememberProvider();invalidatePreparedOutput();renderProviders();updateProviderHint();};box.appendChild(b);
     }
     updateProviderHint();
@@ -131,12 +131,22 @@ ns.createAiWritingOsController=function createAiWritingOsController({
   function prefersNativeShare(){
     const n=getNavigator();if(typeof n?.share!=='function')return false;
     let coarse=false;try{coarse=!!root.matchMedia?.('(pointer: coarse)')?.matches;}catch(_){}
-    return coarse||Number(n.maxTouchPoints||0)>0;
+    const touchPoints=Number(n.maxTouchPoints||0),width=Number(root.innerWidth||0);
+    return coarse||(touchPoints>0&&width>0&&width<=900);
+  }
+  function deliveryPlan(){
+    const p=selectedProvider();
+    if(prefersNativeShare())return{mode:'share',title:'모바일 연결 · 시스템 공유창',hint:p.id==='other'?'공유창이 열리면 평소 쓰는 AI 앱을 선택하세요.':'공유창이 열리면 '+p.label+' 앱을 선택하세요. 브라우저가 특정 앱을 강제로 열지는 않습니다.',button:'OS로 강화해서 공유하기',ready:'버튼 한 번으로 강화한 뒤 시스템 공유창을 엽니다.',after:p.id==='other'?'공유창에서 사용할 AI 앱을 선택해 이어가세요.':'공유창에서 '+p.label+'을 선택해 이어가세요.'};
+    if(p.launchUrl)return{mode:'copy-open',title:'PC 연결 · '+p.label+' 열기 + 프롬프트 복사',hint:'버튼을 누르면 강화 프롬프트를 복사하고 '+p.label+' 새 탭을 엽니다. 새 탭에서 붙여넣기만 하면 됩니다.',button:'OS로 강화해서 '+p.label+' 열기',ready:'한 번 누르면 OS가 강화하고 '+p.label+'를 엽니다.',after:p.label+' 새 탭에서 붙여넣기(Ctrl/⌘+V)만 하면 됩니다.'};
+    return{mode:'copy',title:'범용 연결 · 강화 프롬프트 복사',hint:'특정 AI를 열지 않고 강화 프롬프트만 복사합니다. 평소 쓰는 AI에 붙여넣으세요.',button:'OS로 강화해서 복사하기',ready:'한 번 누르면 OS가 강화 프롬프트를 복사합니다.',after:'평소 쓰는 AI를 열고 붙여넣기만 하면 됩니다.'};
   }
   function updateProviderHint(){
-    const p=selectedProvider(),hint=$('osProviderHint'),delivery=$('osDeliveryHint');
-    if(hint)hint.textContent=p.id==='other'?'어떤 AI든 쓸 수 있도록 강화 프롬프트를 만듭니다.':`${p.label||'선택한 AI'}에 맞춰 전달합니다.`;
-    if(delivery)delivery.textContent=prefersNativeShare()?'모바일에서는 시스템 공유창으로 바로 보냅니다.':p.launchUrl?`PC에서는 강화 프롬프트를 복사하고 ${p.label}를 엽니다.`:'강화 프롬프트를 복사해 원하는 AI에 붙여넣습니다.';
+    const p=selectedProvider(),hint=$('osProviderHint'),delivery=$('osDeliveryHint'),title=$('osDeliveryTitle'),sendLabel=$('osSendEnhancedLabel'),openAi=$('osOpenAi'),plan=deliveryPlan();
+    if(hint)hint.textContent=p.id==='other'?'기타 AI 선택됨 · 다음에도 이 선택을 기본으로 기억합니다.':`${p.label} 선택됨 · 다음에도 이 AI를 기본으로 기억합니다.`;
+    if(title)title.textContent=plan.title;
+    if(delivery)delivery.textContent=plan.hint;
+    if(sendLabel)sendLabel.textContent=plan.button;
+    if(openAi){openAi.hidden=!p.launchUrl;openAi.textContent=p.launchUrl?`${p.label} 다시 열기`:'선택 AI 다시 열기';}
   }
   function routeSummary(pack){
     const names={BLOG:'블로그',INSTAGRAM:'인스타그램',YOUTUBE:'유튜브/쇼츠',PRODUCT:'제품/사업',GENERAL:'일반'};
@@ -208,8 +218,16 @@ ns.createAiWritingOsController=function createAiWritingOsController({
     return lines.filter((v,i,a)=>v!==''||a[i-1]!=='').join('\n').trim();
   }
   function compilerSummary(pack,markdown){
-    const taskChars=pack.task.length,promptChars=markdown.length,totalRules=pack.compiler.commonRuleCount+pack.compiler.channelRuleCount+1;
-    return `원문 ${taskChars.toLocaleString()}자 → 강화 프롬프트 ${promptChars.toLocaleString()}자 · 핵심 규칙 ${totalRules}개 적용 · ${pack.compiler.channelLabel}`;
+    const totalRules=pack.compiler.commonRuleCount+pack.compiler.channelRuleCount+1;
+    return `${pack.compiler.channelLabel}로 자동 분류 · 핵심 규칙 ${totalRules}개 적용 · 원문 의미는 유지하고 실행 조건만 보강했습니다.`;
+  }
+  function appliedRuleLabels(pack){
+    const effort={QUICK:'빠른 완성',STANDARD_PLUS:'표준 품질 검수',CREATOR_10:'다각도 품질 검수',ENTERPRISE:'다부서 관점 검수',GRAND_CHALLENGE:'전주기 심층 검수'};
+    return[`자동 분류 · ${pack.compiler.channelLabel}`,'사실성 보호','결과물 우선',effort[pack.route.workforceMode]||pack.route.workforceMode].filter(Boolean);
+  }
+  function renderAppliedChips(pack){
+    const box=$('osAppliedChips');if(!box)return;box.textContent='';
+    for(const label of appliedRuleLabels(pack)){const chip=document.createElement('span');chip.textContent=label;box.appendChild(chip);}
   }
   function renderPrepared(pack,markdown,{scroll=true}={}){
     currentPack=pack;currentMarkdown=markdown;
@@ -217,19 +235,21 @@ ns.createAiWritingOsController=function createAiWritingOsController({
     if(summary)summary.textContent=routeSummary(pack);
     if(preview)preview.value=markdown;
     if(compilerInfo)compilerInfo.textContent=compilerSummary(pack,markdown);
-    if(ready)ready.textContent=`${pack.providerLabel||'선택한 AI'}에 전달할 강화 프롬프트가 준비됐습니다.`;
+    renderAppliedChips(pack);
+    if(ready)ready.textContent='요청을 실행용 프롬프트로 강화했습니다.';
+    const after=$('osAfterSend');if(after)after.textContent=deliveryPlan().after;
     if(wrap){wrap.hidden=false;if(scroll)requestAnimationFrame(()=>wrap.scrollIntoView({behavior:preferredScrollBehavior(),block:'nearest'}));}
-    syncSimpleState();
+    updateProviderHint();syncSimpleState();
   }
   function invalidatePreparedOutput(){
     if(busy){seq++;prepareAbort?.abort();prepareAbort=null;busy=false;}
-    currentMarkdown='';currentPack=null;const wrap=$('osTaskPackResult');if(wrap)wrap.hidden=true;const preview=$('osTaskPackPreview');if(preview)preview.value='';const compilerInfo=$('osCompilerSummary');if(compilerInfo)compilerInfo.textContent='';syncSimpleState();
+    currentMarkdown='';currentPack=null;const wrap=$('osTaskPackResult');if(wrap)wrap.hidden=true;const preview=$('osTaskPackPreview');if(preview)preview.value='';const compilerInfo=$('osCompilerSummary');if(compilerInfo)compilerInfo.textContent='';const chips=$('osAppliedChips');if(chips)chips.textContent='';syncSimpleState();
   }
   function syncSimpleState(){
     const hasTask=!!$('osTask')?.value.trim(),status=$('osPrepareStatus');
     for(const id of ['osSendEnhanced','osSendRaw']){const b=$(id);if(b)b.disabled=busy||!hasTask;}
     for(const id of ['osCopyPack','osDownloadPack','osOpenAi']){const b=$(id);if(b)b.disabled=busy||!currentMarkdown;}
-    if(status)status.textContent=busy?'OS가 요청을 컴파일하고 있습니다…':hasTask?'한 번 누르면 OS가 강화하고 사용하는 AI로 전달합니다.':'원하는 작업을 먼저 적어주세요.';
+    if(status)status.textContent=busy?'OS가 요청을 실행용 프롬프트로 정리하고 있습니다…':hasTask?deliveryPlan().ready:'원하는 작업을 먼저 적어주세요.';
     $('writingTool')?.setAttribute('aria-busy',busy?'true':'false');
   }
   function setBusy(next){busy=!!next;syncSimpleState();}
@@ -249,6 +269,16 @@ ns.createAiWritingOsController=function createAiWritingOsController({
     const n=getNavigator();if(!prefersNativeShare())return false;
     try{await n.share({title,text});return true;}catch(error){if(error?.name==='AbortError')return null;return false;}
   }
+  function updateDeliveryResult(result){
+    const p=selectedProvider(),ready=$('osReadyMessage'),after=$('osAfterSend'),plan=deliveryPlan();
+    if(!ready||!after)return;
+    if(result==='share'){ready.textContent='OS 강화 후 시스템 공유를 완료했습니다.';after.textContent=plan.after;return;}
+    if(result==='cancel'){ready.textContent='OS 강화는 완료됐고, 공유는 취소되었습니다.';after.textContent='아래에서 프롬프트를 복사하거나 다시 보내면 됩니다.';return;}
+    if(result==='copy-open'){ready.textContent=`${p.label}를 열고 강화 프롬프트를 복사했습니다.`;after.textContent=plan.after;return;}
+    if(result==='open'){ready.textContent=`${p.label}를 열었습니다.`;after.textContent='클립보드 권한이 없어 자동 복사는 못 했습니다. 아래 복사 버튼을 사용하세요.';return;}
+    if(result==='copy'){ready.textContent='강화 프롬프트를 복사했습니다.';after.textContent=plan.after;return;}
+    ready.textContent='OS 강화는 완료됐지만 자동 전달은 막혔습니다.';after.textContent='아래 프롬프트 복사 버튼을 사용해 직접 붙여넣으세요.';
+  }
   async function deliverText(text,{enhanced=true,allowNativeShare=true}={}){
     const p=selectedProvider();
     if(allowNativeShare&&prefersNativeShare()){
@@ -267,7 +297,8 @@ ns.createAiWritingOsController=function createAiWritingOsController({
     if(!compilerReady)await ensureAssets();
     const pack=buildTaskPackSync(),markdown=taskPackToMarkdown(pack);renderPrepared(pack,markdown,{scroll:false});
     const result=await deliverText(markdown,{enhanced:true,allowNativeShare:true});
-    if(result!=='cancel')requestAnimationFrame(()=>$('osTaskPackResult')?.scrollIntoView({behavior:preferredScrollBehavior(),block:'nearest'}));
+    updateDeliveryResult(result);
+    requestAnimationFrame(()=>$('osTaskPackResult')?.scrollIntoView({behavior:preferredScrollBehavior(),block:'nearest'}));
     return result;
   }
   async function sendRaw(){
@@ -281,7 +312,7 @@ ns.createAiWritingOsController=function createAiWritingOsController({
     const md=await ensureMarkdown();if(!md)return;const opened=openWindow(p.launchUrl),copied=await writeClipboard(md);if(opened===null)return showToast(copied?'요청문은 복사했지만 새 탭이 차단됐습니다.':'새 탭이 차단됐습니다.');showToast(copied?`${p.label}를 열고 강화 프롬프트를 복사했습니다.`:`${p.label}를 열었습니다.`);
   }
   function downloadOsZip(){const href=`${assetBase}/os/releases/${encodeURIComponent(manifest.portableZip||FALLBACK_MANIFEST.portableZip)}`,a=document.createElement('a');a.href=href;a.download=manifest.portableZip||FALLBACK_MANIFEST.portableZip;a.hidden=true;document.body.appendChild(a);try{a.click();}finally{a.remove();}}
-  function clearTask(){seq++;prepareAbort?.abort();prepareAbort=null;currentMarkdown='';currentPack=null;if($('osTask'))$('osTask').value='';if($('osRouteSummary'))$('osRouteSummary').textContent='OS가 요청을 분석하면 자동 분류·적용 규칙을 여기에 표시합니다.';if($('osTaskPackPreview'))$('osTaskPackPreview').value='';if($('osTaskPackResult'))$('osTaskPackResult').hidden=true;if($('osCompilerSummary'))$('osCompilerSummary').textContent='';setBusy(false);$('osTask')?.focus();}
+  function clearTask(){seq++;prepareAbort?.abort();prepareAbort=null;currentMarkdown='';currentPack=null;if($('osTask'))$('osTask').value='';if($('osRouteSummary'))$('osRouteSummary').textContent='OS가 요청을 분석하면 자동 분류·적용 규칙을 여기에 표시합니다.';if($('osTaskPackPreview'))$('osTaskPackPreview').value='';if($('osTaskPackResult'))$('osTaskPackResult').hidden=true;if($('osCompilerSummary'))$('osCompilerSummary').textContent='';if($('osAppliedChips'))$('osAppliedChips').textContent='';setBusy(false);$('osTask')?.focus();}
   function bind(){
     $('osSendEnhanced')?.addEventListener('click',()=>sendEnhanced().catch(e=>showToast(e.message)));
     $('osSendRaw')?.addEventListener('click',()=>sendRaw().catch(e=>showToast(e.message)));
@@ -296,7 +327,7 @@ ns.createAiWritingOsController=function createAiWritingOsController({
     $('osMode')?.addEventListener('change',invalidatePreparedOutput);$('osDisplayName')?.addEventListener('input',invalidatePreparedOutput);$('osPreferences')?.addEventListener('input',invalidatePreparedOutput);
   }
   async function init(){
-    if(initialized)return;initialized=true;bind();await ensureAssets();loadStoredProfile();if($('osStatus'))$('osStatus').textContent=`LOCAL COMPILER · OS V${manifest.version}`;renderProviders();if($('osStaticMode'))$('osStaticMode').textContent='GitHub Pages 정적 모드 · 로컬 Prompt Compiler';syncSimpleState();
+    if(initialized)return;initialized=true;bind();await ensureAssets();loadStoredProfile();if($('osStatus'))$('osStatus').textContent=`내 기기에서 준비됨 · OS V${manifest.version}`;renderProviders();if($('osStaticMode'))$('osStaticMode').textContent='GitHub Pages 정적 모드 · 로컬 Prompt Compiler';syncSimpleState();
   }
   function captureState(){return{provider,task:$('osTask')?.value||'',mode:$('osMode')?.value||'auto'};}
   function restoreState(value){if(!value||typeof value!=='object')return false;const requestedProvider=String(value.provider||'');if(requestedProvider)provider=requestedProvider;if($('osTask'))$('osTask').value=String(value.task||'');if($('osMode'))$('osMode').value=['auto','quick','creator_10','enterprise','grand_challenge'].includes(String(value.mode))?String(value.mode):'auto';invalidatePreparedOutput();if(initialized){renderProviders();updateProviderHint();syncSimpleState();}return true;}

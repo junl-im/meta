@@ -157,4 +157,4 @@ function assert(ok,msg){if(!ok)throw new Error(msg);}
   const id=restored.list()[0].id;assert(restored.remove(id)&&restored.size===1,'checkpoint remove failed');restored.clear();assert(restored.size===0,'checkpoint clear failed');
   const budget=M.createResultCheckpointStore({storage:null,limit:8,maxChars:1000,maxTotalChars:1500,now:()=>++t});budget.add({text:'a'.repeat(800),sourceStamp:stampA});budget.add({text:'b'.repeat(800),sourceStamp:stampA});assert(budget.size===1&&budget.list()[0].text.startsWith('b'),'checkpoint total text budget should evict oldest entries');
 }
-console.log('PASS 1.8.2 AI Writing OS Prompt Compiler + delivery integration unit checks');
+console.log('PASS 1.8.3 AI Writing OS Prompt Compiler + linkage UX unit checks');

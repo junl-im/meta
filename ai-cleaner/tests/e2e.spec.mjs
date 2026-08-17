@@ -529,12 +529,15 @@ test('AI writing OS one-action compiler flow stays simple on mobile', async ({ p
   await gotoReady(page);await page.locator('[data-tool="writing"]').click();
   await expect(page.locator('#writingTool')).toBeVisible();
   await expect(page.locator('.osSimpleSteps')).toContainText('원하는 일 적기');
-  await expect(page.locator('.osSimpleSteps')).toContainText('평소 쓰는 AI 선택');
-  await expect(page.locator('.osSimpleSteps')).toContainText('OS로 강화해서 보내기');
+  await expect(page.locator('.osSimpleSteps')).toContainText('내 AI 고르기');
+  await expect(page.locator('.osSimpleSteps')).toContainText('강화해서 보내기');
   expect(await page.locator('#osAdvancedSettings').evaluate(el=>el.open)).toBe(false);
   await expect(page.locator('#osSendEnhanced')).toBeDisabled();
   await expect(page.locator('#osSendRaw')).toBeDisabled();
   await expect(page.locator('#osProviders .osProvider.active')).toHaveText('ChatGPT');
+  await expect(page.locator('#osProviderHint')).toContainText('ChatGPT 선택됨');
+  await expect(page.locator('#osDeliveryTitle')).toContainText('PC 연결');
+  await expect(page.locator('#osSendEnhancedLabel')).toContainText('ChatGPT 열기');
   await page.locator('#osTask').fill('부산 아이와 가볼만한곳 키워드로 자연스러운 네이버 블로그 글 써줘.');
   await expect(page.locator('#osSendEnhanced')).toBeEnabled();
   await expect(page.locator('#osSendRaw')).toBeEnabled();
@@ -542,9 +545,31 @@ test('AI writing OS one-action compiler flow stays simple on mobile', async ({ p
   await page.locator('#osSendEnhanced').click();
   await expect(page.locator('#osTaskPackResult')).toBeVisible();
   await expect(page.locator('#osReadyMessage')).toContainText('ChatGPT');
+  await expect(page.locator('#osAppliedChips span')).toHaveCount(4);
+  await expect(page.locator('#osAfterSend')).toContainText('붙여넣기');
   await expect(page.locator('#osCopyPack')).toBeEnabled();
   await expect(page.locator('#osOpenAi')).toBeEnabled();
   expect(await page.locator('#osAdvancedSettings').evaluate(el=>el.open)).toBe(false);
+});
+
+test('AI writing OS shows an honest mobile share plan and sends the compiled prompt through the system share path', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});
+  await gotoReady(page);
+  await page.evaluate(()=>{
+    Object.defineProperty(navigator,'maxTouchPoints',{configurable:true,value:1});
+    Object.defineProperty(navigator,'share',{configurable:true,value:async payload=>{window.__osSharedPayload=payload;}});
+  });
+  await page.locator('[data-tool="writing"]').click();
+  await expect(page.locator('#osDeliveryTitle')).toContainText('모바일 연결');
+  await expect(page.locator('#osDeliveryHint')).toContainText('ChatGPT 앱을 선택하세요');
+  await expect(page.locator('#osDeliveryHint')).toContainText('강제로 열지는 않습니다');
+  await expect(page.locator('#osSendEnhancedLabel')).toHaveText('OS로 강화해서 공유하기');
+  await page.locator('#osTask').fill('회의 내용을 한 페이지 보고서로 정리해줘.');
+  await page.locator('#osSendEnhanced').click();
+  await expect(page.locator('#osReadyMessage')).toContainText('시스템 공유');
+  const shared=await page.evaluate(()=>window.__osSharedPayload);
+  expect(shared.text).toContain('# AI CLEANER OS — EXECUTION PROMPT');
+  expect(shared.text).toContain('회의 내용을 한 페이지 보고서로 정리해줘.');
 });
 
 test('AI writing OS invalidates a compiled prompt when provider mode or profile changes', async ({ page }) => {
