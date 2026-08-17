@@ -1,0 +1,25 @@
+{
+  "module": "AI_COMPANY_OS_HUB",
+  "version": "1.0.0",
+  "defaultMountPath": "/ai-company",
+  "ownerIdentity": {
+    "required": true,
+    "source": "existing-site-auth",
+    "field": "user_id",
+    "rule": "The browser must not be trusted to invent another user's id. Resolve it from the host site's authenticated server session."
+  },
+  "endpoints": {
+    "status": "GET /ai-company/api/status",
+    "providers": "GET /ai-company/api/providers",
+    "prepare": "POST /ai-company/api/prepare",
+    "contextPack": "POST /ai-company/api/context-pack",
+    "portableZip": "GET /ai-company/download/os.zip",
+    "mcp": "ALL /ai-company/mcp/:privateAccessSlug"
+  },
+  "security": {
+    "memoryInGit": false,
+    "apiKeysRequiredByDefault": false,
+    "mcpSecretMustBeLong": true,
+    "crossUserIsolationRequired": true
+  }
+}

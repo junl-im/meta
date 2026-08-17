@@ -1,0 +1,20 @@
+{
+  "name": "AI COMPANY OS",
+  "version": "6.1",
+  "sourcePackage": "AI_COMPANY_OS_HUB_V1_EMBED 1.0.0",
+  "runtime": "GitHub Pages static context-pack edition",
+  "defaultLanguage": "ko",
+  "portableZip": "AI_COMPANY_OS_V6_1_PUBLIC.zip",
+  "publicProfileMode": true,
+  "remoteMcpLive": false,
+  "fastFiles": [
+    "00_OPEN_FIRST.md",
+    "01_OWNER_PROFILE.md",
+    "02_DEFAULTS_AND_BOUNDARIES.md",
+    "03_TASK_ROUTER.md",
+    "04_BLOG_CORE.md",
+    "05_INSTAGRAM_CORE.md",
+    "06_PRODUCT_ENTERPRISE_CORE.md",
+    "07_STATE_AND_UPDATE.md"
+  ]
+}

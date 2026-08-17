@@ -1,6 +1,6 @@
 # AI Cleaner 프로젝트 인수인계 메모리
 
-업데이트: 2026-08-16 · 현재 패키지: 1.5.1
+업데이트: 2026-08-17 · 현재 패키지: 1.7.0
 
 ## 새 채팅에서 가장 먼저 읽을 것
 이 폴더를 새 채팅에 업로드한 뒤 `PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md 읽고 이어서 개발하자`라고 요청한다. 이 문서는 프로젝트의 결정사항, 보호 경로, UX 방향, 안전 제약, 배포 방식, 알려진 이슈를 보존하기 위한 인수인계 메모리다.
@@ -440,3 +440,38 @@
 - TXT download now provides immediate visible feedback after the browser download is triggered. History actions are visually demoted relative to Copy/Save while retaining their existing positions and behavior.
 - Browser coverage adds staged priority and result-tab accessibility state checks, including left/right keyboard navigation. Worker, Unicode hygiene, Typewriter sanitation, Rewrite Fact Lock, image analysis, update lifecycle, and mobile viewport policies are unchanged.
 - The 1.6.5 baseline was verified green on GitHub Actions run `31954107010` (static-checks + browser-smoke) before finalizing this patch. 1.6.6 local validation: static 184/0, module PASS, all JS/MJS syntax PASS, workflow YAML PASS; browser E2E is configured for 31 cases and GitHub Actions remains the final Chromium gate.
+
+
+## 1.6.7 Final UX & Edge-Case Audit
+- Baseline is the actually delivered `AI_Cleaner_1_6_6_FULL_PROJECT_HANDOFF.zip`; `OPTION/**` remains protected/excluded. GitHub Actions run `31955705356` for 1.6.6 completed green for both static-checks and browser-smoke before this patch was finalized.
+- Mobile Typewriter completion cleanup now cancels the delayed result-navigation timer during workspace reset and clears transient completion/result destination state. Reset can no longer be followed by a stale empty-result scroll.
+- Exact Typewriter verification is now treated as a property of the current result, not a permanent source flag. Manual result edits, issue/review application, Rewrite Studio application, initial-result restore, and user history navigation invalidate `data-typewriter-verified`. Typewriter cancellation/failure restores the previous result without suppressing the source-stage cue.
+- Once the user intentionally edits a result through a downstream path, `자동작성 원본 새로쓰기` remains available but is demoted to `필요할 때 새로쓰기` instead of reappearing as the primary next step. The result guide uses a separate customized-result state. Safe update draft restoration preserves this recommendation state and only restores exact Typewriter verification when the saved output still equals the sanitized visible-text projection of the saved source.
+- Text-file import now has a latest-intent sequence token and a per-request shared Work Lock. An older slow file read cannot overwrite a newer file selection, Sample action, direct source input, Typewriter start, reset, or page lifecycle intent.
+- Text files at or above the 6,000-character Worker threshold no longer use immediate synchronous `analyzeNow`; they schedule immediate coordinated background analysis even when live scan is off. Small file imports keep the existing immediate sync result path.
+- Download links are briefly attached to the DOM before click and removed afterward, with delayed object-URL cleanup for broader mobile/browser compatibility. A dedicated 320px media guard and E2E scenario cover very narrow source/result header overflow.
+- Browser E2E configuration increases from 31 to 36 cases. New cases cover verified-result invalidation, completion-reset timer cleanup, stale async text-file reads, large-file background Worker analysis, and 320px layout containment. Local static architecture checks are 192/0 and module checks PASS. System Chromium is installed but localhost is blocked by the execution environment's organization policy, so GitHub `browser-smoke` remains the final real Chromium gate.
+- If 1.6.7 browser-smoke is green, close the 1.6.x stabilization cycle and start the next feature phase at 1.7.0.
+
+## 1.7.0 Result Checkpoint Workspace
+- 패치 기준선은 실제 전달된 `AI_Cleaner_1_6_7_FULL_PROJECT_HANDOFF.zip`이다. `OPTION/**`은 계속 보호/제외한다.
+- 결과 카드 아래에 독립적인 `☆ 현재 결과 보관 / 보관함 N` 빠른 작업 행을 추가한다. 기존 복사/TXT/직접수정/Undo 액션의 우선순위와 모바일 2열 배치는 유지한다.
+- 신규 `features/result-checkpoint-store.js`가 체크포인트 목록, 중복 갱신, 최대 개수, 세션 복원, 삭제/전체비우기, 원본 지문 계산을 소유한다. 메인 앱은 UI/현재 원본 연계만 담당한다.
+- 체크포인트는 현재 브라우저 탭의 `sessionStorage`에 최대 8개 저장한다. 저장소 접근이 차단되거나 quota 오류가 발생하면 현재 메모리 목록은 유지하되 UI에서 새로고침 시 사라질 수 있음을 알린다.
+- 항목당 최대 300,000자, 전체 체크포인트 텍스트 예산 600,000자를 적용한다. 전체 예산을 넘으면 오래된 항목부터 제거해 update draft / Rewrite Studio session과 sessionStorage 공간을 과도하게 경쟁하지 않게 한다.
+- 각 체크포인트는 원본 전체를 중복 저장하지 않고 이중 해시+길이 지문을 저장한다. 현재 원본이 동일하고 최신 분석 상태일 때만 `결과로 복원`이 활성화된다. 다른 원본에서는 복원은 잠그고 복사/삭제만 허용한다.
+- 동일 원본+동일 결과를 다시 저장하면 중복 항목을 만들지 않고 최근 항목으로 갱신한다. 저장 라벨은 자동작성 완료/직접 수정/현재 history 작업명을 활용한다.
+- 보관함 복원은 Typewriter exact-verification을 무효화하고 현재 결과 history에 새 복원 단계를 기록한 뒤 기존 결과 reveal/focus 흐름을 재사용한다.
+- Browser E2E는 체크포인트 저장→수정 버전 추가→이전 결과 복원→원본 변경 시 복원 잠금, 그리고 같은 탭 새로고침 뒤 목록 유지/빈 원본 복원 잠금을 검증한다.
+- 로컬 검증: static 197/0, module PASS, 전체 JS/MJS syntax PASS, workflow YAML/JSON PASS. Browser E2E는 38개 구성. 2026-08-17 작업 시작 시 GitHub에서 확인되는 최신 AI Cleaner CI는 1.6.6 run `31955705356` GREEN이며 1.6.7 push run은 아직 보이지 않았다.
+
+
+## 1.8.0 AI Writing OS Static Embed
+- Baseline is the actually delivered `AI_Cleaner_1_7_0_FULL_PROJECT_HANDOFF.zip`; `OPTION/**` remains protected/excluded.
+- Added a third top-level tool `AI 글쓰기 OS`, fully separate from the existing text-cleaner and image-inspection workspace states.
+- Migrated the user-provided `AI_COMPANY_OS_HUB_V1_EMBED 1.0.0` flow into the existing AI Cleaner UI/UX: ChatGPT/Claude/Gemini/Grok/Meta AI selection, free task input, automatic channel routing, workforce mode, Task Pack generation/preview/copy/download, provider launch, Portable OS ZIP, and browser-local preferences.
+- Because the live product is GitHub Pages, the uploaded Node `/api/*` and Remote MCP server cannot run in the current deployment. The UI does not invent a fake MCP URL. The real static delivery path is Task Pack then public OS ZIP. The source integration contract is retained for a future authenticated server/reverse-proxy implementation.
+- Public-repository privacy boundary: the uploaded personalized `01_OWNER_PROFILE.md` is replaced by a generic public runtime profile, and a sanitized `AI_COMPANY_OS_V6_1_PUBLIC.zip` is built for download. User preferences stay in `localStorage` and are included in Task Packs only; the UI tells users not to store secrets/API keys/tokens there.
+- New browser module: `js/features/ai-writing-os.js`. Public runtime assets live under `ai-writing-os/`. Existing Worker, Unicode hygiene, Typewriter, Rewrite Studio, image analysis, result checkpoints, and update lifecycle are not reused as OS state and remain isolated.
+- Mobile top navigation supports three equal tools; OS cards/provider/actions follow the existing responsive card/button/focus language.
+- Local architecture validation during implementation: static 211/0 and module PASS before final package verification. Browser E2E is configured for 40 cases, adding AI Writing OS Task Pack generation plus cross-tool state isolation/mobile navigation coverage.

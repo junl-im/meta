@@ -66,6 +66,26 @@ test('completion priority keeps rewrite quiet until auto typewriter finishes and
   await expect(page.locator('#output')).toHaveAttribute('data-typewriter-verified','true',{timeout:7000});await expect(next).toContainText('자동작성 완료');await expect(rewrite).toHaveClass(/rewriteReady/);
 });
 
+test('completed typewriter state is invalidated by a manual result edit without re-promoting it as the next step', async ({ page }) => {
+  await gotoReady(page);
+  const input=page.locator('#input'),output=page.locator('#output'),typewriter=page.locator('#typingPreviewButton'),next=page.locator('#resultNextStep');
+  await input.fill('자동작성 검증 뒤 결과를 직접 수정하면 현재 결과는 더 이상 원본과 정확히 같은 자동작성 결과가 아닙니다.');
+  await page.locator('#typingPreviewSpeed').evaluate(el=>{el.value='0';el.dispatchEvent(new Event('change',{bubbles:true}));});
+  await typewriter.click();await expect(output).toHaveAttribute('data-typewriter-verified','true',{timeout:7000});await expect(page.locator('#typingPreviewPause')).toHaveText('완료 · 결과 보기');
+  await page.locator('#typingPreviewPause').click();await page.locator('#editResult').click();const edited=(await output.inputValue())+' 직접 수정';await output.fill(edited);
+  await expect(output).not.toHaveAttribute('data-typewriter-verified','true');await expect(typewriter).not.toHaveClass(/typewriterRecommended/);await expect(page.locator('#typingBridgeStatus')).toContainText('필요할 때 새로쓰기');await expect(next).toContainText('결과를 수정했습니다');
+  await page.locator('#editResult').click();await expect(output).toHaveValue(/직접 수정$/);
+});
+
+test('reset immediately after mobile typewriter completion cancels the delayed completion navigation', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});await gotoReady(page);
+  await page.locator('#input').fill('완료 직후 초기화를 선택하면 예약되어 있던 결과 자동 이동이 다시 실행되면 안 됩니다.');
+  await page.locator('#typingPreviewSpeed').evaluate(el=>{el.value='0';el.dispatchEvent(new Event('change',{bubbles:true}));});
+  await page.locator('#typingPreviewButton').click();await expect(page.locator('#typingPreviewPause')).toHaveText('완료 · 결과 보기',{timeout:7000});
+  await page.locator('#reset').evaluate(el=>el.click());await expect(page.locator('#input')).toHaveValue('');await expect(page.locator('#output')).toHaveValue('');await expect(page.locator('#typingPreviewPanel')).toBeHidden();await expect(page.locator('#resultNextStep')).toBeHidden();
+  await page.evaluate(()=>scrollTo(0,0));await page.waitForTimeout(1300);expect(await page.evaluate(()=>Math.round(scrollY))).toBeLessThanOrEqual(2);await expect(page.locator('#appToast')).toContainText('글 작업을 초기화했습니다.');
+});
+
 test('mobile source actions stay on one compact row and result tabs align to the right of the result title', async ({ page }) => {
   await page.setViewportSize({width:390,height:844});await gotoReady(page);
   const sourceGeometry=await page.locator('#sample, .sourceActions .filelabel, #reset').evaluateAll(nodes=>nodes.map(el=>{const r=el.getBoundingClientRect();return{top:Math.round(r.top),bottom:Math.round(r.bottom),height:Math.round(r.height)};}));
@@ -248,6 +268,25 @@ test('text file import uses the same source replacement and freshness pipeline',
   await expect(page.locator('#resultFreshness')).toBeHidden();await expect(page.locator('#appToast')).toContainText('source.txt 파일을 열고 바로 다듬었습니다.');
 });
 
+test('a stale text-file read cannot overwrite newer direct input intent', async ({ page }) => {
+  await gotoReady(page);
+  await page.evaluate(()=>{window.__originalFileText=File.prototype.text;File.prototype.text=function(){if(this.name==='slow.txt')return new Promise(resolve=>setTimeout(()=>resolve('느린 파일이 뒤늦게 완료되었습니다.'),450));return window.__originalFileText.call(this);};});
+  await page.locator('#textFileInput').setInputFiles({name:'slow.txt',mimeType:'text/plain',buffer:Buffer.from('느린 파일이 뒤늦게 완료되었습니다.','utf8')});
+  await page.waitForTimeout(40);await page.locator('#input').fill('사용자가 나중에 직접 입력한 최신 원본');await page.waitForTimeout(600);
+  await expect(page.locator('#input')).toHaveValue('사용자가 나중에 직접 입력한 최신 원본');await expect(page.locator('#output')).toHaveValue(/사용자가 나중에 직접 입력한 최신 원본/);
+  await page.evaluate(()=>{File.prototype.text=window.__originalFileText;delete window.__originalFileText;});await expect.poll(async()=>page.evaluate(()=>window.AICleanerApp.workLock.active.filter(x=>x.name.startsWith('text-import-')).length)).toBe(0);
+});
+
+test('large text file import uses immediate worker-safe background analysis even when live scan is off', async ({ page }) => {
+  await gotoReady(page);await page.locator('#liveScan').uncheck();
+  const longText=('대용량 파일 백그라운드 분석 테스트입니다. 숨은 문자\u200B도 안전하게 정리합니다. ').repeat(190);expect(longText.length).toBeGreaterThan(6000);
+  const before=await page.evaluate(()=>window.AICleanerApp.analysisWorker.getStats());
+  await page.locator('#textFileInput').setInputFiles({name:'large.txt',mimeType:'text/plain',buffer:Buffer.from(longText,'utf8')});
+  await expect(page.locator('#input')).toHaveValue(longText);await expect(page.locator('#appToast')).toContainText('백그라운드에서 분석');await expect(page.locator('#output')).not.toHaveValue('',{timeout:10000});await expect(page.locator('#output')).not.toHaveValue(/\u200B/);
+  const after=await page.evaluate(()=>({supported:window.AICleanerApp.analysisWorker.workerSupported,stats:window.AICleanerApp.analysisWorker.getStats(),pending:window.AICleanerApp.analysisCoordinator.pending}));
+  if(after.supported)expect(after.stats.workerSuccess).toBeGreaterThan(before.workerSuccess);else expect(after.stats.fallbackRuns).toBeGreaterThan(before.fallbackRuns);expect(after.pending).toBeFalsy();
+});
+
 test('manual analysis failure keeps the source and exposes a recoverable UI state', async ({ page }) => {
   await gotoReady(page);await page.locator('#liveScan').uncheck();await page.locator('#input').fill('분석 오류 경계 테스트');
   await page.evaluate(()=>{window.__originalAnalyzeForTest=window.AICleanerApp.textEngine.analyze;window.AICleanerApp.textEngine.analyze=()=>{throw new Error('forced analysis failure');};});
@@ -386,6 +425,12 @@ test('mobile compact panels open small and expand on demand', async ({ page }) =
   await expect(panel).not.toHaveClass(/mobileExpanded/);
 });
 
+test('very narrow mobile width keeps the primary source row and result header inside the viewport', async ({ page }) => {
+  await page.setViewportSize({width:320,height:568});await gotoReady(page);await page.locator('#liveScan').uncheck();await page.locator('#input').fill('아주 좁은 화면에서도 원본 버튼과 결과 탭이 화면 밖으로 밀리면 안 됩니다.');
+  const geo=await page.evaluate(()=>{const source=[...document.querySelectorAll('#sample,.sourceActions .filelabel,#reset')].map(el=>el.getBoundingClientRect()),head=document.querySelector('.resultHead').getBoundingClientRect(),tabs=document.querySelector('.resultHead .tabs').getBoundingClientRect();return{scrollWidth:document.documentElement.scrollWidth,innerWidth,sourceTops:source.map(r=>Math.round(r.top)),sourceLeft:Math.min(...source.map(r=>r.left)),sourceRight:Math.max(...source.map(r=>r.right)),headLeft:head.left,headRight:head.right,tabsLeft:tabs.left,tabsRight:tabs.right};});
+  expect(geo.scrollWidth).toBeLessThanOrEqual(geo.innerWidth+1);expect(Math.max(...geo.sourceTops)-Math.min(...geo.sourceTops)).toBeLessThanOrEqual(2);expect(geo.sourceLeft).toBeGreaterThanOrEqual(0);expect(geo.sourceRight).toBeLessThanOrEqual(geo.innerWidth+1);expect(geo.tabsLeft).toBeGreaterThanOrEqual(geo.headLeft);expect(geo.tabsRight).toBeLessThanOrEqual(geo.headRight+1);
+});
+
 test('narrow mobile header and result actions avoid vertical crowding', async ({ page }) => {
   await page.setViewportSize({width:390,height:844});await gotoReady(page);
   const geo=await page.evaluate(()=>{const top=document.querySelector('.top').getBoundingClientRect(),hero=document.querySelector('.hero').getBoundingClientRect(),actions=getComputedStyle(document.querySelector('.resultActions'));return{headerHeight:top.height,headerBottom:top.bottom,heroTop:hero.top,resultColumns:actions.gridTemplateColumns.trim().split(/\s+/).length};});
@@ -409,4 +454,68 @@ test('long live analysis runs through worker-safe adapter', async ({ page }) => 
   expect(info.stats.workerTimeouts).toBe(0);
   expect(info.governor.completed).toBeGreaterThanOrEqual(1);
   await expect(page.locator('#output')).not.toHaveValue(/\u200B/);
+});
+
+test('result checkpoint workspace saves restores and locks restore when the source changes', async ({ page }) => {
+  await gotoReady(page);
+  const input=page.locator('#input'),output=page.locator('#output');
+  await input.fill('체크포인트 원본입니다. 결론적으로 첫 결과를 보관하고 수정 버전도 따로 남깁니다.');await analyzeNow(page,{silent:true});
+  const baseline=await output.inputValue();await expect(page.locator('#checkpointQuickBar')).toBeVisible();await expect(page.locator('#checkpointSave')).toBeEnabled();
+  await page.locator('#checkpointSave').click();await expect(page.locator('#checkpointCount')).toHaveText('1');await page.locator('#checkpointOpen').click();
+  await expect(page.locator('#checkpointPanel')).toBeVisible();await expect(page.locator('#checkpointList [data-checkpoint-id]')).toHaveCount(1);await expect(page.locator('#checkpointList [data-checkpoint-action="restore"]')).toBeEnabled();
+  await page.locator('[data-close-panel="checkpointPanel"]').click();await page.locator('#editResult').click();await output.fill(baseline+'\n직접 수정 버전');await page.locator('#editResult').click();
+  await page.locator('#checkpointSave').click();await expect(page.locator('#checkpointCount')).toHaveText('2');await page.locator('#checkpointOpen').click();await expect(page.locator('#checkpointList [data-checkpoint-id]')).toHaveCount(2);
+  await page.locator('#checkpointList [data-checkpoint-id]').nth(1).locator('[data-checkpoint-action="restore"]').click();await expect(output).toHaveValue(baseline);await expect(page.locator('#checkpointPanel')).toBeHidden();
+  await input.fill('완전히 다른 원본으로 바뀌었습니다. 이전 체크포인트는 복사만 가능해야 합니다.');await page.locator('#checkpointOpen').click();
+  await expect(page.locator('#checkpointList [data-checkpoint-action="restore"]')).toHaveCount(2);for(const restore of await page.locator('#checkpointList [data-checkpoint-action="restore"]').all())await expect(restore).toBeDisabled();
+});
+
+test('result checkpoints survive a same-tab reload without restoring into an empty source', async ({ page }) => {
+  await gotoReady(page);await page.locator('#input').fill('세션 보관함은 같은 탭 새로고침 뒤에도 목록을 다시 불러옵니다.');await analyzeNow(page,{silent:true});await page.locator('#checkpointSave').click();await expect(page.locator('#checkpointCount')).toHaveText('1');
+  await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>window.__AI_CLEANER_APP_READY__===true&&!!window.AICleanerApp,{timeout:15000});
+  await expect(page.locator('#checkpointQuickBar')).toBeVisible();await expect(page.locator('#checkpointCount')).toHaveText('1');await expect(page.locator('#checkpointOpen')).toBeEnabled();await page.locator('#checkpointOpen').click();
+  await expect(page.locator('#checkpointList [data-checkpoint-id]')).toHaveCount(1);await expect(page.locator('#checkpointList [data-checkpoint-action="restore"]')).toBeDisabled();await expect(page.locator('#checkpointList [data-checkpoint-action="copy"]')).toBeEnabled();
+});
+
+test('AI writing OS creates a provider-neutral Task Pack from the uploaded OS rules', async ({ page }) => {
+  await gotoReady(page);
+  await page.locator('[data-tool="writing"]').click();
+  await expect(page.locator('#writingTool')).toBeVisible();
+  await expect(page.locator('#textTool')).toBeHidden();
+  await expect(page.locator('#imageTool')).toBeHidden();
+  await expect(page.locator('#osStatus')).toContainText('V6.1');
+  await expect(page.locator('#osStaticMode')).toContainText('정적 모드');
+  await expect(page.locator('#osProviders .osProvider')).toHaveCount(5);
+  await page.locator('#osTask').fill('Apple Vision Pro 배터리 팁으로 네이버 블로그 글 써줘. 제공하지 않은 체험은 만들지 마.');
+  await page.locator('#osPrepare').click();
+  await expect(page.locator('#osRouteSummary')).toContainText('분류: 블로그');
+  await expect(page.locator('#osRouteSummary')).toContainText('CREATOR_10');
+  await expect(page.locator('#osTaskPackResult')).toBeVisible();
+  await expect(page.locator('#osTaskPackPreview')).toHaveValue(/# AI COMPANY TASK PACK/);
+  await expect(page.locator('#osTaskPackPreview')).toHaveValue(/Output language: ko/);
+  await expect(page.locator('#osTaskPackPreview')).toHaveValue(/Control Plane/);
+  await expect(page.locator('#osTaskPackPreview')).toHaveValue(/사용자가 제공하지 않은 구매·사용·가족반응·효과 경험/);
+});
+
+test('AI writing OS keeps its task state separate from text cleaner and survives tool round trips', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});
+  await gotoReady(page);
+  const source='글 다듬기 쪽 원본은 AI 글쓰기 OS와 별개로 유지되어야 합니다.';
+  await page.locator('#input').fill(source);
+  await page.locator('[data-tool="writing"]').click();
+  await expect(page.locator('#writingTool')).toBeVisible();
+  await page.locator('#osTask').fill('이 제품 인스타 콘텐츠 만들어줘');
+  await page.locator('#osDisplayName').fill('로컬 테스트');
+  await page.locator('#osPreferences').fill('문체: 자연스럽게\n이모지: 적게');
+  await page.locator('#osSavePrefs').click();
+  await page.locator('[data-tool="image"]').click();
+  await expect(page.locator('#imageTool')).toBeVisible();
+  await page.locator('[data-tool="writing"]').click();
+  await expect(page.locator('#osTask')).toHaveValue('이 제품 인스타 콘텐츠 만들어줘');
+  await expect(page.locator('#osDisplayName')).toHaveValue('로컬 테스트');
+  await page.locator('[data-tool="text"]').click();
+  await expect(page.locator('#input')).toHaveValue(source);
+  const navRows=await page.locator('.toolnav').evaluate(el=>({w:el.getBoundingClientRect().width,children:[...el.children].map(x=>x.getBoundingClientRect())}));
+  expect(navRows.children).toHaveLength(3);
+  expect(Math.max(...navRows.children.map(r=>r.right))-Math.min(...navRows.children.map(r=>r.left))).toBeLessThanOrEqual(navRows.w+1);
 });

@@ -8,7 +8,7 @@ const root=path.resolve(here,'..');
 const files=[
   'js/core/event-bus.js','js/core/history-store.js','js/core/work-lock.js','js/core/text-utils.js',
   'js/core/state-store.js','js/core/text-engine.js','js/core/diff-engine.js','js/services/analysis-worker-adapter.js','js/services/analysis-performance-governor.js','js/services/analysis-coordinator.js','js/services/update-manager.js',
-  'js/ui/panel-manager.js','js/ui/diff-view.js','js/features/file-import.js','js/features/typewriter-engine.js'
+  'js/ui/panel-manager.js','js/ui/diff-view.js','js/features/file-import.js','js/features/typewriter-engine.js','js/features/result-checkpoint-store.js','js/features/ai-writing-os.js'
 ];
 const queue=[];
 const context={
@@ -120,4 +120,29 @@ function assert(ok,msg){if(!ok)throw new Error(msg);}
   const pm=M.createPanelManager({ids:['panel'],breakpoint:980,anchor:()=>panel});pm.setMobileExpanded(panel,true);assert(classes.has('mobileExpanded'),'mobile panel expansion setup failed');
   context.innerWidth=1100;context.innerHeight=700;pm.handleResize();assert(!classes.has('mobileExpanded'),'breakpoint transition must clear stale mobile expansion');assert(button.attrs['aria-expanded']==='false','panel size aria state must reset with breakpoint transition');
 }
-console.log('PASS 1.6.6 UX priority + completion flow integration unit checks');
+
+{
+  const os=M.createAiWritingOsController({storage:null,showToast:()=>{},openWindow:()=>{}});
+  const blog=os.routeTask('Apple Vision Pro 배터리 팁 네이버 블로그 써줘');assert(blog.channel==='BLOG'&&blog.workforceMode==='CREATOR_10'&&blog.outputLanguage==='ko','AI writing OS blog routing/default language failed');
+  const instagram=os.routeTask('이 제품 인스타 콘텐츠 만들어줘');assert(instagram.channel==='INSTAGRAM'&&instagram.deliverables.length===3,'AI writing OS Instagram deliverables failed');
+  const quick=os.routeTask('블로그 빠른 초안만 써줘');assert(quick.workforceMode==='QUICK','AI writing OS quick routing failed');
+  const enterprise=os.routeTask('대기업 모드로 이 사업 검토해');assert(enterprise.workforceMode==='ENTERPRISE','AI writing OS enterprise routing failed');
+  const grand=os.routeTask('이 제품 기획 생산부터 출시 판매까지 전부 검토해');assert(grand.workforceMode==='GRAND_CHALLENGE','AI writing OS product lifecycle escalation failed');
+  const english=os.routeTask('Apple Vision Pro 블로그를 영어로 써줘');assert(english.outputLanguage==='en','AI writing OS explicit language routing failed');
+  const fields={osTask:{value:'부산 아쿠아리움 네이버 블로그 써줘'},osMode:{value:'auto'},osDisplayName:{value:'테스트 사용자'},osPreferences:{value:'문체: 자연스럽게'}};context.document={getElementById:id=>fields[id]||null};context.fetch=async url=>{const prefix='ai-writing-os/os/current/';if(!String(url).startsWith(prefix))return{ok:false,status:404,text:async()=>'',json:async()=>({})};const file=String(url).slice(prefix.length);const text=fs.readFileSync(path.join(root,'ai-writing-os','os','current',file),'utf8');return{ok:true,status:200,text:async()=>text,json:async()=>JSON.parse(text)};};
+  const pack=await os.buildTaskPack();const md=os.taskPackToMarkdown(pack);assert(pack.route.channel==='BLOG'&&pack.userProfile.displayName==='테스트 사용자','AI writing OS task-pack profile/routing failed');assert(md.includes('===== 04_BLOG_CORE.md =====')&&md.includes('문체: 자연스럽게')&&md.includes('Control Plane'),'AI writing OS task-pack context/boundary failed');
+}
+
+{
+  const memory=new Map(),storage={getItem:k=>memory.has(k)?memory.get(k):null,setItem:(k,v)=>memory.set(k,v),removeItem:k=>memory.delete(k)};
+  let t=1000;const checkpoints=M.createResultCheckpointStore({storage,limit:2,maxChars:1000,now:()=>++t});
+  const stampA=checkpoints.stamp('원본 A'),stampB=checkpoints.stamp('원본 B');assert(stampA!==stampB,'checkpoint source stamp should distinguish source text');
+  const a=checkpoints.add({text:'결과 하나',label:'첫 결과',sourceStamp:stampA,sourceChars:4});assert(a.ok&&a.created&&checkpoints.size===1&&a.persisted,'checkpoint add/persist failed');
+  const duplicate=checkpoints.add({text:'결과 하나',label:'첫 결과 갱신',sourceStamp:stampA,sourceChars:4});assert(duplicate.ok&&!duplicate.created&&checkpoints.size===1&&checkpoints.list()[0].label==='첫 결과 갱신','checkpoint duplicate should refresh instead of duplicate');
+  checkpoints.add({text:'결과 둘',label:'둘',sourceStamp:stampA});checkpoints.add({text:'결과 셋',label:'셋',sourceStamp:stampB});assert(checkpoints.size===2&&!checkpoints.list().some(x=>x.text==='결과 하나'),'checkpoint limit should evict oldest');
+  const tooLarge=checkpoints.add({text:'x'.repeat(1001),sourceStamp:stampA});assert(!tooLarge.ok&&tooLarge.reason==='too-large','checkpoint size guard failed');
+  const restored=M.createResultCheckpointStore({storage,limit:2,maxChars:1000,now:()=>++t});assert(restored.size===2&&restored.list()[0].text==='결과 셋','checkpoint session reload failed');
+  const id=restored.list()[0].id;assert(restored.remove(id)&&restored.size===1,'checkpoint remove failed');restored.clear();assert(restored.size===0,'checkpoint clear failed');
+  const budget=M.createResultCheckpointStore({storage:null,limit:8,maxChars:1000,maxTotalChars:1500,now:()=>++t});budget.add({text:'a'.repeat(800),sourceStamp:stampA});budget.add({text:'b'.repeat(800),sourceStamp:stampA});assert(budget.size===1&&budget.list()[0].text.startsWith('b'),'checkpoint total text budget should evict oldest entries');
+}
+console.log('PASS 1.8.0 AI writing OS static embed + result checkpoint integration unit checks');

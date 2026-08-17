@@ -1,7 +1,7 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.6.6",
-  "date": "2026-08-16",
+  "version": "1.8.0",
+  "date": "2026-08-17",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
   "appPath": "ai-cleaner/",
@@ -43,12 +43,12 @@
     "ai-cleaner/js/workers/text-analysis-worker.js"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.6.6",
-  "asset_version": "166",
+  "current_version": "1.8.0",
+  "asset_version": "180",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.6.6 UX Priority & Completion Flow Audit: keep Typewriter as the sole source-stage recommendation, add state-aware result next-step guidance, surface Rewrite Studio after verified completion, add accessible result tab semantics, file-picker keyboard focus, and TXT save feedback",
+  "latestPatch": "1.8.0 AI Writing OS Static Embed: third top-level AI writing workspace migrated from AI_COMPANY_OS_HUB_V1_EMBED with provider routing, local Task Pack generation, public Portable OS ZIP, browser-local preferences, and honest static/MCP boundaries",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -127,14 +127,14 @@
     "breakpointExpansionReset": true,
     "safeAreaViewportFitCover": true
   },
-  "nextPhase": "1.6.7 final 1.6.x UX exception sweep after 1.6.6 GitHub browser-smoke is green",
+  "nextPhase": "1.8.1 AI Writing OS browser integration / mobile UX / storage boundary audit after 1.8.0 GitHub browser-smoke validation",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
     "scheme": "semantic versioning"
   },
   "modularCore": {
-    "phase": 5,
+    "phase": 6,
     "uiContract": "1.0.0 preserved",
     "bootOrder": [
       "core/event-bus",
@@ -152,6 +152,7 @@
       "ui/diff-view",
       "features/file-import",
       "features/typewriter-engine",
+      "features/result-checkpoint-store",
       "app"
     ],
     "eventBus": true,
@@ -170,7 +171,8 @@
     "updateManager": true,
     "analysisWorkerAdapter": true,
     "workerSafeTextCore": true,
-    "analysisPerformanceGovernor": true
+    "analysisPerformanceGovernor": true,
+    "resultCheckpointStore": true
   },
   "textHygiene": {
     "policyVersion": "old-v6-layer-a-safe-1.2.2",
@@ -188,7 +190,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "166",
+  "assetVersion": "180",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -197,13 +199,14 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "184 passed / 0 failed",
-    "moduleChecks": "PASS",
+    "staticChecks": "211 passed / 0 failed",
+    "moduleChecks": "PASS including AI Writing OS routing + real Task Pack context generation",
     "jsSyntax": "PASS",
     "workflowYaml": "PASS",
-    "localBrowserSmoke": "NOT_RUN_LOCAL_ENVIRONMENT",
-    "browserE2EConfigured": "31 cases",
-    "baseline165GitHubRun": "31954107010 GREEN"
+    "json": "PASS",
+    "localBrowserSmoke": "SYSTEM_CHROMIUM_HEADLESS_DUMP_TIMED_OUT_AFTER_25S",
+    "browserE2EConfigured": "40 cases",
+    "latestVisibleGitHubBaseline": "1.6.6 run 31955705356 GREEN at migration start; 1.8.0 requires new browser-smoke after push"
   },
   "stabilityAudit131": {
     "updateOnlyWhenSemverNewer": true,
@@ -391,5 +394,59 @@
     "txtSaveFeedback": true,
     "browserCoverageConfigured": 31,
     "delivered165UsedAsPatchBaseline": true
+  },
+  "finalEdgeAudit167": {
+    "completionResetCancelsPendingNavigation": true,
+    "typewriterVerificationInvalidatedOnDownstreamEdit": true,
+    "typewriterRecommendationSuppressedAfterIntentionalResultEdit": true,
+    "customResultCompletionGuide": true,
+    "updateRestoreTypewriterStateCoherence": true,
+    "textImportLatestIntentToken": true,
+    "textImportSharedWorkLock": true,
+    "largeTextImportWorkerSafeBackgroundAnalysis": true,
+    "downloadAnchorAttachedForCompatibility": true,
+    "veryNarrowMobile320Coverage": true,
+    "browserCoverageConfigured": 36,
+    "baseline166GitHubRun": "31955705356 GREEN",
+    "delivered166UsedAsPatchBaseline": true
+  },
+  "resultCheckpointWorkspace": {
+    "enabled": true,
+    "storage": "sessionStorage with memory fallback",
+    "limit": 8,
+    "maxEntryChars": 300000,
+    "maxTotalChars": 600000,
+    "sameSourceRestoreOnly": true,
+    "differentSourceCopyAllowed": true,
+    "duplicateRefresh": true,
+    "oldestEviction": true
+  },
+  "aiWritingOs180": {
+    "enabled": true,
+    "topLevelTool": "writing",
+    "sourcePackage": "AI_COMPANY_OS_HUB_V1_EMBED 1.0.0",
+    "osVersion": "6.1",
+    "runtime": "GitHub Pages static context-pack edition",
+    "providers": [
+      "chatgpt",
+      "claude",
+      "gemini",
+      "grok",
+      "meta-ai"
+    ],
+    "taskRouting": [
+      "BLOG",
+      "INSTAGRAM",
+      "YOUTUBE",
+      "PRODUCT",
+      "GENERAL"
+    ],
+    "taskPackMarkdown": true,
+    "portablePublicZip": "AI_COMPANY_OS_V6_1_PUBLIC.zip",
+    "preferences": "localStorage only; no secrets",
+    "remoteMcpLive": false,
+    "serverContractPreserved": true,
+    "publicOwnerProfileSanitized": true,
+    "separateFromCleanerAndImageState": true
   }
 }

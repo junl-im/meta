@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>곰같은여우의 AI 흔적 지우개</title>
-<meta name="description" content="브라우저에서 로컬로 동작하는 글 다듬기·이미지 출처 신호 검사 도구">
+<meta name="description" content="브라우저에서 로컬로 동작하는 AI 글 다듬기·이미지 출처 신호 검사·AI 글쓰기 OS 도구">
 <meta name="theme-color" content="#fff8f0">
 <meta name="referrer" content="no-referrer">
 <style id="bootCritical">html:not(.boot-ready) body{visibility:hidden}html{background:#fff8f0}html.app-booting body{cursor:progress}html.app-booting body *{cursor:progress!important}</style>
@@ -36,7 +36,7 @@
     const coreScripts=[
       'js/core/event-bus.js','js/core/history-store.js','js/core/work-lock.js','js/core/text-utils.js',
       'js/core/state-store.js','js/core/text-engine.js','js/core/diff-engine.js','js/services/analysis-worker-adapter.js','js/services/analysis-performance-governor.js','js/services/analysis-coordinator.js','js/services/update-manager.js',
-      'js/ui/panel-manager.js','js/ui/diff-view.js','js/features/file-import.js','js/features/typewriter-engine.js'
+      'js/ui/panel-manager.js','js/ui/diff-view.js','js/features/file-import.js','js/features/typewriter-engine.js','js/features/result-checkpoint-store.js','js/features/ai-writing-os.js'
     ];
     for(const src of coreScripts)await loadScript(src+'?v='+av);
     await loadScript('js/app.js?v='+av);
@@ -69,6 +69,7 @@
     <div class="toolnav" aria-label="도구 전환">
       <button class="active" type="button" data-tool="text">AI 글 다듬기</button>
       <button type="button" data-tool="image">AI 이미지 검사</button>
+      <button type="button" data-tool="writing">AI 글쓰기 OS</button>
     </div>
   </div>
 </header>
@@ -130,6 +131,11 @@
             <button class="btn historyBtn" id="undoStep" type="button" disabled>↶ 실행 취소</button>
             <button class="btn historyBtn" id="redoStep" type="button" disabled>↷ 다시 실행</button>
             <button class="btn danger" id="undoAll" type="button">처음 결과</button>
+          </div>
+          <div class="checkpointQuickBar" id="checkpointQuickBar" hidden aria-label="결과 보관함 빠른 작업">
+            <button class="mini checkpointSave" id="checkpointSave" type="button">☆ 현재 결과 보관</button>
+            <button class="mini checkpointOpen" id="checkpointOpen" type="button" aria-controls="checkpointPanel" aria-expanded="false" disabled>보관함 <b id="checkpointCount">0</b></button>
+            <span class="sub" id="checkpointQuickStatus">이 탭에서 최대 8개</span>
           </div>
         </div>
         <div id="diffPane" class="hidden" role="tabpanel" aria-labelledby="resultTabDiff">
@@ -244,6 +250,71 @@
   </div>
 </main>
 
+<main id="writingTool" class="hidden">
+  <section class="hero osHero">
+    <div class="osHeroBadges"><span class="tag orange">NEW</span><span class="perfPill" id="osStatus">AI COMPANY OS 확인 중…</span></div>
+    <h1>AI가 바뀌어도 <span>글쓰기 운영 방식은 그대로</span></h1>
+    <p>첨부된 <b>AI COMPANY OS HUB V1</b>의 작업 분류·Task Pack·Portable OS 흐름을 이 사이트에 이식했습니다. 글 다듬기/이미지 검사와 상태를 공유하지 않는 별도 작업 공간입니다.</p>
+  </section>
+
+  <div class="osGrid">
+    <section class="card osCard">
+      <div class="head"><div><b><span class="osStep">01</span> 사용할 AI</b><span class="sub">Task Pack을 전달할 AI를 선택하세요.</span></div></div>
+      <div class="body">
+        <div class="osProviders" id="osProviders" role="group" aria-label="AI 제공자 선택"></div>
+        <div class="v6note" id="osProviderHint">AI 연결 정보를 준비하고 있습니다.</div>
+      </div>
+    </section>
+
+    <section class="card osCard osTaskCard">
+      <div class="head"><div><b><span class="osStep">02</span> 무엇을 시킬까요?</b><span class="sub">평소 말투로 요청하면 BLOG / Instagram / Product / YouTube 등을 자동 분류합니다.</span></div></div>
+      <div class="body">
+        <textarea id="osTask" class="osTask" rows="8" aria-label="AI 글쓰기 OS 작업 요청" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" placeholder="예: 이 제품 사진 기준으로 네이버 블로그 글 써줘. 제목 키워드는 부산 아이와 가볼만한곳이야."></textarea>
+        <div class="osOptionRow">
+          <label><span>작업 강도</span><select id="osMode" class="v6select">
+            <option value="auto">자동</option><option value="quick">빠르게</option><option value="creator_10">Creator-10</option><option value="enterprise">대기업 30~80+</option><option value="grand_challenge">100명+ 전사모드</option>
+          </select></label>
+          <span class="sub" id="osPrepareStatus">브라우저에서 Task Pack을 로컬 생성합니다.</span>
+        </div>
+        <div class="actions osActions">
+          <button class="btn orange" id="osPrepare" type="button">✦ OS로 업무 준비</button>
+          <button class="btn primary" id="osCopyPack" type="button">AI용 요청문 복사</button>
+          <button class="btn" id="osDownloadPack" type="button">Task Pack .md</button>
+          <button class="btn" id="osOpenAi" type="button">선택 AI 열기</button>
+          <button class="btn soft" id="osClearTask" type="button">요청 비우기</button>
+        </div>
+        <pre class="osSummary" id="osRouteSummary">요청을 입력하면 BLOG / Instagram / Product / YouTube 등을 자동 분류합니다.</pre>
+        <div class="osTaskPackResult" id="osTaskPackResult" hidden>
+          <div class="sectionMiniHead"><b>생성된 AI COMPANY TASK PACK</b><span class="sub">선택 AI에 붙여넣거나 Markdown 파일로 저장하세요.</span></div>
+          <textarea id="osTaskPackPreview" class="osPackPreview" readonly spellcheck="false" aria-label="생성된 Task Pack"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <section class="card osCard">
+      <div class="head"><div><b><span class="osStep">03</span> AI 연결 / Portable OS</b><span class="sub">현재 사이트에서 실제로 동작하는 전달 경로만 표시합니다.</span></div></div>
+      <div class="body">
+        <div class="osConnectionState"><span class="tag green">STATIC</span><b id="osStaticMode">GitHub Pages 정적 모드</b></div>
+        <p class="sub osConnectionCopy">이 배포에서는 서버 API나 가짜 Remote MCP 주소를 만들지 않습니다. <b>Task Pack → OS ZIP</b> 순서로 어떤 AI에든 전달할 수 있습니다. Remote MCP는 별도 Node Hub를 같은 도메인에 연결할 때 활성화할 수 있습니다.</p>
+        <div class="actions"><button class="btn" id="osDownloadZip" type="button">공개용 최신 OS ZIP</button></div>
+        <div class="v6note">공개 저장소 안전성을 위해 원본의 개인화 OWNER PROFILE은 공개용 기본 프로필로 교체했습니다. 개인 선호는 아래 브라우저 로컬 설정에서 Task Pack에만 합쳐집니다.</div>
+      </div>
+    </section>
+
+    <section class="card osCard">
+      <div class="head"><div><b><span class="osStep">04</span> 내 기본 설정</b><span class="sub">AI 글쓰기 OS 전용 설정 · 글 다듬기 상태와 별개입니다.</span></div></div>
+      <div class="body osPrefs">
+        <label><span>표시 이름 <small>선택사항</small></span><input id="osDisplayName" type="text" autocomplete="off" placeholder="예: 곰같은여우"></label>
+        <label><span>추가 선호 <small>한 줄에 ‘항목: 내용’</small></span><textarea id="osPreferences" rows="5" spellcheck="false" placeholder="예: 블로그 문체: 자연스러운 해요체&#10;이모지: 적게&#10;도입부: 바로 본론부터"></textarea></label>
+        <div class="actions"><button class="btn" id="osSavePrefs" type="button">브라우저에 설정 저장</button></div>
+        <div class="v6note">설정은 이 브라우저의 localStorage에만 저장하며 서버로 전송하지 않습니다. 민감한 비밀·API Key·로그인 토큰은 입력하지 마세요.</div>
+      </div>
+    </section>
+  </div>
+
+  <div class="notice"><b>AI 글쓰기 OS 참고</b> · 이 기능은 모델을 직접 호출하는 생성 API가 아니라, 사용자의 요청과 OS 운영 규칙을 하나의 Task Pack으로 만들어 선택한 AI에 전달하는 Control Plane입니다. OS 내부 규칙은 콘텐츠 소재로 섞지 않고, 사용자가 제공하지 않은 체험·효과를 임의로 만들지 않도록 경계를 포함합니다.</div>
+</main>
+
 <div class="footer">곰같은여우의 AI 흔적 지우개 <span id="footerVersion"></span> · 브라우저 로컬 처리</div>
 </div>
 
@@ -334,6 +405,18 @@
       <div class="directStats"><span id="directProgress">0 / 0</span><span id="directAccuracy">정확도 —</span><span id="directStatus">대기</span></div>
       <div class="rewriteActionRow"><button class="btn" id="directReset" type="button">처음부터</button><button class="btn primary" id="directCopy" type="button" disabled>100% 일치 후 결과 반영</button></div>
     </div>
+  </div>
+</section>
+
+
+<section class="floatPanel checkpointPanel" id="checkpointPanel" aria-label="결과 보관함" hidden>
+  <div class="floatHead" data-drag-handle>
+    <div><b>결과 보관함</b><span class="sub" id="checkpointPanelStatus">현재 브라우저 탭에서 최대 8개를 보관합니다.</span></div>
+    <div class="floatHeadActions"><button class="iconBtn mobilePanelSize" type="button" data-panel-size="checkpointPanel" aria-label="크게 보기" aria-expanded="false">↕</button><button class="iconBtn" type="button" data-close-panel="checkpointPanel" aria-label="닫기">×</button></div>
+  </div>
+  <div class="floatBody checkpointBody">
+    <div class="checkpointToolbar"><span class="sub">원본이 같은 결과만 현재 결과로 복원할 수 있습니다.</span><button class="mini danger" id="checkpointClear" type="button" disabled>모두 비우기</button></div>
+    <div id="checkpointList" class="checkpointList"><div class="empty">보관한 결과가 없습니다.</div></div>
   </div>
 </section>
 

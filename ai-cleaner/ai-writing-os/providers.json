@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-08-17",
+  "providers": [
+    {
+      "id": "chatgpt",
+      "label": "ChatGPT",
+      "preferred": [
+        "mcp",
+        "context_pack",
+        "zip"
+      ],
+      "consumerApiRequired": false,
+      "notes": "MCP availability can vary by plan/workspace. Fall back to Context Pack or ZIP when unavailable.",
+      "launchUrl": "https://chatgpt.com/"
+    },
+    {
+      "id": "claude",
+      "label": "Claude",
+      "preferred": [
+        "mcp",
+        "context_pack",
+        "zip"
+      ],
+      "consumerApiRequired": false,
+      "notes": "Remote MCP is the preferred native path when available.",
+      "launchUrl": "https://claude.ai/"
+    },
+    {
+      "id": "gemini",
+      "label": "Gemini",
+      "preferred": [
+        "mcp",
+        "context_pack",
+        "zip"
+      ],
+      "consumerApiRequired": false,
+      "notes": "Custom MCP support can vary by product/region/account. Use fallback automatically.",
+      "launchUrl": "https://gemini.google.com/"
+    },
+    {
+      "id": "grok",
+      "label": "Grok",
+      "preferred": [
+        "mcp",
+        "context_pack",
+        "zip"
+      ],
+      "consumerApiRequired": false,
+      "notes": "Use custom MCP when available; otherwise Context Pack/ZIP.",
+      "launchUrl": "https://grok.com/"
+    },
+    {
+      "id": "meta-ai",
+      "label": "Meta AI",
+      "preferred": [
+        "context_pack",
+        "zip"
+      ],
+      "consumerApiRequired": false,
+      "notes": "Do not assume a general consumer custom-MCP connector. Context Pack/ZIP is the safe default.",
+      "launchUrl": "https://www.meta.ai/"
+    },
+    {
+      "id": "other",
+      "label": "기타 AI",
+      "preferred": [
+        "context_pack",
+        "zip"
+      ],
+      "consumerApiRequired": false,
+      "notes": "Provider-neutral fallback."
+    }
+  ]
+}

@@ -507,3 +507,45 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
 .tabs[role=tablist] .tab[aria-selected=true]{background:var(--ink);color:#fff}
 @media(max-width:620px){.resultNextStep{font-size:9px;margin-top:8px;padding:7px 9px}.resultActions .btn{height:38px}}
 @media(prefers-reduced-motion:reduce){.rewriteReady{animation:none!important}}
+
+/* ===== 1.6.7 final UX / edge-case audit ===== */
+.resultNextStep[data-state=custom]{border-color:#cbdcf5;background:#f5f9ff;color:#2458a6}
+@media(max-width:340px){
+  .resultHead{gap:5px}
+  .resultHead .tab{padding-inline:5px;font-size:8px}
+  .resultFreshness{max-width:58%;font-size:8px;padding-inline:5px}
+}
+
+/* ===== 1.7.0 result checkpoint workspace ===== */
+.checkpointQuickBar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px dashed #eadfce}
+.checkpointQuickBar .mini{min-width:auto;height:30px}
+.checkpointQuickBar .checkpointSave{background:#fff8ef;border-color:#f2cfaa;color:#8a4b0a}
+.checkpointQuickBar .checkpointOpen{background:#f5f9ff;border-color:#cbdcf5;color:#2458a6}
+.checkpointQuickBar .checkpointOpen b{display:inline-grid;place-items:center;min-width:20px;height:20px;margin-left:5px;padding:0 5px;border-radius:999px;background:#2458a6;color:#fff;font-size:9px}
+.checkpointQuickBar .sub{margin-left:auto;font-size:9px}
+.checkpointPanel{width:min(430px,calc(100vw - 32px))}
+.checkpointToolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.checkpointToolbar .sub{line-height:1.45}.checkpointToolbar .mini{min-width:auto;flex:0 0 auto}
+.checkpointList{display:grid;gap:9px}
+.checkpointItem{border:1px solid var(--line);border-radius:13px;background:#fff;padding:11px}
+.checkpointItem.sourceMismatch{background:#faf9f7;border-style:dashed}
+.checkpointItemHead{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.checkpointItemHead>div{min-width:0;display:grid;gap:3px}.checkpointItemHead b{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.checkpointItemHead .sub{font-size:9px}.checkpointItem p{margin:8px 0;color:var(--muted);font-size:10px;line-height:1.55;overflow-wrap:anywhere}
+.checkpointActions{display:flex;gap:6px;flex-wrap:wrap}.checkpointActions .mini{min-width:auto;height:29px}
+.mini.primary{background:var(--ink);color:#fff;border-color:var(--ink)}.mini.danger{color:var(--red);background:var(--redbg);border-color:#f0c4bf}
+.checkpointActions .mini:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:620px){
+  .checkpointQuickBar{display:grid;grid-template-columns:1fr 1fr;gap:6px}.checkpointQuickBar .mini{width:100%}.checkpointQuickBar .sub{grid-column:1/-1;margin-left:0;text-align:center}
+}
+@media(max-width:340px){.checkpointQuickBar .mini{font-size:9px;padding-inline:7px}.checkpointItemHead{gap:5px}.checkpointItemHead .tag{font-size:8px;padding-inline:6px}}
+
+/* ===== 1.8.0 AI Writing OS / AI Company OS static embed ===== */
+.osHero{padding-bottom:18px}.osHeroBadges{display:flex;align-items:center;gap:7px;margin-bottom:9px}.tag.orange{background:#fff0dc;color:#a35200;border-color:#f0c995}.osHero p b{color:var(--ink)}
+.osGrid{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:12px;align-items:start}.osTaskCard{grid-row:span 2}.osCard .head{min-height:58px}.osStep{display:inline-grid;place-items:center;width:28px;height:28px;margin-right:8px;border-radius:9px;background:var(--ink);color:#fff;font-size:9px;vertical-align:middle}.osProviders{display:flex;flex-wrap:wrap;gap:7px}.osProvider{min-height:34px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--ink);font-size:10px;font-weight:900;cursor:pointer}.osProvider:hover{border-color:#e4ad75;background:#fffaf4}.osProvider.active{border-color:var(--orange);background:var(--orange);color:#fff;box-shadow:0 5px 14px rgba(238,125,34,.18)}
+.osTask{width:100%;min-height:190px;resize:vertical;border:1px solid var(--line);border-radius:14px;padding:13px;background:#fff;color:var(--ink);font:inherit;font-size:12px;line-height:1.65;outline:none}.osTask:focus,.osPackPreview:focus,.osPrefs input:focus,.osPrefs textarea:focus{border-color:#e4a464;box-shadow:0 0 0 3px rgba(238,125,34,.10)}.osOptionRow{display:flex;align-items:flex-end;gap:12px;margin-top:10px}.osOptionRow label{display:grid;gap:5px;min-width:220px}.osOptionRow label>span,.osPrefs label>span{font-size:10px;font-weight:900}.osOptionRow>.sub{padding-bottom:8px;margin-left:auto}.osActions{gap:7px}.osActions .btn{flex:1 1 150px}.osActions .btn.orange{flex-basis:190px}.osSummary{margin:12px 0 0;min-height:94px;padding:12px;border:1px solid #eadfce;border-radius:13px;background:#fffaf4;color:#5e5246;font:inherit;font-size:10.5px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}.osTaskPackResult{margin-top:12px;padding-top:10px;border-top:1px dashed #eadfce}.osPackPreview{width:100%;height:260px;margin-top:8px;resize:vertical;border:1px solid var(--line);border-radius:13px;padding:12px;background:#fbfbfa;color:#342e29;font:500 10px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;outline:none}
+.osConnectionState{display:flex;align-items:center;gap:8px;margin-bottom:8px}.osConnectionState b{font-size:11px}.osConnectionCopy{font-size:10px;line-height:1.65}.osConnectionCopy b{color:var(--ink)}.osPrefs{display:grid;gap:10px}.osPrefs label{display:grid;gap:6px}.osPrefs label small{font-weight:600;color:var(--muted)}.osPrefs input,.osPrefs textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff;color:var(--ink);font:inherit;font-size:11px;outline:none}.osPrefs textarea{resize:vertical;line-height:1.55}.osPrefs .actions{margin-top:0}
+@media(max-width:980px){.osGrid{grid-template-columns:1fr}.osTaskCard{grid-row:auto}.osTask{min-height:180px}.osPackPreview{height:230px}}
+@media(max-width:760px){.osHeroBadges{flex-wrap:wrap}.osCard .head{min-height:0}.osOptionRow{align-items:stretch;flex-direction:column;gap:7px}.osOptionRow label{min-width:0}.osOptionRow>.sub{padding-bottom:0;margin-left:0}.osActions{display:grid;grid-template-columns:1fr 1fr}.osActions .btn{width:100%;min-width:0}.osTask{min-height:170px}.osPackPreview{height:220px}}
+@media(max-width:420px){.toolnav{grid-template-columns:repeat(3,minmax(0,1fr))}.toolnav button{padding:7px 3px;font-size:8.5px;line-height:1.15}.osProviders{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.osProvider{width:100%;min-width:0;padding:0 5px;font-size:9px}.osActions{gap:5px}.osActions .btn{height:36px;padding-inline:7px;font-size:9px}.osSummary{font-size:9.5px}.osStep{width:24px;height:24px;border-radius:8px;margin-right:6px}.osTask{min-height:150px;font-size:11px;padding:10px}.osPackPreview{height:190px;font-size:9px}.osPrefs input,.osPrefs textarea{font-size:10px}}
+@media(max-width:340px){.toolnav button{font-size:8px}.osProviders{grid-template-columns:repeat(2,minmax(0,1fr))}.osActions{grid-template-columns:1fr}.osPackPreview{height:170px}}
