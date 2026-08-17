@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "date": "2026-08-17",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -40,15 +40,18 @@
     "ai-cleaner/js/services/analysis-coordinator.js",
     "ai-cleaner/js/ui/diff-view.js",
     "ai-cleaner/js/services/analysis-worker-adapter.js",
-    "ai-cleaner/js/workers/text-analysis-worker.js"
+    "ai-cleaner/js/workers/text-analysis-worker.js",
+    "ai-cleaner/js/features/ai-writing-os.js",
+    "ai-cleaner/ai-writing-os/os-manifest.json",
+    "ai-cleaner/ai-writing-os/providers.json"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.8.0",
-  "asset_version": "180",
+  "current_version": "1.8.1",
+  "asset_version": "181",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.8.0 AI Writing OS Static Embed: third top-level AI writing workspace migrated from AI_COMPANY_OS_HUB_V1_EMBED with provider routing, local Task Pack generation, public Portable OS ZIP, browser-local preferences, and honest static/MCP boundaries",
+  "latestPatch": "1.8.1 AI Writing OS Simple Start: three-step default flow, advanced controls collapsed, stale prepared-request invalidation, cancellable preparation, and shared Work Lock integration",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -127,7 +130,7 @@
     "breakpointExpansionReset": true,
     "safeAreaViewportFitCover": true
   },
-  "nextPhase": "1.8.1 AI Writing OS browser integration / mobile UX / storage boundary audit after 1.8.0 GitHub browser-smoke validation",
+  "nextPhase": "1.8.2 AI Writing OS real-browser follow-up after 1.8.1 GitHub browser-smoke validation",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -153,6 +156,7 @@
       "features/file-import",
       "features/typewriter-engine",
       "features/result-checkpoint-store",
+      "features/ai-writing-os",
       "app"
     ],
     "eventBus": true,
@@ -172,7 +176,8 @@
     "analysisWorkerAdapter": true,
     "workerSafeTextCore": true,
     "analysisPerformanceGovernor": true,
-    "resultCheckpointStore": true
+    "resultCheckpointStore": true,
+    "aiWritingOs": true
   },
   "textHygiene": {
     "policyVersion": "old-v6-layer-a-safe-1.2.2",
@@ -190,7 +195,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "180",
+  "assetVersion": "181",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -199,14 +204,14 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "211 passed / 0 failed",
-    "moduleChecks": "PASS including AI Writing OS routing + real Task Pack context generation",
+    "staticChecks": "215 passed / 0 failed",
+    "moduleChecks": "PASS including AI Writing OS routing/context generation + simple-start integration",
     "jsSyntax": "PASS",
     "workflowYaml": "PASS",
     "json": "PASS",
-    "localBrowserSmoke": "SYSTEM_CHROMIUM_HEADLESS_DUMP_TIMED_OUT_AFTER_25S",
-    "browserE2EConfigured": "40 cases",
-    "latestVisibleGitHubBaseline": "1.6.6 run 31955705356 GREEN at migration start; 1.8.0 requires new browser-smoke after push"
+    "localBrowserSmoke": "BLOCKED_BY_SYSTEM_CHROMIUM_ORGANIZATION_POLICY: chrome-error://chromewebdata/ / 127.0.0.1 is blocked",
+    "browserE2EConfigured": "43 cases",
+    "latestVisibleGitHubBaseline": "latest visible AI Cleaner run remained 1.6.6 GREEN when 1.8.1 audit began; 1.8.1 requires new browser-smoke after push"
   },
   "stabilityAudit131": {
     "updateOnlyWhenSemverNewer": true,
@@ -448,5 +453,28 @@
     "serverContractPreserved": true,
     "publicOwnerProfileSanitized": true,
     "separateFromCleanerAndImageState": true
+  },
+  "aiWritingOs181": {
+    "enabled": true,
+    "defaultFlow": [
+      "원하는 글 적기",
+      "AI 고르기",
+      "글쓰기 준비",
+      "요청문 복사",
+      "AI에 붙여넣기"
+    ],
+    "advancedCollapsedByDefault": true,
+    "technicalTermsDemoted": true,
+    "preparedRequestInvalidatedOn": [
+      "provider",
+      "mode",
+      "profile",
+      "task"
+    ],
+    "prepareAbortController": true,
+    "prepareSharedWorkLock": true,
+    "openAiPopupBlockFeedback": true,
+    "expectedBrowserSmokeTests": 43,
+    "patchBaseline": "AI_Cleaner_1_8_0_FULL_PROJECT_HANDOFF.zip"
   }
 }

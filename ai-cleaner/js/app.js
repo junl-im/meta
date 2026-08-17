@@ -18,7 +18,7 @@ const fileImport=Modules.createFileImportService();
 let checkpointStorage=null;try{checkpointStorage=window.sessionStorage;}catch(_){}
 const checkpointStore=Modules.createResultCheckpointStore({storage:checkpointStorage,limit:8,maxChars:300000,maxTotalChars:600000});
 let aiWritingStorage=null;try{aiWritingStorage=window.localStorage;}catch(_){}
-const aiWritingOs=Modules.createAiWritingOsController({storage:aiWritingStorage,showToast:(message)=>showToast(message)});
+const aiWritingOs=Modules.createAiWritingOsController({storage:aiWritingStorage,workLock,showToast:(message)=>showToast(message)});
 let checkpointSourceCache={source:null,stamp:''};
 function checkpointCurrentSourceStamp(){const input=$('#input')?.value||'';if(!input||inputDirty||state.original!==input)return'';if(checkpointSourceCache.source===input&&checkpointSourceCache.stamp)return checkpointSourceCache.stamp;const stamp=checkpointStore.stamp(input);checkpointSourceCache={source:input,stamp};return stamp;}
 

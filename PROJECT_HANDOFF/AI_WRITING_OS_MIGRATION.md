@@ -22,3 +22,9 @@ The repository is public. Therefore the uploaded personalized owner profile is n
 
 ## Future Remote MCP activation
 A future server/reverse-proxy deployment may implement `ai-cleaner/ai-writing-os/integration-contract.json`. Authentication must come from a trusted server session; browser-supplied arbitrary user IDs must not be trusted. Do not put server secrets or MCP access slugs into this public repository.
+
+## 1.8.1 simple-start presentation
+The 1.8.0 migration preserved most Hub concepts visibly, which was accurate but too dense for first-time use. 1.8.1 keeps the same routing/context engine while changing the default presentation to three steps: request, provider, prepare. Workforce routing, profile settings, route diagnostics, and Portable OS remain available only in the collapsed advanced section. Generated Markdown remains available under a collapsed result detail. Preparation now aborts on newer input/tool intent and participates in the shared app Work Lock.
+
+## 1.8.1 simple-start presentation
+The 1.8.0 migration preserved most Hub concepts visibly, which was accurate but too dense for first-time use. 1.8.1 keeps the same routing/context engine while changing the default presentation to three steps: request, provider, prepare. Workforce routing, profile settings, route diagnostics, and Portable OS remain available only in the collapsed advanced section. Generated Markdown remains available under a collapsed result detail. Preparation now aborts on newer input/tool intent and participates in the shared app Work Lock.

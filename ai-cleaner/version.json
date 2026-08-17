@@ -1,6 +1,6 @@
 {
-  "version": "1.8.0",
-  "assetVersion": "180",
+  "version": "1.8.1",
+  "assetVersion": "181",
   "channel": "stable",
-  "updateMode": "ai-writing-os-static-embed"
+  "updateMode": "ai-writing-os-simple-start-practical-audit"
 }

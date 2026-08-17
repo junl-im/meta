@@ -251,68 +251,78 @@
 </main>
 
 <main id="writingTool" class="hidden">
-  <section class="hero osHero">
-    <div class="osHeroBadges"><span class="tag orange">NEW</span><span class="perfPill" id="osStatus">AI COMPANY OS 확인 중…</span></div>
-    <h1>AI가 바뀌어도 <span>글쓰기 운영 방식은 그대로</span></h1>
-    <p>첨부된 <b>AI COMPANY OS HUB V1</b>의 작업 분류·Task Pack·Portable OS 흐름을 이 사이트에 이식했습니다. 글 다듬기/이미지 검사와 상태를 공유하지 않는 별도 작업 공간입니다.</p>
+  <section class="hero osHero osSimpleHero">
+    <div class="osHeroBadges"><span class="tag orange">AI 글쓰기 OS</span><span class="perfPill" id="osStatus">글쓰기 준비 중…</span></div>
+    <h1>적고 · 고르고 · <span>준비하면 끝.</span></h1>
+    <p>원하는 글을 평소 말투로 적고, 사용할 AI를 고른 뒤 <b>글쓰기 준비</b>를 누르세요. 준비된 요청문을 복사해서 AI에 붙여넣으면 됩니다.</p>
+    <div class="osSimpleSteps" aria-label="AI 글쓰기 OS 사용 순서">
+      <span><b>1</b> 원하는 글 적기</span><span><b>2</b> AI 고르기</span><span><b>3</b> 글쓰기 준비</span>
+    </div>
   </section>
 
-  <div class="osGrid">
-    <section class="card osCard">
-      <div class="head"><div><b><span class="osStep">01</span> 사용할 AI</b><span class="sub">Task Pack을 전달할 AI를 선택하세요.</span></div></div>
+  <div class="osSimpleWorkspace">
+    <section class="card osCard osTaskCard osSimpleCard">
+      <div class="head"><div><b><span class="osStep">1</span> 어떤 글이 필요하세요?</b><span class="sub">길게 설명하지 않아도 됩니다. 평소 말투로 적으세요.</span></div></div>
       <div class="body">
-        <div class="osProviders" id="osProviders" role="group" aria-label="AI 제공자 선택"></div>
-        <div class="v6note" id="osProviderHint">AI 연결 정보를 준비하고 있습니다.</div>
-      </div>
-    </section>
+        <textarea id="osTask" class="osTask" rows="8" aria-label="AI 글쓰기 OS 작업 요청" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" placeholder="예: 부산 아이와 가볼만한곳 키워드로 네이버 블로그 글 써줘. 과장 없이 자연스러운 해요체로."></textarea>
 
-    <section class="card osCard osTaskCard">
-      <div class="head"><div><b><span class="osStep">02</span> 무엇을 시킬까요?</b><span class="sub">평소 말투로 요청하면 BLOG / Instagram / Product / YouTube 등을 자동 분류합니다.</span></div></div>
-      <div class="body">
-        <textarea id="osTask" class="osTask" rows="8" aria-label="AI 글쓰기 OS 작업 요청" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" placeholder="예: 이 제품 사진 기준으로 네이버 블로그 글 써줘. 제목 키워드는 부산 아이와 가볼만한곳이야."></textarea>
-        <div class="osOptionRow">
-          <label><span>작업 강도</span><select id="osMode" class="v6select">
-            <option value="auto">자동</option><option value="quick">빠르게</option><option value="creator_10">Creator-10</option><option value="enterprise">대기업 30~80+</option><option value="grand_challenge">100명+ 전사모드</option>
-          </select></label>
-          <span class="sub" id="osPrepareStatus">브라우저에서 Task Pack을 로컬 생성합니다.</span>
+        <div class="osSimpleProviderBlock">
+          <div class="sectionMiniHead"><b><span class="osStep">2</span> 사용할 AI</b><span class="sub" id="osProviderHint">붙여넣을 AI를 하나 고르세요.</span></div>
+          <div class="osProviders" id="osProviders" role="group" aria-label="AI 제공자 선택"></div>
         </div>
-        <div class="actions osActions">
-          <button class="btn orange" id="osPrepare" type="button">✦ OS로 업무 준비</button>
-          <button class="btn primary" id="osCopyPack" type="button">AI용 요청문 복사</button>
-          <button class="btn" id="osDownloadPack" type="button">Task Pack .md</button>
-          <button class="btn" id="osOpenAi" type="button">선택 AI 열기</button>
-          <button class="btn soft" id="osClearTask" type="button">요청 비우기</button>
+
+        <div class="osSimplePrepare">
+          <button class="btn orange osPrepareMain" id="osPrepare" type="button" disabled><span class="osPrepareNumber">3</span> 글쓰기 준비</button>
+          <button class="btn soft osClearSimple" id="osClearTask" type="button">요청 비우기</button>
+          <span class="sub" id="osPrepareStatus">원하는 글을 먼저 적어주세요.</span>
         </div>
-        <pre class="osSummary" id="osRouteSummary">요청을 입력하면 BLOG / Instagram / Product / YouTube 등을 자동 분류합니다.</pre>
-        <div class="osTaskPackResult" id="osTaskPackResult" hidden>
-          <div class="sectionMiniHead"><b>생성된 AI COMPANY TASK PACK</b><span class="sub">선택 AI에 붙여넣거나 Markdown 파일로 저장하세요.</span></div>
-          <textarea id="osTaskPackPreview" class="osPackPreview" readonly spellcheck="false" aria-label="생성된 Task Pack"></textarea>
+
+        <div class="osTaskPackResult osSimpleResult" id="osTaskPackResult" hidden>
+          <div class="osReadyState"><span class="tag green">준비 완료</span><b id="osReadyMessage">요청문을 복사해서 선택한 AI에 붙여넣으세요.</b></div>
+          <div class="actions osResultActions">
+            <button class="btn primary" id="osCopyPack" type="button">요청문 복사</button>
+            <button class="btn orange" id="osOpenAi" type="button">선택 AI 열기</button>
+          </div>
+          <details class="osInlineDetails">
+            <summary>만든 요청문 보기 · 파일로 저장</summary>
+            <textarea id="osTaskPackPreview" class="osPackPreview" readonly spellcheck="false" aria-label="생성된 AI용 요청문"></textarea>
+            <div class="actions"><button class="btn" id="osDownloadPack" type="button">요청문 .md 저장</button></div>
+          </details>
         </div>
       </div>
     </section>
 
-    <section class="card osCard">
-      <div class="head"><div><b><span class="osStep">03</span> AI 연결 / Portable OS</b><span class="sub">현재 사이트에서 실제로 동작하는 전달 경로만 표시합니다.</span></div></div>
-      <div class="body">
-        <div class="osConnectionState"><span class="tag green">STATIC</span><b id="osStaticMode">GitHub Pages 정적 모드</b></div>
-        <p class="sub osConnectionCopy">이 배포에서는 서버 API나 가짜 Remote MCP 주소를 만들지 않습니다. <b>Task Pack → OS ZIP</b> 순서로 어떤 AI에든 전달할 수 있습니다. Remote MCP는 별도 Node Hub를 같은 도메인에 연결할 때 활성화할 수 있습니다.</p>
-        <div class="actions"><button class="btn" id="osDownloadZip" type="button">공개용 최신 OS ZIP</button></div>
-        <div class="v6note">공개 저장소 안전성을 위해 원본의 개인화 OWNER PROFILE은 공개용 기본 프로필로 교체했습니다. 개인 선호는 아래 브라우저 로컬 설정에서 Task Pack에만 합쳐집니다.</div>
-      </div>
-    </section>
+    <details class="card osAdvanced" id="osAdvancedSettings">
+      <summary><span><b>고급 설정</b><small>작업 강도 · 분류 정보 · 내 기본 설정 · OS 파일</small></span><span class="osAdvancedChevron" aria-hidden="true">⌄</span></summary>
+      <div class="body osAdvancedBody">
+        <section class="osAdvancedSection">
+          <div class="sectionMiniHead"><b>작업 강도</b><span class="sub">잘 모르겠으면 자동 그대로 두세요.</span></div>
+          <select id="osMode" class="v6select">
+            <option value="auto">자동 · 추천</option><option value="quick">빠르게</option><option value="creator_10">Creator-10</option><option value="enterprise">대기업 30~80+</option><option value="grand_challenge">100명+ 전사모드</option>
+          </select>
+          <pre class="osSummary" id="osRouteSummary">글쓰기 준비를 누르면 요청에 맞는 작업 방식을 자동으로 고릅니다.</pre>
+        </section>
 
-    <section class="card osCard">
-      <div class="head"><div><b><span class="osStep">04</span> 내 기본 설정</b><span class="sub">AI 글쓰기 OS 전용 설정 · 글 다듬기 상태와 별개입니다.</span></div></div>
-      <div class="body osPrefs">
-        <label><span>표시 이름 <small>선택사항</small></span><input id="osDisplayName" type="text" autocomplete="off" placeholder="예: 곰같은여우"></label>
-        <label><span>추가 선호 <small>한 줄에 ‘항목: 내용’</small></span><textarea id="osPreferences" rows="5" spellcheck="false" placeholder="예: 블로그 문체: 자연스러운 해요체&#10;이모지: 적게&#10;도입부: 바로 본론부터"></textarea></label>
-        <div class="actions"><button class="btn" id="osSavePrefs" type="button">브라우저에 설정 저장</button></div>
-        <div class="v6note">설정은 이 브라우저의 localStorage에만 저장하며 서버로 전송하지 않습니다. 민감한 비밀·API Key·로그인 토큰은 입력하지 마세요.</div>
+        <section class="osAdvancedSection">
+          <div class="sectionMiniHead"><b>내 기본 설정</b><span class="sub">선택사항 · 이 브라우저에만 저장</span></div>
+          <div class="osPrefs">
+            <label><span>표시 이름</span><input id="osDisplayName" type="text" autocomplete="off" placeholder="예: 곰같은여우"></label>
+            <label><span>추가 선호 <small>한 줄에 ‘항목: 내용’</small></span><textarea id="osPreferences" rows="4" spellcheck="false" placeholder="예: 블로그 문체: 자연스러운 해요체&#10;이모지: 적게&#10;도입부: 바로 본론부터"></textarea></label>
+            <div class="actions"><button class="btn" id="osSavePrefs" type="button">기본 설정 저장</button></div>
+          </div>
+        </section>
+
+        <section class="osAdvancedSection">
+          <div class="sectionMiniHead"><b>OS 파일 / 연결 정보</b><span class="sub">대부분의 사용자는 열 필요가 없습니다.</span></div>
+          <div class="osConnectionState"><span class="tag green">STATIC</span><b id="osStaticMode">GitHub Pages 정적 모드</b></div>
+          <p class="sub osConnectionCopy">이 사이트에서는 서버 연결 없이 AI용 요청문을 로컬에서 준비합니다. Portable OS가 필요한 경우에만 아래 ZIP을 사용하세요.</p>
+          <div class="actions"><button class="btn" id="osDownloadZip" type="button">공개용 OS ZIP</button></div>
+        </section>
       </div>
-    </section>
+    </details>
   </div>
 
-  <div class="notice"><b>AI 글쓰기 OS 참고</b> · 이 기능은 모델을 직접 호출하는 생성 API가 아니라, 사용자의 요청과 OS 운영 규칙을 하나의 Task Pack으로 만들어 선택한 AI에 전달하는 Control Plane입니다. OS 내부 규칙은 콘텐츠 소재로 섞지 않고, 사용자가 제공하지 않은 체험·효과를 임의로 만들지 않도록 경계를 포함합니다.</div>
+  <div class="notice osSimpleNotice"><b>처음이라면 이것만 기억하세요.</b> 원하는 글 입력 → AI 선택 → <b>글쓰기 준비</b> → <b>요청문 복사</b> → 열린 AI에 붙여넣기. 고급 설정은 몰라도 사용할 수 있습니다.</div>
 </main>
 
 <div class="footer">곰같은여우의 AI 흔적 지우개 <span id="footerVersion"></span> · 브라우저 로컬 처리</div>

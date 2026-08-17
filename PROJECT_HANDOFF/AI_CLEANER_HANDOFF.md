@@ -475,3 +475,23 @@
 - New browser module: `js/features/ai-writing-os.js`. Public runtime assets live under `ai-writing-os/`. Existing Worker, Unicode hygiene, Typewriter, Rewrite Studio, image analysis, result checkpoints, and update lifecycle are not reused as OS state and remain isolated.
 - Mobile top navigation supports three equal tools; OS cards/provider/actions follow the existing responsive card/button/focus language.
 - Local architecture validation during implementation: static 211/0 and module PASS before final package verification. Browser E2E is configured for 40 cases, adding AI Writing OS Task Pack generation plus cross-tool state isolation/mobile navigation coverage.
+
+## 1.8.1 AI Writing OS Simple Start & Practical Audit
+- Baseline is the actually delivered `AI_Cleaner_1_8_0_FULL_PROJECT_HANDOFF.zip`; `OPTION/**` remains protected/excluded.
+- The AI Writing OS default screen is reduced to a non-technical three-step path: `원하는 글 적기 -> AI 고르기 -> 글쓰기 준비`. The generated result then exposes `요청문 복사` and `선택 AI 열기` as the two primary completion actions.
+- Workforce mode, route diagnostics, local profile preferences, Portable OS ZIP, full generated Markdown preview, and Markdown download are still available but moved behind collapsed advanced/detail controls.
+- The primary prepare action is disabled until a request exists. ChatGPT remains the default provider; provider hints now explain the immediate user action instead of static-delivery implementation details.
+- A prepared request is invalidated immediately when task/provider/mode/profile inputs change. The same invalidation aborts any preparation already in progress, preventing an older provider/profile Task Pack from appearing after a newer choice.
+- AI Writing OS preparation now uses `AbortController` plus a per-run shared Work Lock. Leaving the top-level writing tool aborts preparation, stale completion is ignored, and auto-update waits while preparation is active.
+- Provider launch happens immediately on the click path to preserve browser popup user activation; clipboard copy is attempted after launch and popup blocking receives explicit feedback.
+- Local validation target: static 215/0, module PASS, JS/MJS syntax PASS, JSON/YAML PASS, browser E2E 43 cases. GitHub `browser-smoke` remains the final interactive Chromium gate after push.
+
+## 1.8.1 AI Writing OS Simple Start & Practical Audit
+- Baseline is the actually delivered `AI_Cleaner_1_8_0_FULL_PROJECT_HANDOFF.zip`; `OPTION/**` remains protected/excluded.
+- The AI Writing OS default screen is reduced to a non-technical three-step path: `원하는 글 적기 -> AI 고르기 -> 글쓰기 준비`. The generated result then exposes `요청문 복사` and `선택 AI 열기` as the two primary completion actions.
+- Workforce mode, route diagnostics, local profile preferences, Portable OS ZIP, full generated Markdown preview, and Markdown download are still available but moved behind collapsed advanced/detail controls.
+- The primary prepare action is disabled until a request exists. ChatGPT remains the default provider; provider hints now explain the immediate user action instead of static-delivery implementation details.
+- A prepared request is invalidated immediately when task/provider/mode/profile inputs change. The same invalidation aborts any preparation already in progress, preventing an older provider/profile Task Pack from appearing after a newer choice.
+- AI Writing OS preparation now uses `AbortController` plus a per-run shared Work Lock. Leaving the top-level writing tool aborts preparation, stale completion is ignored, and auto-update waits while preparation is active.
+- Provider launch happens immediately on the click path to preserve browser popup user activation; clipboard copy is attempted after launch and popup blocking receives explicit feedback.
+- Local validation target: static 215/0, module PASS, JS/MJS syntax PASS, JSON/YAML PASS, browser E2E 43 cases. GitHub `browser-smoke` remains the final interactive Chromium gate after push.

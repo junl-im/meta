@@ -505,6 +505,7 @@ test('AI writing OS keeps its task state separate from text cleaner and survives
   await page.locator('[data-tool="writing"]').click();
   await expect(page.locator('#writingTool')).toBeVisible();
   await page.locator('#osTask').fill('이 제품 인스타 콘텐츠 만들어줘');
+  await page.locator('#osAdvancedSettings > summary').click();
   await page.locator('#osDisplayName').fill('로컬 테스트');
   await page.locator('#osPreferences').fill('문체: 자연스럽게\n이모지: 적게');
   await page.locator('#osSavePrefs').click();
@@ -519,3 +520,32 @@ test('AI writing OS keeps its task state separate from text cleaner and survives
   expect(navRows.children).toHaveLength(3);
   expect(Math.max(...navRows.children.map(r=>r.right))-Math.min(...navRows.children.map(r=>r.left))).toBeLessThanOrEqual(navRows.w+1);
 });
+
+test('AI writing OS simple start keeps the main path to three obvious steps', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});
+  await gotoReady(page);await page.locator('[data-tool="writing"]').click();
+  await expect(page.locator('#writingTool')).toBeVisible();
+  await expect(page.locator('.osSimpleSteps')).toContainText('원하는 글 적기');await expect(page.locator('.osSimpleSteps')).toContainText('AI 고르기');await expect(page.locator('.osSimpleSteps')).toContainText('글쓰기 준비');
+  expect(await page.locator('#osAdvancedSettings').evaluate(el=>el.open)).toBe(false);
+  await expect(page.locator('#osPrepare')).toBeDisabled();await expect(page.locator('#osProviders .osProvider.active')).toHaveText('ChatGPT');
+  await page.locator('#osTask').fill('부산 아이와 가볼만한곳 키워드로 자연스러운 네이버 블로그 글 써줘.');await expect(page.locator('#osPrepare')).toBeEnabled();
+  await page.locator('#osPrepare').click();await expect(page.locator('#osTaskPackResult')).toBeVisible();await expect(page.locator('#osReadyMessage')).toContainText('ChatGPT');await expect(page.locator('#osCopyPack')).toBeEnabled();await expect(page.locator('#osOpenAi')).toBeEnabled();
+  expect(await page.locator('#osAdvancedSettings').evaluate(el=>el.open)).toBe(false);
+});
+
+test('AI writing OS hides a stale prepared request when provider mode or profile changes', async ({ page }) => {
+  await gotoReady(page);await page.locator('[data-tool="writing"]').click();await page.locator('#osTask').fill('이 제품 인스타 콘텐츠를 만들어줘.');await page.locator('#osPrepare').click();await expect(page.locator('#osTaskPackResult')).toBeVisible();
+  await page.locator('#osProviders [data-provider="claude"]').click();await expect(page.locator('#osTaskPackResult')).toBeHidden();await page.locator('#osPrepare').click();await expect(page.locator('#osReadyMessage')).toContainText('Claude');
+  await page.locator('#osAdvancedSettings > summary').click();await page.locator('#osMode').selectOption('quick');await expect(page.locator('#osTaskPackResult')).toBeHidden();await page.locator('#osPrepare').click();await expect(page.locator('#osTaskPackResult')).toBeVisible();
+  await page.locator('#osDisplayName').fill('새 프로필');await expect(page.locator('#osTaskPackResult')).toBeHidden();await expect(page.locator('#osPrepare')).toBeEnabled();
+});
+
+test('leaving AI writing OS during preparation cancels stale completion and releases the shared work lock', async ({ page }) => {
+  await gotoReady(page);await page.locator('[data-tool="writing"]').click();
+  await page.evaluate(()=>{const original=window.fetch.bind(window);window.fetch=(input,init={})=>{if(!String(input).includes('00_OPEN_FIRST.md'))return original(input,init);return new Promise((resolve,reject)=>{const timer=setTimeout(()=>original(input,init).then(resolve,reject),700);init.signal?.addEventListener('abort',()=>{clearTimeout(timer);reject(new DOMException('Aborted','AbortError'));},{once:true});});};});
+  await page.locator('#osTask').fill('네이버 블로그 글을 준비해줘.');await page.locator('#osPrepare').click();await expect(page.locator('#writingTool')).toHaveAttribute('aria-busy','true');
+  await page.locator('[data-tool="text"]').click();await expect(page.locator('#writingTool')).toBeHidden();await expect(page.locator('#textTool')).toBeVisible();
+  await expect.poll(()=>page.evaluate(()=>window.AICleanerApp.workLock.active.filter(x=>x.name.startsWith('ai-writing-os-')).length),{timeout:3000}).toBe(0);
+  await page.waitForTimeout(850);await expect(page.locator('#osTaskPackResult')).toBeHidden();
+});
+
