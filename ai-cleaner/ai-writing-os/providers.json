@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-08-17",
+  "updatedAt": "2026-08-18",
   "providers": [
     {
       "id": "chatgpt",
@@ -11,7 +11,7 @@
         "zip"
       ],
       "consumerApiRequired": false,
-      "notes": "MCP availability can vary by plan/workspace. Fall back to Context Pack or ZIP when unavailable.",
+      "notes": "모바일은 지원 환경에서 시스템 공유, PC는 강화 프롬프트 복사 + ChatGPT 열기를 기본으로 사용합니다.",
       "launchUrl": "https://chatgpt.com/"
     },
     {
@@ -23,7 +23,7 @@
         "zip"
       ],
       "consumerApiRequired": false,
-      "notes": "Remote MCP is the preferred native path when available.",
+      "notes": "모바일은 지원 환경에서 시스템 공유, PC는 강화 프롬프트 복사 + Claude 열기를 기본으로 사용합니다.",
       "launchUrl": "https://claude.ai/"
     },
     {
@@ -35,7 +35,7 @@
         "zip"
       ],
       "consumerApiRequired": false,
-      "notes": "Custom MCP support can vary by product/region/account. Use fallback automatically.",
+      "notes": "모바일은 지원 환경에서 시스템 공유, PC는 강화 프롬프트 복사 + Gemini 열기를 기본으로 사용합니다.",
       "launchUrl": "https://gemini.google.com/"
     },
     {
@@ -47,7 +47,7 @@
         "zip"
       ],
       "consumerApiRequired": false,
-      "notes": "Use custom MCP when available; otherwise Context Pack/ZIP.",
+      "notes": "모바일은 지원 환경에서 시스템 공유, PC는 강화 프롬프트 복사 + Grok 열기를 기본으로 사용합니다.",
       "launchUrl": "https://grok.com/"
     },
     {
@@ -58,7 +58,7 @@
         "zip"
       ],
       "consumerApiRequired": false,
-      "notes": "Do not assume a general consumer custom-MCP connector. Context Pack/ZIP is the safe default.",
+      "notes": "모바일은 지원 환경에서 시스템 공유, PC는 강화 프롬프트 복사 + Meta AI 열기를 기본으로 사용합니다.",
       "launchUrl": "https://www.meta.ai/"
     },
     {
@@ -69,7 +69,7 @@
         "zip"
       ],
       "consumerApiRequired": false,
-      "notes": "Provider-neutral fallback."
+      "notes": "강화 프롬프트를 복사하거나 시스템 공유창으로 평소 사용하는 다른 AI에 전달합니다."
     }
   ]
 }

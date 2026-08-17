@@ -627,3 +627,33 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
   .osSimplePrepare>.sub{grid-column:1}
   .osResultActions{grid-template-columns:1fr}
 }
+
+/* 1.8.2 AI Writing OS Prompt Compiler */
+.osDeliveryHint{margin:8px 0 0;color:#746556}
+.osSendZone{margin-top:14px;padding-top:14px;border-top:1px dashed #eadfce}
+.osPrimaryActions{display:grid;grid-template-columns:minmax(260px,1.45fr) minmax(170px,.55fr);gap:8px}
+.osPrimaryActions .btn{width:100%;height:46px}
+.osSendMain{font-size:12px;font-weight:950;box-shadow:0 9px 22px rgba(238,125,34,.20)}
+.osSendMain:disabled{box-shadow:none}
+.osSendRaw{font-weight:850}
+.osSendMeta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;min-height:28px}
+.osSendMeta .mini{flex:0 0 auto}
+.osCompilerSummary{margin:2px 0 10px;padding:9px 10px;border:1px solid #e8d6bd;border-radius:11px;background:#fff;color:#6b5848;font-size:10px;font-weight:850;line-height:1.5}
+.osCompareNote{max-width:980px;margin:0 auto;padding:13px 15px;border:1px solid #eadfce;border-radius:14px;background:linear-gradient(135deg,#fffaf4,#fff)}
+.osCompareNote>div{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.osCompareNote>div b{font-size:11px}.osCompareNote p{margin:7px 0 0;color:#68594c;font-size:10.5px;line-height:1.65}
+.osTaskPackResult .osReadyState{justify-content:flex-start}
+@media(max-width:760px){
+  .osPrimaryActions{grid-template-columns:1fr}
+  .osPrimaryActions .btn{height:43px}
+  .osSendMain{font-size:10.5px}
+  .osSendMeta{align-items:flex-start}
+  .osCompareNote{padding:11px 12px}
+}
+@media(max-width:420px){
+  .osSendZone{margin-top:11px;padding-top:11px}
+  .osPrimaryActions{gap:6px}
+  .osPrimaryActions .btn{height:40px;font-size:9.5px}
+  .osSendMeta{gap:6px}.osSendMeta .sub{font-size:8.5px;line-height:1.45}
+  .osCompilerSummary{font-size:9px;padding:8px}
+  .osCompareNote p{font-size:9.5px}
+}

@@ -28,3 +28,8 @@ The 1.8.0 migration preserved most Hub concepts visibly, which was accurate but 
 
 ## 1.8.1 simple-start presentation
 The 1.8.0 migration preserved most Hub concepts visibly, which was accurate but too dense for first-time use. 1.8.1 keeps the same routing/context engine while changing the default presentation to three steps: request, provider, prepare. Workforce routing, profile settings, route diagnostics, and Portable OS remain available only in the collapsed advanced section. Generated Markdown remains available under a collapsed result detail. Preparation now aborts on newer input/tool intent and participates in the shared app Work Lock.
+
+## 1.8.2 Prompt Compiler & adaptive delivery
+The static GitHub Pages edition now treats the AI Writing OS primarily as a **Prompt Compiler**, not as a full OS-file transfer UI. `prompt-compiler.json` holds the compact common/channel/effort rules. The normal execution prompt includes only rules relevant to the current task and does not dump `00_OPEN_FIRST.md` or `07_STATE_AND_UPDATE.md` into every request.
+
+The default completion path is now `request -> preferred AI -> OS-enhanced send`. On touch/mobile environments the controller prefers the operating system share sheet through `navigator.share()` when available. Desktop uses clipboard + selected-provider launch. `원문 그대로 보내기` is retained as a comparison/control path. This is still a static handoff model: no fake Remote MCP or `/api/*` endpoint is exposed.

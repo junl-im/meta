@@ -495,3 +495,14 @@
 - AI Writing OS preparation now uses `AbortController` plus a per-run shared Work Lock. Leaving the top-level writing tool aborts preparation, stale completion is ignored, and auto-update waits while preparation is active.
 - Provider launch happens immediately on the click path to preserve browser popup user activation; clipboard copy is attempted after launch and popup blocking receives explicit feedback.
 - Local validation target: static 215/0, module PASS, JS/MJS syntax PASS, JSON/YAML PASS, browser E2E 43 cases. GitHub `browser-smoke` remains the final interactive Chromium gate after push.
+
+## 1.8.2 AI Writing OS Prompt Compiler & Adaptive Delivery
+- 기준선은 실제 전달된 `AI_Cleaner_1_8_1_FULL_PROJECT_HANDOFF.zip`이다. 기존 **글 다듬기 / 이미지 검사** 코너의 동작은 유지하고 신설 `AI 글쓰기 OS` 코너만 강화한다.
+- AI 글쓰기 OS의 기본 역할을 `긴 OS 문서 전달`에서 **사용자 자연어를 AI 실행용 강화 프롬프트로 컴파일**하는 구조로 전환했다.
+- `ai-cleaner/ai-writing-os/prompt-compiler.json`을 추가했다. 공통 Truth/Control 규칙 + BLOG/INSTAGRAM/YOUTUBE/PRODUCT/GENERAL 채널 규칙 + 품질 모드 규칙을 선언적으로 관리한다.
+- 기본 생성 프롬프트는 `00_OPEN_FIRST.md`, `07_STATE_AND_UPDATE.md` 등 전체 Fast Path 문서를 매번 붙이지 않는다. 작업에 필요한 규칙만 선택해 `# AI CLEANER OS — EXECUTION PROMPT`로 압축한다.
+- 기본 화면은 `원하는 일 적기 -> 평소 쓰는 AI 선택 -> OS로 강화해서 AI에 보내기` 한 동작으로 단순화했다. `원문 그대로 보내기`를 비교용 보조 경로로 제공한다.
+- 모바일/터치 환경에서 Web Share API가 가능하면 시스템 공유창을 사용한다. PC에서는 선택 AI를 열면서 강화 프롬프트를 클립보드에 복사한다. 실패 시 수동 복사/프롬프트 보기 경로가 남는다.
+- ChatGPT / Claude / Gemini / Grok / Meta AI + `기타 AI` 6개 선택을 제공하고 마지막 선택은 `localStorage`에 기억한다.
+- API 키를 요구하지 않는다. GitHub Pages 정적 모드, Remote MCP 비활성화, 외부 합성 입력 금지 경계는 그대로 유지한다.
+- 1.8.2 로컬 중간 검증: module PASS, static/architecture 219/0. 최종 패키지 생성 전 버전/문서/JSON/구문 검사를 다시 수행한다.

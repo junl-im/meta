@@ -477,24 +477,27 @@ test('result checkpoints survive a same-tab reload without restoring into an emp
   await expect(page.locator('#checkpointList [data-checkpoint-id]')).toHaveCount(1);await expect(page.locator('#checkpointList [data-checkpoint-action="restore"]')).toBeDisabled();await expect(page.locator('#checkpointList [data-checkpoint-action="copy"]')).toBeEnabled();
 });
 
-test('AI writing OS creates a provider-neutral Task Pack from the uploaded OS rules', async ({ page }) => {
+test('AI writing OS compiles a concise provider-neutral execution prompt without dumping full OS files', async ({ page }) => {
   await gotoReady(page);
   await page.locator('[data-tool="writing"]').click();
   await expect(page.locator('#writingTool')).toBeVisible();
   await expect(page.locator('#textTool')).toBeHidden();
   await expect(page.locator('#imageTool')).toBeHidden();
   await expect(page.locator('#osStatus')).toContainText('V6.1');
-  await expect(page.locator('#osStaticMode')).toContainText('정적 모드');
-  await expect(page.locator('#osProviders .osProvider')).toHaveCount(5);
+  await expect(page.locator('#osStaticMode')).toContainText('Prompt Compiler');
+  await expect(page.locator('#osProviders .osProvider')).toHaveCount(6);
+  await page.evaluate(()=>{window.open=()=>({closed:false});});
   await page.locator('#osTask').fill('Apple Vision Pro 배터리 팁으로 네이버 블로그 글 써줘. 제공하지 않은 체험은 만들지 마.');
-  await page.locator('#osPrepare').click();
+  await page.locator('#osSendEnhanced').click();
   await expect(page.locator('#osRouteSummary')).toContainText('분류: 블로그');
   await expect(page.locator('#osRouteSummary')).toContainText('CREATOR_10');
   await expect(page.locator('#osTaskPackResult')).toBeVisible();
-  await expect(page.locator('#osTaskPackPreview')).toHaveValue(/# AI COMPANY TASK PACK/);
-  await expect(page.locator('#osTaskPackPreview')).toHaveValue(/Output language: ko/);
-  await expect(page.locator('#osTaskPackPreview')).toHaveValue(/Control Plane/);
-  await expect(page.locator('#osTaskPackPreview')).toHaveValue(/사용자가 제공하지 않은 구매·사용·가족반응·효과 경험/);
+  await expect(page.locator('#osCompilerSummary')).toContainText('핵심 규칙');
+  await expect(page.locator('#osTaskPackPreview')).toHaveValue(/# AI CLEANER OS — EXECUTION PROMPT/);
+  await expect(page.locator('#osTaskPackPreview')).toHaveValue(/네이버 블로그 전용 규칙/);
+  await expect(page.locator('#osTaskPackPreview')).toHaveValue(/사용자가 명시하지 않은 구매, 사용, 방문, 가족 반응, 체감 효과/);
+  await expect(page.locator('#osTaskPackPreview')).not.toHaveValue(/===== 00_OPEN_FIRST\.md =====/);
+  await expect(page.locator('#osTaskPackPreview')).not.toHaveValue(/===== 07_STATE_AND_UPDATE\.md =====/);
 });
 
 test('AI writing OS keeps its task state separate from text cleaner and survives tool round trips', async ({ page }) => {
@@ -521,31 +524,43 @@ test('AI writing OS keeps its task state separate from text cleaner and survives
   expect(Math.max(...navRows.children.map(r=>r.right))-Math.min(...navRows.children.map(r=>r.left))).toBeLessThanOrEqual(navRows.w+1);
 });
 
-test('AI writing OS simple start keeps the main path to three obvious steps', async ({ page }) => {
+test('AI writing OS one-action compiler flow stays simple on mobile', async ({ page }) => {
   await page.setViewportSize({width:390,height:844});
   await gotoReady(page);await page.locator('[data-tool="writing"]').click();
   await expect(page.locator('#writingTool')).toBeVisible();
-  await expect(page.locator('.osSimpleSteps')).toContainText('원하는 글 적기');await expect(page.locator('.osSimpleSteps')).toContainText('AI 고르기');await expect(page.locator('.osSimpleSteps')).toContainText('글쓰기 준비');
+  await expect(page.locator('.osSimpleSteps')).toContainText('원하는 일 적기');
+  await expect(page.locator('.osSimpleSteps')).toContainText('평소 쓰는 AI 선택');
+  await expect(page.locator('.osSimpleSteps')).toContainText('OS로 강화해서 보내기');
   expect(await page.locator('#osAdvancedSettings').evaluate(el=>el.open)).toBe(false);
-  await expect(page.locator('#osPrepare')).toBeDisabled();await expect(page.locator('#osProviders .osProvider.active')).toHaveText('ChatGPT');
-  await page.locator('#osTask').fill('부산 아이와 가볼만한곳 키워드로 자연스러운 네이버 블로그 글 써줘.');await expect(page.locator('#osPrepare')).toBeEnabled();
-  await page.locator('#osPrepare').click();await expect(page.locator('#osTaskPackResult')).toBeVisible();await expect(page.locator('#osReadyMessage')).toContainText('ChatGPT');await expect(page.locator('#osCopyPack')).toBeEnabled();await expect(page.locator('#osOpenAi')).toBeEnabled();
+  await expect(page.locator('#osSendEnhanced')).toBeDisabled();
+  await expect(page.locator('#osSendRaw')).toBeDisabled();
+  await expect(page.locator('#osProviders .osProvider.active')).toHaveText('ChatGPT');
+  await page.locator('#osTask').fill('부산 아이와 가볼만한곳 키워드로 자연스러운 네이버 블로그 글 써줘.');
+  await expect(page.locator('#osSendEnhanced')).toBeEnabled();
+  await expect(page.locator('#osSendRaw')).toBeEnabled();
+  await page.evaluate(()=>{window.open=()=>({closed:false});});
+  await page.locator('#osSendEnhanced').click();
+  await expect(page.locator('#osTaskPackResult')).toBeVisible();
+  await expect(page.locator('#osReadyMessage')).toContainText('ChatGPT');
+  await expect(page.locator('#osCopyPack')).toBeEnabled();
+  await expect(page.locator('#osOpenAi')).toBeEnabled();
   expect(await page.locator('#osAdvancedSettings').evaluate(el=>el.open)).toBe(false);
 });
 
-test('AI writing OS hides a stale prepared request when provider mode or profile changes', async ({ page }) => {
-  await gotoReady(page);await page.locator('[data-tool="writing"]').click();await page.locator('#osTask').fill('이 제품 인스타 콘텐츠를 만들어줘.');await page.locator('#osPrepare').click();await expect(page.locator('#osTaskPackResult')).toBeVisible();
-  await page.locator('#osProviders [data-provider="claude"]').click();await expect(page.locator('#osTaskPackResult')).toBeHidden();await page.locator('#osPrepare').click();await expect(page.locator('#osReadyMessage')).toContainText('Claude');
-  await page.locator('#osAdvancedSettings > summary').click();await page.locator('#osMode').selectOption('quick');await expect(page.locator('#osTaskPackResult')).toBeHidden();await page.locator('#osPrepare').click();await expect(page.locator('#osTaskPackResult')).toBeVisible();
-  await page.locator('#osDisplayName').fill('새 프로필');await expect(page.locator('#osTaskPackResult')).toBeHidden();await expect(page.locator('#osPrepare')).toBeEnabled();
+test('AI writing OS invalidates a compiled prompt when provider mode or profile changes', async ({ page }) => {
+  await gotoReady(page);await page.locator('[data-tool="writing"]').click();await page.evaluate(()=>{window.open=()=>({closed:false});});
+  await page.locator('#osTask').fill('이 제품 인스타 콘텐츠를 만들어줘.');await page.locator('#osSendEnhanced').click();await expect(page.locator('#osTaskPackResult')).toBeVisible();
+  await page.locator('#osProviders [data-provider="claude"]').click();await expect(page.locator('#osTaskPackResult')).toBeHidden();await page.locator('#osSendEnhanced').click();await expect(page.locator('#osReadyMessage')).toContainText('Claude');
+  await page.locator('#osAdvancedSettings > summary').click();await page.locator('#osMode').selectOption('quick');await expect(page.locator('#osTaskPackResult')).toBeHidden();await page.locator('#osSendEnhanced').click();await expect(page.locator('#osTaskPackResult')).toBeVisible();
+  await page.locator('#osDisplayName').fill('새 프로필');await expect(page.locator('#osTaskPackResult')).toBeHidden();await expect(page.locator('#osSendEnhanced')).toBeEnabled();
 });
 
-test('leaving AI writing OS during preparation cancels stale completion and releases the shared work lock', async ({ page }) => {
+test('AI writing OS remembers the selected AI and keeps the original two tools untouched after reload', async ({ page }) => {
   await gotoReady(page);await page.locator('[data-tool="writing"]').click();
-  await page.evaluate(()=>{const original=window.fetch.bind(window);window.fetch=(input,init={})=>{if(!String(input).includes('00_OPEN_FIRST.md'))return original(input,init);return new Promise((resolve,reject)=>{const timer=setTimeout(()=>original(input,init).then(resolve,reject),700);init.signal?.addEventListener('abort',()=>{clearTimeout(timer);reject(new DOMException('Aborted','AbortError'));},{once:true});});};});
-  await page.locator('#osTask').fill('네이버 블로그 글을 준비해줘.');await page.locator('#osPrepare').click();await expect(page.locator('#writingTool')).toHaveAttribute('aria-busy','true');
-  await page.locator('[data-tool="text"]').click();await expect(page.locator('#writingTool')).toBeHidden();await expect(page.locator('#textTool')).toBeVisible();
-  await expect.poll(()=>page.evaluate(()=>window.AICleanerApp.workLock.active.filter(x=>x.name.startsWith('ai-writing-os-')).length),{timeout:3000}).toBe(0);
-  await page.waitForTimeout(850);await expect(page.locator('#osTaskPackResult')).toBeHidden();
+  await page.locator('#osProviders [data-provider="claude"]').click();await expect(page.locator('#osProviders .osProvider.active')).toHaveText('Claude');
+  await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>window.__AI_CLEANER_APP_READY__===true&&!!window.AICleanerApp,{timeout:15000});
+  await page.locator('[data-tool="writing"]').click();await expect(page.locator('#osProviders .osProvider.active')).toHaveText('Claude');
+  await page.locator('[data-tool="text"]').click();await expect(page.locator('#textTool')).toBeVisible();
+  await page.locator('[data-tool="image"]').click();await expect(page.locator('#imageTool')).toBeVisible();
 });
 

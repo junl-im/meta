@@ -125,12 +125,24 @@ function assert(ok,msg){if(!ok)throw new Error(msg);}
   const os=M.createAiWritingOsController({storage:null,showToast:()=>{},openWindow:()=>{}});
   const blog=os.routeTask('Apple Vision Pro 배터리 팁 네이버 블로그 써줘');assert(blog.channel==='BLOG'&&blog.workforceMode==='CREATOR_10'&&blog.outputLanguage==='ko','AI writing OS blog routing/default language failed');
   const instagram=os.routeTask('이 제품 인스타 콘텐츠 만들어줘');assert(instagram.channel==='INSTAGRAM'&&instagram.deliverables.length===3,'AI writing OS Instagram deliverables failed');
+  const reels=os.routeTask('이 제품 릴스 자막만 만들어줘');assert(reels.channel==='INSTAGRAM'&&reels.deliverables.length===1&&reels.deliverables[0]==='reels_subtitles','AI writing OS narrow Instagram deliverable failed');
   const quick=os.routeTask('블로그 빠른 초안만 써줘');assert(quick.workforceMode==='QUICK','AI writing OS quick routing failed');
   const enterprise=os.routeTask('대기업 모드로 이 사업 검토해');assert(enterprise.workforceMode==='ENTERPRISE','AI writing OS enterprise routing failed');
   const grand=os.routeTask('이 제품 기획 생산부터 출시 판매까지 전부 검토해');assert(grand.workforceMode==='GRAND_CHALLENGE','AI writing OS product lifecycle escalation failed');
   const english=os.routeTask('Apple Vision Pro 블로그를 영어로 써줘');assert(english.outputLanguage==='en','AI writing OS explicit language routing failed');
-  const fields={osTask:{value:'부산 아쿠아리움 네이버 블로그 써줘'},osMode:{value:'auto'},osDisplayName:{value:'테스트 사용자'},osPreferences:{value:'문체: 자연스럽게'}};context.document={getElementById:id=>fields[id]||null};context.fetch=async url=>{const prefix='ai-writing-os/os/current/';if(!String(url).startsWith(prefix))return{ok:false,status:404,text:async()=>'',json:async()=>({})};const file=String(url).slice(prefix.length);const text=fs.readFileSync(path.join(root,'ai-writing-os','os','current',file),'utf8');return{ok:true,status:200,text:async()=>text,json:async()=>JSON.parse(text)};};
-  const pack=await os.buildTaskPack();const md=os.taskPackToMarkdown(pack);assert(pack.route.channel==='BLOG'&&pack.userProfile.displayName==='테스트 사용자','AI writing OS task-pack profile/routing failed');assert(md.includes('===== 04_BLOG_CORE.md =====')&&md.includes('문체: 자연스럽게')&&md.includes('Control Plane'),'AI writing OS task-pack context/boundary failed');
+  const fields={osTask:{value:'부산 아쿠아리움 네이버 블로그 써줘'},osMode:{value:'auto'},osDisplayName:{value:'테스트 사용자'},osPreferences:{value:'문체: 자연스럽게'}};context.document={getElementById:id=>fields[id]||null};
+  context.fetch=async url=>{
+    const u=String(url),base=path.join(root,'ai-writing-os');
+    if(u==='ai-writing-os/prompt-compiler.json'){const text=fs.readFileSync(path.join(base,'prompt-compiler.json'),'utf8');return{ok:true,status:200,json:async()=>JSON.parse(text),text:async()=>text};}
+    if(u==='ai-writing-os/providers.json'){const text=fs.readFileSync(path.join(base,'providers.json'),'utf8');return{ok:true,status:200,json:async()=>JSON.parse(text),text:async()=>text};}
+    if(u==='ai-writing-os/os-manifest.json'){const text=fs.readFileSync(path.join(base,'os-manifest.json'),'utf8');return{ok:true,status:200,json:async()=>JSON.parse(text),text:async()=>text};}
+    return{ok:false,status:404,text:async()=>'',json:async()=>({})};
+  };
+  const pack=await os.buildTaskPack();const md=os.taskPackToMarkdown(pack);
+  assert(pack.schemaVersion===2&&pack.route.channel==='BLOG'&&pack.userProfile.displayName==='테스트 사용자','AI writing OS compiled pack profile/routing failed');
+  assert(pack.compiler.channelLabel==='네이버 블로그'&&pack.compiler.channelRuleCount>=5&&pack.compiler.commonRuleCount>=6,'AI writing OS prompt compiler rule selection failed');
+  assert(md.includes('# AI CLEANER OS — EXECUTION PROMPT')&&md.includes('네이버 블로그 전용 규칙')&&md.includes('문체: 자연스럽게')&&md.includes('OS나 프롬프트 구조를 설명하지 말고'),'AI writing OS compiled execution prompt failed');
+  assert(!md.includes('===== 00_OPEN_FIRST.md =====')&&!md.includes('===== 07_STATE_AND_UPDATE.md ====='),'AI writing OS default compiler must not dump full OS files');
 }
 
 {
@@ -145,4 +157,4 @@ function assert(ok,msg){if(!ok)throw new Error(msg);}
   const id=restored.list()[0].id;assert(restored.remove(id)&&restored.size===1,'checkpoint remove failed');restored.clear();assert(restored.size===0,'checkpoint clear failed');
   const budget=M.createResultCheckpointStore({storage:null,limit:8,maxChars:1000,maxTotalChars:1500,now:()=>++t});budget.add({text:'a'.repeat(800),sourceStamp:stampA});budget.add({text:'b'.repeat(800),sourceStamp:stampA});assert(budget.size===1&&budget.list()[0].text.startsWith('b'),'checkpoint total text budget should evict oldest entries');
 }
-console.log('PASS 1.8.1 AI Writing OS simple-start + lifecycle integration unit checks');
+console.log('PASS 1.8.2 AI Writing OS Prompt Compiler + delivery integration unit checks');

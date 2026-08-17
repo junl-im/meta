@@ -1,6 +1,6 @@
 {
-  "version": "1.8.1",
-  "assetVersion": "181",
+  "version": "1.8.2",
+  "assetVersion": "182",
   "channel": "stable",
-  "updateMode": "ai-writing-os-simple-start-practical-audit"
+  "updateMode": "ai-writing-os-prompt-compiler-adaptive-delivery"
 }
