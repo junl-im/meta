@@ -671,3 +671,54 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
 .osSimpleHero p b{color:#4f3f31}
 @media(max-width:760px){.osExplainPoints{grid-template-columns:1fr}.osDeliveryPlan{padding:9px 10px}.osProvider.active::after{font-size:6.5px}}
 @media(max-width:420px){.osDeliveryPlan .sub{font-size:8.7px}.osDeliveryMark{width:25px;height:25px;flex-basis:25px}.osAppliedChips{gap:4px}.osAppliedChips span{min-height:23px;padding:3px 7px;font-size:8px}.osAfterSend{font-size:8.8px}.osProvider.active::after{display:none}}
+
+/* ===== 1.8.5 AI Writing OS · Blog Factory ===== */
+.osFactoryHero{padding-bottom:15px}
+.osFactoryHero .tag.blue{background:#eef5ff;color:#285f9e;border-color:#c9ddf4}
+.osFactorySteps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));max-width:760px}
+.osFactorySteps span{justify-content:center}
+.osFactoryCard .body{padding-top:13px}
+.osFactoryPresets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:8px}
+.osFactoryPresets button{display:grid;gap:2px;min-height:54px;padding:9px 10px;border:1px solid #e8dccb;border-radius:12px;background:#fff;color:var(--ink);text-align:left;cursor:pointer;transition:border-color .15s ease,background .15s ease,transform .15s ease,box-shadow .15s ease}
+.osFactoryPresets button:hover{border-color:#e3b17d;background:#fffaf4;transform:translateY(-1px)}
+.osFactoryPresets button.active{border-color:var(--orange);background:#fff4e8;box-shadow:0 6px 16px rgba(238,125,34,.12)}
+.osFactoryPresets button b{font-size:10.5px}.osFactoryPresets button span{color:#7a6a5c;font-size:8.8px;font-weight:750;line-height:1.35}
+.osFactoryModeSummary{display:flex;align-items:center;gap:7px;margin:0 0 12px;padding:8px 10px;border:1px solid #eadfce;border-radius:11px;background:#fbf8f3;color:#655548}
+.osFactoryModeSummary b{font-size:9.5px;white-space:nowrap}.osFactoryModeSummary span{font-size:9px;font-weight:750;line-height:1.45}
+.osFieldLabel{display:block;margin:2px 0 6px}.osFieldLabel>span{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.osFieldLabel b{font-size:10.5px}.osFieldLabel small{color:var(--muted);font-size:9px;font-weight:700}
+.osFactoryTask{min-height:155px}
+.osFactoryGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+.osFactoryGrid label{display:grid;gap:5px;min-width:0}.osFactoryGrid label>span{font-size:9px;font-weight:900}.osFactoryGrid .v6select,.osFactoryGrid input{width:100%;min-width:0;height:38px;border:1px solid var(--line);border-radius:10px;padding:0 9px;background:#fff;color:var(--ink);font:inherit;font-size:9.5px;outline:none}
+.osFactoryGrid input:focus,.osFactoryGrid .v6select:focus,.osFactoryContext textarea:focus{border-color:#e4a464;box-shadow:0 0 0 3px rgba(238,125,34,.10)}
+.osFactoryContext{margin-top:10px;border:1px dashed #e5d7c4;border-radius:12px;background:#fffdf9;overflow:hidden}
+.osFactoryContext>summary{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:40px;padding:0 11px;cursor:pointer;list-style:none;color:#665649;font-size:9.5px;font-weight:900}
+.osFactoryContext>summary::-webkit-details-marker{display:none}.osFactoryContext>summary::before{content:'＋';margin-right:5px;color:var(--orange);font-size:12px}.osFactoryContext[open]>summary::before{content:'−'}
+.osFactoryContext>summary span{margin-left:auto;color:var(--muted);font-size:8.5px;font-weight:750}
+.osFactoryContextBody{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 10px 10px}
+.osFactoryContextBody label{display:grid;gap:5px}.osFactoryContextBody label>span{display:grid;gap:2px}.osFactoryContextBody b{font-size:9.5px}.osFactoryContextBody small{color:var(--muted);font-size:8.5px;font-weight:700;line-height:1.4}.osFactoryContext textarea{width:100%;min-height:86px;resize:vertical;border:1px solid var(--line);border-radius:10px;padding:9px;background:#fff;color:var(--ink);font:inherit;font-size:9.5px;line-height:1.5;outline:none}
+.osFactoryPipeline{display:grid;grid-template-columns:repeat(11,auto);align-items:center;justify-content:center;gap:6px;margin-top:12px;padding:9px 8px;border:1px solid #eee1d0;border-radius:12px;background:linear-gradient(135deg,#fffaf4,#fff)}
+.osFactoryPipeline span{display:grid;gap:1px;text-align:center}.osFactoryPipeline b{font-size:8.8px}.osFactoryPipeline small{color:#7b6b5e;font-size:7.5px;font-weight:700}.osFactoryPipeline i{color:#c4ad94;font-style:normal;font-size:9px}
+.osFactoryNote{background:linear-gradient(135deg,#fff7ed,#fff)}
+.osFactoryExplain{grid-template-columns:repeat(4,minmax(0,1fr))}
+.osFactoryExplain span{min-height:66px}
+.osFactoryPresets button:focus-visible,.osFactoryContext>summary:focus-visible{outline:3px solid rgba(238,125,34,.20);outline-offset:2px}
+
+@media(max-width:900px){
+  .osFactoryGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .osFactoryPipeline{grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}.osFactoryPipeline i{display:none}.osFactoryPipeline span{padding:5px 3px;border:1px solid #f0e5d6;border-radius:9px;background:#fff}
+  .osFactoryExplain{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  .osFactorySteps{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .osFactoryPresets{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .osFactoryContextBody{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+  .osFactorySteps{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .osFactoryPresets{gap:5px}.osFactoryPresets button{min-height:49px;padding:7px 8px}.osFactoryPresets button b{font-size:9.5px}.osFactoryPresets button span{font-size:8px}
+  .osFactoryModeSummary{align-items:flex-start;flex-direction:column;gap:2px}.osFactoryGrid{grid-template-columns:1fr 1fr;gap:6px}.osFactoryGrid .v6select,.osFactoryGrid input{height:36px;font-size:8.8px;padding-inline:7px}
+  .osFactoryPipeline{grid-template-columns:repeat(3,minmax(0,1fr));padding:7px}.osFactoryExplain{grid-template-columns:1fr}.osFactoryExplain span{min-height:0}
+}
+@media(max-width:340px){
+  .osFactorySteps,.osFactoryPresets,.osFactoryGrid{grid-template-columns:1fr}.osFactoryPipeline{grid-template-columns:repeat(2,minmax(0,1fr))}
+}

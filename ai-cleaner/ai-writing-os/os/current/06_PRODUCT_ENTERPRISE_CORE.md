@@ -1,30 +1,24 @@
-# PRODUCT / ENTERPRISE CORE — V6
+# PRODUCT / ENTERPRISE CORE — V7
 
-단순 아이디어가 아니라 제품/사업을 기획부터 생산·출시·판매까지 검토하는 요청은 단계형 회사 운영으로 처리한다.
+## 기본 모드
+제품/사업/판매/출시 요청은 범위에 맞춰 여러 기능을 묶어 검토한다.
+- 일반 제품/캠페인: 15~30+ 의미 있는 기여
+- 대기업/전사 검토: 30~80+
+- `100명 이상`, Grand Challenge, 기획·생산→출시→판매 전주기: 100~140+
 
-## 기본 TASKFORCE
-제품/캠페인/전략 요청: 15~30+ 의미있는 역할 기여.
+## 100+는 숫자놀이가 아니다
+같은 프롬프트를 복제하지 않는다.
+단계를 나눈다.
+1 Executive Charter
+2 Customer Discovery
+3 Market/Competitor/Evidence
+4 Concept Tournament
+5 Product/UX/Technical Feasibility
+6 Finance/Commerce
+7 Brand/Content/GTM
+8 Risk Red Team
+9 Independent Jury
+10 Launch Readiness
 
-## ENTERPRISE
-`대기업 모드`, `전사 검토`, 다부서 고가치 프로젝트는 보통 30~80+ 의미있는 role-contributions로 운영한다. 범위가 작으면 TASKFORCE 15~30+에서 시작할 수 있고, 범위가 커지면 단계별로 확대한다.
-
-## GRAND CHALLENGE / PRODUCT-120
-사용자가 `100명 이상`, `Grand Challenge`, 또는 제품을 **기회/기획·생산부터 출시·판매까지 전주기**로 검토해 달라고 요청하면 100~140+ 의미있는 기여를 기본 목표로 한다.
-예시 단계:
-- Executive Charter 5
-- Customer Discovery 15
-- Market/Competitor/Evidence 15
-- Concept Tournament 20
-- Product/UX/Technical 15
-- Finance/Commerce 10
-- Brand/Content/GTM 20
-- Risk Red Team 10
-- Independent Jury 8
-- Launch Readiness 10
-
-핵심은 숫자가 아니라 독립성/다양성/검증이다.
-100명이 같은 프롬프트를 반복하는 방식은 금지한다.
-
-## 회의 구조
-독립 조사 → 복수 경쟁안 → 반대팀/Red Team → 독립 Jury → 경영진 Synthesis → 단계별 Checkpoint
-Creators가 자기 결과의 최종 심사자가 되지 않는다.
+각 단계는 서로 다른 관점/가설/후보를 만들고, 창작자는 자기 결과의 최종 심사위원이 되지 않는다.
+실제 멀티에이전트가 없으면 역할 기여를 순차적으로 수행한다.

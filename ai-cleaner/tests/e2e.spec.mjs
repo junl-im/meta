@@ -483,7 +483,7 @@ test('AI writing OS compiles a concise provider-neutral execution prompt without
   await expect(page.locator('#writingTool')).toBeVisible();
   await expect(page.locator('#textTool')).toBeHidden();
   await expect(page.locator('#imageTool')).toBeHidden();
-  await expect(page.locator('#osStatus')).toContainText('V6.1');
+  await expect(page.locator('#osStatus')).toContainText('V7');
   await expect(page.locator('#osStaticMode')).toContainText('Prompt Compiler');
   await expect(page.locator('#osProviders .osProvider')).toHaveCount(6);
   await page.evaluate(()=>{window.open=()=>({closed:false});});
@@ -492,9 +492,11 @@ test('AI writing OS compiles a concise provider-neutral execution prompt without
   await expect(page.locator('#osRouteSummary')).toContainText('분류: 블로그');
   await expect(page.locator('#osRouteSummary')).toContainText('CREATOR_10');
   await expect(page.locator('#osTaskPackResult')).toBeVisible();
-  await expect(page.locator('#osCompilerSummary')).toContainText('핵심 규칙');
+  await expect(page.locator('#osCompilerSummary')).toContainText('Creator-10');
   await expect(page.locator('#osTaskPackPreview')).toHaveValue(/# AI CLEANER OS — EXECUTION PROMPT/);
   await expect(page.locator('#osTaskPackPreview')).toHaveValue(/네이버 블로그 전용 규칙/);
+  await expect(page.locator('#osTaskPackPreview')).toHaveValue(/BLOG FACTORY/);
+  await expect(page.locator('#osTaskPackPreview')).toHaveValue(/이미지 제작 계약/);
   await expect(page.locator('#osTaskPackPreview')).toHaveValue(/사용자가 명시하지 않은 구매, 사용, 방문, 가족 반응, 체감 효과/);
   await expect(page.locator('#osTaskPackPreview')).not.toHaveValue(/===== 00_OPEN_FIRST\.md =====/);
   await expect(page.locator('#osTaskPackPreview')).not.toHaveValue(/===== 07_STATE_AND_UPDATE\.md =====/);
@@ -528,9 +530,11 @@ test('AI writing OS one-action compiler flow stays simple on mobile', async ({ p
   await page.setViewportSize({width:390,height:844});
   await gotoReady(page);await page.locator('[data-tool="writing"]').click();
   await expect(page.locator('#writingTool')).toBeVisible();
-  await expect(page.locator('.osSimpleSteps')).toContainText('원하는 일 적기');
-  await expect(page.locator('.osSimpleSteps')).toContainText('내 AI 고르기');
-  await expect(page.locator('.osSimpleSteps')).toContainText('강화해서 보내기');
+  await expect(page.locator('.osSimpleSteps')).toContainText('생산 모드');
+  await expect(page.locator('.osSimpleSteps')).toContainText('주제·사실');
+  await expect(page.locator('.osSimpleSteps')).toContainText('내 AI');
+  await expect(page.locator('.osSimpleSteps')).toContainText('생산 시작');
+  await expect(page.locator('#osFactoryPresets [data-factory-mode="daily_one"]')).toHaveClass(/active/);
   expect(await page.locator('#osAdvancedSettings').evaluate(el=>el.open)).toBe(false);
   await expect(page.locator('#osSendEnhanced')).toBeDisabled();
   await expect(page.locator('#osSendRaw')).toBeDisabled();
@@ -545,7 +549,7 @@ test('AI writing OS one-action compiler flow stays simple on mobile', async ({ p
   await page.locator('#osSendEnhanced').click();
   await expect(page.locator('#osTaskPackResult')).toBeVisible();
   await expect(page.locator('#osReadyMessage')).toContainText('ChatGPT');
-  await expect(page.locator('#osAppliedChips span')).toHaveCount(4);
+  await expect(page.locator('#osAppliedChips span')).toHaveCount(6);
   await expect(page.locator('#osAfterSend')).toContainText('붙여넣기');
   await expect(page.locator('#osCopyPack')).toBeEnabled();
   await expect(page.locator('#osOpenAi')).toBeEnabled();
@@ -564,6 +568,7 @@ test('AI writing OS shows an honest mobile share plan and sends the compiled pro
   await expect(page.locator('#osDeliveryHint')).toContainText('ChatGPT 앱을 선택하세요');
   await expect(page.locator('#osDeliveryHint')).toContainText('강제로 열지는 않습니다');
   await expect(page.locator('#osSendEnhancedLabel')).toHaveText('OS로 강화해서 공유하기');
+  await page.locator('#osFactoryPresets [data-factory-mode="free"]').click();
   await page.locator('#osTask').fill('회의 내용을 한 페이지 보고서로 정리해줘.');
   await page.locator('#osSendEnhanced').click();
   await expect(page.locator('#osReadyMessage')).toContainText('시스템 공유');
@@ -572,8 +577,49 @@ test('AI writing OS shows an honest mobile share plan and sends the compiled pro
   expect(shared.text).toContain('회의 내용을 한 페이지 보고서로 정리해줘.');
 });
 
+
+test('AI writing OS copies before opening AI inside KakaoTalk-style in-app browsers', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});
+  await gotoReady(page);
+  await page.evaluate(()=>{
+    Object.defineProperty(navigator,'userAgent',{configurable:true,value:'Mozilla/5.0 Linux Android KAKAOTALK 25.5.0'});
+    Object.defineProperty(navigator,'share',{configurable:true,value:undefined});
+    window.__osDeliveryEvents=[];
+    document.execCommand=command=>{if(command==='copy'){window.__osDeliveryEvents.push('copy');return true;}return false;};
+    window.open=()=>{window.__osDeliveryEvents.push('open');return{closed:false};};
+  });
+  await page.locator('[data-tool="writing"]').click();
+  await expect(page.locator('#osDeliveryTitle')).toContainText('인앱 브라우저 안전 연결');
+  await expect(page.locator('#osDeliveryHint')).toContainText('복사가 막히면 AI를 열지 않고');
+  await page.locator('#osTask').fill('카카오톡 브라우저 전달 순서를 확인해줘.');
+  await page.locator('#osSendEnhanced').click();
+  expect(await page.evaluate(()=>window.__osDeliveryEvents)).toEqual(['copy','open']);
+  await expect(page.locator('#osReadyMessage')).toContainText('ChatGPT');
+});
+
+test('AI writing OS does not open AI when every clipboard path is blocked', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});
+  await gotoReady(page);
+  await page.evaluate(()=>{
+    Object.defineProperty(navigator,'userAgent',{configurable:true,value:'Mozilla/5.0 Linux Android KAKAOTALK 25.5.0'});
+    Object.defineProperty(navigator,'share',{configurable:true,value:undefined});
+    Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('clipboard blocked');}}});
+    window.__osOpenCount=0;
+    document.execCommand=()=>false;
+    window.open=()=>{window.__osOpenCount++;return{closed:false};};
+  });
+  await page.locator('[data-tool="writing"]').click();
+  await page.locator('#osTask').fill('복사가 막혔을 때 안전하게 멈춰줘.');
+  await page.locator('#osSendEnhanced').click();
+  expect(await page.evaluate(()=>window.__osOpenCount)).toBe(0);
+  await expect(page.locator('#osReadyMessage')).toContainText('자동 복사가 차단');
+  await expect(page.locator('#osAfterSend')).toContainText('직접 복사');
+  await expect(page.locator('#osTaskPackPreview')).toBeFocused();
+});
+
 test('AI writing OS invalidates a compiled prompt when provider mode or profile changes', async ({ page }) => {
   await gotoReady(page);await page.locator('[data-tool="writing"]').click();await page.evaluate(()=>{window.open=()=>({closed:false});});
+  await page.locator('#osFactoryPresets [data-factory-mode="free"]').click();
   await page.locator('#osTask').fill('이 제품 인스타 콘텐츠를 만들어줘.');await page.locator('#osSendEnhanced').click();await expect(page.locator('#osTaskPackResult')).toBeVisible();
   await page.locator('#osProviders [data-provider="claude"]').click();await expect(page.locator('#osTaskPackResult')).toBeHidden();await page.locator('#osSendEnhanced').click();await expect(page.locator('#osReadyMessage')).toContainText('Claude');
   await page.locator('#osAdvancedSettings > summary').click();await page.locator('#osMode').selectOption('quick');await expect(page.locator('#osTaskPackResult')).toBeHidden();await page.locator('#osSendEnhanced').click();await expect(page.locator('#osTaskPackResult')).toBeVisible();

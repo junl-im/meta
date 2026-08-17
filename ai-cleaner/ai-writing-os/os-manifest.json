@@ -1,10 +1,10 @@
 {
   "name": "AI COMPANY OS",
-  "version": "6.1",
-  "sourcePackage": "AI_COMPANY_OS_HUB_V1_EMBED 1.0.0",
-  "runtime": "GitHub Pages static prompt-compiler edition",
+  "version": "7",
+  "sourcePackage": "AI_COMPANY_OS_V7_ZERO_DEPENDENCY",
+  "runtime": "GitHub Pages static Blog Factory prompt-compiler edition",
   "defaultLanguage": "ko",
-  "portableZip": "AI_COMPANY_OS_V6_1_PUBLIC.zip",
+  "portableZip": "AI_COMPANY_OS_V7_ZERO_DEPENDENCY.zip",
   "publicProfileMode": true,
   "remoteMcpLive": false,
   "fastFiles": [
@@ -17,5 +17,12 @@
     "06_PRODUCT_ENTERPRISE_CORE.md",
     "07_STATE_AND_UPDATE.md"
   ],
-  "promptCompiler": "prompt-compiler.json"
+  "promptCompiler": "prompt-compiler.json",
+  "blogFactory": {
+    "enabled": true,
+    "presets": ["daily_one", "batch_three", "idea_bank", "free"],
+    "designBridge": true,
+    "truthGuard": true,
+    "creator10": true
+  }
 }

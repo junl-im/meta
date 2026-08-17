@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.8.3",
+  "version": "1.8.5",
   "date": "2026-08-18",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -47,12 +47,12 @@
     "ai-cleaner/ai-writing-os/prompt-compiler.json"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.8.3",
-  "asset_version": "183",
+  "current_version": "1.8.5",
+  "asset_version": "185",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.8.3 AI Writing OS linkage/clarity UX: simpler explanation, honest mobile share vs desktop copy+open plan, dynamic provider-aware CTA, applied-rule chips, and post-delivery guidance",
+  "latestPatch": "1.8.5 AI Writing OS renewal: AI Company OS V7 Blog Factory presets, topic/research/article/naturalness/image/final-gate production pipeline, persisted factory defaults, and honest web/image capability boundaries; text/image tools preserved",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -131,7 +131,7 @@
     "breakpointExpansionReset": true,
     "safeAreaViewportFitCover": true
   },
-  "nextPhase": "1.8.4 AI Writing OS real-device delivery refinement after 1.8.3 GitHub browser-smoke validation",
+  "nextPhase": "1.8.6 Blog Factory result return/import workflow or optional serverless automation after 1.8.5 device/browser validation",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -196,7 +196,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "183",
+  "assetVersion": "185",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -205,14 +205,15 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "223 passed / 0 failed",
-    "moduleChecks": "PASS including Prompt Compiler routing/rule selection/compact prompt generation + 1.8.3 linkage UX wiring",
-    "jsSyntax": "PASS",
-    "workflowYaml": "PASS",
-    "json": "PASS",
-    "localBrowserSmoke": "BLOCKED_BY_CONTAINER_BROWSER: local HTTP preview responds, but bundled Playwright Chromium is absent and system Chromium headless timed out in this container; GitHub Actions browser-smoke remains final browser gate",
-    "browserE2EConfigured": "44 cases (adds mocked native-share linkage/honesty path)",
-    "latestVisibleGitHubBaseline": "1.8.3 requires browser-smoke after push"
+    "staticChecks": "229 passed / 0 failed",
+    "moduleChecks": "PASS — 1.8.5 Blog Factory + copy-first delivery unit checks",
+    "jsSyntax": "PASS — app/image/rewrite/AI Writing OS",
+    "workflowYaml": "PASS — unchanged from 1.8.4",
+    "json": "PASS — version/manifest/compiler/project state parsed",
+    "protectedToolIntegrity": "PASS — existing text cleaner + image analyzer/core/service/UI hashes unchanged; pre-writing HTML unchanged; CSS only appended with OS-scoped block",
+    "localBrowserSmoke": "ENVIRONMENT-LIMITED — Playwright dependency/browser is not installed in this build container; 46 Chromium E2E cases remain configured for GitHub Actions/local npm install",
+    "browserE2EConfigured": "46 cases including 1.8.5 Blog Factory mobile/preset/compiler coverage plus KakaoTalk-style copy-before-open and clipboard-failure no-open regressions",
+    "latestVisibleGitHubBaseline": "1.8.5 pending user push / GitHub Actions browser-smoke"
   },
   "stabilityAudit131": {
     "updateOnlyWhenSemverNewer": true,
@@ -520,5 +521,62 @@
     "rawComparisonSecondary": true,
     "apiKeyRequired": false,
     "remoteMcpLive": false
+  },
+  "aiWritingOs184": {
+    "scope": "AI Writing OS delivery bridge only; existing text/image engines preserved",
+    "rootCauseFound": "1.8.3 fallback opened provider before clipboard.writeText, which can lose/consume user-gesture capability in restrictive in-app browsers",
+    "copyBeforeOpen": true,
+    "legacyClipboardFallback": true,
+    "restrictedInAppBrowserDetection": [
+      "KAKAOTALK",
+      "Android WebView",
+      "Facebook",
+      "Instagram",
+      "LINE"
+    ],
+    "shareDisabledForRestrictedInAppBrowser": true,
+    "failClosedOnCopyFailure": true,
+    "manualCopySelectionOnFailure": true,
+    "providerOpenSeparatedAsRecoveryAction": true,
+    "e2eCopyThenOpenOrder": true,
+    "e2eNoOpenWhenClipboardBlocked": true,
+    "apiKeyRequired": false,
+    "remoteMcpLive": false
+  },
+  "aiWritingOs185": {
+    "scope": "AI Writing OS only; existing text cleaner and image analyzer engines preserved",
+    "sourcePackage": "AI_COMPANY_OS_V7_ZERO_DEPENDENCY",
+    "osVersion": "7",
+    "runtime": "GitHub Pages static Blog Factory prompt-compiler edition",
+    "factoryPresets": [
+      "daily_one",
+      "batch_three",
+      "idea_bank",
+      "free"
+    ],
+    "pipeline": [
+      "topic radar",
+      "research boundary",
+      "Creator-10 blog",
+      "naturalness edit",
+      "image package",
+      "Truth Guard final gate"
+    ],
+    "factoryDefaultsPersisted": [
+      "mode",
+      "blogType",
+      "audience",
+      "researchMode",
+      "imageCount"
+    ],
+    "transientFactsPersisted": false,
+    "transientAvoidTopicsPersisted": false,
+    "webExecutionClaimedByStaticPage": false,
+    "imageExecutionClaimedByStaticPage": false,
+    "imageFallback": "generation prompt + composition + aspect ratio + placement + caption + ALT",
+    "detectorEvasionOptimization": false,
+    "naturalnessGoal": "reader-natural Korean with factual integrity",
+    "existingFreeRequestModePreserved": true,
+    "portableOsZip": "AI_COMPANY_OS_V7_ZERO_DEPENDENCY.zip"
   }
 }

@@ -1,15 +1,22 @@
-# AI 글쓰기 OS — Static Prompt Compiler Runtime
+# AI 글쓰기 OS — V1.8.5 Blog Factory Runtime
 
-사용자가 제공한 `AI_COMPANY_OS_HUB_V1_EMBED`를 GitHub Pages에서 실제 동작하도록 이식한 공개 런타임입니다.
+AI Company OS V7의 BLOG / DESIGN / Truth Guard를 AI Cleaner의 세 번째 도구에 맞게 압축한 정적 Prompt Compiler입니다.
 
-- 기본 동작: 자연어 요청 → 자동 채널/의도 분류 → 필요한 규칙만 선택 → 강화 실행 프롬프트 생성 → 사용 AI로 전달
-- 내 기본 AI: 마지막 선택을 브라우저에 기억하고, 실제 전달 방식과 함께 표시
-- 전달: 휴대폰/태블릿 등 Web Share 지원 환경은 시스템 공유창(사용자가 대상 AI 앱 선택), PC는 강화 프롬프트 복사 + 선택 AI 열기, 기타 AI는 복사 fallback
-- 연결 정직성: 정적 웹페이지가 임의의 설치 AI 앱을 강제로 지정해 열 수 있다고 표현하지 않음
-- 비교: `원문 그대로 보내기`와 `OS로 강화해서 AI에 보내기`를 모두 제공
-- Compiler 규칙: `prompt-compiler.json`의 공통 + BLOG/INSTAGRAM/YOUTUBE/PRODUCT/GENERAL + 품질 모드 규칙
-- 투명성: 생성된 강화 프롬프트 미리보기/복사/Markdown 저장 가능
-- 로컬 설정: 마지막 AI 선택과 사용자 선호를 브라우저 localStorage에만 저장
-- 비활성: Remote MCP / 서버 사용자 DB / 서버 API. 현재 저장소는 정적 GitHub Pages이므로 가짜 MCP URL을 만들지 않습니다.
-- 공개 배포 안전성: 원본 `01_OWNER_PROFILE.md`는 그대로 공개하지 않고 공개용 기본 프로필로 교체했습니다.
-- 서버 Hub로 확장할 때는 `integration-contract.json`을 기준으로 별도 서버/reverse proxy를 연결할 수 있습니다.
+## 기본 흐름
+- `오늘 1편`: 소재 후보 → 필요 시 최신 정보 확인 → Creator-10 블로그 글 1편 → 이미지 패키지 → 발행 전 검수
+- `3편 생산`: 서로 겹치지 않는 소재 3개 → 완성 블로그 패키지 3개
+- `소재 20개`: 다음 글감 20개 + 우선순위 + 7일 큐
+- `자유 요청`: 1.8.4까지의 일반 AI 글쓰기 OS 강화 흐름
+
+## 정적 런타임 경계
+- 이 페이지 자체는 웹 검색이나 이미지 생성을 실행하지 않습니다.
+- 선택한 AI에 실제 웹 기능이 있을 때만 최신 사실 확인을 요청합니다.
+- 선택한 AI에 실제 이미지 생성 기능이 있을 때만 이미지 생성을 요청합니다. 기능이 없으면 이미지 프롬프트·구도·비율·배치·캡션·ALT를 납품하도록 컴파일합니다.
+- API 키, 서버 사용자 DB, Remote MCP는 기본 사용하지 않습니다.
+- 모바일은 지원 환경에서 시스템 공유창, PC는 복사 확인 후 선택 AI 열기를 사용합니다.
+
+## 자연스러움 정책
+목표는 AI 탐지기 우회가 아니라 실제 독자가 읽기 자연스러운 한국어입니다. 상투적인 서론, 반복 종결, 번역투, 과도한 광고투를 줄이되 사용자에게 없는 경험·구매·방문·가족 반응·효과는 만들지 않습니다.
+
+## V7 자산
+`os/current/`에는 V7 fast-path 핵심 파일을 두고, 전체 원본은 `os/releases/AI_COMPANY_OS_V7_ZERO_DEPENDENCY.zip`으로 제공합니다.

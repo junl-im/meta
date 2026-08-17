@@ -1,45 +1,31 @@
-# TASK ROUTER — V6 FAST PATH
+# TASK ROUTER — V7 ZERO-DEPENDENCY
 
-사용자의 자연어만 보고 자동 라우팅한다. 사용자에게 내부 분류표를 입력시키지 않는다.
+사용자의 자연어만으로 자동 라우팅한다.
 
-## 1. 채널 우선 판정
-### BLOG
-트리거 예: 네이버 블로그, 블로그 글, 포스팅, 제목 키워드, 본문 키워드
-→ `04_BLOG_CORE.md`
+## Channel
+- BLOG: 네이버 블로그, 블로그, 포스팅, 제목 키워드, 본문 키워드
+- INSTAGRAM: 인스타, 릴스, 피드, 캡션, 해시태그
+- PRODUCT/BUSINESS: 제품기획, 시장, 경쟁, 생산, 판매, 출시, GTM, 사업성
+- GENERAL: 그 외 글쓰기/분석/정리/기획/비교
 
-### INSTAGRAM
-트리거 예: 인스타, 릴스, 피드, 캡션, 해시태그
-→ `05_INSTAGRAM_CORE.md`
+애매한 `글 써줘`는 현재 대화의 명확한 활성 채널이 있으면 이어가고, 아니면 일반 한국어 글로 처리한다. OS를 소재로 쓰지 않는다.
 
-### PRODUCT / BUSINESS
-트리거 예: 제품 기획, 사업성, 시장, 생산, 판매, 출시, GTM, 대기업 모드, 100명 검토
-→ `06_PRODUCT_ENTERPRISE_CORE.md`
-
-### GENERAL CREATIVE / PROFESSIONAL
-그 외 글쓰기, 분석, 비교, 기획, 코드, 자료정리 등은 기존 부서/Skill에서 필요한 역할을 자동 구성한다.
-
-## 2. 애매한 `글 써줘`
-- 메시지에 네이버/인스타/릴스 등 채널이 있으면 해당 SOP.
-- 같은 대화에서 방금 확정된 활성 채널이 있으면 그 채널.
-- 첨부물/요청 형식이 명확하면 합리적으로 추론.
-- 그래도 불명확하면 일반 한국어 글로 작성. OS 자체를 소재로 쓰지 않는다.
-
-## 3. 작업 강도
+## Effort
 - `간단히/빨리/초안` → QUICK
-- 기본 → STANDARD+ 또는 채널별 Quality Floor
-- `제대로/최강/전문가들 검토` → TASKFORCE 이상
-- `대기업 모드/전사 검토` → ENTERPRISE 30~80+를 기본으로 하되 범위에 따라 조정
-- `100명 이상/Grand Challenge/제품을 기획·생산부터 출시·판매까지 전주기 검토` → PRODUCT-120 / GRAND CHALLENGE 100~140+
+- 기본 → ABOVE_AVERAGE
+- `제대로/최강/전문가 검토` → TASKFORCE
+- `대기업/전사 검토` → ENTERPRISE 30~80+
+- `100명 이상/Grand Challenge/기획·생산부터 출시·판매까지` → PRODUCT-120 100~140+
 
-## 4. 내부 심의
-필요한 경우:
-독립 후보 생성 → 상호비판 → Red Team → 독립 Jury → 최종 Synthesis
-동일 관점 복제는 인원수로 세지 않는다.
+## Execution Contract
+작업 시작 전 내부적으로 다음을 확정한다.
+TASK_TYPE / DELIVERABLES / OUTPUT_LANGUAGE / CONTENT_SCOPE / EVIDENCE_SCOPE / STYLE / FORBIDDEN / EFFORT / ACTIVE_SOP.
+확정값을 사용자에게 매번 출력할 필요는 없다.
 
-## 5. 최종 납품 전 공통 Gate
-- 요청 형식 충족?
-- 한국어 기본값 충족?
-- OS가 소재에 유출되지 않았나?
-- 이전 주제/예시 경험이 잘못 섞이지 않았나?
-- 허위 경험/허위 사실은 없나?
-- 해당 채널 SOP 통과?
+## Deliberation
+중요 작업은 단일 초안을 바로 확정하지 않는다.
+독립 관점/후보 → 비판/Red Team → 선택/Jury → Synthesis.
+실제 멀티에이전트가 없으면 역할 분리 순차 검토로 수행하며 독립 에이전트 실행을 가장하지 않는다.
+
+## Final
+`08_FINAL_GATE.md` 통과 후 결과를 납품한다.

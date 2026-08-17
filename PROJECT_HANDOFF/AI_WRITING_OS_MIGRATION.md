@@ -39,3 +39,9 @@ The default completion path is now `request -> preferred AI -> OS-enhanced send`
 The runtime behavior remains a static Prompt Compiler, but the presentation now makes the handoff model explicit instead of implying a stronger third-party app connection than the browser can provide. Provider selection is presented as `내 기본 AI`. Desktop shows a provider-aware `copy prompt + open provider` plan. Mobile Web Share shows a system-share plan and explicitly tells the user to choose the preferred AI in the share sheet because the browser cannot force-target an arbitrary installed AI app.
 
 The primary CTA mirrors the real path (`공유하기`, provider-specific `열기`, or `복사하기`). After compilation, four compact rule chips explain what OS applied, and the result state reports the actual handoff outcome plus the next action. The raw-send path remains secondary for A/B comparison.
+
+
+## 1.8.4 copy-first delivery safety
+Real-device feedback exposed a delivery-order bug in the 1.8.3 fallback path: the selected provider was opened before clipboard write. This is fragile in KakaoTalk and similar embedded WebViews because navigation/popup activity can invalidate the transient user gesture used by clipboard APIs. 1.8.4 changes the contract to **copy success first, provider launch second**.
+
+Restricted in-app browser signatures use an explicit safe-copy plan and skip the native-share assumption. A synchronous textarea + `document.execCommand('copy')` fallback is attempted while the click gesture is still active, followed by Async Clipboard when available. If copying still fails, the provider is not opened; the generated prompt stays visible and is selected for manual copy. Provider opening is also available as a separate recovery button after copy.

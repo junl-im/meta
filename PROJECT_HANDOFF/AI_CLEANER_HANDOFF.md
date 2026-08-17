@@ -1,6 +1,6 @@
 # AI Cleaner 프로젝트 인수인계 메모리
 
-업데이트: 2026-08-18 · 현재 패키지: 1.8.3
+업데이트: 2026-08-18 · 현재 패키지: 1.8.5
 
 ## 새 채팅에서 가장 먼저 읽을 것
 이 폴더를 새 채팅에 업로드한 뒤 `PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md 읽고 이어서 개발하자`라고 요청한다. 이 문서는 프로젝트의 결정사항, 보호 경로, UX 방향, 안전 제약, 배포 방식, 알려진 이슈를 보존하기 위한 인수인계 메모리다.
@@ -521,3 +521,27 @@
 - 강화 결과에는 이번 요청에 적용된 핵심 기준 4개를 칩으로 표시하고, 실제 전달 결과에 따라 `붙여넣기`, `공유 취소`, `브라우저 차단` 등 다음 행동을 안내한다.
 - OS 설명 블록은 `작업 파악 / 규칙 보강 / 안전 검수` 3개 개념으로 단순화한다. Prompt Compiler, Portable ZIP 등 기술 정보는 고급 설정에 유지한다.
 - API 키, 가짜 MCP/API, 외부 AI 사이트 DOM 주입/합성 타이핑은 계속 사용하지 않는다.
+
+
+## 1.8.4 AI Writing OS 전달 안정화 — 복사 우선 / 인앱 브라우저
+- 기준선은 실제 전달된 `AI_Cleaner_1_8_3_FULL_PROJECT_HANDOFF.zip`이다. 기존 `AI 글 다듬기` / `AI 이미지 검사` 엔진은 수정하지 않는다.
+- 실사용 피드백: 카카오톡 인앱 브라우저에서 `보내기`를 누르면 ChatGPT 창은 열리지만 붙여넣을 프롬프트가 없는 현상이 확인됐다.
+- 코드 원인: 1.8.3 fallback은 `AI 창 열기 -> clipboard.writeText()` 순서였다. 인앱 WebView에서 창 열기/이동이 사용자 제스처 기반 클립보드 권한을 끊을 수 있다.
+- 1.8.4부터 핵심 계약은 **`복사 성공 -> AI 열기`** 이다. 복사가 실패하면 AI는 열지 않는다.
+- Async Clipboard가 제한된 WebView를 위해 사용자 클릭 순간 temporary readonly textarea + `document.execCommand('copy')` 동기 fallback을 추가한다. modern `navigator.clipboard.writeText()`도 보조 경로로 유지한다.
+- KakaoTalk / Android WebView / Facebook / Instagram / LINE 계열 UA는 restricted in-app browser로 취급해 Web Share를 무조건 신뢰하지 않고 `인앱 브라우저 안전 연결` UI를 보여준다.
+- 모든 자동 복사가 실패하면 생성 프롬프트를 화면에 남기고 선택 상태로 만들어 수동 복사를 바로 할 수 있게 한다. 이때 provider open count는 0이어야 한다.
+- 결과 영역의 `ChatGPT 열기` 등은 복사 재시도가 아닌 AI-only recovery action으로 분리한다.
+- 자동검사: static/architecture 227/0, module PASS. Browser E2E는 46개 구성하며 신규 2개 케이스가 `copy -> open` 순서와 clipboard 완전 차단 시 `no open`을 강제한다.
+- 실제 배포 후 GitHub Actions `browser-smoke`와 KakaoTalk/Chrome/Safari 실기기 확인이 최종 게이트다.
+
+
+## v1.8.5 AI 글쓰기 OS Blog Factory
+- 변경 범위는 세 번째 `AI 글쓰기 OS`로 제한. `글 다듬기`/`이미지 검사` 엔진은 1.8.4 기준을 그대로 보존한다.
+- AI Company OS V7 Zero-Dependency를 내장 기준으로 갱신하고, 정적 Prompt Compiler는 V7 BLOG/DESIGN/Truth Guard를 Blog Factory 흐름으로 압축한다.
+- 기본 생산 프리셋: `오늘 1편`, `3편 생산`, `소재 20개`, `자유 요청`. 자유 요청은 기존 일반 OS 강화 흐름의 호환 모드다.
+- Blog Factory pipeline: 소재 레이더 → 필요한 경우 실제 웹 기능으로 최신 사실 확인 → Creator-10 글 → 자연스러움 편집 → 이미지 생성/프롬프트 → Truth Guard 최종 검수.
+- 정적 Pages 자체는 웹 검색/이미지 생성을 실행했다고 주장하지 않는다. 선택 AI가 실제 기능을 가질 때만 실행을 요청하고, 없으면 확인 필요/이미지 제작 브리프로 fallback한다.
+- 자연스러움 목표는 detector 우회가 아니라 독자 가독성/브랜드 문체/사실 보존. detector 점수 최적화는 계속 금지한다.
+- 생산 기본값(mode/blog type/audience/research/image count)은 localStorage에 저장. 실제 경험/피할 소재는 작업값이며 기본 설정으로 영구 저장하지 않는다.
+- V7 전체 ZIP은 `ai-cleaner/ai-writing-os/os/releases/AI_COMPANY_OS_V7_ZERO_DEPENDENCY.zip`.

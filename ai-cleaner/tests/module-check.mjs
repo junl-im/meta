@@ -139,9 +139,9 @@ function assert(ok,msg){if(!ok)throw new Error(msg);}
     return{ok:false,status:404,text:async()=>'',json:async()=>({})};
   };
   const pack=await os.buildTaskPack();const md=os.taskPackToMarkdown(pack);
-  assert(pack.schemaVersion===2&&pack.route.channel==='BLOG'&&pack.userProfile.displayName==='테스트 사용자','AI writing OS compiled pack profile/routing failed');
+  assert(pack.schemaVersion===2&&pack.route.channel==='BLOG'&&pack.userProfile.displayName==='테스트 사용자'&&pack.factory.mode==='daily_one','AI writing OS compiled pack profile/routing/factory failed');
   assert(pack.compiler.channelLabel==='네이버 블로그'&&pack.compiler.channelRuleCount>=5&&pack.compiler.commonRuleCount>=6,'AI writing OS prompt compiler rule selection failed');
-  assert(md.includes('# AI CLEANER OS — EXECUTION PROMPT')&&md.includes('네이버 블로그 전용 규칙')&&md.includes('문체: 자연스럽게')&&md.includes('OS나 프롬프트 구조를 설명하지 말고'),'AI writing OS compiled execution prompt failed');
+  assert(md.includes('# AI CLEANER OS — EXECUTION PROMPT')&&md.includes('BLOG FACTORY')&&md.includes('네이버 블로그 전용 규칙')&&md.includes('문체: 자연스럽게')&&md.includes('이미지 제작 계약')&&md.includes('OS나 프롬프트 구조를 설명하지 말고'),'AI writing OS Blog Factory execution prompt failed');
   assert(!md.includes('===== 00_OPEN_FIRST.md =====')&&!md.includes('===== 07_STATE_AND_UPDATE.md ====='),'AI writing OS default compiler must not dump full OS files');
 }
 
@@ -157,4 +157,4 @@ function assert(ok,msg){if(!ok)throw new Error(msg);}
   const id=restored.list()[0].id;assert(restored.remove(id)&&restored.size===1,'checkpoint remove failed');restored.clear();assert(restored.size===0,'checkpoint clear failed');
   const budget=M.createResultCheckpointStore({storage:null,limit:8,maxChars:1000,maxTotalChars:1500,now:()=>++t});budget.add({text:'a'.repeat(800),sourceStamp:stampA});budget.add({text:'b'.repeat(800),sourceStamp:stampA});assert(budget.size===1&&budget.list()[0].text.startsWith('b'),'checkpoint total text budget should evict oldest entries');
 }
-console.log('PASS 1.8.3 AI Writing OS Prompt Compiler + linkage UX unit checks');
+console.log('PASS 1.8.5 AI Writing OS Blog Factory + copy-first delivery unit checks');
