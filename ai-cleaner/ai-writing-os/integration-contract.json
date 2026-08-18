@@ -1,25 +1,45 @@
 {
-  "module": "AI_COMPANY_OS_HUB",
-  "version": "1.0.0",
-  "defaultMountPath": "/ai-company",
-  "ownerIdentity": {
-    "required": true,
-    "source": "existing-site-auth",
-    "field": "user_id",
-    "rule": "The browser must not be trusted to invent another user's id. Resolve it from the host site's authenticated server session."
+  "schemaVersion": 4,
+  "name": "AI Cleaner Blog Factory Daily Engine contract",
+  "version": "1.8.8",
+  "runtime": "github-pages-actions-daily-engine-with-local-prompt-builder",
+  "flow": [
+    "scheduled topic generation",
+    "daily-topics.json",
+    "visible topic cards",
+    "selected topic to prompt builder",
+    "manual copy"
+  ],
+  "providerSelection": false,
+  "providerLaunch": false,
+  "nativeShareDelivery": false,
+  "apiKeyInBrowser": false,
+  "dailyEngine": {
+    "enabled": true,
+    "scheduler": "GitHub Actions",
+    "timezone": "Asia/Seoul",
+    "schedule": "06:20 daily",
+    "output": "ai-cleaner/data/daily-topics.json",
+    "topicCount": 10,
+    "topCount": 3,
+    "remoteAi": "OpenAI Responses API",
+    "webSearchTool": true,
+    "secret": "OPENAI_API_KEY",
+    "requiredVariable": "BLOG_FACTORY_SEED",
+    "deploy": "same workflow via GitHub Pages artifact/deploy actions"
   },
-  "endpoints": {
-    "status": "GET /ai-company/api/status",
-    "providers": "GET /ai-company/api/providers",
-    "prepare": "POST /ai-company/api/prepare",
-    "contextPack": "POST /ai-company/api/context-pack",
-    "portableZip": "GET /ai-company/download/os.zip",
-    "mcp": "ALL /ai-company/mcp/:privateAccessSlug"
+  "dailyLocalAutomation": {
+    "enabled": true,
+    "label": "로컬 프롬프트 자동 준비",
+    "trigger": "first app open on a new local date",
+    "requiresSavedSeed": true,
+    "runsWhileBrowserClosed": false,
+    "callsRemoteAi": false,
+    "role": "fallback/helper separate from Daily Engine"
   },
-  "security": {
-    "memoryInGit": false,
-    "apiKeysRequiredByDefault": false,
-    "mcpSecretMustBeLong": true,
-    "crossUserIsolationRequired": true
+  "unattendedAutomation": {
+    "implemented": true,
+    "runsWhileBrowserClosed": true,
+    "secretBoundary": "GitHub Actions secret only; never shipped to Pages bundle"
   }
 }

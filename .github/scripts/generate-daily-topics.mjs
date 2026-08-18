@@ -1,0 +1,225 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+
+const TIMEZONE = 'Asia/Seoul';
+const OUTPUT_PATH = path.resolve('ai-cleaner/data/daily-topics.json');
+const DEFAULT_MODEL = 'gpt-5.6-luna';
+const TOPIC_COUNT = 10;
+
+function env(name, fallback = '') {
+  const value = process.env[name];
+  return typeof value === 'string' && value.trim() ? value.trim() : fallback;
+}
+
+function kstDateParts(now = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23'
+  }).formatToParts(now);
+  const map = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
+  return {
+    date: `${map.year}-${map.month}-${map.day}`,
+    localTimestamp: `${map.year}-${map.month}-${map.day}T${map.hour}:${map.minute}:${map.second}+09:00`
+  };
+}
+
+function clampText(value, max) {
+  return String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
+}
+
+async function loadPreviousTopicTitles() {
+  try {
+    const previous = JSON.parse(await fs.readFile(OUTPUT_PATH, 'utf8'));
+    return (Array.isArray(previous?.topics) ? previous.topics : [])
+      .map(topic => clampText(topic?.title, 120))
+      .filter(Boolean)
+      .slice(0, TOPIC_COUNT);
+  } catch (_) {
+    return [];
+  }
+}
+
+function extractResponseText(payload) {
+  if (typeof payload?.output_text === 'string' && payload.output_text.trim()) return payload.output_text.trim();
+  const chunks = [];
+  for (const item of Array.isArray(payload?.output) ? payload.output : []) {
+    if (!Array.isArray(item?.content)) continue;
+    for (const content of item.content) {
+      if (content?.type === 'output_text' && typeof content.text === 'string') chunks.push(content.text);
+      else if (typeof content?.text === 'string') chunks.push(content.text);
+    }
+  }
+  return chunks.join('\n').trim();
+}
+
+function parseJsonText(text) {
+  const stripped = String(text ?? '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  try { return JSON.parse(stripped); } catch (_) {}
+  const first = stripped.indexOf('{');
+  const last = stripped.lastIndexOf('}');
+  if (first >= 0 && last > first) return JSON.parse(stripped.slice(first, last + 1));
+  throw new Error('OpenAI 응답에서 JSON 객체를 찾지 못했습니다.');
+}
+
+function normalizeTopic(raw, index) {
+  const score = Number(raw?.priorityScore);
+  return {
+    id: `topic-${String(index + 1).padStart(2, '0')}`,
+    title: clampText(raw?.title, 120),
+    category: clampText(raw?.category, 48) || '일반',
+    whyNow: clampText(raw?.whyNow, 220),
+    searchIntent: clampText(raw?.searchIntent, 180),
+    angle: clampText(raw?.angle, 220),
+    researchNeed: clampText(raw?.researchNeed, 240),
+    imageConcept: clampText(raw?.imageConcept, 220),
+    priorityScore: Number.isFinite(score) ? Math.max(1, Math.min(100, Math.round(score))) : Math.max(1, 90 - index * 4)
+  };
+}
+
+function validateAndNormalize(parsed) {
+  const rawTopics = Array.isArray(parsed?.topics) ? parsed.topics : [];
+  if (rawTopics.length < TOPIC_COUNT) throw new Error(`주제가 ${rawTopics.length}개만 생성되었습니다. 정확히 ${TOPIC_COUNT}개가 필요합니다.`);
+  const topics = rawTopics.slice(0, TOPIC_COUNT).map(normalizeTopic).filter(topic => topic.title);
+  if (topics.length !== TOPIC_COUNT) throw new Error('제목이 비어 있는 주제가 있어 Daily Engine 결과를 저장하지 않았습니다.');
+  topics.sort((a, b) => b.priorityScore - a.priorityScore);
+  topics.forEach((topic, index) => {
+    topic.rank = index + 1;
+    topic.top3 = index < 3;
+  });
+  return {
+    summary: clampText(parsed?.summary, 300) || '오늘 작성 가치가 높은 주제를 우선순위대로 정리했습니다.',
+    topics
+  };
+}
+
+async function requestOpenAI({ apiKey, model, prompt, useWebSearch = true }) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 150_000);
+  const topicSchema = {
+    type: 'object',
+    additionalProperties: false,
+    properties: {
+      summary: { type: 'string' },
+      topics: {
+        type: 'array',
+        minItems: TOPIC_COUNT,
+        maxItems: TOPIC_COUNT,
+        items: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            title: { type: 'string' },
+            category: { type: 'string' },
+            whyNow: { type: 'string' },
+            searchIntent: { type: 'string' },
+            angle: { type: 'string' },
+            researchNeed: { type: 'string' },
+            imageConcept: { type: 'string' },
+            priorityScore: { type: 'integer', minimum: 1, maximum: 100 }
+          },
+          required: ['title','category','whyNow','searchIntent','angle','researchNeed','imageConcept','priorityScore']
+        }
+      }
+    },
+    required: ['summary','topics']
+  };
+  const body = {
+    model,
+    input: prompt,
+    store: false,
+    reasoning: { effort: 'low' },
+    text: {
+      verbosity: 'low',
+      format: {
+        type: 'json_schema',
+        name: 'daily_blog_topics',
+        description: 'Exactly ten Korean blog topic candidates and their production metadata.',
+        strict: true,
+        schema: topicSchema
+      }
+    }
+  };
+  if (useWebSearch) body.tools = [{ type: 'web_search' }];
+  try {
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      const response = await fetch('https://api.openai.com/v1/responses', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body),
+        signal: controller.signal
+      });
+      const text = await response.text();
+      let payload;
+      try { payload = JSON.parse(text); } catch (_) { payload = { raw: text }; }
+      if (response.ok) return payload;
+      const message = payload?.error?.message || `HTTP ${response.status}`;
+      if (attempt < 3 && (response.status === 408 || response.status === 409 || response.status === 429 || response.status >= 500)) {
+        await new Promise(resolve => setTimeout(resolve, 1200 * attempt));
+        continue;
+      }
+      throw new Error(`OpenAI API 실패: ${message}`);
+    }
+  } finally {
+    clearTimeout(timer);
+  }
+  throw new Error('OpenAI API 요청이 완료되지 않았습니다.');
+}
+
+async function main() {
+  const apiKey = env('OPENAI_API_KEY');
+  const model = env('OPENAI_MODEL', DEFAULT_MODEL);
+  const seed = env('BLOG_FACTORY_SEED');
+  const audience = env('BLOG_FACTORY_AUDIENCE');
+  const avoidTopics = env('BLOG_FACTORY_AVOID_TOPICS');
+  const previousTopics = await loadPreviousTopicTitles();
+  if (!apiKey) throw new Error('OPENAI_API_KEY secret이 없습니다. Repository Settings > Secrets and variables > Actions에 추가해 주세요.');
+  if (!seed) throw new Error('BLOG_FACTORY_SEED variable이 없습니다. 매일 다룰 관심 분야를 Repository Actions variable로 추가해 주세요.');
+
+  const { date, localTimestamp } = kstDateParts();
+  const prompt = `당신은 한국어 블로그의 데일리 소재 편집장이다. 오늘 날짜는 ${date}, 기준 시간대는 ${TIMEZONE}이다.\n\n` +
+    `관심 분야: ${seed}\n` +
+    `주요 독자: ${audience || '관심 분야에서 합리적으로 추론'}\n` +
+    `이미 쓴 주제/피할 소재: ${avoidTopics || '별도 제공 없음'}\n` +
+    `직전 Daily Engine 주제: ${previousTopics.length ? previousTopics.join(' | ') : '기록 없음'}\n\n` +
+    `웹 검색 도구를 사용할 수 있으면 오늘 기준으로 시기성·계절성·최근 변화가 있는지 확인하라. 다만 확인되지 않은 검색량, 조회수, 인기 순위, 효과 수치를 만들지 마라. ` +
+    `사용자의 실제 방문·구매·사용 경험을 지어내지 마라. 너무 뉴스성이라 하루 만에 가치가 사라지는 소재만 고르지 말고, 검색형·시즌형·생활형·에버그린을 적절히 섞어라. ` +
+    `서로 검색 의도가 겹치지 않도록 정확히 ${TOPIC_COUNT}개를 만들고, priorityScore 1~100으로 오늘 작성 우선순위를 평가하라.\n\n` +
+    `반드시 아래 형태의 JSON 객체만 출력하라. 마크다운 코드펜스와 설명문은 금지한다.\n` +
+    `{"summary":"오늘 소재 구성 요약","topics":[{"title":"제목/주제","category":"검색형|시즌형|생활형|비교형|에버그린 등","whyNow":"오늘 또는 지금 쓰기 좋은 이유. 확인된 사실만 단정","searchIntent":"독자가 이 주제를 찾는 의도","angle":"비슷한 글과 다르게 풀 각도","researchNeed":"본문 작성 전에 확인할 최신 사실 또는 자료. 없으면 '추가 확인 최소'","imageConcept":"대표 이미지 또는 본문 장면 콘셉트","priorityScore":90}]}`;
+
+  const payload = await requestOpenAI({ apiKey, model, prompt, useWebSearch: true });
+  const responseText = extractResponseText(payload);
+  if (!responseText) throw new Error('OpenAI 응답 본문이 비어 있습니다.');
+  const normalized = validateAndNormalize(parseJsonText(responseText));
+  const webSearchUsed = Array.isArray(payload?.output) && payload.output.some(item => String(item?.type || '').includes('web_search'));
+  const result = {
+    schemaVersion: 1,
+    status: 'ready',
+    date,
+    timezone: TIMEZONE,
+    generatedAt: new Date().toISOString(),
+    generatedAtLocal: localTimestamp,
+    model,
+    engine: 'github-actions-openai-responses',
+    webSearchUsed,
+    summary: normalized.summary,
+    topics: normalized.topics
+  };
+  await fs.mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
+  await fs.writeFile(OUTPUT_PATH, `${JSON.stringify(result, null, 2)}\n`, 'utf8');
+  console.log(`Daily Blog Factory: ${date} 주제 ${result.topics.length}개 생성 완료 (${model}, webSearchUsed=${webSearchUsed}).`);
+}
+
+main().catch(error => {
+  console.error(`Daily Blog Factory generation failed: ${error?.message || error}`);
+  process.exitCode = 1;
+});

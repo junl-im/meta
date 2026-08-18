@@ -122,27 +122,35 @@ function assert(ok,msg){if(!ok)throw new Error(msg);}
 }
 
 {
-  const os=M.createAiWritingOsController({storage:null,showToast:()=>{},openWindow:()=>{}});
-  const blog=os.routeTask('Apple Vision Pro 배터리 팁 네이버 블로그 써줘');assert(blog.channel==='BLOG'&&blog.workforceMode==='CREATOR_10'&&blog.outputLanguage==='ko','AI writing OS blog routing/default language failed');
-  const instagram=os.routeTask('이 제품 인스타 콘텐츠 만들어줘');assert(instagram.channel==='INSTAGRAM'&&instagram.deliverables.length===3,'AI writing OS Instagram deliverables failed');
-  const reels=os.routeTask('이 제품 릴스 자막만 만들어줘');assert(reels.channel==='INSTAGRAM'&&reels.deliverables.length===1&&reels.deliverables[0]==='reels_subtitles','AI writing OS narrow Instagram deliverable failed');
-  const quick=os.routeTask('블로그 빠른 초안만 써줘');assert(quick.workforceMode==='QUICK','AI writing OS quick routing failed');
-  const enterprise=os.routeTask('대기업 모드로 이 사업 검토해');assert(enterprise.workforceMode==='ENTERPRISE','AI writing OS enterprise routing failed');
-  const grand=os.routeTask('이 제품 기획 생산부터 출시 판매까지 전부 검토해');assert(grand.workforceMode==='GRAND_CHALLENGE','AI writing OS product lifecycle escalation failed');
-  const english=os.routeTask('Apple Vision Pro 블로그를 영어로 써줘');assert(english.outputLanguage==='en','AI writing OS explicit language routing failed');
-  const fields={osTask:{value:'부산 아쿠아리움 네이버 블로그 써줘'},osMode:{value:'auto'},osDisplayName:{value:'테스트 사용자'},osPreferences:{value:'문체: 자연스럽게'}};context.document={getElementById:id=>fields[id]||null};
+  const os=M.createAiWritingOsController({storage:null,showToast:()=>{}});
+  const blog=os.routeTask('Apple Vision Pro 배터리 팁 네이버 블로그 써줘');assert(blog.channel==='BLOG'&&blog.workforceMode==='CREATOR_10'&&blog.outputLanguage==='ko','Blog Factory blog routing/default language failed');
+  const instagram=os.routeTask('이 제품 인스타 콘텐츠 만들어줘');assert(instagram.channel==='INSTAGRAM'&&instagram.deliverables.length===3,'Blog Factory Instagram deliverables failed');
+  const reels=os.routeTask('이 제품 릴스 자막만 만들어줘');assert(reels.channel==='INSTAGRAM'&&reels.deliverables.length===1&&reels.deliverables[0]==='reels_subtitles','Blog Factory narrow Instagram deliverable failed');
+  const quick=os.routeTask('블로그 빠른 초안만 써줘');assert(quick.workforceMode==='QUICK','Blog Factory quick routing failed');
+  const enterprise=os.routeTask('대기업 모드로 이 사업 검토해');assert(enterprise.workforceMode==='ENTERPRISE','Blog Factory enterprise routing failed');
+  const grand=os.routeTask('이 제품 기획 생산부터 출시 판매까지 전부 검토해');assert(grand.workforceMode==='GRAND_CHALLENGE','Blog Factory product lifecycle escalation failed');
+  const english=os.routeTask('Apple Vision Pro 블로그를 영어로 써줘');assert(english.outputLanguage==='en','Blog Factory explicit language routing failed');
+  const fields={osTask:{value:'육아 · 아이와 갈 곳 · 생활정보'},osMode:{value:'auto'},osDisplayName:{value:'테스트 사용자'},osPreferences:{value:'문체: 자연스럽게'},osBlogType:{value:'auto'},osAudience:{value:''},osResearchMode:{value:'auto'},osImageCount:{value:'5'},osFacts:{value:''},osAvoidTopics:{value:''},osAutoDaily:{checked:false}};context.document={getElementById:id=>fields[id]||null};
   context.fetch=async url=>{
     const u=String(url),base=path.join(root,'ai-writing-os');
     if(u==='ai-writing-os/prompt-compiler.json'){const text=fs.readFileSync(path.join(base,'prompt-compiler.json'),'utf8');return{ok:true,status:200,json:async()=>JSON.parse(text),text:async()=>text};}
-    if(u==='ai-writing-os/providers.json'){const text=fs.readFileSync(path.join(base,'providers.json'),'utf8');return{ok:true,status:200,json:async()=>JSON.parse(text),text:async()=>text};}
     if(u==='ai-writing-os/os-manifest.json'){const text=fs.readFileSync(path.join(base,'os-manifest.json'),'utf8');return{ok:true,status:200,json:async()=>JSON.parse(text),text:async()=>text};}
     return{ok:false,status:404,text:async()=>'',json:async()=>({})};
   };
   const pack=await os.buildTaskPack();const md=os.taskPackToMarkdown(pack);
-  assert(pack.schemaVersion===2&&pack.route.channel==='BLOG'&&pack.userProfile.displayName==='테스트 사용자'&&pack.factory.mode==='daily_one','AI writing OS compiled pack profile/routing/factory failed');
-  assert(pack.compiler.channelLabel==='네이버 블로그'&&pack.compiler.channelRuleCount>=5&&pack.compiler.commonRuleCount>=6,'AI writing OS prompt compiler rule selection failed');
-  assert(md.includes('# AI CLEANER OS — EXECUTION PROMPT')&&md.includes('BLOG FACTORY')&&md.includes('네이버 블로그 전용 규칙')&&md.includes('문체: 자연스럽게')&&md.includes('이미지 제작 계약')&&md.includes('OS나 프롬프트 구조를 설명하지 말고'),'AI writing OS Blog Factory execution prompt failed');
-  assert(!md.includes('===== 00_OPEN_FIRST.md =====')&&!md.includes('===== 07_STATE_AND_UPDATE.md ====='),'AI writing OS default compiler must not dump full OS files');
+  assert(pack.schemaVersion===3&&pack.route.channel==='BLOG'&&pack.userProfile.displayName==='테스트 사용자'&&pack.factory.mode==='daily_topics','Blog Factory compiled pack profile/routing/default mode failed');
+  assert(pack.delivery.method==='copy_only'&&pack.delivery.providerLaunch===false,'Blog Factory must compile to copy-only delivery');
+  assert(pack.compiler.channelLabel==='네이버 블로그'&&pack.compiler.channelRuleCount>=5&&pack.compiler.commonRuleCount>=6,'Blog Factory prompt compiler rule selection failed');
+  assert(md.includes('# BLOG FACTORY — TODAY TOPIC PROMPT')&&md.includes('오늘의 탐색 각도')&&md.includes('완성 본문은 쓰지 말고 오늘 작성 후보 10개')&&md.includes('TOP 3')&&md.includes('OS나 프롬프트 구조를 설명하지 말고'),'Blog Factory today-topic execution prompt failed');
+  assert(md.includes('완성 본문을 작성하지 말고 오늘의 블로그 주제 후보 10개와 TOP 3 우선순위를 먼저 제공한다.')&&!md.includes('- 완성된 블로그 글을 먼저 제공한다.'),'daily topics output contract must not conflict with full-article channel defaults');
+  assert(!md.includes('===== 00_OPEN_FIRST.md =====')&&!md.includes('===== 07_STATE_AND_UPDATE.md ====='),'Blog Factory default compiler must not dump full OS files');
+  fields.osTask.value='육아 주말 나들이 소재 20개';os.selectFactoryMode('idea_bank',{remember:false});const ideaPack=await os.buildTaskPack();const ideaMd=os.taskPackToMarkdown(ideaPack);
+  assert(ideaPack.factory.mode==='idea_bank'&&!ideaPack.route.deliverables.includes('image_plan_and_prompts'),'idea bank must not request a fixed image package');
+  assert(ideaMd.includes('주제별 이미지 콘셉트')&&ideaMd.includes('완성 이미지 패키지는 만들지 않는다')&&!ideaMd.includes('- 이미지 5장 패키지'),'idea bank image contract must stay concept-only');
+  fields.osTask.value='서로 겹치지 않는 육아 글 3편';os.selectFactoryMode('batch_three',{remember:false});const batchMd=os.taskPackToMarkdown(await os.buildTaskPack());assert(batchMd.includes('글당 이미지 5장')&&batchMd.includes('각 글마다 이미지 5장 패키지'),'batch mode image count must be explicitly per article');
+  fields.osFacts.value='x'.repeat(80001);let contextBounded=false;try{os.buildTaskPackSync();}catch(e){contextBounded=/80,000자/.test(e.message);}assert(contextBounded,'Blog Factory oversized context must be bounded');
+  fields.osTask.value='회의 내용을 한 페이지로 정리해줘';os.selectFactoryMode('free',{remember:false});fields.osFacts.value='x'.repeat(80001);const freePack=os.buildTaskPackSync(),freeMd=os.taskPackToMarkdown(freePack);assert(freePack.factory.mode==='free'&&!freeMd.includes('BLOG FACTORY 생산 카드'),'free mode must ignore stale factory context and keep general prompt flow');fields.osFacts.value='';
+  fields.osTask.value='육아 · 아이와 갈 곳';os.selectFactoryMode('daily_topics',{remember:false});os.setAutoDaily(true);const todayPack=os.buildTaskPackSync();assert(todayPack.automation.autoDaily===true&&todayPack.automation.dailyAngle&&todayPack.factory.mode==='daily_topics','daily local automation metadata must be present');
 }
 
 {
@@ -157,4 +165,4 @@ function assert(ok,msg){if(!ok)throw new Error(msg);}
   const id=restored.list()[0].id;assert(restored.remove(id)&&restored.size===1,'checkpoint remove failed');restored.clear();assert(restored.size===0,'checkpoint clear failed');
   const budget=M.createResultCheckpointStore({storage:null,limit:8,maxChars:1000,maxTotalChars:1500,now:()=>++t});budget.add({text:'a'.repeat(800),sourceStamp:stampA});budget.add({text:'b'.repeat(800),sourceStamp:stampA});assert(budget.size===1&&budget.list()[0].text.startsWith('b'),'checkpoint total text budget should evict oldest entries');
 }
-console.log('PASS 1.8.5 AI Writing OS Blog Factory + copy-first delivery unit checks');
+console.log('PASS 1.8.8 Blog Factory GitHub Actions Daily Engine + local prompt builder unit checks');

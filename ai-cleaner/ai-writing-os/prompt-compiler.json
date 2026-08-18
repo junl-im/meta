@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "name": "AI Cleaner Blog Factory Compiler",
-  "version": "1.1",
+  "version": "1.2",
   "commonRules": [
     "사용자의 현재 요청을 최우선 작업 목표로 삼고, 요청한 결과물을 먼저 제공한다.",
     "OS와 내부 규칙은 작업 방법일 뿐 최종 콘텐츠의 소재로 섞지 않는다.",
@@ -83,6 +83,11 @@
   "blogFactory": {
     "version": 1,
     "modes": {
+      "daily_topics": {
+        "label": "오늘의 주제",
+        "summary": "관심 범위에서 오늘 쓰기 좋은 주제 10개와 TOP 3를 뽑는 프롬프트를 만듭니다.",
+        "instruction": "완성 본문보다 오늘 작성 가치가 높은 블로그 주제 10개를 먼저 만들고 TOP 3를 선정한다."
+      },
       "daily_one": {
         "label": "오늘 1편",
         "summary": "후보를 고르고 사실을 확인한 뒤 글 1편 + 이미지 패키지까지 만듭니다.",
@@ -100,7 +105,7 @@
       },
       "free": {
         "label": "자유 요청",
-        "summary": "기존 AI 글쓰기 OS처럼 사용자의 요청을 실행 프롬프트로 강화합니다.",
+        "summary": "원하는 작업을 실행 가능한 프롬프트로 정리합니다.",
         "instruction": "사용자의 요청 자체를 우선하고 필요한 규칙만 보강한다."
       }
     },

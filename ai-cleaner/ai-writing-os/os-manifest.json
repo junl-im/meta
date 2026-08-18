@@ -2,7 +2,7 @@
   "name": "AI COMPANY OS",
   "version": "7",
   "sourcePackage": "AI_COMPANY_OS_V7_ZERO_DEPENDENCY",
-  "runtime": "GitHub Pages static Blog Factory prompt-compiler edition",
+  "runtime": "GitHub Pages + GitHub Actions Daily Engine + local Blog Factory prompt compiler",
   "defaultLanguage": "ko",
   "portableZip": "AI_COMPANY_OS_V7_ZERO_DEPENDENCY.zip",
   "publicProfileMode": true,
@@ -20,9 +20,22 @@
   "promptCompiler": "prompt-compiler.json",
   "blogFactory": {
     "enabled": true,
-    "presets": ["daily_one", "batch_three", "idea_bank", "free"],
+    "presets": [
+      "daily_topics",
+      "daily_one",
+      "batch_three",
+      "idea_bank",
+      "free"
+    ],
     "designBridge": true,
     "truthGuard": true,
-    "creator10": true
+    "creator10": true,
+    "dailyEngine": {
+      "enabled": true,
+      "output": "../data/daily-topics.json",
+      "topicCount": 10,
+      "topCount": 3,
+      "scheduler": "GitHub Actions"
+    }
   }
 }

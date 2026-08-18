@@ -477,39 +477,59 @@ test('result checkpoints survive a same-tab reload without restoring into an emp
   await expect(page.locator('#checkpointList [data-checkpoint-id]')).toHaveCount(1);await expect(page.locator('#checkpointList [data-checkpoint-action="restore"]')).toBeDisabled();await expect(page.locator('#checkpointList [data-checkpoint-action="copy"]')).toBeEnabled();
 });
 
-test('AI writing OS compiles a concise provider-neutral execution prompt without dumping full OS files', async ({ page }) => {
+test('Blog Factory Daily Engine renders generated topics and sends a selected topic to daily-one', async ({ page }) => {
+  const date=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+  const topics=Array.from({length:10},(_,i)=>({
+    id:`topic-${String(i+1).padStart(2,'0')}`,rank:i+1,top3:i<3,title:`자동 주제 ${i+1}`,category:i<3?'시즌형':'에버그린',
+    whyNow:`오늘 추천 이유 ${i+1}`,searchIntent:`검색 의도 ${i+1}`,angle:`차별화 각도 ${i+1}`,researchNeed:`확인할 자료 ${i+1}`,imageConcept:`이미지 콘셉트 ${i+1}`,priorityScore:95-i
+  }));
+  await page.route('**/ai-cleaner/data/daily-topics.json*',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({schemaVersion:1,status:'ready',date,timezone:'Asia/Seoul',generatedAtLocal:`${date}T06:20:00+09:00`,model:'test-model',engine:'github-actions-openai-responses',webSearchUsed:true,summary:'오늘 테스트 주제 10개',topics})}));
+  await gotoReady(page);await page.locator('[data-tool="writing"]').click();
+  await expect(page.locator('#osDailyEngineStatus')).toHaveText('오늘 10개 준비');
+  await expect(page.locator('#osDailyTopics .osDailyTopic')).toHaveCount(10);
+  await expect(page.locator('#osDailyTopics .osDailyTopic.top3')).toHaveCount(3);
+  await expect(page.locator('#osDailyEngineMeta')).toContainText('웹 검색 사용');
+  await page.locator('[data-daily-topic-use="0"]').click();
+  await expect(page.locator('#osFactoryPresets [data-factory-mode="daily_one"]')).toHaveClass(/active/);
+  await expect(page.locator('#osTask')).toHaveValue(/자동 주제 1/);
+  await expect(page.locator('#osTask')).toHaveValue(/검색 의도: 검색 의도 1/);
+  await expect(page.locator('#osTask')).toHaveValue(/본문 전에 확인할 항목: 확인할 자료 1/);
+  await expect(page.locator('#osBuildPrompt')).toBeEnabled();
+});
+
+test('Blog Factory builds today topics prompt and never exposes provider launch controls', async ({ page }) => {
   await gotoReady(page);
   await page.locator('[data-tool="writing"]').click();
   await expect(page.locator('#writingTool')).toBeVisible();
   await expect(page.locator('#textTool')).toBeHidden();
   await expect(page.locator('#imageTool')).toBeHidden();
+  await expect(page.locator('[data-tool="writing"]')).toHaveText('블로그 팩토리');
   await expect(page.locator('#osStatus')).toContainText('V7');
-  await expect(page.locator('#osStaticMode')).toContainText('Prompt Compiler');
-  await expect(page.locator('#osProviders .osProvider')).toHaveCount(6);
-  await page.evaluate(()=>{window.open=()=>({closed:false});});
-  await page.locator('#osTask').fill('Apple Vision Pro 배터리 팁으로 네이버 블로그 글 써줘. 제공하지 않은 체험은 만들지 마.');
-  await page.locator('#osSendEnhanced').click();
-  await expect(page.locator('#osRouteSummary')).toContainText('분류: 블로그');
-  await expect(page.locator('#osRouteSummary')).toContainText('CREATOR_10');
+  await expect(page.locator('#osStaticMode')).toContainText('Actions Daily Engine');
+  await expect(page.locator('#osFactoryPresets [data-factory-mode="daily_topics"]')).toHaveClass(/active/);
+  await expect(page.locator('#osProviders')).toHaveCount(0);
+  await expect(page.locator('#osOpenAi')).toHaveCount(0);
+  await expect(page.locator('#osSendRaw')).toHaveCount(0);
+  await page.locator('#osTask').fill('육아 · 아이와 갈 곳 · 생활정보 · 주말 나들이');
+  await page.locator('#osBuildPrompt').click();
   await expect(page.locator('#osTaskPackResult')).toBeVisible();
-  await expect(page.locator('#osCompilerSummary')).toContainText('Creator-10');
-  await expect(page.locator('#osTaskPackPreview')).toHaveValue(/# AI CLEANER OS — EXECUTION PROMPT/);
-  await expect(page.locator('#osTaskPackPreview')).toHaveValue(/네이버 블로그 전용 규칙/);
-  await expect(page.locator('#osTaskPackPreview')).toHaveValue(/BLOG FACTORY/);
-  await expect(page.locator('#osTaskPackPreview')).toHaveValue(/이미지 제작 계약/);
-  await expect(page.locator('#osTaskPackPreview')).toHaveValue(/사용자가 명시하지 않은 구매, 사용, 방문, 가족 반응, 체감 효과/);
+  await expect(page.locator('#osReadyMessage')).toContainText('오늘의 주제 발굴 프롬프트');
+  await expect(page.locator('#osCompilerSummary')).toContainText('주제 10개 + TOP 3');
+  await expect(page.locator('#osTaskPackPreview')).toHaveValue(/# BLOG FACTORY — TODAY TOPIC PROMPT/);
+  await expect(page.locator('#osTaskPackPreview')).toHaveValue(/오늘의 탐색 각도/);
+  await expect(page.locator('#osTaskPackPreview')).toHaveValue(/완성 본문은 쓰지 말고 오늘 작성 후보 10개/);
+  await expect(page.locator('#osTaskPackPreview')).toHaveValue(/TOP 3/);
   await expect(page.locator('#osTaskPackPreview')).not.toHaveValue(/===== 00_OPEN_FIRST\.md =====/);
   await expect(page.locator('#osTaskPackPreview')).not.toHaveValue(/===== 07_STATE_AND_UPDATE\.md =====/);
 });
 
-test('AI writing OS keeps its task state separate from text cleaner and survives tool round trips', async ({ page }) => {
+test('Blog Factory keeps its task state separate from text cleaner and survives tool round trips', async ({ page }) => {
   await page.setViewportSize({width:390,height:844});
   await gotoReady(page);
-  const source='글 다듬기 쪽 원본은 AI 글쓰기 OS와 별개로 유지되어야 합니다.';
+  const source='글 다듬기 쪽 원본은 블로그 팩토리와 별개로 유지되어야 합니다.';
   await page.locator('#input').fill(source);
   await page.locator('[data-tool="writing"]').click();
-  await expect(page.locator('#writingTool')).toBeVisible();
-  await page.locator('#osTask').fill('이 제품 인스타 콘텐츠 만들어줘');
+  await page.locator('#osTask').fill('육아 · 아이와 갈 곳 · 생활정보');
   await page.locator('#osAdvancedSettings > summary').click();
   await page.locator('#osDisplayName').fill('로컬 테스트');
   await page.locator('#osPreferences').fill('문체: 자연스럽게\n이모지: 적게');
@@ -517,7 +537,7 @@ test('AI writing OS keeps its task state separate from text cleaner and survives
   await page.locator('[data-tool="image"]').click();
   await expect(page.locator('#imageTool')).toBeVisible();
   await page.locator('[data-tool="writing"]').click();
-  await expect(page.locator('#osTask')).toHaveValue('이 제품 인스타 콘텐츠 만들어줘');
+  await expect(page.locator('#osTask')).toHaveValue('육아 · 아이와 갈 곳 · 생활정보');
   await expect(page.locator('#osDisplayName')).toHaveValue('로컬 테스트');
   await page.locator('[data-tool="text"]').click();
   await expect(page.locator('#input')).toHaveValue(source);
@@ -526,112 +546,87 @@ test('AI writing OS keeps its task state separate from text cleaner and survives
   expect(Math.max(...navRows.children.map(r=>r.right))-Math.min(...navRows.children.map(r=>r.left))).toBeLessThanOrEqual(navRows.w+1);
 });
 
-test('AI writing OS one-action compiler flow stays simple on mobile', async ({ page }) => {
+test('Blog Factory copy-first flow stays simple on mobile', async ({ page }) => {
   await page.setViewportSize({width:390,height:844});
   await gotoReady(page);await page.locator('[data-tool="writing"]').click();
-  await expect(page.locator('#writingTool')).toBeVisible();
-  await expect(page.locator('.osSimpleSteps')).toContainText('생산 모드');
-  await expect(page.locator('.osSimpleSteps')).toContainText('주제·사실');
-  await expect(page.locator('.osSimpleSteps')).toContainText('내 AI');
-  await expect(page.locator('.osSimpleSteps')).toContainText('생산 시작');
-  await expect(page.locator('#osFactoryPresets [data-factory-mode="daily_one"]')).toHaveClass(/active/);
-  expect(await page.locator('#osAdvancedSettings').evaluate(el=>el.open)).toBe(false);
-  await expect(page.locator('#osSendEnhanced')).toBeDisabled();
-  await expect(page.locator('#osSendRaw')).toBeDisabled();
-  await expect(page.locator('#osProviders .osProvider.active')).toHaveText('ChatGPT');
-  await expect(page.locator('#osProviderHint')).toContainText('ChatGPT 선택됨');
-  await expect(page.locator('#osDeliveryTitle')).toContainText('PC 연결');
-  await expect(page.locator('#osSendEnhancedLabel')).toContainText('ChatGPT 열기');
-  await page.locator('#osTask').fill('부산 아이와 가볼만한곳 키워드로 자연스러운 네이버 블로그 글 써줘.');
-  await expect(page.locator('#osSendEnhanced')).toBeEnabled();
-  await expect(page.locator('#osSendRaw')).toBeEnabled();
-  await page.evaluate(()=>{window.open=()=>({closed:false});});
-  await page.locator('#osSendEnhanced').click();
+  await expect(page.locator('.osSimpleSteps')).toContainText('자동 주제');
+  await expect(page.locator('.osSimpleSteps')).toContainText('하나 선택');
+  await expect(page.locator('.osSimpleSteps')).toContainText('글 프롬프트');
+  await expect(page.locator('.osSimpleSteps')).toContainText('복사');
+  await expect(page.locator('#osBuildPrompt')).toBeDisabled();
+  await expect(page.locator('#osCopyPack')).toBeDisabled();
+  await page.locator('#osTask').fill('아이와 주말 나들이 · 실내 체험 · 생활정보');
+  await expect(page.locator('#osBuildPrompt')).toBeEnabled();
+  await page.locator('#osBuildPrompt').click();
   await expect(page.locator('#osTaskPackResult')).toBeVisible();
-  await expect(page.locator('#osReadyMessage')).toContainText('ChatGPT');
-  await expect(page.locator('#osAppliedChips span')).toHaveCount(6);
-  await expect(page.locator('#osAfterSend')).toContainText('붙여넣기');
+  await expect(page.locator('#osTaskPackPreview')).toBeVisible();
   await expect(page.locator('#osCopyPack')).toBeEnabled();
-  await expect(page.locator('#osOpenAi')).toBeEnabled();
+  await expect(page.locator('#osAfterSend')).toContainText('직접 선택');
   expect(await page.locator('#osAdvancedSettings').evaluate(el=>el.open)).toBe(false);
 });
 
-test('AI writing OS shows an honest mobile share plan and sends the compiled prompt through the system share path', async ({ page }) => {
-  await page.setViewportSize({width:390,height:844});
-  await gotoReady(page);
-  await page.evaluate(()=>{
-    Object.defineProperty(navigator,'maxTouchPoints',{configurable:true,value:1});
-    Object.defineProperty(navigator,'share',{configurable:true,value:async payload=>{window.__osSharedPayload=payload;}});
-  });
-  await page.locator('[data-tool="writing"]').click();
-  await expect(page.locator('#osDeliveryTitle')).toContainText('모바일 연결');
-  await expect(page.locator('#osDeliveryHint')).toContainText('ChatGPT 앱을 선택하세요');
-  await expect(page.locator('#osDeliveryHint')).toContainText('강제로 열지는 않습니다');
-  await expect(page.locator('#osSendEnhancedLabel')).toHaveText('OS로 강화해서 공유하기');
-  await page.locator('#osFactoryPresets [data-factory-mode="free"]').click();
-  await page.locator('#osTask').fill('회의 내용을 한 페이지 보고서로 정리해줘.');
-  await page.locator('#osSendEnhanced').click();
-  await expect(page.locator('#osReadyMessage')).toContainText('시스템 공유');
-  const shared=await page.evaluate(()=>window.__osSharedPayload);
-  expect(shared.text).toContain('# AI CLEANER OS — EXECUTION PROMPT');
-  expect(shared.text).toContain('회의 내용을 한 페이지 보고서로 정리해줘.');
-});
-
-
-test('AI writing OS copies before opening AI inside KakaoTalk-style in-app browsers', async ({ page }) => {
-  await page.setViewportSize({width:390,height:844});
-  await gotoReady(page);
-  await page.evaluate(()=>{
-    Object.defineProperty(navigator,'userAgent',{configurable:true,value:'Mozilla/5.0 Linux Android KAKAOTALK 25.5.0'});
-    Object.defineProperty(navigator,'share',{configurable:true,value:undefined});
-    window.__osDeliveryEvents=[];
-    document.execCommand=command=>{if(command==='copy'){window.__osDeliveryEvents.push('copy');return true;}return false;};
-    window.open=()=>{window.__osDeliveryEvents.push('open');return{closed:false};};
-  });
-  await page.locator('[data-tool="writing"]').click();
-  await expect(page.locator('#osDeliveryTitle')).toContainText('인앱 브라우저 안전 연결');
-  await expect(page.locator('#osDeliveryHint')).toContainText('복사가 막히면 AI를 열지 않고');
-  await page.locator('#osTask').fill('카카오톡 브라우저 전달 순서를 확인해줘.');
-  await page.locator('#osSendEnhanced').click();
-  expect(await page.evaluate(()=>window.__osDeliveryEvents)).toEqual(['copy','open']);
-  await expect(page.locator('#osReadyMessage')).toContainText('ChatGPT');
-});
-
-test('AI writing OS does not open AI when every clipboard path is blocked', async ({ page }) => {
-  await page.setViewportSize({width:390,height:844});
-  await gotoReady(page);
-  await page.evaluate(()=>{
-    Object.defineProperty(navigator,'userAgent',{configurable:true,value:'Mozilla/5.0 Linux Android KAKAOTALK 25.5.0'});
-    Object.defineProperty(navigator,'share',{configurable:true,value:undefined});
-    Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('clipboard blocked');}}});
-    window.__osOpenCount=0;
-    document.execCommand=()=>false;
-    window.open=()=>{window.__osOpenCount++;return{closed:false};};
-  });
-  await page.locator('[data-tool="writing"]').click();
-  await page.locator('#osTask').fill('복사가 막혔을 때 안전하게 멈춰줘.');
-  await page.locator('#osSendEnhanced').click();
-  expect(await page.evaluate(()=>window.__osOpenCount)).toBe(0);
-  await expect(page.locator('#osReadyMessage')).toContainText('자동 복사가 차단');
-  await expect(page.locator('#osAfterSend')).toContainText('직접 복사');
-  await expect(page.locator('#osTaskPackPreview')).toBeFocused();
-});
-
-test('AI writing OS invalidates a compiled prompt when provider mode or profile changes', async ({ page }) => {
-  await gotoReady(page);await page.locator('[data-tool="writing"]').click();await page.evaluate(()=>{window.open=()=>({closed:false});});
-  await page.locator('#osFactoryPresets [data-factory-mode="free"]').click();
-  await page.locator('#osTask').fill('이 제품 인스타 콘텐츠를 만들어줘.');await page.locator('#osSendEnhanced').click();await expect(page.locator('#osTaskPackResult')).toBeVisible();
-  await page.locator('#osProviders [data-provider="claude"]').click();await expect(page.locator('#osTaskPackResult')).toBeHidden();await page.locator('#osSendEnhanced').click();await expect(page.locator('#osReadyMessage')).toContainText('Claude');
-  await page.locator('#osAdvancedSettings > summary').click();await page.locator('#osMode').selectOption('quick');await expect(page.locator('#osTaskPackResult')).toBeHidden();await page.locator('#osSendEnhanced').click();await expect(page.locator('#osTaskPackResult')).toBeVisible();
-  await page.locator('#osDisplayName').fill('새 프로필');await expect(page.locator('#osTaskPackResult')).toBeHidden();await expect(page.locator('#osSendEnhanced')).toBeEnabled();
-});
-
-test('AI writing OS remembers the selected AI and keeps the original two tools untouched after reload', async ({ page }) => {
+test('Blog Factory switches pipeline semantics across topic and production modes', async ({ page }) => {
   await gotoReady(page);await page.locator('[data-tool="writing"]').click();
-  await page.locator('#osProviders [data-provider="claude"]').click();await expect(page.locator('#osProviders .osProvider.active')).toHaveText('Claude');
+  await expect(page.locator('#osFactoryPipeline')).toContainText('TOP 3');
+  await expect(page.locator('#osImageCount')).toBeDisabled();
+  await page.locator('#osFactoryPresets [data-factory-mode="idea_bank"]').click();
+  await expect(page.locator('#osImageCount')).toBeDisabled();
+  await expect(page.locator('#osFactoryPipeline')).toContainText('20개 정렬');
+  await expect(page.locator('#osFactoryPipeline')).toContainText('다음 7일');
+  await page.locator('#osTask').fill('육아와 주말 나들이 쪽에서 다음 20개 소재를 비축');
+  await page.locator('#osBuildPrompt').click();
+  await expect(page.locator('#osTaskPackPreview')).toHaveValue(/완성 이미지 패키지는 만들지 않는다/);
+  await expect(page.locator('#osTaskPackPreview')).not.toHaveValue(/- 이미지 5장 패키지/);
+  await page.locator('#osFactoryPresets [data-factory-mode="free"]').click();
+  await expect(page.locator('#osFactoryPipeline')).toContainText('목표·형식');
+  await expect(page.locator('#osFactoryPipeline')).toContainText('직접 사용');
+  await page.locator('#osFactoryPresets [data-factory-mode="daily_one"]').click();
+  await expect(page.locator('#osImageCount')).toBeEnabled();
+  await expect(page.locator('#osFactoryPipeline')).toContainText('Creator-10');
+});
+
+test('Blog Factory invalidates a built prompt when mode profile or seed changes', async ({ page }) => {
+  await gotoReady(page);await page.locator('[data-tool="writing"]').click();
+  await page.locator('#osTask').fill('생활정보 · 육아 · 주말 나들이');
+  await page.locator('#osBuildPrompt').click();await expect(page.locator('#osTaskPackResult')).toBeVisible();
+  await page.locator('#osFactoryPresets [data-factory-mode="daily_one"]').click();await expect(page.locator('#osTaskPackResult')).toBeHidden();
+  await page.locator('#osBuildPrompt').click();await expect(page.locator('#osTaskPackResult')).toBeVisible();
+  await page.locator('#osAdvancedSettings > summary').click();
+  await page.locator('#osMode').selectOption('quick');await expect(page.locator('#osTaskPackResult')).toBeHidden();
+  await page.locator('#osBuildPrompt').click();await expect(page.locator('#osTaskPackResult')).toBeVisible();
+  await page.locator('#osDisplayName').fill('새 프로필');await expect(page.locator('#osTaskPackResult')).toBeHidden();
+  await page.locator('#osTask').fill('완전히 다른 관심 분야');await expect(page.locator('#osTaskPackResult')).toBeHidden();
+});
+
+test('Blog Factory daily auto preparation persists seed and restores same-day prompt', async ({ page }) => {
+  await gotoReady(page);await page.locator('[data-tool="writing"]').click();
+  await page.locator('#osTask').fill('육아 · 아이와 갈 곳 · 생활정보');
+  await page.locator('#osAutoDaily').check();
+  await expect(page.locator('#osTaskPackResult')).toBeVisible();
+  await expect(page.locator('#osAutoDailyStatus')).toContainText('오늘 프롬프트가 이미 준비');
+  const firstPrompt=await page.locator('#osTaskPackPreview').inputValue();
+  expect(firstPrompt).toContain('오늘의 탐색 각도');
   await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>window.__AI_CLEANER_APP_READY__===true&&!!window.AICleanerApp,{timeout:15000});
-  await page.locator('[data-tool="writing"]').click();await expect(page.locator('#osProviders .osProvider.active')).toHaveText('Claude');
-  await page.locator('[data-tool="text"]').click();await expect(page.locator('#textTool')).toBeVisible();
-  await page.locator('[data-tool="image"]').click();await expect(page.locator('#imageTool')).toBeVisible();
+  await page.locator('[data-tool="writing"]').click();
+  await expect(page.locator('#osTask')).toHaveValue('육아 · 아이와 갈 곳 · 생활정보');
+  await expect(page.locator('#osAutoDaily')).toBeChecked();
+  await expect(page.locator('#osTaskPackResult')).toBeVisible();
+  await expect(page.locator('#osTaskPackPreview')).toHaveValue(firstPrompt);
+});
+
+test('Blog Factory copy fallback never opens a provider and selects prompt when clipboard is blocked', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});
+  await gotoReady(page);
+  await page.evaluate(()=>{
+    Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('clipboard blocked');}}});
+    document.execCommand=()=>false;
+    window.__openCount=0;window.open=()=>{window.__openCount++;return{closed:false};};
+  });
+  await page.locator('[data-tool="writing"]').click();
+  await page.locator('#osTask').fill('생활정보 · 정리수납 · 절약');
+  await page.locator('#osBuildPrompt').click();
+  await page.locator('#osCopyPack').click();
+  expect(await page.evaluate(()=>window.__openCount)).toBe(0);
+  await expect(page.locator('#osTaskPackPreview')).toBeFocused();
 });
 

@@ -1,6 +1,6 @@
 {
-  "version": "1.8.5",
-  "assetVersion": "185",
+  "version": "1.8.8",
+  "assetVersion": "188",
   "channel": "stable",
-  "updateMode": "ai-writing-os-blog-factory-v7"
+  "updateMode": "blog-factory-github-actions-daily-engine-v7"
 }

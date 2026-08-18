@@ -1,0 +1,98 @@
+name: Daily Blog Factory + GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '20 6 * * *'
+      timezone: 'Asia/Seoul'
+  workflow_dispatch:
+    inputs:
+      generate_topics:
+        description: '오늘의 주제를 새로 생성한 뒤 배포'
+        required: false
+        default: true
+        type: boolean
+
+concurrency:
+  group: pages-blog-factory
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Generate today's blog topics
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.generate_topics)
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+          BLOG_FACTORY_SEED: ${{ vars.BLOG_FACTORY_SEED }}
+          BLOG_FACTORY_AUDIENCE: ${{ vars.BLOG_FACTORY_AUDIENCE }}
+          BLOG_FACTORY_AVOID_TOPICS: ${{ vars.BLOG_FACTORY_AVOID_TOPICS }}
+        run: node .github/scripts/generate-daily-topics.mjs
+
+      - name: Persist generated daily topics
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.generate_topics)
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ai-cleaner/data/daily-topics.json
+          if git diff --cached --quiet; then
+            echo 'Daily topics are unchanged; no commit needed.'
+          else
+            DATE_KST="$(TZ=Asia/Seoul date +%F)"
+            git commit -m "chore: update daily blog topics ${DATE_KST} [skip ci]"
+            git push
+          fi
+
+      - name: JavaScript syntax checks
+        run: |
+          node --check .github/scripts/generate-daily-topics.mjs
+          node --check ai-cleaner/js/features/ai-writing-os.js
+          node --check ai-cleaner/tests/static-check.mjs
+          node --check ai-cleaner/tests/module-check.mjs
+
+      - name: Blog Factory static checks
+        run: |
+          node ai-cleaner/tests/module-check.mjs
+          node ai-cleaner/tests/static-check.mjs
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: '.'
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,6 +1,6 @@
 # AI Cleaner 프로젝트 인수인계 메모리
 
-업데이트: 2026-08-18 · 현재 패키지: 1.8.5
+업데이트: 2026-08-18 · 현재 패키지: 1.8.8
 
 ## 새 채팅에서 가장 먼저 읽을 것
 이 폴더를 새 채팅에 업로드한 뒤 `PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md 읽고 이어서 개발하자`라고 요청한다. 이 문서는 프로젝트의 결정사항, 보호 경로, UX 방향, 안전 제약, 배포 방식, 알려진 이슈를 보존하기 위한 인수인계 메모리다.
@@ -9,8 +9,8 @@
 - GitHub: `junl-im/meta`
 - GitHub Pages 루트: `https://junl-im.github.io/meta/`
 - 루트 `index.html`은 `./ai-cleaner/`로 진입시킨다.
-- Pages Build and deployment는 **Branch 방식(main / root)** 을 유지한다. Actions로 Pages 배포 방식으로 바꾸지 않는다.
-- `.github/workflows/ai-cleaner-ci.yml`은 배포가 아니라 검사 전용이다.
+- Pages Build and deployment는 **Source = GitHub Actions** 를 사용한다. 1.8.8부터 `.github/workflows/daily-blog-factory-pages.yml`이 일반 push 배포와 Daily Engine 예약 생성/배포를 함께 담당한다.
+- `.github/workflows/ai-cleaner-ci.yml`은 별도의 검사 전용 CI로 유지한다.
 - **`OPTION/**`은 다른 서비스가 사용하는 보호 경로. 어떤 경우에도 수정/이동/삭제/rename 금지.**
 
 ## 사용자의 작업 방식
@@ -73,9 +73,27 @@
 - 앱은 version.json을 no-store로 확인해 새 버전 발견 시 cache-busting query로 재진입한다.
 
 ## CI
-- `.github/workflows/ai-cleaner-ci.yml`: checkout@v7, setup-node@v6, Node 24.
-- JS syntax, static-check, OPTION 보호를 검사한다.
-- 2026-08-14 v6.5.1 기준 Actions와 Pages 둘 다 Success 확인됨.
+- `.github/workflows/ai-cleaner-ci.yml`: 기존 검사 전용 CI. JS syntax, static-check, OPTION 보호, browser smoke를 유지한다.
+- `.github/workflows/daily-blog-factory-pages.yml`: 1.8.8 Pages 배포 + 예약 Daily Engine.
+- 두 workflow의 역할을 섞지 말고, Pages Source는 GitHub Actions로 둔다.
+
+## 1.8.8 GitHub Actions Daily Engine
+- Daily Engine은 **GitHub Pages + GitHub Actions** 전용이다. Netlify/serverless provider 의존 코드를 넣지 않는다.
+- `.github/workflows/daily-blog-factory-pages.yml`은 `main` push 시 Pages만 배포하고, 매일 `06:20 Asia/Seoul` schedule 또는 수동 `workflow_dispatch` 시에만 실제 오늘의 주제를 생성한다.
+- generator는 `OPENAI_API_KEY` Actions Secret과 `BLOG_FACTORY_SEED` Actions Variable을 사용한다. 비밀키를 HTML/JS/JSON에 넣지 않는다.
+- 생성 결과는 `ai-cleaner/data/daily-topics.json`에 정확히 10개를 저장하고 상위 3개를 TOP 3로 표시한다. 선택한 주제는 기존 `오늘 1편` 프롬프트 빌더로 전달한다.
+- scheduled run에서 JSON을 커밋한 뒤 **같은 workflow 실행에서 Pages artifact를 업로드/배포**한다. workflow bot의 push가 별도 Pages workflow 재실행에 의존하지 않도록 한다.
+- `로컬 프롬프트 자동 준비`는 1.8.7 기능을 보조 기능으로 유지한다. 이것은 브라우저가 닫힌 동안 원격 AI를 실행하지 않으며 Daily Engine과 구분한다.
+- 최초 전환: GitHub `Settings → Pages → Build and deployment → Source → GitHub Actions`, Actions Secret/Variables 설정 후 `Daily Blog Factory + GitHub Pages`를 한 번 수동 실행한다.
+- 2026-08-18 연결된 `junl-im/meta` 원격 `main`은 아직 1.8.5로 확인되었으므로 1.8.8 Patch는 **1.8.5 → 1.8.8 누적 패치**로 배포한다. 1.8.6/1.8.7 로컬본 위에 덮어써도 동일한 1.8.8 결과가 나와야 한다.
+
+## 1.8.7 블로그 팩토리 copy-first 리뉴얼
+- 세 번째 메뉴명을 `AI 글쓰기 OS`에서 `블로그 팩토리`로 변경. 앞의 `글 다듬기`/`이미지 검사` UI와 엔진은 보호한다.
+- 기본 흐름은 `관심 분야/주제 씨앗 → 오늘의 주제 프롬프트 만들기 → 화면 확인 → 프롬프트 복사`. provider 선택, AI 새 탭 열기, 시스템 공유, 원문 보내기 경로는 제거한다.
+- 기본 모드는 `오늘의 주제`: 완성 본문 대신 후보 10개 + TOP 3 + 확인 필요 사실 + 이미지 콘셉트를 요청한다. `소재 20개`도 완성 본문/고정 이미지 패키지를 만들지 않는다.
+- `매일 자동 준비`는 opt-in 로컬 자동화다. 관심 분야를 저장하고 새 날짜에 사용자가 앱을 열었을 때 그날용 프롬프트를 준비한다. 앱이 닫힌 동안 AI를 실행했다고 주장하지 않는다.
+- 오늘 프롬프트 캐시는 자동 준비 opt-in일 때만 저장하며, 임시 `실제 경험/사실`·`중복 방지 메모`가 있으면 캐시하지 않는다. 프로필/독자/조사 설정/주제 씨앗이 바뀌면 signature 불일치로 같은 날 캐시도 폐기한다.
+- 완전 무인 일일 생성은 정적 Pages에 비밀키를 넣지 말고, 향후 서버 스케줄러 + 서버 측 AI API + 지속 저장소 계층으로 분리한다.
 
 ## 다음 개선 후보
 - PDF/DOCX 안전한 로컬 파일 import.
@@ -545,3 +563,14 @@
 - 자연스러움 목표는 detector 우회가 아니라 독자 가독성/브랜드 문체/사실 보존. detector 점수 최적화는 계속 금지한다.
 - 생산 기본값(mode/blog type/audience/research/image count)은 localStorage에 저장. 실제 경험/피할 소재는 작업값이며 기본 설정으로 영구 저장하지 않는다.
 - V7 전체 ZIP은 `ai-cleaner/ai-writing-os/os/releases/AI_COMPANY_OS_V7_ZERO_DEPENDENCY.zip`.
+
+
+## v1.8.6 AI 글쓰기 OS 안정화 패치
+- 기준선은 실제 전달된 `AI_Cleaner_1_8_5_FULL_PROJECT_HANDOFF.zip`. 앞의 `글 다듬기` / `이미지 검사` 엔진과 공통 core/service/UI는 변경하지 않는다.
+- `소재 20개` 모드에서 남아 있던 고정 `이미지 N장 패키지` 표현 충돌을 제거했다. 이 모드는 이미지 장수 선택을 비활성화하고 각 소재별 이미지 콘셉트만 제안한다.
+- 생산 단계 UI는 모드별로 실제 흐름을 표시한다: daily/batch는 소재→조사→글→자연화→이미지→검수, idea bank는 소재→조사→각도→우선순위→이미지 콘셉트→7일 큐, free는 요청→분류→규칙→강화→전달→실행.
+- update draft나 오래된 local state에서 복원되는 provider ID는 현재 provider registry에 존재하는 값만 적용한다. 잘못된 ID로 인해 활성 AI가 화면에서 사라지는 상태를 막는다.
+- 독자 설명 500자, 실제 사실/경험 80,000자, 중복 방지 메모 80,000자 상한을 추가했다. free mode는 이전 factory 보조값 때문에 막히지 않는다.
+- `선택 AI 열기` 복구 버튼의 안내 문구는 실제 복사 여부를 전제로 하지 않도록 수정했다.
+- CSS는 기존 계통을 유지하며 factory disabled 상태와 reduced-motion hover만 보강했다.
+- 신규 회귀 검사는 idea-bank 이미지 계약, mode-aware pipeline, context bounds, restored provider validation을 포함한다.

@@ -1,12 +1,12 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.8.5",
+  "version": "1.8.8",
   "date": "2026-08-18",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
   "appPath": "ai-cleaner/",
   "defaultBranch": "main",
-  "deployment": "GitHub Pages branch deployment from main/root",
+  "deployment": "GitHub Pages custom workflow via GitHub Actions (main repository content + scheduled Daily Engine)",
   "protectedPaths": [
     "OPTION/**"
   ],
@@ -44,15 +44,18 @@
     "ai-cleaner/js/features/ai-writing-os.js",
     "ai-cleaner/ai-writing-os/os-manifest.json",
     "ai-cleaner/ai-writing-os/providers.json",
-    "ai-cleaner/ai-writing-os/prompt-compiler.json"
+    "ai-cleaner/ai-writing-os/prompt-compiler.json",
+    ".github/workflows/daily-blog-factory-pages.yml",
+    ".github/scripts/generate-daily-topics.mjs",
+    "ai-cleaner/data/daily-topics.json"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.8.5",
-  "asset_version": "185",
+  "current_version": "1.8.8",
+  "asset_version": "188",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.8.5 AI Writing OS renewal: AI Company OS V7 Blog Factory presets, topic/research/article/naturalness/image/final-gate production pipeline, persisted factory defaults, and honest web/image capability boundaries; text/image tools preserved",
+  "latestPatch": "1.8.8 Daily Engine: scheduled OpenAI topic generation, persisted daily-topics.json, same-run GitHub Pages deployment, and in-app topic cards; text/image tools preserved",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -77,7 +80,8 @@
     "patchIncludesOnlyChangedFiles": true,
     "protectedPathsExcluded": [
       "OPTION/**"
-    ]
+    ],
+    "patchBaseline": "GitHub-visible 1.8.5 cumulative patch to 1.8.8; also safe to overlay on 1.8.6/1.8.7"
   },
   "internalTypewriter": {
     "source": "visible-text projection of original",
@@ -131,7 +135,7 @@
     "breakpointExpansionReset": true,
     "safeAreaViewportFitCover": true
   },
-  "nextPhase": "1.8.6 Blog Factory result return/import workflow or optional serverless automation after 1.8.5 device/browser validation",
+  "nextPhase": "1.8.9 Daily Engine result-to-article queue / generated article package workflow after first real GitHub Actions run",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -196,7 +200,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "185",
+  "assetVersion": "188",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -205,15 +209,17 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "229 passed / 0 failed",
-    "moduleChecks": "PASS — 1.8.5 Blog Factory + copy-first delivery unit checks",
-    "jsSyntax": "PASS — app/image/rewrite/AI Writing OS",
-    "workflowYaml": "PASS — unchanged from 1.8.4",
-    "json": "PASS — version/manifest/compiler/project state parsed",
-    "protectedToolIntegrity": "PASS — existing text cleaner + image analyzer/core/service/UI hashes unchanged; pre-writing HTML unchanged; CSS only appended with OS-scoped block",
-    "localBrowserSmoke": "ENVIRONMENT-LIMITED — Playwright dependency/browser is not installed in this build container; 46 Chromium E2E cases remain configured for GitHub Actions/local npm install",
-    "browserE2EConfigured": "46 cases including 1.8.5 Blog Factory mobile/preset/compiler coverage plus KakaoTalk-style copy-before-open and clipboard-failure no-open regressions",
-    "latestVisibleGitHubBaseline": "1.8.5 pending user push / GitHub Actions browser-smoke"
+    "staticChecks": "234 passed / 0 failed",
+    "moduleChecks": "PASS — 1.8.8 Blog Factory GitHub Actions Daily Engine + local prompt builder unit checks",
+    "jsSyntax": "PASS — 27 JS/MJS files",
+    "workflowYaml": "PASS — existing CI + Daily Engine workflow parse; Daily Engine contract covered by static checks",
+    "json": "PASS — all ai-cleaner and PROJECT_HANDOFF JSON parsed",
+    "mockedDailyGenerator": "PASS — Responses request, web_search, strict JSON schema, exactly 10 topics/TOP3, API secret not persisted",
+    "protectedToolIntegrity": "PASS — rewrite-studio/image-analyzer plus 17 core/service/UI modules SHA-identical to 1.8.5; textTool/imageTool HTML blocks exact; app.js only third-tool error-label wording changed",
+    "localBrowserSmoke": "ENVIRONMENT-LIMITED — curl preview succeeded but installed Chromium headless navigation hung in this container; repository browser-smoke remains final interactive gate",
+    "browserE2EConfigured": "46 cases including Daily Engine generated-topic transfer plus existing Blog Factory/text/image regressions",
+    "latestVisibleGitHubBaseline": "junl-im/meta main reports 1.8.5 before user applies this cumulative patch",
+    "patchRebuild": "PASS — GitHub-visible 1.8.5 + cumulative 23-file Patch and 1.8.7 + same Patch both reproduce the 1.8.8 full tree exactly"
   },
   "stabilityAudit131": {
     "updateOnlyWhenSemverNewer": true,
@@ -578,5 +584,62 @@
     "naturalnessGoal": "reader-natural Korean with factual integrity",
     "existingFreeRequestModePreserved": true,
     "portableOsZip": "AI_COMPANY_OS_V7_ZERO_DEPENDENCY.zip"
+  },
+  "aiWritingOs186": {
+    "scope": "AI Writing OS stabilization only; existing text cleaner and image analyzer/core/service/UI preserved",
+    "baseline": "1.8.5 delivered full project",
+    "ideaBankFixedImagePackage": false,
+    "ideaBankImageContract": "concept-only per topic; no fixed image count",
+    "modeAwarePipeline": true,
+    "restoredProviderValidated": true,
+    "contextLimits": {
+      "audience": 500,
+      "facts": 80000,
+      "avoidTopics": 80000
+    },
+    "freeModeIgnoresStaleFactoryContextLimits": true,
+    "aiOnlyRecoveryCopyClaimFixed": true,
+    "detectorEvasionOptimization": false
+  },
+  "aiWritingOs187": {
+    "scope": "third tool only; text cleaner and image analyzer engines preserved",
+    "menuName": "블로그 팩토리",
+    "defaultMode": "daily_topics",
+    "flow": [
+      "seed input",
+      "prompt build",
+      "visible preview",
+      "manual copy"
+    ],
+    "providerSelection": false,
+    "providerLaunch": false,
+    "nativeShareDelivery": false,
+    "dailyLocalAutomation": true,
+    "dailyAutomationTrigger": "first app open on a new local date",
+    "dailyAutomationRunsWhileBrowserClosed": false,
+    "remoteAiCalledByStaticPage": false,
+    "unattendedAutomationRequires": "server scheduler + server-side AI API + persistent storage",
+    "apiKeyInBrowser": false
+  },
+  "aiWritingOs188": {
+    "scope": "third tool Daily Engine integration; text cleaner and image analyzer engines preserved",
+    "menuName": "블로그 팩토리",
+    "scheduler": "GitHub Actions schedule + workflow_dispatch",
+    "schedule": {
+      "cron": "20 6 * * *",
+      "timezone": "Asia/Seoul"
+    },
+    "dailyOutput": "ai-cleaner/data/daily-topics.json",
+    "topicCount": 10,
+    "topCount": 3,
+    "remoteAi": "OpenAI Responses API",
+    "webSearchTool": true,
+    "apiKeyStorage": "GitHub Actions secret OPENAI_API_KEY",
+    "requiredVariable": "BLOG_FACTORY_SEED",
+    "providerLaunch": false,
+    "apiKeyInBrowser": false,
+    "sameWorkflowPagesDeploy": true,
+    "localPromptAutoPreparePreserved": true,
+    "localPromptAutoPrepareRunsWhileClosed": false
   }
 }

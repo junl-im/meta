@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>곰같은여우의 AI 흔적 지우개</title>
-<meta name="description" content="브라우저에서 로컬로 동작하는 AI 글 다듬기·이미지 출처 신호 검사·AI 글쓰기 OS 도구">
+<meta name="description" content="브라우저에서 로컬로 동작하는 AI 글 다듬기·이미지 출처 신호 검사·블로그 팩토리 도구">
 <meta name="theme-color" content="#fff8f0">
 <meta name="referrer" content="no-referrer">
 <style id="bootCritical">html:not(.boot-ready) body{visibility:hidden}html{background:#fff8f0}html.app-booting body{cursor:progress}html.app-booting body *{cursor:progress!important}</style>
@@ -69,7 +69,7 @@
     <div class="toolnav" aria-label="도구 전환">
       <button class="active" type="button" data-tool="text">AI 글 다듬기</button>
       <button type="button" data-tool="image">AI 이미지 검사</button>
-      <button type="button" data-tool="writing">AI 글쓰기 OS</button>
+      <button type="button" data-tool="writing">블로그 팩토리</button>
     </div>
   </div>
 </header>
@@ -252,102 +252,110 @@
 
 <main id="writingTool" class="hidden">
   <section class="hero osHero osSimpleHero osFactoryHero">
-    <div class="osHeroBadges"><span class="tag orange">AI 글쓰기 OS</span><span class="tag blue">BLOG FACTORY</span><span class="perfPill" id="osStatus">내 기기에서 준비 중…</span></div>
-    <h1>오늘 뭐 쓰지?부터 <span>글 · 이미지 패키지까지 한 번에.</span></h1>
-    <p>AI Company OS V7의 BLOG · DESIGN · Truth Guard를 한 흐름으로 묶었습니다. <b>소재 발굴 → 사실 확인 → 자연스러운 네이버 글 → 이미지 기획 → 최종 검수</b>를 실행 프롬프트 하나로 정리해 평소 쓰는 AI에 넘깁니다.</p>
-    <div class="osSimpleSteps osFactorySteps" aria-label="AI 글쓰기 OS 생산 순서">
-      <span><b>1</b> 생산 모드</span><span><b>2</b> 주제·사실</span><span><b>3</b> 내 AI</span><span><b>4</b> 생산 시작</span>
+    <div class="osHeroBadges"><span class="tag orange">블로그 팩토리</span><span class="tag blue">DAILY BLOG OS</span><span class="perfPill" id="osStatus">내 기기에서 준비 중…</span></div>
+    <h1>아침에 열면 오늘 주제가 준비되고, <span>고른 주제는 글 프롬프트로.</span></h1>
+    <p><b>GitHub Actions Daily Engine</b>이 매일 오늘의 주제를 만들고 Pages에 배포합니다. 자동 주제에서 하나를 고르면 아래 생산 도구로 바로 넘겨 <b>글 1편 · 3편 생산 · 소재 비축</b> 프롬프트를 만들고 복사할 수 있습니다.</p>
+    <div class="osSimpleSteps osFactorySteps" aria-label="블로그 팩토리 사용 순서">
+      <span><b>1</b> 자동 주제</span><span><b>2</b> 하나 선택</span><span><b>3</b> 글 프롬프트</span><span><b>4</b> 복사</span>
     </div>
   </section>
 
   <div class="osSimpleWorkspace">
+    <section class="card osCard osDailyEngineCard" id="osDailyEngineCard" aria-labelledby="osDailyEngineTitle">
+      <div class="head osDailyEngineHead">
+        <div><b id="osDailyEngineTitle"><span class="osStep">AUTO</span> 오늘 자동 주제</b><span class="sub">GitHub Actions가 매일 오전 6:20(Asia/Seoul)에 생성합니다.</span></div>
+        <span class="perfPill" id="osDailyEngineStatus">확인 중…</span>
+      </div>
+      <div class="body">
+        <div class="osDailyEngineSummary">
+          <div><span class="tag green">DAILY ENGINE</span><b id="osDailyEngineSummary">오늘의 자동 주제를 불러오고 있습니다.</b><small id="osDailyEngineMeta">Actions 설정 전에는 아래 수동 프롬프트 빌더를 그대로 사용할 수 있습니다.</small></div>
+          <button class="mini passive" id="osCopyDailyTopics" type="button" disabled>주제 10개 복사</button>
+        </div>
+        <div class="osDailyTopics" id="osDailyTopics" aria-live="polite"></div>
+        <div class="osDailyEngineEmpty" id="osDailyEngineEmpty" hidden>
+          <b>오늘 자동 생성된 주제가 아직 없습니다.</b>
+          <span>Repository의 <code>OPENAI_API_KEY</code> Secret과 <code>BLOG_FACTORY_SEED</code> Variable을 설정한 뒤 Actions에서 <b>Daily Blog Factory + GitHub Pages</b>를 한 번 수동 실행하세요.</span>
+        </div>
+      </div>
+    </section>
+
     <section class="card osCard osTaskCard osSimpleCard osFactoryCard">
-      <div class="head"><div><b><span class="osStep">1</span> 오늘 무엇을 생산할까요?</b><span class="sub">매일 쓰는 블로그 작업은 프리셋으로, 다른 글쓰기는 자유 요청으로 바로 전환할 수 있습니다.</span></div></div>
+      <div class="head"><div><b><span class="osStep">1</span> 오늘 무엇을 준비할까요?</b><span class="sub">가장 자주 쓰는 흐름은 ‘오늘의 주제’입니다. 관심 분야를 넓게 적어도 됩니다.</span></div></div>
       <div class="body">
         <div class="osFactoryPresets" id="osFactoryPresets" role="group" aria-label="블로그 생산 모드">
-          <button type="button" class="active" data-factory-mode="daily_one" aria-pressed="true"><b>오늘 1편</b><span>소재부터 완성본</span></button>
+          <button type="button" class="active" data-factory-mode="daily_topics" aria-pressed="true"><b>오늘의 주제</b><span>10개 후보 + TOP 3</span></button>
+          <button type="button" data-factory-mode="daily_one" aria-pressed="false"><b>오늘 1편</b><span>소재부터 완성본</span></button>
           <button type="button" data-factory-mode="batch_three" aria-pressed="false"><b>3편 생산</b><span>서로 다른 3개 패키지</span></button>
           <button type="button" data-factory-mode="idea_bank" aria-pressed="false"><b>소재 20개</b><span>다음 글감 비축</span></button>
-          <button type="button" data-factory-mode="free" aria-pressed="false"><b>자유 요청</b><span>기존 OS 방식</span></button>
+          <button type="button" data-factory-mode="free" aria-pressed="false"><b>자유 요청</b><span>원하는 작업</span></button>
         </div>
-        <div class="osFactoryModeSummary" id="osFactoryModeSummary" aria-live="polite"><b>오늘 1편</b><span>후보를 고르고 사실을 확인한 뒤 글 1편 + 이미지 패키지까지 만듭니다.</span></div>
+        <div class="osFactoryModeSummary" id="osFactoryModeSummary" aria-live="polite"><b>오늘의 주제</b><span>관심 범위에서 오늘 쓰기 좋은 주제 10개와 TOP 3를 뽑는 프롬프트를 만듭니다.</span></div>
 
-        <label class="osFieldLabel" for="osTask"><span><b id="osTaskLabel">주제 씨앗 / 관심 범위</b><small id="osTaskHint">정확한 제목이 없어도 됩니다. 예: 육아 · 아이와 갈 곳 · 생활 꿀팁 중 오늘 쓸 소재 찾아줘.</small></span></label>
-        <textarea id="osTask" class="osTask osFactoryTask" rows="7" aria-label="AI 글쓰기 OS 작업 요청" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" placeholder="예: 육아·아이와 갈 곳·생활정보 쪽에서 오늘 검색할 만한 소재를 찾아서 네이버 블로그 글 1편 만들어줘."></textarea>
+        <label class="osFieldLabel" for="osTask"><span><b id="osTaskLabel">관심 분야 / 오늘의 씨앗</b><small id="osTaskHint">정확한 제목이 없어도 됩니다. 한 번 저장해두면 매일 같은 관심 분야에서 다른 각도로 주제를 찾습니다.</small></span></label>
+        <textarea id="osTask" class="osTask osFactoryTask" rows="6" aria-label="블로그 팩토리 관심 분야 또는 작업 요청" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" placeholder="예: 육아 · 아이와 갈 곳 · 생활정보 · 주말 나들이"></textarea>
 
-        <div class="osFactoryGrid" aria-label="블로그 생산 옵션">
+        <div class="osFactoryGrid" role="group" aria-label="블로그 생산 옵션">
           <label><span>글 유형</span><select id="osBlogType" class="v6select"><option value="auto">자동 판단</option><option value="search_info">검색 정보형</option><option value="place_trip">장소 · 여행</option><option value="parenting_life">육아 · 생활</option><option value="product_info">제품 · 비교 정보형</option><option value="monetization">수익 연결형</option></select></label>
-          <label><span>독자</span><input id="osAudience" type="text" autocomplete="off" placeholder="예: 아이와 주말 나들이를 찾는 부모"></label>
+          <label><span>독자</span><input id="osAudience" type="text" autocomplete="off" maxlength="500" placeholder="예: 아이와 주말 나들이를 찾는 부모"></label>
           <label><span>최신 정보 조사</span><select id="osResearchMode" class="v6select"><option value="auto">필요할 때만</option><option value="required">가능하면 반드시 확인</option><option value="off">외부 조사 없이</option></select></label>
-          <label><span>이미지 패키지</span><select id="osImageCount" class="v6select"><option value="5">대표 1 + 본문 4</option><option value="3">대표 1 + 본문 2</option><option value="7">대표 1 + 본문 6</option><option value="0">이미지 제외</option></select></label>
+          <label><span>이미지 패키지</span><select id="osImageCount" class="v6select" disabled title="주제 발굴 모드에서는 고정 장수 대신 각 주제별 이미지 콘셉트를 제안합니다."><option value="5">대표 1 + 본문 4</option><option value="3">대표 1 + 본문 2</option><option value="7">대표 1 + 본문 6</option><option value="0">이미지 제외</option></select></label>
         </div>
 
         <details class="osFactoryContext" id="osFactoryContext">
           <summary>실제 경험 · 고정 사실 · 이미 쓴 소재 입력 <span>선택사항</span></summary>
           <div class="osFactoryContextBody">
-            <label><span><b>내가 실제로 아는 사실 / 경험</b><small>여기에 적은 내용만 1인칭 경험으로 써도 됩니다.</small></span><textarea id="osFacts" rows="4" spellcheck="false" placeholder="예: 지난 주말에 아이와 직접 방문함 / 주차는 2시간 이용 / 아이가 공룡 전시를 가장 오래 봄"></textarea></label>
-            <label><span><b>이미 쓴 제목 · 피하고 싶은 소재</b><small>중복 소재를 피할 때 참고합니다.</small></span><textarea id="osAvoidTopics" rows="4" spellcheck="false" placeholder="예: 지난주에 서울 실내동물원 글 작성 / 키즈카페 소재는 이번 주 제외"></textarea></label>
+            <label><span><b>내가 실제로 아는 사실 / 경험</b><small>여기에 적은 내용만 1인칭 경험으로 써도 됩니다.</small></span><textarea id="osFacts" rows="4" maxlength="80000" spellcheck="false" placeholder="예: 지난 주말에 아이와 직접 방문함 / 주차는 2시간 이용 / 아이가 공룡 전시를 가장 오래 봄"></textarea></label>
+            <label><span><b>이미 쓴 제목 · 피하고 싶은 소재</b><small>중복 주제를 피할 때 참고합니다.</small></span><textarea id="osAvoidTopics" rows="4" maxlength="80000" spellcheck="false" placeholder="예: 지난주에 서울 실내동물원 글 작성 / 키즈카페 소재는 이번 주 제외"></textarea></label>
           </div>
         </details>
 
-        <div class="osFactoryPipeline" aria-label="블로그 팩토리 생산 단계">
-          <span><b>소재</b><small>검색 의도·중복</small></span><i>→</i><span><b>조사</b><small>사실·출처</small></span><i>→</i><span><b>글</b><small>Creator-10</small></span><i>→</i><span><b>자연화</b><small>문체·리듬</small></span><i>→</i><span><b>이미지</b><small>생성/프롬프트</small></span><i>→</i><span><b>검수</b><small>Truth Guard</small></span>
+        <div class="osFactoryPipeline" id="osFactoryPipeline" aria-label="현재 생산 단계" aria-live="polite">
+          <span><b>소재</b><small>관심 범위</small></span><i>→</i><span><b>시기</b><small>오늘성</small></span><i>→</i><span><b>의도</b><small>검색 이유</small></span><i>→</i><span><b>각도</b><small>차별점</small></span><i>→</i><span><b>이미지</b><small>콘셉트</small></span><i>→</i><span><b>TOP 3</b><small>우선순위</small></span>
         </div>
 
-        <div class="osSimpleProviderBlock">
-          <div class="sectionMiniHead"><b><span class="osStep">2</span> 내 기본 AI</b><span class="sub" id="osProviderHint">사용하는 AI를 하나 고르세요. 이 브라우저에 기억됩니다.</span></div>
-          <div class="osProviders" id="osProviders" role="group" aria-label="내 기본 AI 선택"></div>
-          <div class="osDeliveryPlan" id="osDeliveryPlan" aria-live="polite">
-            <span class="osDeliveryMark" aria-hidden="true">↗</span>
-            <div><b id="osDeliveryTitle">현재 연결 방식</b><span class="sub osDeliveryHint" id="osDeliveryHint">환경에 맞는 가장 간단한 전달 방식을 사용합니다.</span></div>
-          </div>
+        <div class="osAutoDaily" id="osAutoDailyBox">
+          <label class="check osAutoDailyToggle"><input type="checkbox" id="osAutoDaily"> <b>로컬 프롬프트 자동 준비</b></label>
+          <div><b>관심 분야는 한 번만.</b><span class="sub" id="osAutoDailyStatus">꺼짐 · GitHub Daily Engine과 별개로, 이 브라우저에서 새 날짜 첫 실행 시 복사용 주제 프롬프트를 준비하는 보조 기능입니다.</span></div>
         </div>
 
-        <div class="osSendZone">
+        <div class="osSendZone osPromptBuildZone">
           <div class="osPrimaryActions">
-            <button class="btn orange osSendMain" id="osSendEnhanced" type="button" disabled data-legacy-label="OS로 강화해서 AI에 보내기"><span aria-hidden="true">✦</span><span id="osSendEnhancedLabel">Blog Factory로 강화해서 AI에 보내기</span></button>
-            <button class="btn soft osSendRaw" id="osSendRaw" type="button" disabled>비교용 · 원문 그대로 보내기</button>
+            <button class="btn orange osSendMain" id="osBuildPrompt" type="button" disabled><span aria-hidden="true">✦</span><span id="osBuildPromptLabel">오늘의 주제 프롬프트 만들기</span></button>
           </div>
-          <div class="osSendMeta"><span class="sub" id="osPrepareStatus" aria-live="polite">주제 씨앗이나 원하는 작업을 먼저 적어주세요.</span><button class="mini passive" id="osClearTask" type="button">이번 작업 비우기</button></div>
+          <div class="osSendMeta"><span class="sub" id="osPrepareStatus" aria-live="polite">관심 분야나 주제 씨앗을 먼저 적어주세요.</span><button class="mini passive" id="osClearTask" type="button">입력 비우기</button></div>
         </div>
 
-        <div class="osTaskPackResult osSimpleResult" id="osTaskPackResult" hidden>
-          <div class="osReadyState"><span class="tag green">FACTORY PACK 준비</span><b id="osReadyMessage" aria-live="polite">생산용 실행 프롬프트가 준비됐습니다.</b></div>
-          <div class="osAppliedChips" id="osAppliedChips" aria-label="이번 요청에 적용된 OS 기준"></div>
+        <div class="osTaskPackResult osSimpleResult osPromptResult" id="osTaskPackResult" hidden>
+          <div class="osReadyState"><span class="tag green">TODAY PROMPT</span><b id="osReadyMessage" aria-live="polite">오늘의 주제 발굴 프롬프트가 준비됐습니다.</b></div>
+          <div class="osAppliedChips" id="osAppliedChips" aria-label="이번 프롬프트에 적용된 기준"></div>
           <div class="osCompilerSummary" id="osCompilerSummary"></div>
-          <p class="osAfterSend" id="osAfterSend">자동 전달이 막히면 아래에서 다시 복사하거나 AI만 따로 열 수 있습니다.</p>
+          <p class="osAfterSend" id="osAfterSend">아래 프롬프트를 확인한 뒤 복사하세요. 사용할 AI나 작성 도구는 직접 선택하면 됩니다.</p>
+          <textarea id="osTaskPackPreview" class="osPackPreview osPromptPreviewAlways" readonly spellcheck="false" aria-label="생성된 복사용 프롬프트"></textarea>
           <div class="actions osResultActions">
-            <button class="btn primary" id="osCopyPack" type="button">Factory 프롬프트 복사</button>
-            <button class="btn orange" id="osOpenAi" type="button">선택 AI 열기</button>
+            <button class="btn primary" id="osCopyPack" type="button">프롬프트 복사</button>
+            <button class="btn" id="osDownloadPack" type="button">.md 저장</button>
           </div>
-          <details class="osInlineDetails">
-            <summary>OS가 만든 생산 프롬프트 보기 · 파일 저장</summary>
-            <textarea id="osTaskPackPreview" class="osPackPreview" readonly spellcheck="false" aria-label="생성된 AI용 강화 프롬프트"></textarea>
-            <div class="actions"><button class="btn" id="osDownloadPack" type="button">생산 프롬프트 .md 저장</button></div>
-          </details>
         </div>
       </div>
     </section>
 
-    <section class="osCompareNote osFactoryNote" aria-label="Blog Factory가 해주는 일">
-      <div><span class="tag orange">V7 BLOG FACTORY</span><b>프롬프트 한 장 안에 소재팀 · 글팀 · 디자인팀 · 검수팀의 순서를 넣습니다.</b></div>
+    <section class="osCompareNote osFactoryNote" aria-label="블로그 팩토리가 해주는 일">
+      <div><span class="tag orange">DAILY BLOG FACTORY</span><b>연결 버튼 대신, 오늘 쓸 수 있는 실행 프롬프트를 눈앞에 먼저 보여줍니다.</b></div>
       <div class="osExplainPoints osFactoryExplain">
-        <span><b>소재 레이더</b><small>현재성·검색 의도·중복 가능성을 먼저 확인</small></span>
-        <span><b>Creator-10</b><small>사실·구조·자연스러움·SEO·모바일 흐름 검수</small></span>
-        <span><b>Image Pack</b><small>도구가 있으면 생성, 없으면 제작 프롬프트·배치·캡션</small></span>
+        <span><b>오늘의 주제</b><small>같은 관심 분야라도 날짜와 탐색 각도를 바꿔 10개 후보 + TOP 3</small></span>
+        <span><b>Creator-10</b><small>글 생산 모드에서는 사실·구조·자연스러움·SEO·모바일 흐름 검수</small></span>
+        <span><b>Image Pack</b><small>글 모드에서는 이미지 제작 프롬프트·배치·캡션까지 포함</small></span>
         <span><b>Truth Guard</b><small>없는 구매·방문·가족 반응·효과를 경험처럼 만들지 않음</small></span>
       </div>
     </section>
 
     <details class="card osAdvanced" id="osAdvancedSettings">
-      <summary><span><b>고급 설정</b><small>품질 강도 · 내 문체 · OS V7 파일 · 연결 정보</small></span><span class="osAdvancedChevron" aria-hidden="true">⌄</span></summary>
+      <summary><span><b>고급 설정</b><small>품질 강도 · 내 문체 · OS V7 파일</small></span><span class="osAdvancedChevron" aria-hidden="true">⌄</span></summary>
       <div class="body osAdvancedBody">
         <section class="osAdvancedSection">
           <div class="sectionMiniHead"><b>품질 강도</b><span class="sub">블로그는 자동에서 Creator-10을 기본으로 적용합니다.</span></div>
-          <select id="osMode" class="v6select">
-            <option value="auto">자동 · 추천</option><option value="quick">빠르게</option><option value="creator_10">Creator-10 관점 검수</option><option value="enterprise">대기업 다부서 검토</option><option value="grand_challenge">전주기 심층 검토</option>
-          </select>
-          <pre class="osSummary" id="osRouteSummary">OS가 요청을 분석하면 생산 모드·적용 규칙·출력 패키지를 여기에 표시합니다.</pre>
+          <select id="osMode" class="v6select"><option value="auto">자동 · 추천</option><option value="quick">빠르게</option><option value="creator_10">Creator-10 관점 검수</option><option value="enterprise">대기업 다부서 검토</option><option value="grand_challenge">전주기 심층 검토</option></select>
+          <pre class="osSummary" id="osRouteSummary">블로그 팩토리가 요청을 분석하면 생산 모드·적용 규칙·출력 패키지를 여기에 표시합니다.</pre>
         </section>
 
         <section class="osAdvancedSection">
@@ -360,16 +368,16 @@
         </section>
 
         <section class="osAdvancedSection">
-          <div class="sectionMiniHead"><b>OS 파일 / 연결 정보</b><span class="sub">AI Company OS V7 Zero-Dependency 기준</span></div>
-          <div class="osConnectionState"><span class="tag green">LOCAL</span><b id="osStaticMode">GitHub Pages 정적 모드 · V7 Blog Factory Compiler</b></div>
-          <p class="sub osConnectionCopy">이 웹페이지 자체가 검색·이미지 생성을 한 척하지 않습니다. API 키 없이 브라우저에서 실행 프롬프트를 만들고, 선택한 AI에 실제 웹/이미지 기능이 있을 때만 그 기능을 사용하도록 요청합니다. 모바일은 지원 환경에서 시스템 공유창을 사용하고, PC는 프롬프트 복사를 확인한 뒤 선택한 AI를 엽니다.</p>
+          <div class="sectionMiniHead"><b>OS 파일 / 실행 방식</b><span class="sub">AI Company OS V7 Zero-Dependency 기준</span></div>
+          <div class="osConnectionState"><span class="tag green">GITHUB</span><b id="osStaticMode">GitHub Pages + Actions Daily Engine · V7 Blog Factory</b></div>
+          <p class="sub osConnectionCopy">브라우저에는 API 키를 넣지 않습니다. 실제 무인 주제 생성은 GitHub Actions에서 Repository Secret을 사용하고, 이 화면은 배포된 <code>daily-topics.json</code>만 읽습니다. 아래 프롬프트 빌더는 API 없이도 계속 사용할 수 있습니다.</p>
           <div class="actions"><button class="btn" id="osDownloadZip" type="button">AI Company OS V7 ZIP</button></div>
         </section>
       </div>
     </details>
   </div>
 
-  <div class="notice osSimpleNotice"><b>매일 쓰는 방식:</b> 생산 모드 선택 → 관심 범위 한 줄 → 필요하면 실제 경험만 추가 → 주황색 버튼. OS는 탐지기 점수 우회가 아니라 <b>독자가 읽기 자연스러운 문체와 사실 보존</b>을 목표로 편집합니다.</div>
+  <div class="notice osSimpleNotice"><b>자동화 방식:</b> GitHub Actions가 매일 주제 10개를 생성·저장·Pages 배포 → 사이트를 열면 오늘 주제가 이미 표시됩니다. 아래 ‘로컬 프롬프트 자동 준비’는 Actions와 무관한 브라우저 보조 기능입니다.</div>
 </main>
 <div class="footer">곰같은여우의 AI 흔적 지우개 <span id="footerVersion"></span> · 브라우저 로컬 처리</div>
 </div>

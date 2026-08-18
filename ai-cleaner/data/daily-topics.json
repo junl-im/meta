@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "status": "not_generated",
+  "date": "",
+  "timezone": "Asia/Seoul",
+  "generatedAt": "",
+  "generatedAtLocal": "",
+  "model": "",
+  "engine": "github-actions-openai-responses",
+  "webSearchUsed": false,
+  "summary": "GitHub Actions Daily Engine이 아직 오늘의 주제를 생성하지 않았습니다.",
+  "topics": []
+}

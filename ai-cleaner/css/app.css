@@ -690,6 +690,7 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
 .osFactoryGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
 .osFactoryGrid label{display:grid;gap:5px;min-width:0}.osFactoryGrid label>span{font-size:9px;font-weight:900}.osFactoryGrid .v6select,.osFactoryGrid input{width:100%;min-width:0;height:38px;border:1px solid var(--line);border-radius:10px;padding:0 9px;background:#fff;color:var(--ink);font:inherit;font-size:9.5px;outline:none}
 .osFactoryGrid input:focus,.osFactoryGrid .v6select:focus,.osFactoryContext textarea:focus{border-color:#e4a464;box-shadow:0 0 0 3px rgba(238,125,34,.10)}
+.osFactoryGrid input:disabled,.osFactoryGrid .v6select:disabled,.osFactoryContext textarea:disabled{opacity:.52;cursor:not-allowed;background:#f7f3ee}
 .osFactoryContext{margin-top:10px;border:1px dashed #e5d7c4;border-radius:12px;background:#fffdf9;overflow:hidden}
 .osFactoryContext>summary{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:40px;padding:0 11px;cursor:pointer;list-style:none;color:#665649;font-size:9.5px;font-weight:900}
 .osFactoryContext>summary::-webkit-details-marker{display:none}.osFactoryContext>summary::before{content:'＋';margin-right:5px;color:var(--orange);font-size:12px}.osFactoryContext[open]>summary::before{content:'−'}
@@ -722,3 +723,33 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
 @media(max-width:340px){
   .osFactorySteps,.osFactoryPresets,.osFactoryGrid{grid-template-columns:1fr}.osFactoryPipeline{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+@media(prefers-reduced-motion:reduce){.osFactoryPresets button{transition:none}.osFactoryPresets button:hover{transform:none}}
+
+/* 1.8.7 Blog Factory copy-first + daily prompt preparation */
+.osFactoryPresets{grid-template-columns:repeat(5,minmax(0,1fr))}
+.osAutoDaily{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:11px;margin-top:12px;padding:11px 12px;border:1px solid #eadfce;border-radius:12px;background:linear-gradient(135deg,#fffaf4,#fff)}
+.osAutoDailyToggle{margin:0;white-space:nowrap}.osAutoDaily>div{display:grid;gap:2px;min-width:0}.osAutoDaily>div>b{font-size:9.5px}.osAutoDaily .sub{font-size:8.8px;line-height:1.45}
+.osPromptBuildZone .osPrimaryActions{display:block}.osPromptBuildZone .osSendMain{width:100%;min-height:44px}
+.osPromptResult .osPackPreview{display:block;height:320px;margin-top:10px;background:#fff}
+.osPromptResult .osResultActions{margin-top:9px}
+.osPromptResult .osResultActions .btn{flex:1 1 180px}
+@media(max-width:980px){.osFactoryPresets{grid-template-columns:repeat(3,minmax(0,1fr))}.osPromptResult .osPackPreview{height:290px}}
+@media(max-width:760px){.osFactoryPresets{grid-template-columns:repeat(2,minmax(0,1fr))}.osAutoDaily{grid-template-columns:1fr;gap:6px}.osPromptResult .osPackPreview{height:260px}}
+@media(max-width:420px){.osFactoryPresets{grid-template-columns:1fr}.osPromptResult .osPackPreview{height:235px}}
+
+/* 1.8.8 Daily Engine — GitHub Actions generated topics */
+.osDailyEngineCard{border-color:#d9e8d7;background:linear-gradient(180deg,#fbfff9,#fff)}
+.osDailyEngineHead{align-items:center}.osDailyEngineHead .perfPill{margin-left:auto;white-space:nowrap}
+.osDailyEngineSummary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 11px;border:1px solid #dfead9;border-radius:12px;background:#f8fcf5}
+.osDailyEngineSummary>div{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:4px 7px;min-width:0}.osDailyEngineSummary b{font-size:10px}.osDailyEngineSummary small{grid-column:1/-1;color:var(--muted);font-size:8.7px;font-weight:700;line-height:1.45}
+.osDailyTopics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+.osDailyTopic{display:grid;gap:7px;min-width:0;padding:11px;border:1px solid #e7dfd3;border-radius:13px;background:#fff;box-shadow:0 5px 14px rgba(76,58,40,.04)}
+.osDailyTopic.top3{border-color:#f0c187;background:linear-gradient(135deg,#fff8ee,#fff)}
+.osDailyTopicTop{display:flex;align-items:center;gap:6px;min-width:0}.osDailyTopicRank{display:grid;place-items:center;min-width:25px;height:25px;border-radius:999px;background:#f3eee7;color:#6c5b4b;font-size:9px;font-weight:950}.osDailyTopic.top3 .osDailyTopicRank{background:#ffedd7;color:#b25a12}
+.osDailyTopicCategory{color:#7a6b5d;font-size:8px;font-weight:850}.osDailyTopicScore{margin-left:auto;color:#7b8b72;font-size:8px;font-weight:850}
+.osDailyTopic h3{margin:0;color:var(--ink);font-size:11px;line-height:1.45}.osDailyTopic p{margin:0;color:#6f6257;font-size:8.8px;font-weight:700;line-height:1.5}.osDailyTopic dl{display:grid;grid-template-columns:auto 1fr;gap:4px 7px;margin:0;padding-top:2px}.osDailyTopic dt{color:#9b7554;font-size:8px;font-weight:900}.osDailyTopic dd{margin:0;color:#6d6258;font-size:8.3px;font-weight:700;line-height:1.45}
+.osDailyTopicActions{display:flex;justify-content:flex-end;gap:6px;margin-top:2px}.osDailyTopicActions .mini{min-height:29px}
+.osDailyEngineEmpty{display:grid;gap:4px;margin-top:10px;padding:12px;border:1px dashed #dfd2bf;border-radius:12px;background:#fffaf4;color:#6b5d50}.osDailyEngineEmpty b{font-size:10px}.osDailyEngineEmpty span{font-size:8.8px;font-weight:700;line-height:1.5}.osDailyEngineEmpty code{font-size:8.5px}
+@media(max-width:760px){.osDailyEngineSummary{align-items:flex-start;flex-direction:column}.osDailyTopics{grid-template-columns:1fr}.osDailyEngineHead{align-items:flex-start}.osDailyEngineHead .perfPill{margin-left:0}}
+@media(max-width:420px){.osDailyTopic{padding:9px}.osDailyTopic dl{grid-template-columns:1fr}.osDailyTopic dd{margin-bottom:2px}}
