@@ -74,8 +74,8 @@ test('completed typewriter state is invalidated by a manual result edit without 
   await typewriter.click();await expect(output).toHaveAttribute('data-typewriter-verified','true',{timeout:7000});
   await expect(page.locator('#typingPreviewPanel')).toBeHidden();await expect(page.locator('#typingPreviewPause')).toHaveText('일시정지');
   await page.locator('#editResult').click();const edited=(await output.inputValue())+' 직접 수정';await output.fill(edited);
-  await expect(output).not.toHaveAttribute('data-typewriter-verified','true');await expect(typewriter).not.toHaveClass(/typewriterRecommended/);await expect(page.locator('#typingBridgeStatus')).toContainText('필요할 때 새로쓰기');await expect(next).toContainText('결과를 수정했습니다');
-  await page.locator('#editResult').click();await expect(output).toHaveValue(/직접 수정$/);
+  await expect(output).not.toHaveAttribute('data-typewriter-verified','true');await expect(typewriter).not.toHaveClass(/typewriterRecommended/);await expect(page.locator('#typingBridgeStatus')).toContainText('필요할 때 새로쓰기');await expect(next).toContainText('직접 수정 중');
+  await page.locator('#editResult').click();await expect(output).toHaveValue(/직접 수정$/);await expect(next).toContainText('결과를 수정했습니다');
 });
 
 test('reset immediately after mobile typewriter completion cancels the delayed completion navigation', async ({ page }) => {
