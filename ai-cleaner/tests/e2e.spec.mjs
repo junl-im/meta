@@ -71,8 +71,9 @@ test('completed typewriter state is invalidated by a manual result edit without 
   const input=page.locator('#input'),output=page.locator('#output'),typewriter=page.locator('#typingPreviewButton'),next=page.locator('#resultNextStep');
   await input.fill('자동작성 검증 뒤 결과를 직접 수정하면 현재 결과는 더 이상 원본과 정확히 같은 자동작성 결과가 아닙니다.');
   await page.locator('#typingPreviewSpeed').evaluate(el=>{el.value='0';el.dispatchEvent(new Event('change',{bubbles:true}));});
-  await typewriter.click();await expect(output).toHaveAttribute('data-typewriter-verified','true',{timeout:7000});await expect(page.locator('#typingPreviewPause')).toHaveText('완료 · 결과 보기');
-  await page.locator('#typingPreviewPause').click();await page.locator('#editResult').click();const edited=(await output.inputValue())+' 직접 수정';await output.fill(edited);
+  await typewriter.click();await expect(output).toHaveAttribute('data-typewriter-verified','true',{timeout:7000});
+  await expect(page.locator('#typingPreviewPanel')).toBeHidden();await expect(page.locator('#typingPreviewPause')).toHaveText('일시정지');
+  await page.locator('#editResult').click();const edited=(await output.inputValue())+' 직접 수정';await output.fill(edited);
   await expect(output).not.toHaveAttribute('data-typewriter-verified','true');await expect(typewriter).not.toHaveClass(/typewriterRecommended/);await expect(page.locator('#typingBridgeStatus')).toContainText('필요할 때 새로쓰기');await expect(next).toContainText('결과를 수정했습니다');
   await page.locator('#editResult').click();await expect(output).toHaveValue(/직접 수정$/);
 });
