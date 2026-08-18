@@ -406,7 +406,13 @@
     <div><b>교정 제안</b><span class="sub" id="issuesPanelStatus">필요한 것만 반영하세요.</span></div>
     <div class="floatHeadActions"><button class="iconBtn mobilePanelSize" type="button" data-panel-size="issuesPanel" aria-label="크게 보기" aria-expanded="false">↕</button><button class="iconBtn" type="button" data-close-panel="issuesPanel" aria-label="닫기">×</button></div>
   </div>
-  <div class="floatBody" id="issues"><div class="empty">교정 제안이 없습니다.</div></div>
+  <div class="floatBody">
+    <div class="issueBulkBar" id="issueBulkBar" hidden>
+      <div><b id="issueBulkCount">바로 반영 0개</b><span class="sub">확인이 필요한 항목은 제외합니다.</span></div>
+      <button class="mini apply" id="applyAllIssues" type="button" disabled>일괄 반영</button>
+    </div>
+    <div id="issues"><div class="empty">교정 제안이 없습니다.</div></div>
+  </div>
 </section>
 
 

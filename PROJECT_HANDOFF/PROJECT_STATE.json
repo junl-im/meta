@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.8.9",
+  "version": "1.9.0",
   "date": "2026-08-18",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -50,12 +50,12 @@
     "ai-cleaner/data/daily-topics.json"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.8.9",
-  "asset_version": "189",
+  "current_version": "1.9.0",
+  "asset_version": "190",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.8.9 Blog Factory public UI polish: hide deployment/setup internals, center 1-4 hero steps, preserve Daily Engine behavior",
+  "latestPatch": "1.9.0 correction safe bulk apply: apply deterministic correction suggestions together, preserve review-only items, resolve overlapping ranges iteratively, single-step undo/redo",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -81,7 +81,7 @@
     "protectedPathsExcluded": [
       "OPTION/**"
     ],
-    "patchBaseline": "GitHub-visible 1.8.5 cumulative patch to 1.8.8; also safe to overlay on 1.8.6/1.8.7"
+    "patchBaseline": "GitHub main 1.8.9 + CI Hotfix 2 -> 1.9.0"
   },
   "internalTypewriter": {
     "source": "visible-text projection of original",
@@ -135,7 +135,7 @@
     "breakpointExpansionReset": true,
     "safeAreaViewportFitCover": true
   },
-  "nextPhase": "1.8.9 Daily Engine result-to-article queue / generated article package workflow after first real GitHub Actions run",
+  "nextPhase": "Daily Engine first real topic generation + result-to-article queue; continue Blog Factory workflow after correction bulk-apply stabilization",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -200,7 +200,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "189",
+  "assetVersion": "190",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,

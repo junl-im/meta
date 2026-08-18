@@ -308,8 +308,56 @@ function renderDiag(){
   const ds=$('#detailSummary');if(ds)ds.textContent=state.original?`교정 ${state.issues.length} · 기술 ${state.allChars.length+state.homoglyphs.length}`:'분석 전';
 }
 
+function syncIssueBulkUi(){
+  const bar=$('#issueBulkBar'),button=$('#applyAllIssues'),countEl=$('#issueBulkCount'),status=$('#issuesPanelStatus');
+  if(!bar||!button||!countEl)return;
+  const pending=state.issues.filter(x=>x.applicable&&!state.applied.has(x.id)).length;
+  const confirm=state.issues.filter(x=>!x.applicable).length;
+  bar.hidden=pending===0;button.disabled=pending===0;countEl.textContent=`바로 반영 ${pending}개`;
+  if(status){
+    if(pending>0)status.textContent=confirm>0?`바로 반영 ${pending}개 · 직접 확인 ${confirm}개`:`바로 반영 가능한 제안 ${pending}개`;
+    else if(confirm>0)status.textContent=`직접 확인이 필요한 항목 ${confirm}개`;
+    else if(state.issues.length)status.textContent='반영 가능한 제안을 모두 적용했습니다.';
+    else status.textContent='교정 제안이 없습니다.';
+  }
+}
+
+function nonOverlappingApplicableIssues(list){
+  const sorted=[...list].filter(x=>x.applicable&&x.start>=0&&x.end>=x.start).sort((a,b)=>a.start-b.start||b.end-a.end);
+  const batch=[];let end=-1;
+  for(const x of sorted){if(x.start<end)continue;batch.push(x);end=x.end;}
+  return batch;
+}
+
+function applyIssueBatch(text,batch){
+  let next=String(text||'');
+  for(const x of [...batch].sort((a,b)=>b.start-a.start))next=next.slice(0,x.start)+x.after+next.slice(x.end);
+  return next;
+}
+
+function applyAllIssues(){
+  if(inputDirty||!state.original)return;
+  let text=$('#output').value||state.working||state.issueBase||state.base||'';
+  let appliedCount=0;
+  for(let pass=0;pass<8;pass++){
+    const candidates=issues(text).filter(x=>x.applicable&&x.start>=0);
+    if(!candidates.length)break;
+    const batch=nonOverlappingApplicableIssues(candidates);
+    if(!batch.length)break;
+    const next=applyIssueBatch(text,batch);
+    if(next===text)break;
+    appliedCount+=batch.length;text=next;
+  }
+  if(!appliedCount){showToast('한 번에 반영할 수 있는 교정 제안이 없습니다.');return;}
+  invalidateTypewriterVerification();
+  const out=$('#output');out.readOnly=true;out.value=text;$('#editResult').textContent='✎ 직접 수정';
+  refreshSuggestionBaseline(text,{unread:false});renderAll();flashOutput();recordHistory('교정 일괄 반영');
+  revealAppliedResult(`✓ 교정 제안 ${appliedCount}개를 한 번에 반영했습니다. 직접 확인 항목은 그대로 두었습니다.`);
+}
+
 function renderIssues(){
   const box=$('#issues');
+  syncIssueBulkUi();
   if(!state.issues.length){box.innerHTML='<div class="empty">교정 제안이 없습니다. 🦊</div>';return;}
   box.innerHTML=state.issues.map(x=>{
     const locateTarget=x.word||((x.start>=0&&x.before)?x.before:null);
@@ -320,6 +368,7 @@ function renderIssues(){
   $$('[data-apply]').forEach(b=>b.onclick=()=>{invalidateTypewriterVerification();state.applied.add(b.dataset.apply);state.manual=false;renderAll();notifyTextChanged('output');flashOutput();recordHistory('교정 반영');});
   $$('[data-undo]').forEach(b=>b.onclick=()=>{invalidateTypewriterVerification();state.applied.delete(b.dataset.undo);state.manual=false;renderAll();notifyTextChanged('output');flashOutput();recordHistory('교정 되돌리기');});
   $$('[data-locate]').forEach(b=>b.onclick=()=>locateIssue(b.dataset.locate));
+  syncIssueBulkUi();
 }
 
 function activateResultTab(name){
@@ -722,7 +771,7 @@ $('#undoAll').onclick=()=>{if(inputDirty||!state.original)return;invalidateTypew
 $('#undoStep').onclick=undoHistory;$('#redoStep').onclick=redoHistory;
 $('#editResult').onclick=()=>{if(!ensureFreshAnalysis()||!state.original)return;if($('#output').readOnly){manualEditBaseline=$('#output').value;$('#output').readOnly=false;$('#output').focus();$('#editResult').textContent='✓ 수정 완료';}else{$('#output').readOnly=true;const edited=$('#output').value;$('#editResult').textContent='✎ 직접 수정';if(edited!==manualEditBaseline){refreshSuggestionBaseline(edited,{unread:false});renderAll();flashOutput();recordHistory('직접 수정');}else{state.working=edited;state.manual=false;}manualEditBaseline='';}};
 $('#output').addEventListener('input',()=>{if(!$('#output').readOnly){invalidateTypewriterVerification();state.working=$('#output').value;state.manual=true;queueCompare();}});
-$('#v62ApplyReviews').onclick=applyReviews;
+$('#v62ApplyReviews').onclick=applyReviews;if($('#applyAllIssues'))$('#applyAllIssues').onclick=applyAllIssues;
 
 $('#textFileInput').addEventListener('change',async e=>{
   const f=e.target.files&&e.target.files[0];if(!f)return;const request=++textImportSeq,lockName=`text-import-${request}`;workLock.acquire(lockName,{name:f.name||'text'});

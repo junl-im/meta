@@ -478,6 +478,29 @@ test('result checkpoints survive a same-tab reload without restoring into an emp
   await expect(page.locator('#checkpointList [data-checkpoint-id]')).toHaveCount(1);await expect(page.locator('#checkpointList [data-checkpoint-action="restore"]')).toBeDisabled();await expect(page.locator('#checkpointList [data-checkpoint-action="copy"]')).toBeEnabled();
 });
 
+test('correction suggestions bulk-apply safe edits, resolve overlaps, and leave review-only items', async ({ page }) => {
+  await gotoReady(page);
+  const input=page.locator('#input'),output=page.locator('#output');
+  await input.fill('**결론적으로** 안내합니다.\n\n\n테스트 테스트 테스트 테스트 테스트 테스트');
+  await analyzeNow(page,{silent:true});
+  await page.locator('#issuesWidget').click();
+  await expect(page.locator('#issueBulkBar')).toBeVisible();
+  await expect(page.locator('#issueBulkCount')).toContainText('바로 반영 3개');
+  await expect(page.locator('#applyAllIssues')).toBeEnabled();
+  await page.locator('#applyAllIssues').click();
+  await expect(output).toContainText('그래서 안내합니다.');
+  await expect(output).not.toHaveValue(/\*\*|결론적으로|\n{3,}/);
+  await expect(page.locator('#issuesPanelStatus')).toContainText('직접 확인');
+  await expect(page.locator('#issueBulkBar')).toBeHidden();
+  await expect(page.locator('#issuesPanel [data-apply]')).toHaveCount(0);
+  await expect(page.locator('#issuesPanel')).toBeHidden();
+  await page.locator('#undoStep').click();
+  await expect(output).toHaveValue(/\*\*결론적으로\*\*/);
+  await expect(output).toHaveValue(/\n{3,}/);
+  await page.locator('#redoStep').click();
+  await expect(output).toContainText('그래서 안내합니다.');
+});
+
 test('Blog Factory Daily Engine renders generated topics and sends a selected topic to daily-one', async ({ page }) => {
   const date=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
   const topics=Array.from({length:10},(_,i)=>({

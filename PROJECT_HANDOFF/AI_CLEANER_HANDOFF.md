@@ -1,6 +1,6 @@
 # AI Cleaner 프로젝트 인수인계 메모리
 
-업데이트: 2026-08-18 · 현재 패키지: 1.8.8
+업데이트: 2026-08-18 · 현재 패키지: 1.9.0
 
 ## 새 채팅에서 가장 먼저 읽을 것
 이 폴더를 새 채팅에 업로드한 뒤 `PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md 읽고 이어서 개발하자`라고 요청한다. 이 문서는 프로젝트의 결정사항, 보호 경로, UX 방향, 안전 제약, 배포 방식, 알려진 이슈를 보존하기 위한 인수인계 메모리다.
@@ -9,8 +9,9 @@
 - GitHub: `junl-im/meta`
 - GitHub Pages 루트: `https://junl-im.github.io/meta/`
 - 루트 `index.html`은 `./ai-cleaner/`로 진입시킨다.
-- Pages Build and deployment는 **Source = GitHub Actions** 를 사용한다. 1.8.8부터 `.github/workflows/daily-blog-factory-pages.yml`이 일반 push 배포와 Daily Engine 예약 생성/배포를 함께 담당한다.
-- `.github/workflows/ai-cleaner-ci.yml`은 별도의 검사 전용 CI로 유지한다.
+- Pages Build and deployment는 **Source = GitHub Actions** 를 사용한다.
+- 일반 `main` push는 `.github/workflows/ai-cleaner-ci.yml`이 정적 검사 -> browser-smoke -> Pages 배포까지 한 흐름으로 담당한다.
+- `.github/workflows/daily-blog-factory-pages.yml`은 예약/수동 Daily Engine 생성 + Pages 배포 전용이다. 일반 push에서는 실행하지 않는다.
 - **`OPTION/**`은 다른 서비스가 사용하는 보호 경로. 어떤 경우에도 수정/이동/삭제/rename 금지.**
 
 ## 사용자의 작업 방식
@@ -26,6 +27,7 @@
 - 원본/결과/문장 편집 textarea만 텍스트 선택을 허용한다. 일반 UI는 기본 우클릭/드래그 선택을 막는다. textarea 우클릭은 자체 메뉴를 사용한다.
 - 브라우저 맞춤법/자동교정/Grammarly 힌트는 textarea에서 최대한 끈다.
 - 반복 단어/교정 항목의 `🔍 위치 보기`는 textarea 내부 scrollTop을 계산해 실제 등장 위치로 이동해야 한다.
+- 1.9.0 교정 제안 패널은 `일괄 반영`을 제공한다. 실제 치환값이 있는 deterministic 제안만 대상이며 반복 단어 등 확인 항목은 자동 변경하지 않는다. 겹치는 범위는 여러 pass로 재분석해 안전하게 처리하고, 전체 일괄 반영은 History 한 단계로 Undo/Redo 가능해야 한다.
 - X-ray 전용 결과 탭은 1.1.1에서 제거했다. 숨은 Unicode/특수 공백/유사문자는 `기술 정보` 패널에서 확인한다.
 
 ## 텍스트 안전 정책
@@ -73,9 +75,9 @@
 - 앱은 version.json을 no-store로 확인해 새 버전 발견 시 cache-busting query로 재진입한다.
 
 ## CI
-- `.github/workflows/ai-cleaner-ci.yml`: 기존 검사 전용 CI. JS syntax, static-check, OPTION 보호, browser smoke를 유지한다.
-- `.github/workflows/daily-blog-factory-pages.yml`: 1.8.8 Pages 배포 + 예약 Daily Engine.
-- 두 workflow의 역할을 섞지 말고, Pages Source는 GitHub Actions로 둔다.
+- `.github/workflows/ai-cleaner-ci.yml`: 일반 main push의 JS syntax, static-check, OPTION 보호, browser smoke를 수행하고 성공 후 Pages를 배포한다.
+- `.github/workflows/daily-blog-factory-pages.yml`: 예약/수동 Daily Engine 생성 + Pages 배포 전용.
+- 일반 push와 예약 생성이 동시에 이중 실행되지 않도록 역할 분리를 유지하고, Pages Source는 GitHub Actions로 둔다.
 
 ## 1.8.8 GitHub Actions Daily Engine
 - Daily Engine은 **GitHub Pages + GitHub Actions** 전용이다. Netlify/serverless provider 의존 코드를 넣지 않는다.

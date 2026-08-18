@@ -200,6 +200,9 @@ if(!failures.length){
  /AbortController/.test(aiWritingOs)&&/workLock\?\.acquire/.test(aiWritingOs)&&/prepareAbort\?\.abort/.test(aiWritingOs)?pass('Blog Factory compile lifecycle','manual compile path remains cancellable and participates in shared work lock'):fail('Blog Factory compile lifecycle','compile lifecycle guard missing');
  /Blog Factory Daily Engine renders generated topics and sends a selected topic to daily-one/.test(e2e)&&/Blog Factory builds today topics prompt and never exposes provider launch controls/.test(e2e)&&/Blog Factory copy-first flow stays simple on mobile/.test(e2e)&&/Blog Factory switches pipeline semantics across topic and production modes/.test(e2e)&&/Blog Factory daily auto preparation persists seed and restores same-day prompt/.test(e2e)&&/Blog Factory keeps its task state separate/.test(e2e)?pass('browser Blog Factory coverage','Daily Engine, copy-first compiler, mode-aware pipeline, local daily helper, and top-level isolation are covered by E2E'):fail('browser Blog Factory coverage','Blog Factory browser regressions missing');
  String(projectState.version)===String(ver.version)&&String(projectState.current_version)===String(ver.version)&&String(projectState.assetVersion)===String(ver.assetVersion)&&String(projectState.asset_version)===String(ver.assetVersion)?pass('handoff version consistency','PROJECT_STATE matches runtime version'):fail('handoff version consistency',JSON.stringify({projectState:{version:projectState.version,current_version:projectState.current_version,assetVersion:projectState.assetVersion,asset_version:projectState.asset_version},runtime:ver}));
+ html.includes('id="issueBulkBar"')&&html.includes('id="applyAllIssues"')&&html.includes('id="issueBulkCount"')?pass('correction bulk apply UI','bulk toolbar + count + action'):fail('correction bulk apply UI','bulk controls missing');
+ app.includes('nonOverlappingApplicableIssues')&&app.includes("filter(x=>x.applicable&&x.start>=0)")&&app.includes("recordHistory('교정 일괄 반영')")?pass('correction bulk apply safety','applicable-only + overlap passes + history'):fail('correction bulk apply safety','safe bulk boundary missing');
+ /correction suggestions bulk-apply safe edits, resolve overlaps, and leave review-only items/.test(e2e)?pass('browser correction bulk coverage','overlap + review-only + undo/redo'):fail('browser correction bulk coverage','bulk apply E2E missing');
  const mobileChecks=[
   ['mobile compact panel CSS exists',css.includes('1.0.0 mobile compact panels')&&css.includes('46dvh')&&css.includes('mobileExpanded')],
   ['mobile panel size controls exist',html.includes('data-panel-size="issuesPanel"')&&html.includes('data-panel-size="rewritePanel"')&&html.includes('aria-expanded="false"')],
@@ -216,5 +219,6 @@ if(!failures.length){
 
 }
 for(const p of passes)console.log(`PASS ${p.n}${p.d?` — ${p.d}`:''}`);for(const f of failures)console.error(`FAIL ${f.n}${f.d?` — ${f.d}`:''}`);
+
 console.log(`\nSummary: ${passes.length} passed, ${failures.length} failed`);if(failures.length)process.exit(1);
 
