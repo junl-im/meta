@@ -3,7 +3,7 @@ import path from 'node:path';
 
 const TIMEZONE = 'Asia/Seoul';
 const OUTPUT_PATH = path.resolve('ai-cleaner/data/daily-topics.json');
-const DEFAULT_MODEL = 'gpt-5.6-luna';
+const DEFAULT_MODEL = 'gpt-5';
 const TOPIC_COUNT = 10;
 
 function env(name, fallback = '') {
@@ -168,6 +168,9 @@ async function requestOpenAI({ apiKey, model, prompt, useWebSearch = true }) {
       }
       throw new Error(`OpenAI API 실패: ${message}`);
     }
+  } catch (error) {
+    if (error?.name === 'AbortError') throw new Error('OpenAI API 요청이 150초를 넘어 중단되었습니다. 잠시 뒤 다시 실행해 주세요.');
+    throw error;
   } finally {
     clearTimeout(timer);
   }
@@ -177,9 +180,9 @@ async function requestOpenAI({ apiKey, model, prompt, useWebSearch = true }) {
 async function main() {
   const apiKey = env('OPENAI_API_KEY');
   const model = env('OPENAI_MODEL', DEFAULT_MODEL);
-  const seed = env('BLOG_FACTORY_SEED');
-  const audience = env('BLOG_FACTORY_AUDIENCE');
-  const avoidTopics = env('BLOG_FACTORY_AVOID_TOPICS');
+  const seed = clampText(env('BLOG_FACTORY_SEED'), 4000);
+  const audience = clampText(env('BLOG_FACTORY_AUDIENCE'), 1200);
+  const avoidTopics = clampText(env('BLOG_FACTORY_AVOID_TOPICS'), 8000);
   const previousTopics = await loadPreviousTopicTitles();
   if (!apiKey) throw new Error('OPENAI_API_KEY secret이 없습니다. Repository Settings > Secrets and variables > Actions에 추가해 주세요.');
   if (!seed) throw new Error('BLOG_FACTORY_SEED variable이 없습니다. 매일 다룰 관심 분야를 Repository Actions variable로 추가해 주세요.');

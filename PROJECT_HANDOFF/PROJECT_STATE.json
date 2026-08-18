@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.9.0",
+  "version": "1.9.1",
   "date": "2026-08-18",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -50,12 +50,12 @@
     "ai-cleaner/data/daily-topics.json"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.9.0",
-  "asset_version": "190",
+  "current_version": "1.9.1",
+  "asset_version": "191",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.9.0 correction safe bulk apply: apply deterministic correction suggestions together, preserve review-only items, resolve overlapping ranges iteratively, single-step undo/redo",
+  "latestPatch": "1.9.1 stability hardening: correction overlap/direct-edit guards, bounded suggestion UI, clipboard fallback, Seoul-date Daily state, partial-data honesty, API model/env guard, stale/overlapping Pages deployment protection",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -81,7 +81,7 @@
     "protectedPathsExcluded": [
       "OPTION/**"
     ],
-    "patchBaseline": "GitHub main 1.8.9 + CI Hotfix 2 -> 1.9.0"
+    "patchBaseline": "GitHub main 1.9.0 + CI Hotfix 3 -> 1.9.1"
   },
   "internalTypewriter": {
     "source": "visible-text projection of original",
@@ -135,7 +135,7 @@
     "breakpointExpansionReset": true,
     "safeAreaViewportFitCover": true
   },
-  "nextPhase": "Daily Engine first real topic generation + result-to-article queue; continue Blog Factory workflow after correction bulk-apply stabilization",
+  "nextPhase": "Run GitHub browser-smoke for 1.9.1, then Daily Engine first real topic generation + result-to-article queue",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -200,7 +200,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "190",
+  "assetVersion": "191",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -209,17 +209,15 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "234 passed / 0 failed",
-    "moduleChecks": "PASS — 1.8.8 Blog Factory GitHub Actions Daily Engine + local prompt builder unit checks",
+    "staticChecks": "249 passed / 0 failed",
+    "moduleChecks": "PASS — Blog Factory GitHub Actions Daily Engine + local prompt builder unit checks",
     "jsSyntax": "PASS — 27 JS/MJS files",
-    "workflowYaml": "PASS — existing CI + Daily Engine workflow parse; Daily Engine contract covered by static checks",
-    "json": "PASS — all ai-cleaner and PROJECT_HANDOFF JSON parsed",
-    "mockedDailyGenerator": "PASS — Responses request, web_search, strict JSON schema, exactly 10 topics/TOP3, API secret not persisted",
-    "protectedToolIntegrity": "PASS — rewrite-studio/image-analyzer plus 17 core/service/UI modules SHA-identical to 1.8.5; textTool/imageTool HTML blocks exact; app.js only third-tool error-label wording changed",
-    "localBrowserSmoke": "ENVIRONMENT-LIMITED — curl preview succeeded but installed Chromium headless navigation hung in this container; repository browser-smoke remains final interactive gate",
-    "browserE2EConfigured": "46 cases including Daily Engine generated-topic transfer plus existing Blog Factory/text/image regressions",
-    "latestVisibleGitHubBaseline": "junl-im/meta main reports 1.8.5 before user applies this cumulative patch",
-    "patchRebuild": "PASS — GitHub-visible 1.8.5 + cumulative 23-file Patch and 1.8.7 + same Patch both reproduce the 1.8.8 full tree exactly"
+    "workflowYaml": "PASS — ai-cleaner-ci.yml + daily-blog-factory-pages.yml parse",
+    "protectedToolIntegrity": "PASS — OPTION unchanged; rewrite-studio.js, image-analyzer.js, text-engine.js, typewriter-engine.js SHA-identical to 1.9.0 CI Hotfix 3 baseline",
+    "localBrowserSmoke": "ENVIRONMENT-LIMITED — installed Chromium displays organization policy block for localhost; GitHub browser-smoke remains final interactive gate",
+    "browserE2EConfigured": "50 cases including correction overlap/direct-edit and partial Daily Engine data",
+    "patchRebuild": "PASS — 1.9.0 CI Hotfix 3 baseline + 17-file Patch reproduces 1.9.1 tree (110 files / diff 0)",
+    "mockedDailyGenerator": "PASS — Responses request, gpt-5 default, web_search, strict JSON schema, exactly 10 topics/TOP3, API secret not persisted"
   },
   "stabilityAudit131": {
     "updateOnlyWhenSemverNewer": true,

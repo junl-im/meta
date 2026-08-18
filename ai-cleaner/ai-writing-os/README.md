@@ -1,6 +1,6 @@
-# 블로그 팩토리 — V1.8.8 GitHub Actions Daily Engine
+# 블로그 팩토리 — V1.9.1 GitHub Actions Daily Engine
 
-AI Cleaner의 세 번째 도구 **블로그 팩토리**는 1.8.8부터 두 층으로 동작합니다.
+AI Cleaner의 세 번째 도구 **블로그 팩토리**는 Daily Engine과 로컬 프롬프트 빌더의 두 층으로 동작합니다.
 
 1. **Daily Engine**: GitHub Actions가 매일 자동으로 실제 오늘의 주제 10개를 생성해 `data/daily-topics.json`에 저장하고 GitHub Pages를 배포합니다.
 2. **로컬 프롬프트 빌더**: 사용자가 직접 주제 씨앗을 넣어 `오늘의 주제`, `오늘 1편`, `3편 생산`, `소재 20개`, `자유 요청` 프롬프트를 만들고 화면에서 확인한 뒤 복사합니다.
@@ -11,7 +11,7 @@ AI Cleaner의 세 번째 도구 **블로그 팩토리**는 1.8.8부터 두 층�
 
 `GitHub Actions schedule → OpenAI Responses API + web_search → 오늘의 주제 10개 → daily-topics.json → GitHub Pages 배포 → 블로그 팩토리 카드 표시`
 
-기본 스케줄은 **매일 06:20 Asia/Seoul**입니다. Actions의 수동 실행(`workflow_dispatch`)으로 즉시 새로 생성할 수도 있습니다. 일반 `push`에서는 API를 다시 호출하지 않고 현재 저장된 데이터를 포함해 Pages만 배포합니다.
+기본 스케줄은 **매일 06:20 Asia/Seoul**입니다. Actions의 수동 실행(`workflow_dispatch`)으로 즉시 새로 생성할 수도 있습니다. 일반 `main` push는 `ai-cleaner-ci.yml`이 검사 통과 후 Pages를 배포하며, Daily workflow는 예약/수동 실행에서만 AI API를 호출합니다.
 
 ## 최초 설정
 
@@ -26,13 +26,13 @@ GitHub 저장소에서 아래 값만 설정합니다. 브라우저 코드에는 
 - `BLOG_FACTORY_SEED` — 필수. 예: `육아, 아이와 갈 곳, 생활정보, 주말 나들이`
 - `BLOG_FACTORY_AUDIENCE` — 선택. 예: `초등 자녀가 있는 30~40대 부모`
 - `BLOG_FACTORY_AVOID_TOPICS` — 선택. 이미 자주 쓴 소재나 피할 주제
-- `OPENAI_MODEL` — 선택. 비어 있으면 generator의 기본 모델을 사용
+- `OPENAI_MODEL` — 선택. 비어 있으면 generator 기본값 `gpt-5` 사용
 
 Pages 설정은 `Settings → Pages → Build and deployment → Source → GitHub Actions`로 전환합니다. 그 뒤 `Actions → Daily Blog Factory + GitHub Pages → Run workflow`를 한 번 실행해 초기 데이터와 배포를 확인합니다.
 
 ## 오늘의 주제 카드
 
-`data/daily-topics.json`이 오늘 날짜의 `ready` 상태이면 블로그 팩토리 상단에 10개가 표시됩니다. 우선순위 상위 3개는 TOP 3로 강조합니다.
+`data/daily-topics.json`이 오늘 날짜의 `ready` 상태이면 블로그 팩토리 상단에 주제가 표시됩니다. 정상 생성은 10개이며, 부분 데이터가 들어오면 `N/10`으로 실제 개수를 표시하고 상위 최대 3개만 TOP 3로 강조합니다.
 
 각 카드의 `이 주제로 글 만들기`를 누르면 해당 주제의 검색 의도, 오늘 쓰는 이유, 차별화 각도, 확인할 자료가 `오늘 1편` 입력으로 넘어갑니다. 이후 기존 V7 Blog Factory 프롬프트를 만들고 복사하면 됩니다.
 
@@ -42,7 +42,7 @@ Pages 설정은 `Settings → Pages → Build and deployment → Source → GitH
 
 ## 실패 경계
 
-- Daily Engine 생성이 실패하면 workflow를 실패 처리해 잘못된 빈 결과를 배포하지 않습니다. 기존 Pages 배포본은 그대로 남습니다.
+- Daily Engine 생성/검증이 실패하면 JSON을 커밋하지 않고 workflow를 실패 처리합니다. 기존 Pages 배포본은 그대로 남습니다.
 - 생성 결과는 정확히 10개 제목이 있는지 검증한 뒤 JSON을 덮어씁니다.
 - API 키는 JSON/HTML/JS에 기록하지 않습니다.
 - 사용자의 실제 방문·구매·사용 경험을 모델이 지어내지 않도록 generator 프롬프트에 명시합니다.
@@ -55,3 +55,8 @@ Pages 설정은 `Settings → Pages → Build and deployment → Source → GitH
 - `ai-cleaner/data/daily-topics.json` — 공개 Pages가 읽는 오늘의 주제 데이터
 - `ai-cleaner/js/features/ai-writing-os.js` — Daily Engine 카드 표시 + 선택 주제를 기존 빌더로 전달
 - `ai-cleaner/ai-writing-os/*` — V7 OS manifest/compiler/runtime 자료
+
+## 1.9.1 안정화 메모
+- 브라우저 로컬 일일 캐시는 기기 시간대가 아니라 `Asia/Seoul` 날짜를 사용합니다.
+- Daily 생성 커밋은 정적/모듈 검사 뒤에 저장되며, 동시 main 변경 시 fetch/rebase/push를 재시도합니다.
+- 일반 CI는 자신보다 최신 main commit이 생기면 오래된 Pages artifact 배포를 건너뜁니다. Daily와 일반 CI의 실제 Pages deploy는 같은 concurrency group으로 직렬화됩니다.

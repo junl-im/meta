@@ -1,6 +1,6 @@
 # AI Cleaner 프로젝트 인수인계 메모리
 
-업데이트: 2026-08-18 · 현재 패키지: 1.9.0
+업데이트: 2026-08-18 · 현재 패키지: 1.9.1
 
 ## 새 채팅에서 가장 먼저 읽을 것
 이 폴더를 새 채팅에 업로드한 뒤 `PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md 읽고 이어서 개발하자`라고 요청한다. 이 문서는 프로젝트의 결정사항, 보호 경로, UX 방향, 안전 제약, 배포 방식, 알려진 이슈를 보존하기 위한 인수인계 메모리다.
@@ -27,7 +27,7 @@
 - 원본/결과/문장 편집 textarea만 텍스트 선택을 허용한다. 일반 UI는 기본 우클릭/드래그 선택을 막는다. textarea 우클릭은 자체 메뉴를 사용한다.
 - 브라우저 맞춤법/자동교정/Grammarly 힌트는 textarea에서 최대한 끈다.
 - 반복 단어/교정 항목의 `🔍 위치 보기`는 textarea 내부 scrollTop을 계산해 실제 등장 위치로 이동해야 한다.
-- 1.9.0 교정 제안 패널은 `일괄 반영`을 제공한다. 실제 치환값이 있는 deterministic 제안만 대상이며 반복 단어 등 확인 항목은 자동 변경하지 않는다. 겹치는 범위는 여러 pass로 재분석해 안전하게 처리하고, 전체 일괄 반영은 History 한 단계로 Undo/Redo 가능해야 한다.
+- 1.9.1 교정 제안 패널은 `안전 일괄 반영`을 제공한다. 실제 치환값이 있는 deterministic 제안만 대상이며 반복 단어 등 확인 항목은 자동 변경하지 않는다. 개별 반영 시 이미 적용한 제안과 범위가 겹치면 `겹침 · 일괄`로 전환하고, 대량 목록은 120개까지만 렌더링한다. 전체 일괄 반영은 History 한 단계로 Undo/Redo 가능해야 한다.
 - X-ray 전용 결과 탭은 1.1.1에서 제거했다. 숨은 Unicode/특수 공백/유사문자는 `기술 정보` 패널에서 확인한다.
 
 ## 텍스트 안전 정책
@@ -576,3 +576,15 @@
 - `선택 AI 열기` 복구 버튼의 안내 문구는 실제 복사 여부를 전제로 하지 않도록 수정했다.
 - CSS는 기존 계통을 유지하며 factory disabled 상태와 reduced-motion hover만 보강했다.
 - 신규 회귀 검사는 idea-bank 이미지 계약, mode-aware pipeline, context bounds, restored provider validation을 포함한다.
+
+
+## 1.9.1 UI/UX · 예외사항 안정화
+- 결과 `직접 수정` 중에는 오래된 교정 제안, 문장 검토, 재작성, 보관함 복원, Undo/Redo, 변경 비교를 잠근다. 수정 완료 뒤 현재 결과를 기준으로 제안을 다시 계산한다.
+- 결과를 전부 지운 상태에서도 `수정 완료` 버튼은 살아 있어 편집 모드에 갇히지 않는다.
+- 교정 제안 목록은 최대 120개만 렌더링하고 숨겨진 제안도 `안전 일괄 반영`에서는 처리한다. 겹치는 개별 제안은 안전 일괄 처리로 유도한다.
+- 텍스트 도구 복사는 Async Clipboard 실패 시 legacy copy를 시도하고, 최종 실패 시 결과를 선택해 수동 복사할 수 있게 한다.
+- Blog Factory 저장 프로필/요청 입력 상한을 UI와 런타임 양쪽에 두고, 로컬 일일 프롬프트의 날짜/파일명/캐시 키를 `Asia/Seoul`로 통일한다.
+- Daily Engine JSON이 10개 미만이면 `부분 준비 · N/10`으로 실제 개수를 표시하고 TOP 3를 다시 정규화한다.
+- Daily Engine generator 기본 모델은 `gpt-5`; `OPENAI_MODEL`로 override 가능. seed/audience/avoid 변수 길이와 150초 timeout 오류를 방어한다.
+- Daily 생성 JSON은 정적/모듈 검사가 통과한 뒤에만 커밋한다. 동시 main push가 있으면 최대 3회 fetch/rebase/push 재시도한다.
+- 일반 CI의 오래된 commit은 최신 `main`과 SHA가 다르면 Pages 배포를 건너뛴다. CI와 Daily의 Pages deploy job은 공통 `github-pages-deploy` concurrency group으로 직렬화한다.

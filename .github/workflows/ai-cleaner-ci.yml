@@ -134,20 +134,42 @@ jobs:
       contents: read
       pages: write
       id-token: write
+    outputs:
+      deployable: ${{ steps.head.outputs.deployable }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Skip stale main deployment
+        id: head
+        shell: bash
+        run: |
+          git fetch origin main
+          if [ "$(git rev-parse origin/main)" = "$GITHUB_SHA" ]; then
+            echo 'deployable=true' >> "$GITHUB_OUTPUT"
+            echo 'This run still matches the current main branch.'
+          else
+            echo 'deployable=false' >> "$GITHUB_OUTPUT"
+            echo 'A newer main commit exists; skipping this stale Pages deployment.'
+          fi
       - name: Configure GitHub Pages
+        if: steps.head.outputs.deployable == 'true'
         uses: actions/configure-pages@v5
       - name: Upload GitHub Pages artifact
+        if: steps.head.outputs.deployable == 'true'
         uses: actions/upload-pages-artifact@v4
         with:
           path: '.'
 
   pages-deploy:
     needs: pages-package
+    if: needs.pages-package.outputs.deployable == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    concurrency:
+      group: github-pages-deploy
+      cancel-in-progress: false
     permissions:
       pages: write
       id-token: write

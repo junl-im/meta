@@ -67,6 +67,7 @@ ns.createAiWritingOsController=function createAiWritingOsController({
   const REMOTE_DAILY_PATH='data/daily-topics.json';
   const MAX_TASK_CHARS=200000;
   const CONTEXT_LIMITS={audience:500,facts:80000,avoidTopics:80000};
+  const PROFILE_LIMITS={displayName:80,preferencesText:12000,entries:50,key:80,value:1000};
   const FACTORY_DEFAULTS={mode:'daily_topics',blogType:'auto',audience:'',researchMode:'auto',imageCount:'5'};
   const BLOG_TYPE_LABELS={auto:'자동 판단',search_info:'검색 정보형',place_trip:'장소 · 여행',parenting_life:'육아 · 생활',product_info:'제품 · 비교 정보형',monetization:'수익 연결형'};
   const RESEARCH_LABELS={auto:'필요할 때만',required:'가능하면 반드시 확인',off:'외부 조사 없이'};
@@ -122,10 +123,11 @@ ns.createAiWritingOsController=function createAiWritingOsController({
     return{task:raw,channel,intent:detectIntent(text),workforceMode,contributions,outputLanguage:detectOutputLanguage(raw,text),deliverables,controlPlaneIsNotContent:true};
   }
   function parsePreferences(text){
-    const out={};for(const line of String(text||'').split('\n')){const i=line.indexOf(':');if(i>0){const k=line.slice(0,i).trim(),v=line.slice(i+1).trim();if(k&&v)out[k]=v;}}
+    const out=Object.create(null),lines=String(text||'').slice(0,PROFILE_LIMITS.preferencesText).split('\n');let count=0;
+    for(const line of lines){if(count>=PROFILE_LIMITS.entries)break;const i=line.indexOf(':');if(i<=0)continue;const k=line.slice(0,i).trim().slice(0,PROFILE_LIMITS.key),v=line.slice(i+1).trim().slice(0,PROFILE_LIMITS.value);if(k&&v){out[k]=v;count++;}}
     return out;
   }
-  function getProfile(){return{displayName:$('osDisplayName')?.value.trim()||'',preferences:parsePreferences($('osPreferences')?.value||'')};}
+  function getProfile(){return{displayName:($('osDisplayName')?.value.trim()||'').slice(0,PROFILE_LIMITS.displayName),preferences:parsePreferences($('osPreferences')?.value||'')};}
   function getFactoryModeProfile(mode=factoryMode){return compiler.blogFactory?.modes?.[mode]||FALLBACK_COMPILER.blogFactory.modes[mode]||FALLBACK_COMPILER.blogFactory.modes.daily_topics;}
   function usesFullImagePackage(mode=factoryMode){return mode==='daily_one'||mode==='batch_three';}
   function factoryImageSummary(settings){
@@ -154,7 +156,7 @@ ns.createAiWritingOsController=function createAiWritingOsController({
   }
   function loadStoredProfile(){
     if(!storage)return;
-    try{const raw=storage.getItem(PROFILE_KEY);if(raw){const value=JSON.parse(raw);if($('osDisplayName'))$('osDisplayName').value=String(value.displayName||'');if($('osPreferences'))$('osPreferences').value=String(value.preferencesText||'');}}catch(_){}
+    try{const raw=storage.getItem(PROFILE_KEY);if(raw){const value=JSON.parse(raw);if($('osDisplayName'))$('osDisplayName').value=String(value.displayName||'').slice(0,PROFILE_LIMITS.displayName);if($('osPreferences'))$('osPreferences').value=String(value.preferencesText||'').slice(0,PROFILE_LIMITS.preferencesText);}}catch(_){}
     try{
       const raw=storage.getItem(FACTORY_KEY);if(raw){const value=JSON.parse(raw);if(value&&typeof value==='object'){
         if(['daily_topics','daily_one','batch_three','idea_bank','free'].includes(value.mode))factoryMode=value.mode;
@@ -171,7 +173,7 @@ ns.createAiWritingOsController=function createAiWritingOsController({
     if(!storage)return;const s=getFactorySettings();
     try{storage.setItem(FACTORY_KEY,JSON.stringify({mode:s.mode,blogType:s.blogType,audience:s.audience,researchMode:s.researchMode,imageCount:s.imageCount,savedAt:Date.now()}));}catch(_){}
   }
-  function rememberDailySeed(){if(!storage)return;try{const value=$('osTask')?.value.trim()||'';if(value)storage.setItem(DAILY_SEED_KEY,value);else storage.removeItem?.(DAILY_SEED_KEY);}catch(_){} }
+  function rememberDailySeed(){if(!storage)return;try{const value=($('osTask')?.value.trim()||'').slice(0,MAX_TASK_CHARS);if(value)storage.setItem(DAILY_SEED_KEY,value);else storage.removeItem?.(DAILY_SEED_KEY);}catch(_){} }
   function setAutoDaily(next,{prepareNow=false}={}){
     autoDaily=!!next;const toggle=$('osAutoDaily');if(toggle)toggle.checked=autoDaily;
     if(storage){try{storage.setItem(AUTO_DAILY_KEY,autoDaily?'1':'0');}catch(_){}}
@@ -180,7 +182,7 @@ ns.createAiWritingOsController=function createAiWritingOsController({
     return true;
   }
   function saveProfile(){
-    const value={displayName:$('osDisplayName')?.value.trim()||'',preferencesText:$('osPreferences')?.value||'',savedAt:Date.now()};
+    const value={displayName:($('osDisplayName')?.value.trim()||'').slice(0,PROFILE_LIMITS.displayName),preferencesText:String($('osPreferences')?.value||'').slice(0,PROFILE_LIMITS.preferencesText),savedAt:Date.now()};
     if(storage){try{storage.setItem(PROFILE_KEY,JSON.stringify(value));showToast('블로그 팩토리 기본 설정을 이 브라우저에 저장했습니다.');return true;}catch(_){} }
     showToast('브라우저 저장소를 사용할 수 없어 설정을 저장하지 못했습니다.');return false;
   }
@@ -236,20 +238,23 @@ ns.createAiWritingOsController=function createAiWritingOsController({
   }
   function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function localDateKey(){const d=new Date(),p=n=>String(n).padStart(2,'0');return`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;}
-  function localDateLabel(){try{return new Intl.DateTimeFormat('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',weekday:'short'}).format(new Date());}catch(_){return localDateKey();}}
-  function stableHash(text){let h=2166136261;for(let i=0;i<text.length;i++){h^=text.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
-  function dailyAngle(){const key=localDateKey(),seed=$('osTask')?.value.trim()||'';return DAILY_ANGLES[stableHash(key+'|'+seed)%DAILY_ANGLES.length];}
   function seoulDateKey(){try{return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());}catch(_){return localDateKey();}}
+  function seoulDateLabel(){try{return new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',weekday:'short'}).format(new Date());}catch(_){return seoulDateKey();}}
+  function stableHash(text){let h=2166136261;for(let i=0;i<text.length;i++){h^=text.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+  function dailyAngle(){const key=seoulDateKey(),seed=$('osTask')?.value.trim()||'';return DAILY_ANGLES[stableHash(key+'|'+seed)%DAILY_ANGLES.length];}
   function normalizeDailyEngineData(value){
     if(!value||typeof value!=='object')return null;
-    const topics=Array.isArray(value.topics)?value.topics.slice(0,20).map((topic,index)=>({
-      id:String(topic?.id||`topic-${index+1}`),rank:Number(topic?.rank)||index+1,top3:topic?.top3===true||(Number(topic?.rank)||index+1)<=3,
+    const mapped=Array.isArray(value.topics)?value.topics.slice(0,20).map((topic,index)=>({
+      id:String(topic?.id||`topic-${index+1}`),rank:Number.isFinite(Number(topic?.rank))&&Number(topic?.rank)>0?Number(topic.rank):index+1,
       title:String(topic?.title||'').trim().slice(0,160),category:String(topic?.category||'일반').trim().slice(0,60),
       whyNow:String(topic?.whyNow||'').trim().slice(0,320),searchIntent:String(topic?.searchIntent||'').trim().slice(0,260),
       angle:String(topic?.angle||'').trim().slice(0,320),researchNeed:String(topic?.researchNeed||'').trim().slice(0,360),
       imageConcept:String(topic?.imageConcept||'').trim().slice(0,320),priorityScore:Math.max(0,Math.min(100,Number(topic?.priorityScore)||0))
     })).filter(topic=>topic.title):[];
-    return{schemaVersion:Number(value.schemaVersion)||1,status:String(value.status||''),date:String(value.date||''),timezone:String(value.timezone||'Asia/Seoul'),generatedAtLocal:String(value.generatedAtLocal||''),model:String(value.model||''),engine:String(value.engine||''),webSearchUsed:value.webSearchUsed===true,summary:String(value.summary||'').trim().slice(0,500),topics};
+    mapped.sort((a,b)=>a.rank-b.rank||b.priorityScore-a.priorityScore);
+    const topics=mapped.slice(0,10);topics.forEach((topic,index)=>{topic.rank=index+1;topic.top3=index<3;});
+    const rawDate=String(value.date||''),date=/^\d{4}-\d{2}-\d{2}$/.test(rawDate)?rawDate:'';
+    return{schemaVersion:Number(value.schemaVersion)||1,status:String(value.status||''),date,timezone:String(value.timezone||'Asia/Seoul'),generatedAtLocal:String(value.generatedAtLocal||''),model:String(value.model||''),engine:String(value.engine||''),webSearchUsed:value.webSearchUsed===true,summary:String(value.summary||'').trim().slice(0,500),topics};
   }
   function dailyEngineGeneratedLabel(data){
     if(!data?.generatedAtLocal)return data?.date||'준비 시각 없음';
@@ -257,11 +262,11 @@ ns.createAiWritingOsController=function createAiWritingOsController({
   }
   function renderDailyEngine(){
     const box=$('osDailyTopics'),empty=$('osDailyEngineEmpty'),status=$('osDailyEngineStatus'),summary=$('osDailyEngineSummary'),meta=$('osDailyEngineMeta'),copy=$('osCopyDailyTopics');if(!box)return;
-    box.textContent='';const data=dailyEngineData,topics=data?.topics||[],today=seoulDateKey(),isToday=!!data?.date&&data.date===today&&data.status==='ready'&&topics.length>0;
-    if(copy)copy.disabled=!topics.length;
+    box.textContent='';const data=dailyEngineData,topics=data?.topics||[],today=seoulDateKey(),complete=topics.length===10,isToday=!!data?.date&&data.date===today&&data.status==='ready'&&topics.length>0;
+    if(copy){copy.disabled=!topics.length;copy.textContent=topics.length?`주제 ${Math.min(10,topics.length)}개 복사`:'주제 복사';}
     if(!topics.length){if(empty)empty.hidden=false;if(status)status.textContent=dailyEngineLoading?'확인 중…':'준비 전';if(summary)summary.textContent=data?.summary||'오늘의 주제가 아직 준비되지 않았습니다.';if(meta)meta.textContent='잠시 후 다시 확인하거나 아래에서 직접 주제 프롬프트를 만들어 보세요.';return;}
-    if(empty)empty.hidden=true;if(status)status.textContent=isToday?`오늘 ${topics.length}개 준비`:`지난 데이터 · ${data.date||'날짜 없음'}`;
-    if(summary)summary.textContent=isToday?(data.summary||'오늘 작성할 주제를 우선순위대로 준비했습니다.'):`${data.date||'이전 날짜'}에 준비된 주제입니다. 오늘 새 주제가 준비되기 전까지 참고용으로 사용할 수 있습니다.`;
+    if(empty)empty.hidden=true;if(status)status.textContent=isToday?(complete?'오늘 10개 준비':`부분 준비 · ${topics.length}/10`):`지난 데이터 · ${data.date||'날짜 없음'}`;
+    if(summary)summary.textContent=isToday?(complete?(data.summary||'오늘 작성할 주제를 우선순위대로 준비했습니다.'):`오늘 주제가 ${topics.length}개만 준비되었습니다. 필요한 경우 아래 수동 프롬프트 빌더를 함께 사용하세요.`):`${data.date||'이전 날짜'}에 준비된 주제입니다. 오늘 새 주제가 준비되기 전까지 참고용으로 사용할 수 있습니다.`;
     if(meta)meta.textContent=`${dailyEngineGeneratedLabel(data)} · ${data.webSearchUsed?'최신 정보 확인 포함 · ':''}TOP 3 우선 추천`;
     topics.slice(0,10).forEach((topic,index)=>{
       const card=document.createElement('article');card.className=`osDailyTopic${topic.top3?' top3':''}`;card.dataset.dailyTopicIndex=String(index);
@@ -285,7 +290,7 @@ ns.createAiWritingOsController=function createAiWritingOsController({
     const topic=dailyEngineData?.topics?.[Number(index)];if(!topic)return false;selectFactoryMode('daily_one',{remember:true});const task=$('osTask');if(task)task.value=dailyTopicToTask(topic);if(autoDaily)rememberDailySeed();invalidatePreparedOutput();syncSimpleState();updateAutoDailyStatus();requestAnimationFrame(()=>{task?.scrollIntoView({behavior:preferredScrollBehavior(),block:'center'});try{task?.focus({preventScroll:true});}catch(_){task?.focus();}});showToast('자동 주제를 오늘 1편 생산 모드로 가져왔습니다.');return true;
   }
   async function copyDailyTopics(){
-    const data=dailyEngineData,topics=data?.topics||[];if(!topics.length)return false;const lines=[`# ${data.date||seoulDateKey()} 블로그 팩토리 오늘의 주제`,'',...topics.slice(0,10).map((topic,index)=>`${topic.top3?'★ ':' '}${index+1}. ${topic.title}${topic.searchIntent?` — ${topic.searchIntent}`:''}`)];const copied=await writeClipboard(lines.join('\n'));showToast(copied?'오늘의 주제 10개를 복사했습니다.':'자동 복사가 차단되었습니다.');return copied;
+    const data=dailyEngineData,topics=(data?.topics||[]).slice(0,10);if(!topics.length)return false;const lines=[`# ${data.date||seoulDateKey()} 블로그 팩토리 오늘의 주제`,'',...topics.map((topic,index)=>`${topic.top3?'★ ':' '}${index+1}. ${topic.title}${topic.searchIntent?` — ${topic.searchIntent}`:''}`)];const copied=await writeClipboard(lines.join('\n'));showToast(copied?`오늘의 주제 ${topics.length}개를 복사했습니다.`:'자동 복사가 차단되었습니다.');return copied;
   }
   function factoryStagesForMode(mode){
     if(mode==='daily_topics')return[
@@ -336,9 +341,9 @@ ns.createAiWritingOsController=function createAiWritingOsController({
     }
     const profile=getProfile(),channel=selectedChannel(route),commonRules=[...(compiler.commonRules||[])],channelRules=[...(channel.rules||[])],effort=qualityRule(route),factoryStages=factory.mode==='free'?[]:factoryStagesForMode(factory.mode),naturalnessRules=[...(compiler.blogFactory?.naturalnessRules||FALLBACK_COMPILER.blogFactory.naturalnessRules)];
     return{
-      schemaVersion:3,createdAt:new Date().toISOString(),localDate:localDateLabel(),dailyKey:localDateKey(),
+      schemaVersion:3,createdAt:new Date().toISOString(),localDate:seoulDateLabel(),dailyKey:seoulDateKey(),
       os:{name:manifest.name,version:manifest.version,compiler:compiler.name||'AI Cleaner Blog Factory Compiler',compilerVersion:compiler.version||'1.2',mode:'LOCAL_PROMPT_FACTORY',defaultLanguage:manifest.defaultLanguage||'ko',portableZip:manifest.portableZip},
-      task,route,factory,automation:{autoDaily,dailyKey:localDateKey(),dailyAngle:dailyAngle(),method:'local-date prompt preparation'},
+      task,route,factory,automation:{autoDaily,dailyKey:seoulDateKey(),dailyAngle:dailyAngle(),method:'seoul-date prompt preparation'},
       boundaries:{controlPlaneIsNotContent:true,userContentIsContentPlane:true,neverInventExperience:true,doNotExposeInternalDeliberationByDefault:true,defaultUserFacingLanguage:route.outputLanguage,detectorEvasionOptimization:false},
       userProfile:(profile.displayName||Object.keys(profile.preferences).length)?profile:undefined,
       compiler:{commonRules,channelRules,effortRule:effort,outputContract:outputContractFor(factory,channel),channelLabel:channel.label||route.channel,commonRuleCount:commonRules.length,channelRuleCount:channelRules.length,factoryStages,naturalnessRules,factoryStageCount:factoryStages.length},
@@ -419,7 +424,7 @@ ns.createAiWritingOsController=function createAiWritingOsController({
   }
   function readTodayCache(){
     if(!storage||!autoDaily)return null;
-    try{const raw=storage.getItem(DAILY_CACHE_KEY);if(!raw)return null;const value=JSON.parse(raw);if(value?.date!==localDateKey()||value?.signature!==dailySignature())return null;return value;}catch(_){return null;}
+    try{const raw=storage.getItem(DAILY_CACHE_KEY);if(!raw)return null;const value=JSON.parse(raw);if(value?.date!==seoulDateKey()||value?.signature!==dailySignature())return null;return value;}catch(_){return null;}
   }
   function renderPrepared(pack,markdown,{scroll=true,cache=true}={}){
     currentPack=pack;currentMarkdown=markdown;const summary=$('osRouteSummary'),preview=$('osTaskPackPreview'),wrap=$('osTaskPackResult'),compilerInfo=$('osCompilerSummary'),ready=$('osReadyMessage');
@@ -436,7 +441,7 @@ ns.createAiWritingOsController=function createAiWritingOsController({
     const toggle=$('osAutoDaily'),status=$('osAutoDailyStatus');if(toggle)toggle.checked=autoDaily;if(!status)return;
     if(!autoDaily){status.textContent='꺼짐 · 켜두면 새 날짜 첫 실행 때 복사용 주제 프롬프트를 자동으로 준비합니다.';return;}
     if(!$('osTask')?.value.trim()){status.textContent='켜짐 · 관심 분야를 입력하면 자동 준비가 시작됩니다.';return;}
-    const cached=readTodayCache();status.textContent=cached?'켜짐 · 오늘 프롬프트가 이미 준비되어 있습니다. 날짜가 바뀌면 다음 프롬프트를 자동 준비합니다.':'켜짐 · 오늘 날짜 기준 프롬프트를 자동 준비합니다. 브라우저를 닫아둔 동안에는 실행되지 않습니다.';
+    const cached=readTodayCache();status.textContent=cached?'켜짐 · 서울 기준 오늘 프롬프트가 이미 준비되어 있습니다. 날짜가 바뀌면 다음 프롬프트를 자동 준비합니다.':'켜짐 · 서울 기준 오늘 날짜의 프롬프트를 자동 준비합니다. 브라우저를 닫아둔 동안에는 실행되지 않습니다.';
   }
   function syncSimpleState(){
     const hasTask=!!$('osTask')?.value.trim(),status=$('osPrepareStatus'),build=$('osBuildPrompt');if(build)build.disabled=busy||!hasTask;
@@ -460,7 +465,7 @@ ns.createAiWritingOsController=function createAiWritingOsController({
   function focusManualCopy(){const target=$('osTaskPackPreview');if(!target)return;try{try{target.focus({preventScroll:true});}catch(_){target.focus();}target.select();}catch(_){} }
   async function copyMarkdown(){const md=await ensureMarkdown();if(!md)return false;const copied=await writeClipboard(md);if(!copied)focusManualCopy();showToast(copied?'프롬프트를 복사했습니다.':'자동 복사가 차단됐습니다. 프롬프트가 선택되어 있으니 직접 복사해 주세요.');return copied;}
   function downloadText(name,text,type='text/plain;charset=utf-8'){const url=URL.createObjectURL(new Blob([text],{type})),a=document.createElement('a');a.href=url;a.download=name;a.hidden=true;document.body.appendChild(a);try{a.click();}finally{a.remove();setTimeout(()=>URL.revokeObjectURL(url),1200);}}
-  async function downloadMarkdown(){const md=await ensureMarkdown();if(md)downloadText(factoryMode==='daily_topics'?`BLOG_FACTORY_TOPICS_${localDateKey()}.md`:factoryMode==='free'?'BLOG_FACTORY_PROMPT.md':'BLOG_FACTORY_PRODUCTION_PROMPT.md',md,'text/markdown;charset=utf-8');}
+  async function downloadMarkdown(){const md=await ensureMarkdown();if(md)downloadText(factoryMode==='daily_topics'?`BLOG_FACTORY_TOPICS_${seoulDateKey()}.md`:factoryMode==='free'?'BLOG_FACTORY_PROMPT.md':'BLOG_FACTORY_PRODUCTION_PROMPT.md',md,'text/markdown;charset=utf-8');}
   function downloadOsZip(){const href=`${assetBase}/os/releases/${encodeURIComponent(manifest.portableZip||FALLBACK_MANIFEST.portableZip)}`,a=document.createElement('a');a.href=href;a.download=manifest.portableZip||FALLBACK_MANIFEST.portableZip;a.hidden=true;document.body.appendChild(a);try{a.click();}finally{a.remove();}}
   function clearTask(){
     seq++;prepareAbort?.abort();prepareAbort=null;currentMarkdown='';currentPack=null;for(const id of ['osTask','osFacts','osAvoidTopics'])if($(id))$(id).value='';
@@ -503,7 +508,7 @@ ns.createAiWritingOsController=function createAiWritingOsController({
   }
   async function init(){
     if(initialized)return;initialized=true;bind();await ensureAssets();loadStoredProfile();if(pendingRestoreState){const value=pendingRestoreState;pendingRestoreState=null;applyRestoredState(value);}renderFactoryModes();if($('osStatus'))$('osStatus').textContent='오늘 주제 + 프롬프트 준비 완료';
-    if($('osStaticMode'))$('osStaticMode').textContent='오늘의 주제 자동 준비 · V7 Blog Factory';syncSimpleState();updateAutoDailyStatus();void loadDailyEngine();
+    if($('osStaticMode'))$('osStaticMode').textContent='오늘의 주제 자동 준비 · 복사 중심';syncSimpleState();updateAutoDailyStatus();void loadDailyEngine();
   }
   function captureState(){const f=getFactorySettings();return{task:$('osTask')?.value||'',mode:$('osMode')?.value||'auto',factoryMode:f.mode,blogType:f.blogType,audience:f.audience,researchMode:f.researchMode,imageCount:f.imageCount,facts:f.facts,avoidTopics:f.avoidTopics,autoDaily};}
   function restoreState(value){if(!value||typeof value!=='object')return false;if(!initialized){pendingRestoreState={...value};return true;}return applyRestoredState(value);}

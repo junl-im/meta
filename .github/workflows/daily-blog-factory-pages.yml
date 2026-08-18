@@ -47,6 +47,18 @@ jobs:
           BLOG_FACTORY_AVOID_TOPICS: ${{ vars.BLOG_FACTORY_AVOID_TOPICS }}
         run: node .github/scripts/generate-daily-topics.mjs
 
+      - name: JavaScript syntax checks
+        run: |
+          node --check .github/scripts/generate-daily-topics.mjs
+          node --check ai-cleaner/js/features/ai-writing-os.js
+          node --check ai-cleaner/tests/static-check.mjs
+          node --check ai-cleaner/tests/module-check.mjs
+
+      - name: Blog Factory static checks
+        run: |
+          node ai-cleaner/tests/module-check.mjs
+          node ai-cleaner/tests/static-check.mjs
+
       - name: Persist generated daily topics
         if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.generate_topics)
         shell: bash
@@ -59,20 +71,27 @@ jobs:
           else
             DATE_KST="$(TZ=Asia/Seoul date +%F)"
             git commit -m "chore: update daily blog topics ${DATE_KST} [skip ci]"
-            git push
+            PUSHED=false
+            for attempt in 1 2 3; do
+              if git push origin HEAD:main; then
+                PUSHED=true
+                break
+              fi
+              echo "Push attempt ${attempt} failed; rebasing onto the latest main before retrying."
+              git fetch origin main
+              git rebase origin/main
+            done
+            if [ "$PUSHED" != true ]; then
+              echo 'Failed to persist daily topics after 3 attempts.'
+              exit 1
+            fi
           fi
 
-      - name: JavaScript syntax checks
+      - name: Sync latest main before packaging
+        shell: bash
         run: |
-          node --check .github/scripts/generate-daily-topics.mjs
-          node --check ai-cleaner/js/features/ai-writing-os.js
-          node --check ai-cleaner/tests/static-check.mjs
-          node --check ai-cleaner/tests/module-check.mjs
-
-      - name: Blog Factory static checks
-        run: |
-          node ai-cleaner/tests/module-check.mjs
-          node ai-cleaner/tests/static-check.mjs
+          git fetch origin main
+          git merge --ff-only origin/main
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -86,6 +105,9 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    concurrency:
+      group: github-pages-deploy
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

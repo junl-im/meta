@@ -501,6 +501,65 @@ test('correction suggestions bulk-apply safe edits, resolve overlaps, and leave 
   await expect(output).toHaveValue(/그래서 안내합니다\./);
 });
 
+test('overlapping individual corrections stay safe and hand off to bulk apply', async ({ page }) => {
+  await gotoReady(page);
+  const input=page.locator('#input'),output=page.locator('#output');
+  await input.fill('**결론적으로** 안내합니다.');
+  await analyzeNow(page,{silent:true});
+  await page.locator('#issuesWidget').click();
+  const markdown=page.locator('#issues .item').filter({hasText:'마크다운 **'});
+  await expect(markdown.locator('[data-apply]')).toBeEnabled();
+  await markdown.locator('[data-apply]').click();
+  await expect(output).toHaveValue('결론적으로 안내합니다.');
+  const transition=page.locator('#issues .item').filter({hasText:'정형 전환어'});
+  await expect(transition.locator('.issueOverlap')).toHaveText('겹침 · 일괄');
+  await expect(transition.locator('[data-apply]')).toHaveCount(0);
+  await page.locator('#applyAllIssues').click();
+  await expect(output).toHaveValue('그래서 안내합니다.');
+});
+
+test('direct result editing temporarily locks stale correction and restore actions', async ({ page }) => {
+  await gotoReady(page);
+  const input=page.locator('#input'),output=page.locator('#output');
+  await input.fill('결론적으로 안내합니다.');
+  await analyzeNow(page,{silent:true});
+  await page.locator('#checkpointSave').click();
+  await expect(page.locator('#checkpointCount')).toHaveText('1');
+  await page.locator('#issuesWidget').click();await expect(page.locator('#issuesPanel')).toBeVisible();
+  await page.locator('#editResult').click();
+  await expect(output).toHaveJSProperty('readOnly',false);
+  await expect(page.locator('#issuesWidget')).toBeHidden();
+  await expect(page.locator('#rewriteWidget')).toBeHidden();
+  await expect(page.locator('#issuesPanel')).toBeHidden();
+  await expect(page.locator('#checkpointOpen')).toBeDisabled();
+  await expect(page.locator('#undoStep')).toBeDisabled();
+  await expect(page.locator('#resultTabDiff')).toBeDisabled();
+  await output.fill('');
+  await expect(page.locator('#editResult')).toBeEnabled();
+  await output.fill('결론적으로 직접 수정했습니다.');
+  await expect(page.locator('#resultNextStep')).toContainText('직접 수정 중');
+  await page.locator('#editResult').click();
+  await expect(output).toHaveJSProperty('readOnly',true);
+  await expect(page.locator('#issuesWidget')).toBeVisible();
+  await expect(page.locator('#rewriteWidget')).toBeVisible();
+  await expect(page.locator('#checkpointOpen')).toBeEnabled();
+  await expect(page.locator('#undoStep')).toBeEnabled();
+  await page.locator('#issuesWidget').click();
+  await expect(page.locator('#issuesPanel [data-apply]')).toHaveCount(1);
+});
+
+test('Blog Factory Daily Engine handles partial topic data without overstating readiness', async ({ page }) => {
+  const date=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+  const topics=Array.from({length:4},(_,i)=>({id:`partial-${i+1}`,rank:20-i,top3:true,title:`부분 주제 ${i+1}`,category:'생활형',whyNow:'오늘 확인',searchIntent:'정보 탐색',angle:'다른 각도',researchNeed:'추가 확인',imageConcept:'생활 장면',priorityScore:80-i}));
+  await page.route('**/ai-cleaner/data/daily-topics.json*',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({schemaVersion:1,status:'ready',date,timezone:'Asia/Seoul',generatedAtLocal:`${date}T06:20:00+09:00`,webSearchUsed:false,summary:'부분 생성',topics})}));
+  await gotoReady(page);await page.locator('[data-tool="writing"]').click();
+  await expect(page.locator('#osDailyEngineStatus')).toHaveText('부분 준비 · 4/10');
+  await expect(page.locator('#osDailyTopics .osDailyTopic')).toHaveCount(4);
+  await expect(page.locator('#osDailyTopics .osDailyTopic.top3')).toHaveCount(3);
+  await expect(page.locator('#osCopyDailyTopics')).toHaveText('주제 4개 복사');
+  await expect(page.locator('#osDailyEngineSummary')).toContainText('4개만 준비');
+});
+
 test('Blog Factory Daily Engine renders generated topics and sends a selected topic to daily-one', async ({ page }) => {
   const date=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
   const topics=Array.from({length:10},(_,i)=>({

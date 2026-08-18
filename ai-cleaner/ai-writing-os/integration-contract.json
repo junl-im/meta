@@ -1,7 +1,7 @@
 {
   "schemaVersion": 4,
   "name": "AI Cleaner Blog Factory Daily Engine contract",
-  "version": "1.8.8",
+  "version": "1.9.1",
   "runtime": "github-pages-actions-daily-engine-with-local-prompt-builder",
   "flow": [
     "scheduled topic generation",
@@ -26,12 +26,16 @@
     "webSearchTool": true,
     "secret": "OPENAI_API_KEY",
     "requiredVariable": "BLOG_FACTORY_SEED",
-    "deploy": "same workflow via GitHub Pages artifact/deploy actions"
+    "deploy": "same workflow via GitHub Pages artifact/deploy actions",
+    "defaultModel": "gpt-5",
+    "modelOverrideVariable": "OPENAI_MODEL",
+    "partialPayloadUi": "show actual N/10 count without claiming full readiness",
+    "deploymentRaceGuard": "shared Pages deploy concurrency + stale main deployment skip"
   },
   "dailyLocalAutomation": {
     "enabled": true,
     "label": "로컬 프롬프트 자동 준비",
-    "trigger": "first app open on a new local date",
+    "trigger": "first app open on a new Asia/Seoul date",
     "requiresSavedSeed": true,
     "runsWhileBrowserClosed": false,
     "callsRemoteAi": false,

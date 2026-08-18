@@ -1,6 +1,6 @@
 {
-  "version": "1.9.0",
-  "assetVersion": "190",
+  "version": "1.9.1",
+  "assetVersion": "191",
   "channel": "stable",
-  "updateMode": "correction-safe-bulk-apply"
+  "updateMode": "ui-edge-case-stability-hardening"
 }
