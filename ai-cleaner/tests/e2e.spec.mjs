@@ -489,7 +489,7 @@ test('Blog Factory Daily Engine renders generated topics and sends a selected to
   await expect(page.locator('#osDailyEngineStatus')).toHaveText('오늘 10개 준비');
   await expect(page.locator('#osDailyTopics .osDailyTopic')).toHaveCount(10);
   await expect(page.locator('#osDailyTopics .osDailyTopic.top3')).toHaveCount(3);
-  await expect(page.locator('#osDailyEngineMeta')).toContainText('웹 검색 사용');
+  await expect(page.locator('#osDailyEngineMeta')).toContainText('최신 정보 확인 포함');
   await page.locator('[data-daily-topic-use="0"]').click();
   await expect(page.locator('#osFactoryPresets [data-factory-mode="daily_one"]')).toHaveClass(/active/);
   await expect(page.locator('#osTask')).toHaveValue(/자동 주제 1/);
@@ -505,7 +505,7 @@ test('Blog Factory builds today topics prompt and never exposes provider launch 
   await expect(page.locator('#textTool')).toBeHidden();
   await expect(page.locator('#imageTool')).toBeHidden();
   await expect(page.locator('[data-tool="writing"]')).toHaveText('블로그 팩토리');
-  await expect(page.locator('#osStatus')).toContainText('V7');
+  await expect(page.locator('#osStatus')).toBeVisible();await expect(page.locator('#osStatus')).not.toContainText('V7');
   await expect(page.locator('#osStaticMode')).toContainText('오늘의 주제 자동 준비');
   await expect(page.locator('#osFactoryPresets [data-factory-mode="daily_topics"]')).toHaveClass(/active/);
   await expect(page.locator('#osProviders')).toHaveCount(0);
