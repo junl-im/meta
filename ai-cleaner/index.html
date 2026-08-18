@@ -252,9 +252,9 @@
 
 <main id="writingTool" class="hidden">
   <section class="hero osHero osSimpleHero osFactoryHero">
-    <div class="osHeroBadges"><span class="tag orange">블로그 팩토리</span><span class="tag blue">DAILY BLOG OS</span><span class="perfPill" id="osStatus">내 기기에서 준비 중…</span></div>
+    <div class="osHeroBadges"><span class="tag orange">블로그 팩토리</span><span class="tag blue">TODAY BLOG</span><span class="perfPill" id="osStatus">내 기기에서 준비 중…</span></div>
     <h1>아침에 열면 오늘 주제가 준비되고, <span>고른 주제는 글 프롬프트로.</span></h1>
-    <p><b>GitHub Actions Daily Engine</b>이 매일 오늘의 주제를 만들고 Pages에 배포합니다. 자동 주제에서 하나를 고르면 아래 생산 도구로 바로 넘겨 <b>글 1편 · 3편 생산 · 소재 비축</b> 프롬프트를 만들고 복사할 수 있습니다.</p>
+    <p>매일 새로운 주제를 준비해두고, 마음에 드는 소재를 고르면 아래 생산 도구로 바로 넘겨 <b>글 1편 · 3편 생산 · 소재 비축</b> 프롬프트를 만들고 복사할 수 있습니다.</p>
     <div class="osSimpleSteps osFactorySteps" aria-label="블로그 팩토리 사용 순서">
       <span><b>1</b> 자동 주제</span><span><b>2</b> 하나 선택</span><span><b>3</b> 글 프롬프트</span><span><b>4</b> 복사</span>
     </div>
@@ -263,18 +263,18 @@
   <div class="osSimpleWorkspace">
     <section class="card osCard osDailyEngineCard" id="osDailyEngineCard" aria-labelledby="osDailyEngineTitle">
       <div class="head osDailyEngineHead">
-        <div><b id="osDailyEngineTitle"><span class="osStep">AUTO</span> 오늘 자동 주제</b><span class="sub">GitHub Actions가 매일 오전 6:20(Asia/Seoul)에 생성합니다.</span></div>
+        <div><b id="osDailyEngineTitle"><span class="osStep">AUTO</span> 오늘 자동 주제</b><span class="sub">매일 아침 새로운 주제를 준비합니다.</span></div>
         <span class="perfPill" id="osDailyEngineStatus">확인 중…</span>
       </div>
       <div class="body">
         <div class="osDailyEngineSummary">
-          <div><span class="tag green">DAILY ENGINE</span><b id="osDailyEngineSummary">오늘의 자동 주제를 불러오고 있습니다.</b><small id="osDailyEngineMeta">Actions 설정 전에는 아래 수동 프롬프트 빌더를 그대로 사용할 수 있습니다.</small></div>
+          <div><span class="tag green">TODAY</span><b id="osDailyEngineSummary">오늘의 주제를 불러오고 있습니다.</b><small id="osDailyEngineMeta">준비된 주제에서 골라 바로 글 프롬프트로 이어갈 수 있습니다.</small></div>
           <button class="mini passive" id="osCopyDailyTopics" type="button" disabled>주제 10개 복사</button>
         </div>
         <div class="osDailyTopics" id="osDailyTopics" aria-live="polite"></div>
         <div class="osDailyEngineEmpty" id="osDailyEngineEmpty" hidden>
-          <b>오늘 자동 생성된 주제가 아직 없습니다.</b>
-          <span>Repository의 <code>OPENAI_API_KEY</code> Secret과 <code>BLOG_FACTORY_SEED</code> Variable을 설정한 뒤 Actions에서 <b>Daily Blog Factory + GitHub Pages</b>를 한 번 수동 실행하세요.</span>
+          <b>오늘의 주제가 아직 준비되지 않았습니다.</b>
+          <span>잠시 후 다시 확인하거나, 아래에서 직접 주제 프롬프트를 만들어 보세요.</span>
         </div>
       </div>
     </section>
@@ -314,8 +314,8 @@
         </div>
 
         <div class="osAutoDaily" id="osAutoDailyBox">
-          <label class="check osAutoDailyToggle"><input type="checkbox" id="osAutoDaily"> <b>로컬 프롬프트 자동 준비</b></label>
-          <div><b>관심 분야는 한 번만.</b><span class="sub" id="osAutoDailyStatus">꺼짐 · GitHub Daily Engine과 별개로, 이 브라우저에서 새 날짜 첫 실행 시 복사용 주제 프롬프트를 준비하는 보조 기능입니다.</span></div>
+          <label class="check osAutoDailyToggle"><input type="checkbox" id="osAutoDaily"> <b>날짜별 프롬프트 자동 준비</b></label>
+          <div><b>관심 분야는 한 번만.</b><span class="sub" id="osAutoDailyStatus">꺼짐 · 켜두면 새 날짜 첫 실행 때 복사용 주제 프롬프트를 자동으로 준비합니다.</span></div>
         </div>
 
         <div class="osSendZone osPromptBuildZone">
@@ -368,16 +368,15 @@
         </section>
 
         <section class="osAdvancedSection">
-          <div class="sectionMiniHead"><b>OS 파일 / 실행 방식</b><span class="sub">AI Company OS V7 Zero-Dependency 기준</span></div>
-          <div class="osConnectionState"><span class="tag green">GITHUB</span><b id="osStaticMode">GitHub Pages + Actions Daily Engine · V7 Blog Factory</b></div>
-          <p class="sub osConnectionCopy">브라우저에는 API 키를 넣지 않습니다. 실제 무인 주제 생성은 GitHub Actions에서 Repository Secret을 사용하고, 이 화면은 배포된 <code>daily-topics.json</code>만 읽습니다. 아래 프롬프트 빌더는 API 없이도 계속 사용할 수 있습니다.</p>
+          <div class="sectionMiniHead"><b>AI Company OS V7</b><span class="sub">필요할 때 원본 파일 내려받기</span></div>
+          <div class="osConnectionState"><span class="tag green">AUTO</span><b id="osStaticMode">오늘의 주제 자동 준비 · V7 Blog Factory</b></div>
+          <p class="sub osConnectionCopy">매일 준비된 주제를 이 화면에서 바로 불러옵니다. 자동 주제가 없더라도 아래 프롬프트 빌더는 언제든 그대로 사용할 수 있습니다.</p>
           <div class="actions"><button class="btn" id="osDownloadZip" type="button">AI Company OS V7 ZIP</button></div>
         </section>
       </div>
     </details>
   </div>
 
-  <div class="notice osSimpleNotice"><b>자동화 방식:</b> GitHub Actions가 매일 주제 10개를 생성·저장·Pages 배포 → 사이트를 열면 오늘 주제가 이미 표시됩니다. 아래 ‘로컬 프롬프트 자동 준비’는 Actions와 무관한 브라우저 보조 기능입니다.</div>
 </main>
 <div class="footer">곰같은여우의 AI 흔적 지우개 <span id="footerVersion"></span> · 브라우저 로컬 처리</div>
 </div>

@@ -1,6 +1,6 @@
 {
-  "version": "1.8.8",
-  "assetVersion": "188",
+  "version": "1.8.9",
+  "assetVersion": "189",
   "channel": "stable",
-  "updateMode": "blog-factory-github-actions-daily-engine-v7"
+  "updateMode": "blog-factory-public-ui-polish-v7"
 }

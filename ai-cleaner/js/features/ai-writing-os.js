@@ -252,17 +252,17 @@ ns.createAiWritingOsController=function createAiWritingOsController({
     return{schemaVersion:Number(value.schemaVersion)||1,status:String(value.status||''),date:String(value.date||''),timezone:String(value.timezone||'Asia/Seoul'),generatedAtLocal:String(value.generatedAtLocal||''),model:String(value.model||''),engine:String(value.engine||''),webSearchUsed:value.webSearchUsed===true,summary:String(value.summary||'').trim().slice(0,500),topics};
   }
   function dailyEngineGeneratedLabel(data){
-    if(!data?.generatedAtLocal)return data?.date||'생성 시각 없음';
-    const match=data.generatedAtLocal.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})/);return match?`${match[1]} ${match[2]}:${match[3]} KST`:data.generatedAtLocal;
+    if(!data?.generatedAtLocal)return data?.date||'준비 시각 없음';
+    const match=data.generatedAtLocal.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})/);return match?`${match[1].slice(5).replace('-', '월 ')}일 ${match[2]}:${match[3]} 준비`:data.generatedAtLocal;
   }
   function renderDailyEngine(){
     const box=$('osDailyTopics'),empty=$('osDailyEngineEmpty'),status=$('osDailyEngineStatus'),summary=$('osDailyEngineSummary'),meta=$('osDailyEngineMeta'),copy=$('osCopyDailyTopics');if(!box)return;
     box.textContent='';const data=dailyEngineData,topics=data?.topics||[],today=seoulDateKey(),isToday=!!data?.date&&data.date===today&&data.status==='ready'&&topics.length>0;
     if(copy)copy.disabled=!topics.length;
-    if(!topics.length){if(empty)empty.hidden=false;if(status)status.textContent=dailyEngineLoading?'확인 중…':'설정 필요';if(summary)summary.textContent=data?.summary||'오늘의 자동 주제가 아직 없습니다.';if(meta)meta.textContent='Actions Secret/Variable 설정 후 수동 실행하면 바로 생성됩니다.';return;}
+    if(!topics.length){if(empty)empty.hidden=false;if(status)status.textContent=dailyEngineLoading?'확인 중…':'준비 전';if(summary)summary.textContent=data?.summary||'오늘의 주제가 아직 준비되지 않았습니다.';if(meta)meta.textContent='잠시 후 다시 확인하거나 아래에서 직접 주제 프롬프트를 만들어 보세요.';return;}
     if(empty)empty.hidden=true;if(status)status.textContent=isToday?`오늘 ${topics.length}개 준비`:`지난 데이터 · ${data.date||'날짜 없음'}`;
-    if(summary)summary.textContent=isToday?(data.summary||'오늘 작성할 주제를 우선순위대로 준비했습니다.'):`${data.date||'이전 날짜'}에 생성된 주제입니다. 오늘 Actions 실행 전이라면 참고용으로만 사용하세요.`;
-    if(meta)meta.textContent=`${dailyEngineGeneratedLabel(data)} · ${data.model||'모델 정보 없음'} · ${data.webSearchUsed?'웹 검색 사용':'웹 검색 미확인'} · TOP 3 강조`;
+    if(summary)summary.textContent=isToday?(data.summary||'오늘 작성할 주제를 우선순위대로 준비했습니다.'):`${data.date||'이전 날짜'}에 준비된 주제입니다. 오늘 새 주제가 준비되기 전까지 참고용으로 사용할 수 있습니다.`;
+    if(meta)meta.textContent=`${dailyEngineGeneratedLabel(data)} · ${data.webSearchUsed?'최신 정보 확인 포함 · ':''}TOP 3 우선 추천`;
     topics.slice(0,10).forEach((topic,index)=>{
       const card=document.createElement('article');card.className=`osDailyTopic${topic.top3?' top3':''}`;card.dataset.dailyTopicIndex=String(index);
       const top=document.createElement('div');top.className='osDailyTopicTop';
@@ -434,7 +434,7 @@ ns.createAiWritingOsController=function createAiWritingOsController({
   }
   function updateAutoDailyStatus(){
     const toggle=$('osAutoDaily'),status=$('osAutoDailyStatus');if(toggle)toggle.checked=autoDaily;if(!status)return;
-    if(!autoDaily){status.textContent='꺼짐 · GitHub Daily Engine과 별개로, 이 브라우저에서 새 날짜 첫 실행 시 복사용 주제 프롬프트를 준비하는 보조 기능입니다.';return;}
+    if(!autoDaily){status.textContent='꺼짐 · 켜두면 새 날짜 첫 실행 때 복사용 주제 프롬프트를 자동으로 준비합니다.';return;}
     if(!$('osTask')?.value.trim()){status.textContent='켜짐 · 관심 분야를 입력하면 자동 준비가 시작됩니다.';return;}
     const cached=readTodayCache();status.textContent=cached?'켜짐 · 오늘 프롬프트가 이미 준비되어 있습니다. 날짜가 바뀌면 다음 프롬프트를 자동 준비합니다.':'켜짐 · 오늘 날짜 기준 프롬프트를 자동 준비합니다. 브라우저를 닫아둔 동안에는 실행되지 않습니다.';
   }
@@ -502,8 +502,8 @@ ns.createAiWritingOsController=function createAiWritingOsController({
     invalidatePreparedOutput();if(initialized){renderFactoryModes();syncSimpleState();updateAutoDailyStatus();}return true;
   }
   async function init(){
-    if(initialized)return;initialized=true;bind();await ensureAssets();loadStoredProfile();if(pendingRestoreState){const value=pendingRestoreState;pendingRestoreState=null;applyRestoredState(value);}renderFactoryModes();if($('osStatus'))$('osStatus').textContent=`Daily Engine + 로컬 빌더 · OS V${manifest.version}`;
-    if($('osStaticMode'))$('osStaticMode').textContent='GitHub Pages + Actions Daily Engine · V7 Blog Factory';syncSimpleState();updateAutoDailyStatus();void loadDailyEngine();
+    if(initialized)return;initialized=true;bind();await ensureAssets();loadStoredProfile();if(pendingRestoreState){const value=pendingRestoreState;pendingRestoreState=null;applyRestoredState(value);}renderFactoryModes();if($('osStatus'))$('osStatus').textContent='오늘 주제 + 프롬프트 준비 완료';
+    if($('osStaticMode'))$('osStaticMode').textContent='오늘의 주제 자동 준비 · V7 Blog Factory';syncSimpleState();updateAutoDailyStatus();void loadDailyEngine();
   }
   function captureState(){const f=getFactorySettings();return{task:$('osTask')?.value||'',mode:$('osMode')?.value||'auto',factoryMode:f.mode,blogType:f.blogType,audience:f.audience,researchMode:f.researchMode,imageCount:f.imageCount,facts:f.facts,avoidTopics:f.avoidTopics,autoDaily};}
   function restoreState(value){if(!value||typeof value!=='object')return false;if(!initialized){pendingRestoreState={...value};return true;}return applyRestoredState(value);}

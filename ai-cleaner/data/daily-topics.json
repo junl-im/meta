@@ -8,6 +8,6 @@
   "model": "",
   "engine": "github-actions-openai-responses",
   "webSearchUsed": false,
-  "summary": "GitHub Actions Daily Engine이 아직 오늘의 주제를 생성하지 않았습니다.",
+  "summary": "오늘의 주제가 아직 준비되지 않았습니다.",
   "topics": []
 }

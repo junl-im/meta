@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.8.8",
+  "version": "1.8.9",
   "date": "2026-08-18",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -50,12 +50,12 @@
     "ai-cleaner/data/daily-topics.json"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.8.8",
-  "asset_version": "188",
+  "current_version": "1.8.9",
+  "asset_version": "189",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.8.8 Daily Engine: scheduled OpenAI topic generation, persisted daily-topics.json, same-run GitHub Pages deployment, and in-app topic cards; text/image tools preserved",
+  "latestPatch": "1.8.9 Blog Factory public UI polish: hide deployment/setup internals, center 1-4 hero steps, preserve Daily Engine behavior",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -200,7 +200,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "188",
+  "assetVersion": "189",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,

@@ -675,8 +675,8 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
 /* ===== 1.8.5 AI Writing OS · Blog Factory ===== */
 .osFactoryHero{padding-bottom:15px}
 .osFactoryHero .tag.blue{background:#eef5ff;color:#285f9e;border-color:#c9ddf4}
-.osFactorySteps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));max-width:760px}
-.osFactorySteps span{justify-content:center}
+.osFactorySteps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:min(100%,760px);margin:14px auto 0}
+.osFactorySteps span{justify-content:center;text-align:center}
 .osFactoryCard .body{padding-top:13px}
 .osFactoryPresets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:8px}
 .osFactoryPresets button{display:grid;gap:2px;min-height:54px;padding:9px 10px;border:1px solid #e8dccb;border-radius:12px;background:#fff;color:var(--ink);text-align:left;cursor:pointer;transition:border-color .15s ease,background .15s ease,transform .15s ease,box-shadow .15s ease}
