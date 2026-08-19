@@ -1,7 +1,7 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.9.1",
-  "date": "2026-08-18",
+  "version": "1.9.2",
+  "date": "2026-08-19",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
   "appPath": "ai-cleaner/",
@@ -50,12 +50,12 @@
     "ai-cleaner/data/daily-topics.json"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.9.1",
-  "asset_version": "191",
+  "current_version": "1.9.2",
+  "asset_version": "192",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.9.1 stability hardening: correction overlap/direct-edit guards, bounded suggestion UI, clipboard fallback, Seoul-date Daily state, partial-data honesty, API model/env guard, stale/overlapping Pages deployment protection",
+  "latestPatch": "1.9.2 delivery hardening: Daily Engine missing-config fallback, combined config diagnostics, boot recovery UI, panel focus return, explicit editor labels, selectable page text, mobile/Blog Factory readability improvements",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -81,7 +81,7 @@
     "protectedPathsExcluded": [
       "OPTION/**"
     ],
-    "patchBaseline": "GitHub main 1.9.0 + CI Hotfix 3 -> 1.9.1"
+    "patchBaseline": "GitHub main 1.9.1 -> 1.9.2"
   },
   "internalTypewriter": {
     "source": "visible-text projection of original",
@@ -135,7 +135,7 @@
     "breakpointExpansionReset": true,
     "safeAreaViewportFitCover": true
   },
-  "nextPhase": "Run GitHub browser-smoke for 1.9.1, then Daily Engine first real topic generation + result-to-article queue",
+  "nextPhase": "Push 1.9.2, confirm the Daily workflow deploys successfully without optional secrets, then add OPENAI_API_KEY/BLOG_FACTORY_SEED and run the first real topic generation",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -200,7 +200,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "191",
+  "assetVersion": "192",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -209,7 +209,7 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "249 passed / 0 failed",
+    "staticChecks": "256 passed / 0 failed",
     "moduleChecks": "PASS — Blog Factory GitHub Actions Daily Engine + local prompt builder unit checks",
     "jsSyntax": "PASS — 27 JS/MJS files",
     "workflowYaml": "PASS — ai-cleaner-ci.yml + daily-blog-factory-pages.yml parse",

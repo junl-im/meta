@@ -1,6 +1,6 @@
 {
-  "version": "1.9.1",
-  "assetVersion": "191",
+  "version": "1.9.2",
+  "assetVersion": "192",
   "channel": "stable",
-  "updateMode": "ui-edge-case-stability-hardening"
+  "updateMode": "ci-config-fallback-accessibility-readability"
 }

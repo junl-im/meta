@@ -598,8 +598,21 @@ function dismissMobileKeyboard(){
   if(innerWidth>PANEL_SHEET_BREAKPOINT)return;const active=document.activeElement;if(active&&/^(TEXTAREA|INPUT|SELECT)$/.test(active.tagName))try{active.blur();}catch(_){}
 }
 function setMobilePanelExpanded(panel,expanded){panelManager.setMobileExpanded(panel,expanded);}
+const panelReturnFocus=new Map();
+function rememberPanelReturnFocus(id){
+  const active=document.activeElement;if(!active||active===document.body||active.closest?.('.floatPanel'))return;
+  panelReturnFocus.set(id,active);
+}
+function focusOpenedPanel(panel){
+  if(!panel)return;requestAnimationFrame(()=>{if(panel.hidden)return;try{panel.focus({preventScroll:true});}catch(_){try{panel.focus();}catch(__){}}});
+}
+function restorePanelReturnFocus(id){
+  const target=panelReturnFocus.get(id);panelReturnFocus.delete(id);if(!target||!target.isConnected||target.disabled)return;
+  requestAnimationFrame(()=>{try{target.focus({preventScroll:true});}catch(_){try{target.focus();}catch(__){}}});
+}
 function closeAllPanels(except=''){if(except!=='rewritePanel')invalidatePendingRewriteOpen();if(except!=='rewritePanel'&&!$('#rewritePanel').hidden)window.AICleanerRewriteStudio?.cancelGeneration?.({status:'패널을 닫아 생성 작업을 취소했습니다.'});panelManager.closeAll(except);syncPanelAria();}
 function openPanel(id){
+  rememberPanelReturnFocus(id);
   if(innerWidth<=PANEL_SHEET_BREAKPOINT)dismissMobileKeyboard();
   cancelResultNavigation();
   if(id!=='rewritePanel')invalidatePendingRewriteOpen();
@@ -608,7 +621,7 @@ function openPanel(id){
   if(id==='reviewPanel'&&(state.reviewsDirty||!state.reviews.length))buildReviews();
   if(id==='checkpointPanel')renderCheckpointPanel();
   if(id==='techPanel')renderTech();
-  const panel=panelManager.open(id);if(!panel)return null;syncPanelAria();
+  const panel=panelManager.open(id);if(!panel)return null;syncPanelAria();focusOpenedPanel(panel);
   if(id==='issuesPanel'){state.issueUnread=false;$('#issuesWidget').classList.remove('attention');}
   if(id==='reviewPanel'){state.reviewUnread=false;$('#reviewWidget').classList.remove('attention');}
   if(id==='techPanel'){state.techUnread=false;$('#techWidget').classList.remove('attention');}
@@ -692,7 +705,7 @@ document.addEventListener('keydown',(e)=>{
   if(e.key!=='Escape')return;
   hideContextMenu();
   if(!$('#typingPreviewPanel').hidden){stopTypingPreview();return;}
-  const closed=panelManager.closeTop();if(closed){if(closed.id==='typingPreviewPanel'&&typewriterEngine.running)stopTypingPreview({restore:true,silent:true});if(closed.id==='rewritePanel')window.AICleanerRewriteStudio?.cancelGeneration?.({status:'패널을 닫아 생성 작업을 취소했습니다.'});syncPanelAria();e.preventDefault();}
+  const closed=panelManager.closeTop();if(closed){if(closed.id==='typingPreviewPanel'&&typewriterEngine.running)stopTypingPreview({restore:true,silent:true});else restorePanelReturnFocus(closed.id);if(closed.id==='rewritePanel')window.AICleanerRewriteStudio?.cancelGeneration?.({status:'패널을 닫아 생성 작업을 취소했습니다.'});syncPanelAria();e.preventDefault();}
 });
 window.addEventListener('resize',queueViewportSync);window.addEventListener('orientationchange',queueViewportSync);
 if(window.visualViewport){window.visualViewport.addEventListener('resize',queueViewportSync);window.visualViewport.addEventListener('scroll',queueViewportSync);}
@@ -732,6 +745,7 @@ function stopTypingPreview({restore=true,silent=false}={}){
   const panel=$('#typingPreviewPanel');panel.hidden=true;panel.classList.remove('typewriterComplete');setMobilePanelExpanded(panel,false);syncPanelAria();$('#typingPreviewPause').textContent='일시정지';$('#typingPreviewPause').removeAttribute('title');$('#typingPreviewPause').setAttribute('aria-label','자동작성 일시정지');typewriterBridgeStatus();
   typingPreview.completed=false;$('#input').readOnly=typingPreview.inputWasReadOnly;setTypewriterBusy(false);
   if(restore&&wasRunning&&typingPreview.historyIndex>=0){restoreHistoryIndex(typingPreview.historyIndex,{announce:false,suppressTypewriterRecommendation:false});if(!silent)showToast('자동 작성을 중지하고 이전 결과로 복원했습니다.');}
+  restorePanelReturnFocus('typingPreviewPanel');
 }
 function finishTypingPreview(snapshot){
   const out=$('#output'),source=snapshot.source,exact=out.value===source;$('#input').readOnly=typingPreview.inputWasReadOnly;setTypewriterBusy(false);
@@ -827,7 +841,7 @@ window.AICleanerApp={
 };
 $('#rewriteWidget').onclick=async()=>{const request=++rewriteOpenSeq;try{showToast('재작성 스튜디오를 여는 중…');const studio=await ensureRewriteStudio();if(request!==rewriteOpenSeq||!document.querySelector('[data-tool="text"]')?.classList.contains('active'))return;openPanel('rewritePanel');if(request!==rewriteOpenSeq)return;studio.open();}catch(err){if(request!==rewriteOpenSeq)return;console.error(err);showToast('재작성 도구를 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.');}};
 $('#issuesWidget').onclick=()=>openPanel('issuesPanel');$('#reviewWidget').onclick=()=>openPanel('reviewPanel');$('#checkpointOpen').onclick=()=>openPanel('checkpointPanel');$('#checkpointSave').onclick=saveResultCheckpoint;$('#checkpointClear').onclick=clearResultCheckpoints;$('#checkpointList').addEventListener('click',e=>{const b=e.target.closest('[data-checkpoint-action]'),item=e.target.closest('[data-checkpoint-id]');if(!b||!item||b.disabled)return;const id=item.dataset.checkpointId;if(b.dataset.checkpointAction==='restore')restoreResultCheckpoint(id);else if(b.dataset.checkpointAction==='copy')void copyResultCheckpoint(id);else if(b.dataset.checkpointAction==='remove')removeResultCheckpoint(id);});$('#techWidget').onclick=()=>openPanel('techPanel');
-$$('[data-close-panel]').forEach(b=>b.onclick=()=>{const p=$('#'+b.dataset.closePanel);if(p?.id==='rewritePanel')window.AICleanerRewriteStudio?.cancelGeneration?.({status:'패널을 닫아 생성 작업을 취소했습니다.'});p.hidden=true;setMobilePanelExpanded(p,false);syncPanelAria();});
+$$('[data-close-panel]').forEach(b=>b.onclick=()=>{const p=$('#'+b.dataset.closePanel);if(!p)return;if(p.id==='rewritePanel')window.AICleanerRewriteStudio?.cancelGeneration?.({status:'패널을 닫아 생성 작업을 취소했습니다.'});p.hidden=true;setMobilePanelExpanded(p,false);syncPanelAria();restorePanelReturnFocus(p.id);});
 $$('[data-panel-size]').forEach(b=>b.onclick=(e)=>{e.stopPropagation();const p=$('#'+b.dataset.panelSize);if(!p||innerWidth>PANEL_SHEET_BREAKPOINT)return;setMobilePanelExpanded(p,!p.classList.contains('mobileExpanded'));requestAnimationFrame(()=>p.querySelector('.floatBody')?.scrollTo({top:0,behavior:preferredScrollBehavior()}));});
 makeDraggable($('#typingPreviewPanel'));makeDraggable($('#issuesPanel'));makeDraggable($('#reviewPanel'));makeDraggable($('#rewritePanel'));makeDraggable($('#checkpointPanel'));makeDraggable($('#techPanel'));
 

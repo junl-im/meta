@@ -11,6 +11,22 @@ function env(name, fallback = '') {
   return typeof value === 'string' && value.trim() ? value.trim() : fallback;
 }
 
+function requiredConfigIssues({ apiKey, seed }) {
+  const issues = [];
+  if (!apiKey) issues.push('OPENAI_API_KEY secret');
+  if (!seed) issues.push('BLOG_FACTORY_SEED variable');
+  return issues;
+}
+
+function assertRequiredConfig({ apiKey, seed }) {
+  const issues = requiredConfigIssues({ apiKey, seed });
+  if (!issues.length) return;
+  throw new Error(
+    `필수 Actions 설정 ${issues.length}개가 없습니다: ${issues.join(', ')}. ` +
+    'Repository Settings > Secrets and variables > Actions에서 설정해 주세요.'
+  );
+}
+
 function kstDateParts(now = new Date()) {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: TIMEZONE,
@@ -184,8 +200,7 @@ async function main() {
   const audience = clampText(env('BLOG_FACTORY_AUDIENCE'), 1200);
   const avoidTopics = clampText(env('BLOG_FACTORY_AVOID_TOPICS'), 8000);
   const previousTopics = await loadPreviousTopicTitles();
-  if (!apiKey) throw new Error('OPENAI_API_KEY secret이 없습니다. Repository Settings > Secrets and variables > Actions에 추가해 주세요.');
-  if (!seed) throw new Error('BLOG_FACTORY_SEED variable이 없습니다. 매일 다룰 관심 분야를 Repository Actions variable로 추가해 주세요.');
+  assertRequiredConfig({ apiKey, seed });
 
   const { date, localTimestamp } = kstDateParts();
   const prompt = `당신은 한국어 블로그의 데일리 소재 편집장이다. 오늘 날짜는 ${date}, 기준 시간대는 ${TIMEZONE}이다.\n\n` +

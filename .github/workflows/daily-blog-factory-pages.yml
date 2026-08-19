@@ -37,8 +37,41 @@ jobs:
           node-version: '24'
           package-manager-cache: false
 
-      - name: Generate today's blog topics
+      - name: Check Daily Engine configuration
+        id: daily-config
         if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.generate_topics)
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          BLOG_FACTORY_SEED: ${{ vars.BLOG_FACTORY_SEED }}
+        shell: bash
+        run: |
+          missing=()
+          if [ -z "$OPENAI_API_KEY" ]; then missing+=("OPENAI_API_KEY secret"); fi
+          if [ -z "$BLOG_FACTORY_SEED" ]; then missing+=("BLOG_FACTORY_SEED variable"); fi
+
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo 'configured=false' >> "$GITHUB_OUTPUT"
+            printf -v missing_list '%s, ' "${missing[@]}"
+            missing_list="${missing_list%, }"
+            echo "::warning title=Daily Blog Factory skipped::필수 설정이 없어 오늘 주제 생성을 건너뜁니다: ${missing_list}. 사이트 검사와 Pages 배포는 계속됩니다."
+            {
+              echo '### Daily Blog Factory'
+              echo
+              echo '오늘 주제 생성은 건너뛰었지만 사이트 검사와 Pages 배포는 계속됩니다.'
+              echo
+              for item in "${missing[@]}"; do echo "- 누락: \`${item}\`"; done
+              echo '- 설정 위치: Repository Settings > Secrets and variables > Actions'
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          echo 'configured=true' >> "$GITHUB_OUTPUT"
+          echo 'Daily Blog Factory configuration is ready.' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Generate today's blog topics
+        if: >-
+          (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.generate_topics)) &&
+          steps.daily-config.outputs.configured == 'true'
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
@@ -60,7 +93,9 @@ jobs:
           node ai-cleaner/tests/static-check.mjs
 
       - name: Persist generated daily topics
-        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.generate_topics)
+        if: >-
+          (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.generate_topics)) &&
+          steps.daily-config.outputs.configured == 'true'
         shell: bash
         run: |
           git config user.name 'github-actions[bot]'
