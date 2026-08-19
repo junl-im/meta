@@ -86,6 +86,7 @@ jobs:
           node --check ai-cleaner/js/features/ai-writing-os.js
           node --check ai-cleaner/tests/static-check.mjs
           node --check ai-cleaner/tests/module-check.mjs
+          node --check .github/scripts/build-pages-artifact.mjs
 
       - name: Blog Factory static checks
         run: |
@@ -131,10 +132,13 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
+      - name: Prepare isolated GitHub Pages artifact
+        run: node .github/scripts/build-pages-artifact.mjs
+
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: '.'
+          path: '.pages-site'
 
   deploy:
     needs: build

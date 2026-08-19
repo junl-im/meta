@@ -49,10 +49,10 @@ button,textarea,input,select{font:inherit}button{cursor:pointer}.hidden{display:
 .item p{font-size:11px;line-height:1.6;margin:7px 0 0;color:var(--muted)}.itemactions{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap;align-items:center}
 .mini{height:31px;padding:0 10px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:10px;font-weight:850}
 .mini.apply{background:var(--ink);color:#fff;border-color:var(--ink)}.mini.undo{color:var(--red)}.mini.locate{color:var(--blue);background:var(--bluebg);border-color:#cbdcf5}
-.locateStatus{font-size:10px;color:var(--muted)}.empty{padding:28px;text-align:center;color:#a99280;font-size:11px}
+.locateStatus{font-size:10px;color:var(--muted)}.empty{padding:28px;text-align:center;color:var(--muted);font-size:11px}
 .tablewrap{overflow:auto;max-height:360px;border:1px solid var(--line);border-radius:12px}
 table{width:100%;border-collapse:collapse;font-size:10px}th,td{text-align:left;padding:8px 9px;border-bottom:1px solid #2b1d1208;white-space:nowrap}
-th{background:#fff7ee;color:var(--muted);position:sticky;top:0}.footer{text-align:center;color:#aa9585;font-size:10px;margin-top:28px}
+th{background:#fff7ee;color:var(--muted);position:sticky;top:0}.footer{text-align:center;color:var(--muted);font-size:10px;margin-top:28px}
 .notice{margin-top:12px;padding:11px 13px;border-radius:12px;background:var(--bluebg);color:var(--blue);font-size:11px;line-height:1.6}
 .warnbox{background:var(--yellowbg);color:var(--yellow)}
 

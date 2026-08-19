@@ -1,6 +1,6 @@
 {
-  "version": "1.9.2",
-  "assetVersion": "192",
+  "version": "1.9.3",
+  "assetVersion": "193",
   "channel": "stable",
-  "updateMode": "ci-config-fallback-accessibility-readability"
+  "updateMode": "pages-artifact-isolation"
 }

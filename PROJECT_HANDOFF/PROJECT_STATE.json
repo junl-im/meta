@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.9.2",
+  "version": "1.9.3",
   "date": "2026-08-19",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -47,15 +47,16 @@
     "ai-cleaner/ai-writing-os/prompt-compiler.json",
     ".github/workflows/daily-blog-factory-pages.yml",
     ".github/scripts/generate-daily-topics.mjs",
-    "ai-cleaner/data/daily-topics.json"
+    "ai-cleaner/data/daily-topics.json",
+    ".github/scripts/build-pages-artifact.mjs"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.9.2",
-  "asset_version": "192",
+  "current_version": "1.9.3",
+  "asset_version": "193",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.9.2 delivery hardening: Daily Engine missing-config fallback, combined config diagnostics, boot recovery UI, panel focus return, explicit editor labels, selectable page text, mobile/Blog Factory readability improvements",
+  "latestPatch": "1.9.3 deployment hardening: runtime-only Pages staging artifact, protected/non-runtime paths excluded from deployment, low-contrast empty/footer text tightened",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -81,7 +82,7 @@
     "protectedPathsExcluded": [
       "OPTION/**"
     ],
-    "patchBaseline": "GitHub main 1.9.1 -> 1.9.2"
+    "patchBaseline": "Delivered 1.9.2 FULL_PROJECT_HANDOFF -> 1.9.3"
   },
   "internalTypewriter": {
     "source": "visible-text projection of original",
@@ -200,7 +201,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "192",
+  "assetVersion": "193",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,

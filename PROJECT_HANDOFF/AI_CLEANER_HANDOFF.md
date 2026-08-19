@@ -588,3 +588,12 @@
 - Daily Engine generator 기본 모델은 `gpt-5`; `OPENAI_MODEL`로 override 가능. seed/audience/avoid 변수 길이와 150초 timeout 오류를 방어한다.
 - Daily 생성 JSON은 정적/모듈 검사가 통과한 뒤에만 커밋한다. 동시 main push가 있으면 최대 3회 fetch/rebase/push 재시도한다.
 - 일반 CI의 오래된 commit은 최신 `main`과 SHA가 다르면 Pages 배포를 건너뛴다. CI와 Daily의 Pages deploy job은 공통 `github-pages-deploy` concurrency group으로 직렬화한다.
+
+## 1.9.3 Pages artifact 격리
+- 기준선은 실제 전달된 `AI_CLEANER_1.9.2_FULL_PROJECT_HANDOFF.zip`이다. `OPTION/**`은 계속 절대 보호/제외한다.
+- 일반 CI와 Daily workflow는 더 이상 저장소 루트 `.` 전체를 GitHub Pages artifact로 업로드하지 않는다.
+- `.github/scripts/build-pages-artifact.mjs`가 `.pages-site/` staging 디렉터리를 만들고, 공개 런타임에 필요한 파일만 allowlist 방식으로 복사한다.
+- Pages 공개 대상은 루트 `index.html`과 `ai-cleaner/` 런타임 파일/디렉터리만이다. `OPTION/**`, `PROJECT_HANDOFF/**`, `.github/**`, `package.json`, `ai-cleaner/tests/**`, `ai-cleaner/MIGRATION.md`는 배포 artifact에서 제외한다.
+- 이 규칙은 보호 폴더를 이동/삭제해서 해결하는 방식이 아니라, 애초에 배포 입력을 별도 staging directory로 제한하는 방식이다.
+- 결과물 FULL/Patch ZIP에도 `OPTION/**`은 포함하지 않는다.
+- 빈 상태 안내와 footer의 옅은 텍스트는 기존 `--muted` 색으로 통일해 작은 글씨 대비를 보강한다.

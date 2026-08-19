@@ -78,6 +78,7 @@ jobs:
           node --check ai-cleaner/tests/static-check.mjs
           node --check ai-cleaner/tests/module-check.mjs
           node --check ai-cleaner/tests/e2e.spec.mjs
+          node --check .github/scripts/build-pages-artifact.mjs
       - name: Modular core unit checks
         run: node ai-cleaner/tests/module-check.mjs
       - name: Static checks
@@ -156,11 +157,14 @@ jobs:
       - name: Configure GitHub Pages
         if: steps.head.outputs.deployable == 'true'
         uses: actions/configure-pages@v5
+      - name: Prepare isolated GitHub Pages artifact
+        if: steps.head.outputs.deployable == 'true'
+        run: node .github/scripts/build-pages-artifact.mjs
       - name: Upload GitHub Pages artifact
         if: steps.head.outputs.deployable == 'true'
         uses: actions/upload-pages-artifact@v4
         with:
-          path: '.'
+          path: '.pages-site'
 
   pages-deploy:
     needs: pages-package
