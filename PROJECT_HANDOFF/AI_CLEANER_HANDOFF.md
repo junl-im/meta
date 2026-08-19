@@ -597,3 +597,13 @@
 - 이 규칙은 보호 폴더를 이동/삭제해서 해결하는 방식이 아니라, 애초에 배포 입력을 별도 staging directory로 제한하는 방식이다.
 - 결과물 FULL/Patch ZIP에도 `OPTION/**`은 포함하지 않는다.
 - 빈 상태 안내와 footer의 옅은 텍스트는 기존 `--muted` 색으로 통일해 작은 글씨 대비를 보강한다.
+
+## 1.9.4 browser-smoke 빈 입력 상태 hotfix
+- 기준선은 실제 배포된 `1.9.3` (`main` commit `030ea0869f292c73e39d695a72a6f6e76dda85ed`)이다.
+- GitHub Actions `browser-smoke`에서 50개 중 1개가 실패했다. 분석 뒤 원본을 `''`로 비웠을 때 결과 textarea가 이전 값 `앞뒤 끝`을 유지하는 회귀였다.
+- `handleSourceMutation()`의 빈 입력 처리를 최우선 fast-path로 이동했다. 빈 입력에서는 stale/dirty UI 동기화보다 먼저 `clearTextAnalysis({keepInput:true})`를 실행한다.
+- 빈 입력 초기화 뒤 `original` 변경 이벤트는 유지하여 Rewrite Studio 등 연결 모듈의 기준 글 변경 감지가 끊기지 않게 한다.
+- 집중 E2E `clearing the source immediately clears stale output and analysis state`를 추가했다. output empty, 이슈/문장검토/기술 위젯 hidden, 진단 `분석 전`을 검증한다.
+- 정적 검사는 빈 입력 fast-path가 `setInputDirty(true)`보다 앞서는 순서 계약까지 검사한다.
+- 로컬 검증: module PASS, static 260/0, JS/MJS syntax PASS. 컨테이너 Chromium은 조직 정책으로 localhost 자체가 차단되어 GitHub browser-smoke 재실행이 최종 확인이다.
+- `OPTION/**`은 절대 보호 영역이며 어떤 수정/복사/패키징에도 포함하지 않는다.

@@ -320,6 +320,21 @@ test('direct typing progress survives rewrite tab and panel round trips until th
   await page.locator('#input').fill('XYZ');await expect(page.locator('#directTyped')).toHaveValue('');
 });
 
+test('clearing the source immediately clears stale output and analysis state', async ({ page }) => {
+  await gotoReady(page);
+  const input=page.locator('#input'),output=page.locator('#output');
+  await input.fill('앞\u200B뒤\u00A0끝');
+  await analyzeNow(page,{silent:true});
+  await expect(output).toHaveValue('앞뒤 끝');
+  await input.fill('');
+  await expect(input).toHaveValue('');
+  await expect(output).toHaveValue('');
+  await expect(page.locator('#issuesWidget')).toBeHidden();
+  await expect(page.locator('#reviewWidget')).toBeHidden();
+  await expect(page.locator('#techWidget')).toBeHidden();
+  await expect(page.locator('#detailSummary')).toHaveText('분석 전');
+});
+
 test('foundation flow keeps state, layout and rewrite tools coherent', async ({ page }) => {
   await gotoReady(page);
   await expect(page.locator('#versionBadge')).toHaveText('v'+APP_VERSION);

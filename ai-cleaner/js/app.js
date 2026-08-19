@@ -110,8 +110,13 @@ function handleSourceMutation({analyzeNow=false,backgroundNow=false,resetPerform
   const rewriteWidget=$('#rewriteWidget');if(rewriteWidget){clearTimeout(syncWidgets.rewriteReadyTimer);rewriteWidget.classList.remove('rewriteReady');delete rewriteWidget.dataset.seenReady;}
   if(resetPerformance){analysisCoordinator.cancel();analysisPerformance.reset();}
   const out=$('#output');if(out)delete out.dataset.typewriterVerified;
+  const input=$('#input');
+  if(!input?.value.trim()){
+    clearTextAnalysis({keepInput:true});
+    notifyTextChanged('original');
+    return false;
+  }
   setInputDirty(true);queueStats();syncWidgets();notifyTextChanged('original');syncTypewriterRecommendation({restart:restartTypewriterCue});
-  const input=$('#input');if(!input.value.trim()){clearTextAnalysis({keepInput:true});return false;}
   if(analyzeNow)return analyze(true);
   queueLiveAnalysis({force:backgroundNow,immediate:backgroundNow});return true;
 }

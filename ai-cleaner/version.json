@@ -1,6 +1,6 @@
 {
-  "version": "1.9.3",
-  "assetVersion": "193",
+  "version": "1.9.4",
+  "assetVersion": "194",
   "channel": "stable",
-  "updateMode": "pages-artifact-isolation"
+  "updateMode": "blank-source-fast-reset"
 }
