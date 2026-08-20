@@ -1,10 +1,15 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 
 const TIMEZONE = 'Asia/Seoul';
 const OUTPUT_PATH = path.resolve('ai-cleaner/data/daily-topics.json');
 const DEFAULT_MODEL = 'gpt-5';
 const TOPIC_COUNT = 10;
+const HISTORY_COMMITS = 14;
+const HISTORY_TOPIC_LIMIT = 120;
+const execFileAsync = promisify(execFile);
 
 function env(name, fallback = '') {
   const value = process.env[name];
@@ -49,16 +54,32 @@ function clampText(value, max) {
   return String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
 }
 
-async function loadPreviousTopicTitles() {
+async function loadRecentTopicTitles() {
+  const titles = [];
+  const seen = new Set();
+  const addPayload = payload => {
+    for (const topic of Array.isArray(payload?.topics) ? payload.topics : []) {
+      const title = clampText(topic?.title, 120);
+      const key = title.toLocaleLowerCase('ko-KR');
+      if (!title || seen.has(key)) continue;
+      seen.add(key);
+      titles.push(title);
+      if (titles.length >= HISTORY_TOPIC_LIMIT) break;
+    }
+  };
+  try { addPayload(JSON.parse(await fs.readFile(OUTPUT_PATH, 'utf8'))); } catch (_) {}
+  if (titles.length >= HISTORY_TOPIC_LIMIT) return titles;
   try {
-    const previous = JSON.parse(await fs.readFile(OUTPUT_PATH, 'utf8'));
-    return (Array.isArray(previous?.topics) ? previous.topics : [])
-      .map(topic => clampText(topic?.title, 120))
-      .filter(Boolean)
-      .slice(0, TOPIC_COUNT);
-  } catch (_) {
-    return [];
-  }
+    const { stdout } = await execFileAsync('git', ['log', `-${HISTORY_COMMITS}`, '--format=%H', '--', 'ai-cleaner/data/daily-topics.json'], { cwd: process.cwd(), maxBuffer: 1024 * 1024 });
+    for (const sha of stdout.split(/\r?\n/).map(v => v.trim()).filter(Boolean)) {
+      if (titles.length >= HISTORY_TOPIC_LIMIT) break;
+      try {
+        const { stdout: raw } = await execFileAsync('git', ['show', `${sha}:ai-cleaner/data/daily-topics.json`], { cwd: process.cwd(), maxBuffer: 2 * 1024 * 1024 });
+        addPayload(JSON.parse(raw));
+      } catch (_) {}
+    }
+  } catch (_) {}
+  return titles.slice(0, HISTORY_TOPIC_LIMIT);
 }
 
 function extractResponseText(payload) {
@@ -94,6 +115,7 @@ function normalizeTopic(raw, index) {
     angle: clampText(raw?.angle, 220),
     researchNeed: clampText(raw?.researchNeed, 240),
     imageConcept: clampText(raw?.imageConcept, 220),
+    priorityReason: clampText(raw?.priorityReason, 220),
     priorityScore: Number.isFinite(score) ? Math.max(1, Math.min(100, Math.round(score))) : Math.max(1, 90 - index * 4)
   };
 }
@@ -137,9 +159,10 @@ async function requestOpenAI({ apiKey, model, prompt, useWebSearch = true }) {
             angle: { type: 'string' },
             researchNeed: { type: 'string' },
             imageConcept: { type: 'string' },
+            priorityReason: { type: 'string' },
             priorityScore: { type: 'integer', minimum: 1, maximum: 100 }
           },
-          required: ['title','category','whyNow','searchIntent','angle','researchNeed','imageConcept','priorityScore']
+          required: ['title','category','whyNow','searchIntent','angle','researchNeed','imageConcept','priorityReason','priorityScore']
         }
       }
     },
@@ -199,7 +222,7 @@ async function main() {
   const seed = clampText(env('BLOG_FACTORY_SEED'), 4000);
   const audience = clampText(env('BLOG_FACTORY_AUDIENCE'), 1200);
   const avoidTopics = clampText(env('BLOG_FACTORY_AVOID_TOPICS'), 8000);
-  const previousTopics = await loadPreviousTopicTitles();
+  const recentTopics = await loadRecentTopicTitles();
   assertRequiredConfig({ apiKey, seed });
 
   const { date, localTimestamp } = kstDateParts();
@@ -207,12 +230,13 @@ async function main() {
     `관심 분야: ${seed}\n` +
     `주요 독자: ${audience || '관심 분야에서 합리적으로 추론'}\n` +
     `이미 쓴 주제/피할 소재: ${avoidTopics || '별도 제공 없음'}\n` +
-    `직전 Daily Engine 주제: ${previousTopics.length ? previousTopics.join(' | ') : '기록 없음'}\n\n` +
+    `최근 Daily Engine 주제(중복 회피용, 최대 ${HISTORY_TOPIC_LIMIT}개): ${recentTopics.length ? recentTopics.join(' | ') : '기록 없음'}\n\n` +
     `웹 검색 도구를 사용할 수 있으면 오늘 기준으로 시기성·계절성·최근 변화가 있는지 확인하라. 다만 확인되지 않은 검색량, 조회수, 인기 순위, 효과 수치를 만들지 마라. ` +
     `사용자의 실제 방문·구매·사용 경험을 지어내지 마라. 너무 뉴스성이라 하루 만에 가치가 사라지는 소재만 고르지 말고, 검색형·시즌형·생활형·에버그린을 적절히 섞어라. ` +
-    `서로 검색 의도가 겹치지 않도록 정확히 ${TOPIC_COUNT}개를 만들고, priorityScore 1~100으로 오늘 작성 우선순위를 평가하라.\n\n` +
+    `서로 검색 의도가 겹치지 않도록 정확히 ${TOPIC_COUNT}개를 만들고, 최근 주제와 제목만 다른 재탕 소재는 제외하라. 검색형·시즌형·비교형·생활형·에버그린이 한 유형에 과도하게 몰리지 않게 구성하라. ` +
+    `priorityScore는 검색 의도 명확성 30점 + 오늘성/시기성 25점 + 차별화 25점 + 작성 실행가능성 20점 기준으로 합산하고, priorityReason에 점수 근거를 한 문장으로 적어라.\n\n` +
     `반드시 아래 형태의 JSON 객체만 출력하라. 마크다운 코드펜스와 설명문은 금지한다.\n` +
-    `{"summary":"오늘 소재 구성 요약","topics":[{"title":"제목/주제","category":"검색형|시즌형|생활형|비교형|에버그린 등","whyNow":"오늘 또는 지금 쓰기 좋은 이유. 확인된 사실만 단정","searchIntent":"독자가 이 주제를 찾는 의도","angle":"비슷한 글과 다르게 풀 각도","researchNeed":"본문 작성 전에 확인할 최신 사실 또는 자료. 없으면 '추가 확인 최소'","imageConcept":"대표 이미지 또는 본문 장면 콘셉트","priorityScore":90}]}`;
+    `{"summary":"오늘 소재 구성 요약","topics":[{"title":"제목/주제","category":"검색형|시즌형|생활형|비교형|에버그린 등","whyNow":"오늘 또는 지금 쓰기 좋은 이유. 확인된 사실만 단정","searchIntent":"독자가 이 주제를 찾는 의도","angle":"비슷한 글과 다르게 풀 각도","researchNeed":"본문 작성 전에 확인할 최신 사실 또는 자료. 없으면 '추가 확인 최소'","imageConcept":"대표 이미지 또는 본문 장면 콘셉트","priorityReason":"검색 의도·오늘성·차별화·실행가능성 기준의 우선순위 이유","priorityScore":90}]}`;
 
   const payload = await requestOpenAI({ apiKey, model, prompt, useWebSearch: true });
   const responseText = extractResponseText(payload);
@@ -229,6 +253,7 @@ async function main() {
     model,
     engine: 'github-actions-openai-responses',
     webSearchUsed,
+    historyCompared: recentTopics.length,
     summary: normalized.summary,
     topics: normalized.topics
   };

@@ -1,12 +1,18 @@
 {
   "name": "ai-cleaner-browser-checks",
   "private": true,
-  "version": "1.9.4",
+  "version": "1.9.6",
   "devDependencies": {
     "@playwright/test": "1.62.1"
   },
   "scripts": {
     "test:e2e": "playwright test ai-cleaner/tests/e2e.spec.mjs --browser=chromium --workers=1",
-    "test:modules": "node ai-cleaner/tests/module-check.mjs"
+    "test:modules": "node ai-cleaner/tests/module-check.mjs",
+    "build:vendor": "node .github/scripts/build-runtime-vendor.mjs"
+  },
+  "dependencies": {
+    "@contentauth/c2pa-web": "0.13.4",
+    "esbuild": "0.28.2",
+    "exifreader": "4.42.0"
   }
 }

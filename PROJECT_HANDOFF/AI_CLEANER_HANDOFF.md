@@ -607,3 +607,22 @@
 - 정적 검사는 빈 입력 fast-path가 `setInputDirty(true)`보다 앞서는 순서 계약까지 검사한다.
 - 로컬 검증: module PASS, static 260/0, JS/MJS syntax PASS. 컨테이너 Chromium은 조직 정책으로 localhost 자체가 차단되어 GitHub browser-smoke 재실행이 최종 확인이다.
 - `OPTION/**`은 절대 보호 영역이며 어떤 수정/복사/패키징에도 포함하지 않는다.
+
+## 1.9.5 런타임 vendor / 구형 한글 import / lazy Blog Factory
+- `OPTION/**`은 계속 절대 보호 영역이며 수정·복사·패키징하지 않는다.
+- 이미지 검사 브라우저 런타임의 외부 CDN 의존성을 제거했다. GitHub Actions가 배포 전에 고정 버전 ExifReader/C2PA + WASM을 `ai-cleaner/vendor/`로 생성하고 Pages allowlist에 포함한다.
+- 로컬 개발에서 이미지 검사를 사용하려면 저장소 루트에서 의존성 설치 후 `npm run build:vendor`를 먼저 실행한다. 일반 CI와 Daily Pages workflow는 이 단계를 자동 수행한다.
+- TXT 가져오기는 UTF-8/UTF-16뿐 아니라 오래된 CP949/EUC-KR byte stream을 fallback으로 복구한다. RTF `\\ansicpg949` ANSI byte run도 codepage에 맞게 해석한다.
+- Blog Factory controller는 초기 boot에서 제외하고 해당 도구를 처음 열 때 lazy-load한다. 로드 전 복원 상태는 pending state로 보존한다.
+- UI 글자 크기 하한을 9.5px로 잡고 기존 9.5px 미만 선언을 정리했다.
+- 자동검사: module PASS, static 266/0, JS/MJS syntax PASS, workflow YAML PASS. Playwright는 53개로 확장했으며 실제 vendor build/browser-smoke는 GitHub Actions가 최종 게이트다.
+
+
+## 1.9.6 Blog Factory resilience / anti-repeat quality
+- OPTION/** remains a protected, excluded path. Do not inspect, modify, move, delete, rename, or package it.
+- Daily Engine browser fetch is bounded to 8 seconds and exposes a manual retry state instead of hanging indefinitely.
+- Topic cards use progressive disclosure and support copying one topic brief. Selecting a topic clears previous topic-specific USER FACT context.
+- Stale Daily Engine dates are carried into the task with an explicit today-freshness recheck instruction.
+- Daily generation compares up to 14 git revisions / 120 recent topic titles to reduce repeated themes without adding public history files.
+- Daily priority score is now rubric-based and includes priorityReason; runtime surfaces history comparison count and score rationale.
+- Blog compiler 1.3 removes rigid keyword/length targets and strengthens intent-first, mobile, title/body promise, freshness, and factual-source boundaries.

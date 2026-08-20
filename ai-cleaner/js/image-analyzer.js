@@ -2,12 +2,14 @@
 'use strict';
 
 const C2PA_VERSION='0.13.4';
-const C2PA_ESM=`https://cdn.jsdelivr.net/npm/@contentauth/c2pa-web@${C2PA_VERSION}/+esm`;
+const EXIF_VERSION='4.42.0';
+const RUNTIME_ASSET_VERSION=encodeURIComponent(String(window.__AI_CLEANER_VERSION__?.assetVersion||window.__AI_CLEANER_VERSION__?.version||Date.now()));
+const vendorUrl=(name)=>{const u=new URL(`vendor/${name}`,document.baseURI);u.searchParams.set('v',RUNTIME_ASSET_VERSION);return u.href;};
+const C2PA_ESM=vendorUrl('c2pa-web.js');
 const MAX_IMAGE_FILE_BYTES=50*1024*1024;
 const MAX_IMAGE_PIXELS=60_000_000;
-const C2PA_WASM=`https://cdn.jsdelivr.net/npm/@contentauth/c2pa-web@${C2PA_VERSION}/dist/resources/c2pa_bg.wasm`;
-const EXIF_VERSION='4.42.0';
-const EXIF_URL=`https://cdn.jsdelivr.net/npm/exifreader@${EXIF_VERSION}/dist/exif-reader.js`;
+const C2PA_WASM=vendorUrl('c2pa_bg.wasm');
+const EXIF_URL=vendorUrl('exif-reader.js');
 const AI_SOURCE_TOKEN='trainedAlgorithmicMedia';
 const CAMERA_SOURCE_TOKEN='digitalCapture';
 
@@ -87,7 +89,7 @@ function loadExifReader(){
     const s=document.createElement('script');
     s.src=EXIF_URL;s.crossOrigin='anonymous';s.async=true;
     s.onload=()=>window.ExifReader?resolve(window.ExifReader):reject(new Error('ExifReader export 없음'));
-    s.onerror=()=>reject(new Error('ExifReader CDN 로드 실패'));
+    s.onerror=()=>reject(new Error('로컬 ExifReader 리소스 로드 실패'));
     document.head.appendChild(s);
   }).catch(err=>{exifScriptPromise=null;throw err;});
   return exifScriptPromise;

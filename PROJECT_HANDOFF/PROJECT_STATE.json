@@ -1,7 +1,7 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.9.4",
-  "date": "2026-08-19",
+  "version": "1.9.6",
+  "date": "2026-08-20",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
   "appPath": "ai-cleaner/",
@@ -48,15 +48,16 @@
     ".github/workflows/daily-blog-factory-pages.yml",
     ".github/scripts/generate-daily-topics.mjs",
     "ai-cleaner/data/daily-topics.json",
-    ".github/scripts/build-pages-artifact.mjs"
+    ".github/scripts/build-pages-artifact.mjs",
+    ".github/scripts/build-runtime-vendor.mjs"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.9.4",
-  "asset_version": "194",
+  "current_version": "1.9.6",
+  "asset_version": "196",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.9.4 browser-smoke hotfix: blank source takes an immediate reset path before stale UI synchronization; focused E2E regression added",
+  "latestPatch": "1.9.6 Blog Factory hardening: resilient Daily Engine fetch/retry, git-backed 14-run anti-repeat history, explainable topic scoring, stale-date context guard, progressive topic cards, and prompt metrics",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -82,7 +83,7 @@
     "protectedPathsExcluded": [
       "OPTION/**"
     ],
-    "patchBaseline": "Delivered 1.9.3 FULL_PROJECT_HANDOFF -> 1.9.4"
+    "patchBaseline": "Delivered 1.9.5 FULL_PROJECT_HANDOFF -> 1.9.6"
   },
   "internalTypewriter": {
     "source": "visible-text projection of original",
@@ -114,7 +115,9 @@
     "imageResourceGuard": true,
     "e2eVersionDerived": true,
     "e2eAbsolutePreviewUrl": true,
-    "blankInputFastPath": true
+    "blankInputFastPath": true,
+    "legacyKoreanTextImport": true,
+    "rtfAnsiCodepageImport": true
   },
   "layoutStabilization": {
     "desktopWorkspace": "two equal columns",
@@ -137,7 +140,7 @@
     "breakpointExpansionReset": true,
     "safeAreaViewportFitCover": true
   },
-  "nextPhase": "Push 1.9.4 and confirm browser-smoke is green before resuming deeper 1.9.x UI/performance hardening",
+  "nextPhase": "Push 1.9.6, confirm browser-smoke and Daily Engine generation are green, then continue CSS consolidation/CSP/offline hardening",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -163,7 +166,6 @@
       "features/file-import",
       "features/typewriter-engine",
       "features/result-checkpoint-store",
-      "features/ai-writing-os",
       "app"
     ],
     "eventBus": true,
@@ -184,7 +186,8 @@
     "workerSafeTextCore": true,
     "analysisPerformanceGovernor": true,
     "resultCheckpointStore": true,
-    "aiWritingOs": true
+    "aiWritingOs": true,
+    "aiWritingOsLazyLoaded": true
   },
   "textHygiene": {
     "policyVersion": "old-v6-layer-a-safe-1.2.2",
@@ -202,7 +205,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "194",
+  "assetVersion": "196",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -211,15 +214,16 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "260 passed / 0 failed",
-    "moduleChecks": "PASS — Blog Factory GitHub Actions Daily Engine + local prompt builder unit checks",
-    "jsSyntax": "PASS — 27 JS/MJS files",
+    "staticChecks": "270 passed / 0 failed",
+    "moduleChecks": "PASS — includes CP949/EUC-KR TXT and CP949 RTF decoding unit coverage",
+    "jsSyntax": "PASS — 29 JS/MJS files",
     "workflowYaml": "PASS — ai-cleaner-ci.yml + daily-blog-factory-pages.yml parse",
-    "protectedToolIntegrity": "PASS — OPTION unchanged; rewrite-studio.js, image-analyzer.js, text-engine.js, typewriter-engine.js SHA-identical to 1.9.0 CI Hotfix 3 baseline",
-    "localBrowserSmoke": "ENVIRONMENT-LIMITED — installed Chromium blocks localhost by organization policy; GitHub browser-smoke remains final interactive gate",
-    "browserE2EConfigured": "51 cases including focused blank-source stale-output regression, correction overlap/direct-edit and partial Daily Engine data",
-    "patchRebuild": "PASS — 1.9.0 CI Hotfix 3 baseline + 17-file Patch reproduces 1.9.1 tree (110 files / diff 0)",
-    "mockedDailyGenerator": "PASS — Responses request, gpt-5 default, web_search, strict JSON schema, exactly 10 topics/TOP3, API secret not persisted"
+    "protectedToolIntegrity": "PASS — OPTION/** remains excluded from the 1.9.5 work tree and delivery artifacts; image-analyzer.js is intentionally changed only to replace runtime CDN loading with local version-pinned vendor assets",
+    "localBrowserSmoke": "ENVIRONMENT-LIMITED — local container cannot fetch npm packages / complete localhost Chromium validation; GitHub Actions builds vendor assets before browser-smoke and remains the final interactive gate",
+    "browserE2EConfigured": "53 cases including CP949 import + Blog Factory lazy-load + prior 1.9.4 regressions",
+    "patchRebuild": "PASS — 1.9.4 FULL baseline + 17-file 1.9.5 Patch reproduces 1.9.5 source tree (124 files / diff 0)",
+    "mockedDailyGenerator": "PASS — Responses request, gpt-5 default, web_search, strict JSON schema, exactly 10 topics/TOP3, API secret not persisted",
+    "runtimeVendorBuild": "GITHUB-GATE — source/build pipeline configured; local container DNS prevents npm dependency fetch, so GitHub Actions must confirm npm run build:vendor and browser-smoke"
   },
   "stabilityAudit131": {
     "updateOnlyWhenSemverNewer": true,
@@ -641,5 +645,15 @@
     "sameWorkflowPagesDeploy": true,
     "localPromptAutoPreparePreserved": true,
     "localPromptAutoPrepareRunsWhileClosed": false
+  },
+  "hardening195": {
+    "runtimeImageVendor": "ExifReader 4.42.0 + @contentauth/c2pa-web 0.13.4 bundled locally during CI",
+    "browserRuntimeCdnImport": false,
+    "vendorLicensesCopied": true,
+    "cp949EucKrImport": true,
+    "rtfAnsicpg949": true,
+    "blogFactoryLazyLoaded": true,
+    "minimumCssFontPx": 9.5,
+    "optionPathTouched": false
   }
 }

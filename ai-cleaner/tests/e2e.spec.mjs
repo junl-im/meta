@@ -269,13 +269,22 @@ test('text file import uses the same source replacement and freshness pipeline',
   await expect(page.locator('#resultFreshness')).toBeHidden();await expect(page.locator('#appToast')).toContainText('source.txt 파일을 열고 바로 다듬었습니다.');
 });
 
+test('legacy CP949 Korean text import decodes before entering the shared analysis pipeline', async ({ page }) => {
+  await gotoReady(page);await page.locator('#liveScan').uncheck();
+  const cp949=Buffer.from([191,192,183,161,181,200,32,199,209,177,219,32,198,196,192,207]);
+  await page.locator('#textFileInput').setInputFiles({name:'old-korean.txt',mimeType:'text/plain',buffer:cp949});
+  await expect(page.locator('#input')).toHaveValue('오래된 한글 파일');
+  await expect(page.locator('#output')).toHaveValue('오래된 한글 파일');
+  await expect(page.locator('#appToast')).toContainText('EUC-KR/CP949');
+});
+
 test('a stale text-file read cannot overwrite newer direct input intent', async ({ page }) => {
   await gotoReady(page);
-  await page.evaluate(()=>{window.__originalFileText=File.prototype.text;File.prototype.text=function(){if(this.name==='slow.txt')return new Promise(resolve=>setTimeout(()=>resolve('느린 파일이 뒤늦게 완료되었습니다.'),450));return window.__originalFileText.call(this);};});
+  await page.evaluate(()=>{window.__originalFileArrayBuffer=File.prototype.arrayBuffer;File.prototype.arrayBuffer=function(){const file=this;if(file.name==='slow.txt')return new Promise((resolve,reject)=>setTimeout(()=>window.__originalFileArrayBuffer.call(file).then(resolve,reject),450));return window.__originalFileArrayBuffer.call(file);};});
   await page.locator('#textFileInput').setInputFiles({name:'slow.txt',mimeType:'text/plain',buffer:Buffer.from('느린 파일이 뒤늦게 완료되었습니다.','utf8')});
   await page.waitForTimeout(40);await page.locator('#input').fill('사용자가 나중에 직접 입력한 최신 원본');await page.waitForTimeout(600);
   await expect(page.locator('#input')).toHaveValue('사용자가 나중에 직접 입력한 최신 원본');await expect(page.locator('#output')).toHaveValue(/사용자가 나중에 직접 입력한 최신 원본/);
-  await page.evaluate(()=>{File.prototype.text=window.__originalFileText;delete window.__originalFileText;});await expect.poll(async()=>page.evaluate(()=>window.AICleanerApp.workLock.active.filter(x=>x.name.startsWith('text-import-')).length)).toBe(0);
+  await page.evaluate(()=>{File.prototype.arrayBuffer=window.__originalFileArrayBuffer;delete window.__originalFileArrayBuffer;});await expect.poll(async()=>page.evaluate(()=>window.AICleanerApp.workLock.active.filter(x=>x.name.startsWith('text-import-')).length)).toBe(0);
 });
 
 test('large text file import uses immediate worker-safe background analysis even when live scan is off', async ({ page }) => {
@@ -563,6 +572,15 @@ test('direct result editing temporarily locks stale correction and restore actio
   await expect(page.locator('#issuesPanel [data-apply]')).toHaveCount(1);
 });
 
+test('Blog Factory controller stays out of initial boot and loads only when the tool is opened', async ({ page }) => {
+  await gotoReady(page);
+  await expect.poll(async()=>page.evaluate(()=>typeof window.AICleanerModules?.createAiWritingOsController)).not.toBe('function');
+  await page.locator('[data-tool="writing"]').click();
+  await expect(page.locator('#writingTool')).toBeVisible();
+  await expect.poll(async()=>page.evaluate(()=>typeof window.AICleanerModules?.createAiWritingOsController),{timeout:5000}).toBe('function');
+  await expect.poll(async()=>page.evaluate(()=>window.AICleanerApp.aiWritingOs.loaded)).toBeTruthy();
+});
+
 test('Blog Factory Daily Engine handles partial topic data without overstating readiness', async ({ page }) => {
   const date=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
   const topics=Array.from({length:4},(_,i)=>({id:`partial-${i+1}`,rank:20-i,top3:true,title:`부분 주제 ${i+1}`,category:'생활형',whyNow:'오늘 확인',searchIntent:'정보 탐색',angle:'다른 각도',researchNeed:'추가 확인',imageConcept:'생활 장면',priorityScore:80-i}));
@@ -579,20 +597,56 @@ test('Blog Factory Daily Engine renders generated topics and sends a selected to
   const date=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
   const topics=Array.from({length:10},(_,i)=>({
     id:`topic-${String(i+1).padStart(2,'0')}`,rank:i+1,top3:i<3,title:`자동 주제 ${i+1}`,category:i<3?'시즌형':'에버그린',
-    whyNow:`오늘 추천 이유 ${i+1}`,searchIntent:`검색 의도 ${i+1}`,angle:`차별화 각도 ${i+1}`,researchNeed:`확인할 자료 ${i+1}`,imageConcept:`이미지 콘셉트 ${i+1}`,priorityScore:95-i
+    whyNow:`오늘 추천 이유 ${i+1}`,searchIntent:`검색 의도 ${i+1}`,angle:`차별화 각도 ${i+1}`,researchNeed:`확인할 자료 ${i+1}`,imageConcept:`이미지 콘셉트 ${i+1}`,priorityReason:`우선순위 근거 ${i+1}`,priorityScore:95-i
   }));
-  await page.route('**/ai-cleaner/data/daily-topics.json*',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({schemaVersion:1,status:'ready',date,timezone:'Asia/Seoul',generatedAtLocal:`${date}T06:20:00+09:00`,model:'test-model',engine:'github-actions-openai-responses',webSearchUsed:true,summary:'오늘 테스트 주제 10개',topics})}));
+  await page.route('**/ai-cleaner/data/daily-topics.json*',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({schemaVersion:1,status:'ready',date,timezone:'Asia/Seoul',generatedAtLocal:`${date}T06:20:00+09:00`,model:'test-model',engine:'github-actions-openai-responses',webSearchUsed:true,historyCompared:80,summary:'오늘 테스트 주제 10개',topics})}));
   await gotoReady(page);await page.locator('[data-tool="writing"]').click();
   await expect(page.locator('#osDailyEngineStatus')).toHaveText('오늘 10개 준비');
   await expect(page.locator('#osDailyTopics .osDailyTopic')).toHaveCount(10);
   await expect(page.locator('#osDailyTopics .osDailyTopic.top3')).toHaveCount(3);
+  await expect(page.locator('#osDailyEngineMeta')).toContainText('최근 주제 80개 중복 비교');
   await expect(page.locator('#osDailyEngineMeta')).toContainText('최신 정보 확인 포함');
+  await expect(page.locator('#osDailyTopics .osDailyTopicDetails').first()).not.toHaveAttribute('open','');
+  await page.locator('#osDailyTopics .osDailyTopicDetails summary').first().click();
+  await expect(page.locator('#osDailyTopics .osDailyTopicDetails').first()).toContainText('우선순위 근거 1');
+  await page.locator('#osFacts').fill('이전 주제의 실제 경험');
   await page.locator('[data-daily-topic-use="0"]').click();
   await expect(page.locator('#osFactoryPresets [data-factory-mode="daily_one"]')).toHaveClass(/active/);
   await expect(page.locator('#osTask')).toHaveValue(/자동 주제 1/);
   await expect(page.locator('#osTask')).toHaveValue(/검색 의도: 검색 의도 1/);
   await expect(page.locator('#osTask')).toHaveValue(/본문 전에 확인할 항목: 확인할 자료 1/);
+  await expect(page.locator('#osTask')).toHaveValue(/우선순위 근거: 우선순위 근거 1/);
+  await expect(page.locator('#osFacts')).toHaveValue('');
   await expect(page.locator('#osBuildPrompt')).toBeEnabled();
+});
+
+
+test('Blog Factory Daily Engine exposes retry after a fetch failure and recovers on demand', async ({ page }) => {
+  const date=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+  let calls=0;
+  await page.route('**/ai-cleaner/data/daily-topics.json*',route=>{
+    calls++;
+    if(calls===1)return route.fulfill({status:503,contentType:'text/plain',body:'temporary'});
+    const topics=Array.from({length:10},(_,i)=>({id:`retry-${i}`,rank:i+1,title:`복구 주제 ${i+1}`,category:'생활형',whyNow:'지금 쓰기 좋음',searchIntent:'정보 탐색',angle:'차별화',researchNeed:'확인 최소',imageConcept:'생활 장면',priorityReason:'실행 가능성이 높음',priorityScore:90-i}));
+    return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({schemaVersion:1,status:'ready',date,timezone:'Asia/Seoul',generatedAtLocal:`${date}T06:20:00+09:00`,summary:'복구됨',topics})});
+  });
+  await gotoReady(page);await page.locator('[data-tool="writing"]').click();
+  await expect(page.locator('#osDailyEngineStatus')).toHaveText('불러오기 실패');
+  await expect(page.locator('#osRefreshDailyTopics')).toBeEnabled();
+  await page.locator('#osRefreshDailyTopics').click();
+  await expect(page.locator('#osDailyEngineStatus')).toHaveText('오늘 10개 준비');
+  await expect(page.locator('#osDailyTopics .osDailyTopic')).toHaveCount(10);
+});
+
+test('Blog Factory marks stale Daily Engine topics for today freshness verification', async ({ page }) => {
+  const yesterday=new Date(Date.now()-86400000);
+  const date=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(yesterday);
+  const topics=[{id:'stale-1',rank:1,title:'지난 자동 주제',category:'시즌형',whyNow:'이전 추천',searchIntent:'정보 탐색',angle:'각도',researchNeed:'운영시간 재확인',imageConcept:'현장',priorityReason:'이전 기준 우선',priorityScore:90}];
+  await page.route('**/ai-cleaner/data/daily-topics.json*',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({schemaVersion:1,status:'ready',date,timezone:'Asia/Seoul',generatedAtLocal:`${date}T06:20:00+09:00`,topics})}));
+  await gotoReady(page);await page.locator('[data-tool="writing"]').click();
+  await expect(page.locator('#osDailyEngineStatus')).toContainText('지난 데이터');
+  await page.locator('[data-daily-topic-use="0"]').click();
+  await expect(page.locator('#osTask')).toHaveValue(/오늘 기준 최신성 재확인 필요/);
 });
 
 test('Blog Factory builds today topics prompt and never exposes provider launch controls', async ({ page }) => {
@@ -613,6 +667,8 @@ test('Blog Factory builds today topics prompt and never exposes provider launch 
   await expect(page.locator('#osTaskPackResult')).toBeVisible();
   await expect(page.locator('#osReadyMessage')).toContainText('오늘의 주제 발굴 프롬프트');
   await expect(page.locator('#osCompilerSummary')).toContainText('주제 10개 + TOP 3');
+  await expect(page.locator('#osPromptMetrics')).toContainText('자');
+  await expect(page.locator('#osPromptMetrics')).toContainText('줄');
   await expect(page.locator('#osTaskPackPreview')).toHaveValue(/# BLOG FACTORY — TODAY TOPIC PROMPT/);
   await expect(page.locator('#osTaskPackPreview')).toHaveValue(/오늘의 탐색 각도/);
   await expect(page.locator('#osTaskPackPreview')).toHaveValue(/완성 본문은 쓰지 말고 오늘 작성 후보 10개/);

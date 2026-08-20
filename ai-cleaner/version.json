@@ -1,6 +1,6 @@
 {
-  "version": "1.9.4",
-  "assetVersion": "194",
+  "version": "1.9.6",
+  "assetVersion": "196",
   "channel": "stable",
-  "updateMode": "blank-source-fast-reset"
+  "updateMode": "blog-factory-resilience-history-quality"
 }

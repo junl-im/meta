@@ -37,6 +37,12 @@ jobs:
           node-version: '24'
           package-manager-cache: false
 
+      - name: Install runtime build dependencies
+        run: npm install --no-audit --no-fund --omit=dev
+
+      - name: Build local runtime vendor
+        run: npm run build:vendor
+
       - name: Check Daily Engine configuration
         id: daily-config
         if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.generate_topics)
@@ -87,6 +93,7 @@ jobs:
           node --check ai-cleaner/tests/static-check.mjs
           node --check ai-cleaner/tests/module-check.mjs
           node --check .github/scripts/build-pages-artifact.mjs
+          node --check .github/scripts/build-runtime-vendor.mjs
 
       - name: Blog Factory static checks
         run: |

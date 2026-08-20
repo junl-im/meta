@@ -4,7 +4,7 @@
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 const Modules=window.AICleanerModules||{};
-const requiredModules=['createEventBus','createHistoryStore','createWorkLock','splitGraphemesExact','sanitizeVisibleTypingSource','classifyTextCodePoint','createTextStateStore','createTextEngine','createDiffEngine','createAnalysisWorkerAdapter','createAnalysisPerformanceGovernor','createAnalysisCoordinator','createFileImportService','createUpdateManager','createPanelManager','createDiffView','createTypewriterEngine','createResultCheckpointStore','createAiWritingOsController'];
+const requiredModules=['createEventBus','createHistoryStore','createWorkLock','splitGraphemesExact','sanitizeVisibleTypingSource','classifyTextCodePoint','createTextStateStore','createTextEngine','createDiffEngine','createAnalysisWorkerAdapter','createAnalysisPerformanceGovernor','createAnalysisCoordinator','createFileImportService','createUpdateManager','createPanelManager','createDiffView','createTypewriterEngine','createResultCheckpointStore'];
 const missingModules=requiredModules.filter(name=>typeof Modules[name]!=='function');
 if(missingModules.length)throw new Error('AI Cleaner core modules missing: '+missingModules.join(', '));
 const eventBus=Modules.createEventBus();
@@ -18,7 +18,14 @@ const fileImport=Modules.createFileImportService();
 let checkpointStorage=null;try{checkpointStorage=window.sessionStorage;}catch(_){}
 const checkpointStore=Modules.createResultCheckpointStore({storage:checkpointStorage,limit:8,maxChars:300000,maxTotalChars:600000});
 let aiWritingStorage=null;try{aiWritingStorage=window.localStorage;}catch(_){}
-const aiWritingOs=Modules.createAiWritingOsController({storage:aiWritingStorage,workLock,showToast:(message)=>showToast(message)});
+let aiWritingController=null,pendingAiWritingRestore=null;
+const aiWritingOs={
+  get loaded(){return !!aiWritingController;},
+  captureState(){return aiWritingController?.captureState?.()??pendingAiWritingRestore??null;},
+  restoreState(value){if(!value)return false;if(aiWritingController)return aiWritingController.restoreState(value);pendingAiWritingRestore=value;return true;},
+  async activate(){const controller=await ensureAiWritingOsController();return controller.activate();},
+  deactivate(){return aiWritingController?.deactivate?.();}
+};
 let checkpointSourceCache={source:null,stamp:''};
 function checkpointCurrentSourceStamp(){const input=$('#input')?.value||'';if(!input||inputDirty||state.original!==input)return'';if(checkpointSourceCache.source===input&&checkpointSourceCache.stamp)return checkpointSourceCache.stamp;const stamp=checkpointStore.stamp(input);checkpointSourceCache={source:input,stamp};return stamp;}
 
@@ -52,6 +59,7 @@ function loadLazyScript(src){
 }
 async function ensureImageAnalyzer(){if(typeof window.loadImage==='function')return window.loadImage;await loadLazyScript(`js/image-analyzer.js?v=${ASSET_VERSION}`);if(typeof window.loadImage!=='function')throw new Error('이미지 검사 엔진 초기화 실패');return window.loadImage;}
 async function ensureRewriteStudio(){if(window.AICleanerRewriteStudio)return window.AICleanerRewriteStudio;await loadLazyScript(`js/rewrite-studio.js?v=${ASSET_VERSION}`);if(!window.AICleanerRewriteStudio)throw new Error('재작성 스튜디오 초기화 실패');return window.AICleanerRewriteStudio;}
+async function ensureAiWritingOsController(){if(aiWritingController)return aiWritingController;await loadLazyScript(`js/features/ai-writing-os.js?v=${ASSET_VERSION}`);const factory=window.AICleanerModules?.createAiWritingOsController;if(typeof factory!=='function')throw new Error('블로그 팩토리 모듈 초기화 실패');const controller=factory({storage:aiWritingStorage,workLock,showToast:(message)=>showToast(message)});aiWritingController=controller;if(pendingAiWritingRestore){const pending=pendingAiWritingRestore;pendingAiWritingRestore=null;controller.restoreState(pending);}return controller;}
 const historyStore=Modules.createHistoryStore({limit:60,signature:s=>JSON.stringify([s.output,s.manual,s.applied,s.issueBase])});
 let manualEditBaseline='';
 let inputDirty=false;
@@ -811,7 +819,8 @@ $('#textFileInput').addEventListener('change',async e=>{
   try{
     const imported=await fileImport.read(f);if(request!==textImportSeq)return;
     const large=imported.text.length>=ANALYSIS_WORKER_THRESHOLD,ok=replaceSourceText(imported.text,{analyzeNow:!large,backgroundNow:large,resetPerformance:true});if(!ok)return;
-    showToast(large?`${imported.name} 파일을 열었습니다. 큰 문서는 백그라운드에서 분석합니다.`:`${imported.name} 파일을 열고 바로 다듬었습니다.`);
+    const encodingNote=imported.encoding==='euc-kr'?' · EUC-KR/CP949 감지':imported.encoding&&imported.encoding.startsWith('utf-16')?` · ${imported.encoding.toUpperCase()} 감지`:'';
+    showToast((large?`${imported.name} 파일을 열었습니다. 큰 문서는 백그라운드에서 분석합니다.`:`${imported.name} 파일을 열고 바로 다듬었습니다.`)+encodingNote);
   }
   catch(err){if(request!==textImportSeq)return;if(err?.code==='FILE_TOO_LARGE')showToast('20MB가 넘는 텍스트 파일은 브라우저가 느려질 수 있어 열지 않았습니다. 파일을 나눠서 사용해 주세요.');else if(err?.code==='BINARY_TEXT')showToast('바이너리 데이터가 많은 파일이라 텍스트로 열지 않았습니다.');else showToast('파일을 읽지 못했습니다. 텍스트 기반 파일인지 확인해 주세요.');}
   finally{workLock.release(lockName);e.target.value='';}

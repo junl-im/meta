@@ -57,7 +57,7 @@
     const coreScripts=[
       'js/core/event-bus.js','js/core/history-store.js','js/core/work-lock.js','js/core/text-utils.js',
       'js/core/state-store.js','js/core/text-engine.js','js/core/diff-engine.js','js/services/analysis-worker-adapter.js','js/services/analysis-performance-governor.js','js/services/analysis-coordinator.js','js/services/update-manager.js',
-      'js/ui/panel-manager.js','js/ui/diff-view.js','js/features/file-import.js','js/features/typewriter-engine.js','js/features/result-checkpoint-store.js','js/features/ai-writing-os.js'
+      'js/ui/panel-manager.js','js/ui/diff-view.js','js/features/file-import.js','js/features/typewriter-engine.js','js/features/result-checkpoint-store.js'
     ];
     for(const src of coreScripts)await loadScript(src+'?v='+av);
     await loadScript('js/app.js?v='+av);
@@ -200,7 +200,7 @@
 <main id="imageTool" class="hidden">
   <section class="hero">
     <h1>이미지의 <span>출처 신호와 메타데이터</span>를 확인하세요.</h1>
-    <p>구조화 메타데이터, C2PA Content Credentials, 파일 내부의 명시적 생성 도구 정보와 시각 통계를 구분해서 보여줍니다.</p>
+    <p>구조화 메타데이터, C2PA Content Credentials, 파일 내부의 명시적 생성 도구 정보와 시각 통계를 구분해서 보여줍니다. 선택한 이미지 파일 자체는 서버로 업로드하지 않으며, ExifReader/C2PA 실행 코드는 사이트와 함께 배포된 고정 버전을 사용합니다.</p>
   </section>
   <section class="card">
     <div class="body">
@@ -290,7 +290,7 @@
       <div class="body">
         <div class="osDailyEngineSummary">
           <div><span class="tag green">TODAY</span><b id="osDailyEngineSummary">오늘의 주제를 불러오고 있습니다.</b><small id="osDailyEngineMeta">준비된 주제에서 골라 바로 글 프롬프트로 이어갈 수 있습니다.</small></div>
-          <button class="mini passive" id="osCopyDailyTopics" type="button" disabled>주제 10개 복사</button>
+          <div class="osDailyEngineActions"><button class="mini passive" id="osRefreshDailyTopics" type="button">다시 확인</button><button class="mini passive" id="osCopyDailyTopics" type="button" disabled>주제 10개 복사</button></div>
         </div>
         <div class="osDailyTopics" id="osDailyTopics" aria-live="polite"></div>
         <div class="osDailyEngineEmpty" id="osDailyEngineEmpty" hidden>
@@ -349,7 +349,7 @@
         <div class="osTaskPackResult osSimpleResult osPromptResult" id="osTaskPackResult" hidden>
           <div class="osReadyState"><span class="tag green">TODAY PROMPT</span><b id="osReadyMessage" aria-live="polite">오늘의 주제 발굴 프롬프트가 준비됐습니다.</b></div>
           <div class="osAppliedChips" id="osAppliedChips" aria-label="이번 프롬프트에 적용된 기준"></div>
-          <div class="osCompilerSummary" id="osCompilerSummary"></div>
+          <div class="osCompilerSummaryRow"><div class="osCompilerSummary" id="osCompilerSummary"></div><span class="osPromptMetrics" id="osPromptMetrics" aria-label="프롬프트 길이"></span></div>
           <p class="osAfterSend" id="osAfterSend">아래 프롬프트를 확인한 뒤 복사하세요. 사용할 AI나 작성 도구는 직접 선택하면 됩니다.</p>
           <textarea id="osTaskPackPreview" class="osPackPreview osPromptPreviewAlways" readonly spellcheck="false" aria-label="생성된 복사용 프롬프트"></textarea>
           <div class="actions osResultActions">

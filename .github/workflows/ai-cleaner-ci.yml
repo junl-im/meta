@@ -8,6 +8,7 @@ on:
       - 'package.json'
       - 'OPTION/**'
       - '.github/workflows/ai-cleaner-ci.yml'
+      - '.github/scripts/**'
   push:
     branches:
       - main
@@ -79,6 +80,7 @@ jobs:
           node --check ai-cleaner/tests/module-check.mjs
           node --check ai-cleaner/tests/e2e.spec.mjs
           node --check .github/scripts/build-pages-artifact.mjs
+          node --check .github/scripts/build-runtime-vendor.mjs
       - name: Modular core unit checks
         run: node ai-cleaner/tests/module-check.mjs
       - name: Static checks
@@ -100,10 +102,12 @@ jobs:
         shell: bash
         run: |
           if [ -f package-lock.json ]; then
-            npm ci --ignore-scripts --no-audit --no-fund
+            npm ci --no-audit --no-fund
           else
-            npm install --ignore-scripts --no-audit --no-fund
+            npm install --no-audit --no-fund
           fi
+      - name: Build local runtime vendor
+        run: npm run build:vendor
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Start static preview
@@ -154,6 +158,18 @@ jobs:
             echo 'deployable=false' >> "$GITHUB_OUTPUT"
             echo 'A newer main commit exists; skipping this stale Pages deployment.'
           fi
+      - name: Setup Node
+        if: steps.head.outputs.deployable == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install runtime build dependencies
+        if: steps.head.outputs.deployable == 'true'
+        run: npm install --no-audit --no-fund --omit=dev
+      - name: Build local runtime vendor
+        if: steps.head.outputs.deployable == 'true'
+        run: npm run build:vendor
       - name: Configure GitHub Pages
         if: steps.head.outputs.deployable == 'true'
         uses: actions/configure-pages@v5

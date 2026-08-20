@@ -8,7 +8,7 @@ const OS = path.join(APP, 'ai-writing-os');
 
 const rootFiles = ['index.html'];
 const appFiles = ['index.html', 'site.webmanifest', 'version.json'];
-const appDirs = ['css', 'data', 'js'];
+const appDirs = ['css', 'data', 'js', 'vendor'];
 const assetFiles = [
   'favicon-v66.png',
   'apple-touch-icon-v66.png',
