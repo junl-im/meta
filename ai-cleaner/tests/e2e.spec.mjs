@@ -90,7 +90,7 @@ test('reset immediately after mobile typewriter completion cancels the delayed c
 test('mobile source actions stay on one compact row and result tabs align to the right of the result title', async ({ page }) => {
   await page.setViewportSize({width:390,height:844});await gotoReady(page);
   const sourceGeometry=await page.locator('#sample, .sourceActions .filelabel, #reset').evaluateAll(nodes=>nodes.map(el=>{const r=el.getBoundingClientRect();return{top:Math.round(r.top),bottom:Math.round(r.bottom),height:Math.round(r.height)};}));
-  expect(sourceGeometry).toHaveLength(3);expect(Math.max(...sourceGeometry.map(x=>x.top))-Math.min(...sourceGeometry.map(x=>x.top))).toBeLessThanOrEqual(2);expect(Math.max(...sourceGeometry.map(x=>x.height))).toBeLessThanOrEqual(38);
+  expect(sourceGeometry).toHaveLength(3);expect(Math.max(...sourceGeometry.map(x=>x.top))-Math.min(...sourceGeometry.map(x=>x.top))).toBeLessThanOrEqual(2);expect(Math.min(...sourceGeometry.map(x=>x.height))).toBeGreaterThanOrEqual(40);
   await page.locator('#liveScan').uncheck();await page.locator('#input').fill('결과 상태 안내가 보여도 탭은 같은 줄 오른쪽에 있어야 합니다.');await expect(page.locator('#resultFreshness')).toBeVisible();
   const resultLayout=await page.locator('#resultCard').evaluate(card=>{const title=card.querySelector('.resultTitle').getBoundingClientRect(),tabs=card.querySelector('.tabs').getBoundingClientRect(),head=card.querySelector('.resultHead').getBoundingClientRect();return{titleTop:Math.round(title.top),tabsTop:Math.round(tabs.top),titleRight:Math.round(title.right),tabsLeft:Math.round(tabs.left),headRight:Math.round(head.right),tabsRight:Math.round(tabs.right)};});
   expect(Math.abs(resultLayout.titleTop-resultLayout.tabsTop)).toBeLessThanOrEqual(8);expect(resultLayout.tabsLeft).toBeGreaterThanOrEqual(resultLayout.titleRight-4);expect(resultLayout.tabsRight).toBeLessThanOrEqual(resultLayout.headRight+1);
@@ -786,3 +786,43 @@ test('Blog Factory copy fallback never opens a provider and selects prompt when 
   await expect(page.locator('#osTaskPackPreview')).toBeFocused();
 });
 
+
+
+test('service worker keeps the core text cleaner available after the network drops', async ({ page, context }) => {
+  await gotoReady(page);
+  await page.waitForFunction(async()=>{if(!('serviceWorker' in navigator))return false;const reg=await navigator.serviceWorker.ready;return !!reg?.active;},{timeout:10000});
+  await page.waitForFunction(()=>!!navigator.serviceWorker.controller,{timeout:10000});
+  const scope=await page.evaluate(async()=>String((await navigator.serviceWorker.ready).scope));
+  expect(scope).toContain('/ai-cleaner/');
+  await context.setOffline(true);
+  try{
+    await page.reload({waitUntil:'domcontentloaded',timeout:15000});
+    await page.waitForFunction(()=>window.__AI_CLEANER_APP_READY__===true&&!!window.AICleanerApp,{timeout:15000});
+    await page.locator('#input').fill('오프라인에서도 기본 텍스트 정리는 열려야 합니다.');
+    await analyzeNow(page,{silent:true});
+    await expect(page.locator('#output')).not.toHaveValue('');
+  } finally { await context.setOffline(false); }
+});
+
+test('top-level tool tabs support roving keyboard focus and synchronized panel state', async ({ page }) => {
+  await gotoReady(page);
+  const text=page.locator('#toolTabText'),image=page.locator('#toolTabImage'),writing=page.locator('#toolTabWriting');
+  await expect(text).toHaveAttribute('role','tab');await expect(text).toHaveAttribute('aria-selected','true');await expect(text).toHaveAttribute('tabindex','0');
+  await expect(image).toHaveAttribute('aria-selected','false');await expect(image).toHaveAttribute('tabindex','-1');
+  await text.focus();await page.keyboard.press('ArrowRight');
+  await expect(image).toBeFocused();await expect(image).toHaveAttribute('aria-selected','true');await expect(page.locator('#imageTool')).toBeVisible();await expect(page.locator('#textTool')).toBeHidden();
+  await page.keyboard.press('End');await expect(writing).toBeFocused();await expect(writing).toHaveAttribute('aria-selected','true');await expect(page.locator('#writingTool')).toBeVisible();
+  await page.keyboard.press('Home');await expect(text).toBeFocused();await expect(text).toHaveAttribute('aria-selected','true');await expect(page.locator('#textTool')).toBeVisible();await expect(page.locator('#writingTool')).toBeHidden();
+});
+
+test('Blog Factory keeps compact presets and disclosure targets inside narrow mobile viewports', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});await gotoReady(page);await page.locator('#toolTabWriting').click();
+  const presets=page.locator('#osFactoryPresets button');
+  const first390=await presets.nth(0).boundingBox(),second390=await presets.nth(1).boundingBox(),third390=await presets.nth(2).boundingBox();
+  expect(first390&&second390&&third390).toBeTruthy();expect(Math.abs(first390.y-second390.y)).toBeLessThan(2);expect(third390.y).toBeGreaterThan(first390.y+10);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBeTruthy();
+  expect(await page.locator('#osFactoryContext > summary').evaluate(el=>el.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
+  await page.setViewportSize({width:320,height:568});
+  const first320=await presets.nth(0).boundingBox(),second320=await presets.nth(1).boundingBox();
+  expect(first320&&second320).toBeTruthy();expect(second320.y).toBeGreaterThan(first320.y+10);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBeTruthy();
+});

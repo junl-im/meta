@@ -1,6 +1,6 @@
 # AI Cleaner 프로젝트 인수인계 메모리
 
-업데이트: 2026-08-20 · 현재 패키지: 1.9.9
+업데이트: 2026-08-20 · 현재 패키지: 1.11.0
 
 ## 새 채팅에서 가장 먼저 읽을 것
 이 폴더를 새 채팅에 업로드한 뒤 `PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md 읽고 이어서 개발하자`라고 요청한다. 이 문서는 프로젝트의 결정사항, 보호 경로, UX 방향, 안전 제약, 배포 방식, 알려진 이슈를 보존하기 위한 인수인계 메모리다.
@@ -96,6 +96,14 @@
 - `매일 자동 준비`는 opt-in 로컬 자동화다. 관심 분야를 저장하고 새 날짜에 사용자가 앱을 열었을 때 그날용 프롬프트를 준비한다. 앱이 닫힌 동안 AI를 실행했다고 주장하지 않는다.
 - 오늘 프롬프트 캐시는 자동 준비 opt-in일 때만 저장하며, 임시 `실제 경험/사실`·`중복 방지 메모`가 있으면 캐시하지 않는다. 프로필/독자/조사 설정/주제 씨앗이 바뀌면 signature 불일치로 같은 날 캐시도 폐기한다.
 - 완전 무인 일일 생성은 정적 Pages에 비밀키를 넣지 말고, 향후 서버 스케줄러 + 서버 측 AI API + 지속 저장소 계층으로 분리한다.
+
+
+## 1.11.0 UI 구조 정리
+- 상단 도구 전환은 ARIA tablist/tab 구조로 고정하며 `←/→/Home/End` 키보드 이동과 roving tabindex를 유지한다.
+- `prefers-reduced-motion` CSS는 단일 최종 계약 블록에서 관리한다. 새 버전별 reduced-motion override를 별도 블록으로 누적하지 않는다.
+- Blog Factory 프리셋은 390px급 모바일에서는 2열을 유지하고 340px 이하에서만 1열로 전환한다.
+- 모바일 disclosure summary는 터치 영역을 보장하고 긴 Daily Topic/Compiler 문구는 카드 밖으로 넘치지 않게 wrap한다.
+- `OPTION/**`은 계속 AI Cleaner 수정/전달 대상에서 제외하며 `/OPTION/SS_OPTION.txt` public bridge만 기존 Pages 동작을 유지한다.
 
 ## 다음 개선 후보
 - PDF/DOCX 안전한 로컬 파일 import.
@@ -650,3 +658,12 @@
 - background update check는 8초 timeout으로 abort해 `busy`가 영구 고정되지 않게 한다.
 - 이미지 vendor는 ExifReader/C2PA module 10초, C2PA WASM init 12초 timeout을 둔다. 실패는 이미지 분석 전체 hang이 아니라 해당 metadata 신호의 실패 상태로 귀결된다.
 - `OPTION/**`은 수정/이동/삭제/전달 ZIP 포함 금지. 기존 Pages bridge는 owner-managed `OPTION/SS_OPTION.txt`를 존재할 때 그대로 읽어 복사하는 예외만 유지하며, AI Cleaner 코드가 내용을 변경하지 않는다.
+
+
+## 1.10.0 Offline / performance / mobile foundation
+
+- `OPTION/**` remains outside all handoff ZIPs and outside the AI Cleaner service-worker scope. The existing Pages bridge for `OPTION/SS_OPTION.txt` remains a deployment-only exception.
+- Initial core/app JavaScript is generated as `vendor/app-core.bundle.js` during `npm run build:vendor`, reducing production first-load script requests. `boot.js` falls back to the original ordered source files if the bundle is unavailable.
+- `ai-cleaner/sw.js` adds a scoped offline shell for `/ai-cleaner/` only. `version.json` and `data/daily-topics.json` use network-first freshness; other runtime assets use cache-first within the versioned cache.
+- The web app manifest now has an explicit id, language, description, categories, and orientation metadata.
+- Coarse-pointer mobile controls receive a larger touch floor; text fields/selects use 16px on mobile to avoid focus zoom. Reduced-motion and increased-contrast preferences receive stronger global handling.

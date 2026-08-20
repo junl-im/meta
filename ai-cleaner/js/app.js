@@ -830,12 +830,23 @@ $('#textFileInput').addEventListener('change',async e=>{
 $$('[data-resulttab]').forEach(t=>{t.onclick=()=>activateResultTab(t.dataset.resulttab);t.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;const tabs=$$('[data-resulttab]').filter(x=>!x.disabled);if(!tabs.length)return;const current=tabs.indexOf(t),dir=e.key==='ArrowLeft'?-1:1;let next=e.key==='Home'?tabs[0]:e.key==='End'?tabs.at(-1):tabs[(current+dir+tabs.length)%tabs.length];if(!next)return;e.preventDefault();activateResultTab(next.dataset.resulttab);next.focus();});});
 
 const TOOL_SECTION_IDS={text:'textTool',image:'imageTool',writing:'writingTool'};
-$$('[data-tool]').forEach(b=>b.onclick=()=>{
-  const nextTool=b.dataset.tool;
+const toolTabs=$$('[data-tool]');
+function activateToolTab(b){
+  if(!b)return;const nextTool=b.dataset.tool;
   if(nextTool!=='text'){invalidatePendingRewriteOpen();try{window.AICleanerRewriteStudio?.saveSession?.();}catch(_){}window.AICleanerRewriteStudio?.cancelGeneration?.({status:'다른 도구로 이동해 생성 작업을 취소했습니다.'});closeAllPanels();}
   if(nextTool!=='image'){invalidatePendingImageRun({status:'다른 도구로 이동해 이미지 분석을 중지했습니다.'});window.cancelImageAnalysis?.({status:'다른 도구로 이동해 이미지 분석을 중지했습니다.'});}
   if(nextTool==='writing')void aiWritingOs.activate().catch(err=>{console.error(err);showToast('블로그 팩토리를 초기화하지 못했습니다. 새로고침 후 다시 시도해 주세요.');});else aiWritingOs.deactivate();
-  $$('[data-tool]').forEach(x=>x.classList.toggle('active',x===b));for(const [tool,id] of Object.entries(TOOL_SECTION_IDS))$('#'+id)?.classList.toggle('hidden',tool!==nextTool);syncWidgets();
+  toolTabs.forEach(x=>{const active=x===b;x.classList.toggle('active',active);x.setAttribute('aria-selected',active?'true':'false');x.tabIndex=active?0:-1;});
+  for(const [tool,id] of Object.entries(TOOL_SECTION_IDS))$('#'+id)?.classList.toggle('hidden',tool!==nextTool);syncWidgets();
+}
+toolTabs.forEach(b=>{
+  b.onclick=()=>activateToolTab(b);
+  b.addEventListener('keydown',e=>{
+    if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;
+    const current=toolTabs.indexOf(b),dir=e.key==='ArrowLeft'?-1:1;
+    const next=e.key==='Home'?toolTabs[0]:e.key==='End'?toolTabs.at(-1):toolTabs[(current+dir+toolTabs.length)%toolTabs.length];
+    if(!next)return;e.preventDefault();activateToolTab(next);next.focus();
+  });
 });
 
 window.AICleanerApp={

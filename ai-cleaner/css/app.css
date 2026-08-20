@@ -2,7 +2,8 @@
   --ink:#2b1d12;--muted:#806b5c;--bg:#fff8f0;--card:#fffdf9;--line:#eadbca;
   --orange:#ff7a00;--soft:#fff0df;--red:#b42318;--redbg:#fff0ef;--yellow:#7a4a00;
   --yellowbg:#fff5d8;--green:#187a2b;--greenbg:#eaf7ea;--blue:#2458a6;--bluebg:#eef5ff;
-  --shadow:0 10px 30px rgba(43,29,18,.07);--floatShadow:0 22px 65px rgba(43,29,18,.22)
+  --shadow:0 10px 30px rgba(43,29,18,.07);--floatShadow:0 22px 65px rgba(43,29,18,.22);
+  --app-visual-height:100dvh;--app-visual-offset-top:0px;--touch-target:44px;--touch-target-compact:40px;--focus-ring:rgba(22,131,248,.24)
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -108,7 +109,6 @@ th{background:#fff7ee;color:var(--muted);position:sticky;top:0}.footer{text-alig
   .floatPanel,.floatPanel.techPanel{left:8px!important;right:8px!important;top:auto!important;bottom:64px!important;width:auto;max-height:72vh;border-radius:18px}
   .floatHead{cursor:default}.v62compare{grid-template-columns:1fr}
 }
-@media(prefers-reduced-motion:reduce){.floatWidget.attention{animation:none}.resultarea.resultFlash{animation:none}}
 
 /* ===== v6.5 UX / interaction overrides ===== */
 body{-webkit-user-select:text;user-select:text}
@@ -157,7 +157,6 @@ img{-webkit-user-drag:none;user-drag:none}
   .bridgeAction{position:relative;z-index:2}.bridgeBtn{width:min(300px,88vw)}
   .contextMenu{width:172px}
 }
-@media(prefers-reduced-motion:reduce){.floatWidget.attention,.floatWidget.attention .widgetIcon{animation:none}}
 
 .itemactions .mini,.itemactions .mini.passive{min-width:94px}
 .floatWidget{width:138px}
@@ -243,7 +242,6 @@ img{-webkit-user-drag:none;user-drag:none}
   .floatPanel.rewritePanel{left:8px!important;right:8px!important;top:auto!important;bottom:66px!important;width:auto!important;height:min(79vh,690px)!important;min-width:0;min-height:0;max-width:none;max-height:79vh;resize:none;border-radius:20px 20px 14px 14px}
   .rewriteOptions{grid-template-columns:1fr}.rewriteDraft{min-height:180px}.directTyped{min-height:150px}.factLockHead{align-items:center}.factLockHead>div .sub{display:none}
 }
-@media(prefers-reduced-motion:reduce){.floatWidget.rewrite.rewriteReady{animation:none}}
 
 
 /* ===== v6.8.1 precision UI polish ===== */
@@ -277,7 +275,6 @@ img{-webkit-user-drag:none;user-drag:none}
 /* ===== v6.8.2 focus flow ===== */
 .resultarea.resultApplied{animation:resultAppliedFocus 1.2s ease}
 @keyframes resultAppliedFocus{0%{box-shadow:0 0 0 0 rgba(255,122,0,0);border-color:var(--line)}25%{box-shadow:0 0 0 7px rgba(255,122,0,.20),0 14px 34px rgba(255,122,0,.14);border-color:#ff8d24}70%{box-shadow:0 0 0 3px rgba(255,122,0,.08);border-color:#ffb36f}100%{box-shadow:0 0 0 0 rgba(255,122,0,0);border-color:var(--line)}}
-@media(prefers-reduced-motion:reduce){.resultarea.resultApplied{animation:none;outline:3px solid rgba(255,122,0,.20);outline-offset:2px}}
 
 
 /* ===== v6.8.3 cohesion & integrity ===== */
@@ -350,7 +347,6 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
 }
 @media(max-width:620px){.workspace{gap:10px}.bridgeAction{min-height:50px}.bridgeBtn,.bridgeBtn.previewBridge{width:min(300px,88vw);max-width:88vw;height:44px;min-height:44px}.workspace>.card>.head{gap:8px}}
 @media(max-width:420px){.bridgeBtn,.bridgeBtn.previewBridge{width:min(280px,90vw);max-width:90vw;padding:0 12px}.bridgeBtn.previewBridge small{font-size:9.5px}.workspace>.card>.head{padding-left:12px;padding-right:12px}}
-@media(prefers-reduced-motion:reduce){.bridgeBtn:hover{transform:none}}
 
 
 /* ===== 1.0.0 mobile compact panels / product baseline ===== */
@@ -385,7 +381,6 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
   .floatHead{padding-left:9px}.floatHead>div>b{font-size:10.5px}.floatPanel .btn{font-size:9.5px}.rewriteOptions{grid-template-columns:1fr}.floatPanel:not(.mobileExpanded) .factLockCard{display:none}
   .floatWidget{min-width:0;width:38px;height:38px;padding:0;justify-content:center}.floatWidget>span:not(.widgetIcon),.floatWidget>b{display:none}.widgetIcon{font-size:14px}
 }
-@media(prefers-reduced-motion:reduce){.floatPanel{transition:none!important}}
 
 
 /* ===== 1.1.1 visible-text write + widget labels ===== */
@@ -417,7 +412,6 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
 .resultarea.resultStale{border-style:dashed;border-color:#e0a956;background:#fffaf1}.detailDiagnostics.analysisPending .detailBody{opacity:.58}.detailDiagnostics.analysisPending>summary{background:#fffaf1}.tab:disabled{opacity:.42;cursor:not-allowed}.sourceActions .btn,.sourceActions .filelabel{justify-content:center;align-items:center}
 @media(max-width:620px){.sourceActions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.sourceActions>.btn,.sourceActions>.filelabel{width:100%;min-width:0}.resultTitle{width:100%;justify-content:space-between}.resultFreshness{max-width:68%;overflow:hidden;text-overflow:ellipsis}}
 @media(max-width:420px){.resultFreshness{font-size:9.5px;max-width:72%}}
-@media(prefers-reduced-motion:reduce){.resultarea.resultStale{transition:none}}
 .workspace>.card:first-child .actions.sourceActions{grid-template-columns:92px minmax(150px,1fr) 92px}
 @media(max-width:760px){.workspace>.card:first-child .actions.sourceActions{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:360px){.workspace>.card:first-child .actions.sourceActions{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}}
@@ -436,10 +430,8 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
   .typingPreviewPanel.typewriterComplete #typingPreviewPause{flex:1 1 150px;min-height:38px}
 }
 @media(max-width:420px){.resultCard{scroll-margin-top:82px}}
-@media(prefers-reduced-motion:reduce){.resultCard{transition:none}.resultCard.resultDestinationPulse{animation:none;border-color:#92cf9d;box-shadow:0 0 0 3px #187a2b14}}
 
 /* ===== 1.6.1 mobile viewport / safe-area exception audit ===== */
-:root{--app-visual-height:100dvh;--app-visual-offset-top:0px}
 .wrap{padding-left:max(22px,env(safe-area-inset-left));padding-right:max(22px,env(safe-area-inset-right));padding-bottom:max(54px,calc(env(safe-area-inset-bottom) + 46px))}
 .top{height:calc(68px + env(safe-area-inset-top));padding-top:env(safe-area-inset-top)}
 .appToast{bottom:max(26px,calc(env(safe-area-inset-bottom) + 16px));max-width:calc(100vw - max(24px,env(safe-area-inset-left)) - max(24px,env(safe-area-inset-right)));text-align:center}
@@ -466,7 +458,6 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
   .floatPanel.typingPreviewPanel.mobileExpanded{height:min(70dvh,580px,calc(var(--app-visual-height) - 68px))!important;max-height:min(70dvh,580px,calc(var(--app-visual-height) - 68px))!important}
 }
 @media(max-width:420px){.top{height:auto;min-height:calc(68px + env(safe-area-inset-top));padding:calc(7px + env(safe-area-inset-top)) 0 7px}}
-@media(prefers-reduced-motion:reduce){html.mobile-keyboard-visible .floatPanel{transition:none!important}}
 
 
 /* ===== 1.6.4 simplified source -> typewriter result flow ===== */
@@ -478,7 +469,6 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
 .resultCard.typewriterDestinationActive .resultTitle>b:after{content:" · 자동작성 중";color:#b85b00;font-size:9.5px;font-weight:850}
 @keyframes typewriterRecommendCue{0%,100%{transform:translateY(0) scale(1)}42%{transform:translateY(-2px) scale(1.025);box-shadow:0 0 0 5px rgba(255,248,240,.98),0 0 0 12px rgba(255,122,0,.10),0 14px 30px rgba(255,122,0,.38)}}
 @media(max-width:980px){#typingPreviewButton.typewriterRecommended{width:min(330px,88vw)}.resultCard.typewriterDestinationActive{box-shadow:0 0 0 3px rgba(255,122,0,.11),var(--shadow)}}
-@media(prefers-reduced-motion:reduce){#typingPreviewButton.typewriterRecommended{animation:none;outline:3px solid rgba(255,122,0,.22);outline-offset:3px}}
 
 
 /* ===== 1.6.5 async intent + compact mobile action flow ===== */
@@ -510,7 +500,6 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
 .filelabel:focus-within{outline:3px solid rgba(22,131,248,.22);outline-offset:2px}
 .tabs[role=tablist] .tab[aria-selected=true]{background:var(--ink);color:#fff}
 @media(max-width:620px){.resultNextStep{font-size:9.5px;margin-top:8px;padding:7px 9px}.resultActions .btn{height:38px}}
-@media(prefers-reduced-motion:reduce){.rewriteReady{animation:none!important}}
 
 /* ===== 1.6.7 final UX / edge-case audit ===== */
 .resultNextStep[data-state=custom]{border-color:#cbdcf5;background:#f5f9ff;color:#2458a6}
@@ -728,7 +717,6 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
   .osFactorySteps,.osFactoryPresets,.osFactoryGrid{grid-template-columns:1fr}.osFactoryPipeline{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
-@media(prefers-reduced-motion:reduce){.osFactoryPresets button{transition:none}.osFactoryPresets button:hover{transform:none}}
 
 /* 1.8.7 Blog Factory copy-first + daily prompt preparation */
 .osFactoryPresets{grid-template-columns:repeat(5,minmax(0,1fr))}
@@ -777,3 +765,55 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
 .osCompilerSummaryRow .osCompilerSummary{min-width:0;flex:1}
 .osPromptMetrics{flex:0 0 auto;color:var(--muted);font-size:10px;font-weight:800;white-space:nowrap}
 @media(max-width:760px){.osDailyEngineActions{width:100%}.osDailyEngineActions .mini{flex:1}.osDailyTopicActions{justify-content:stretch}.osDailyTopicActions .mini{flex:1;min-height:36px}.osCompilerSummaryRow{display:grid;gap:4px}.osPromptMetrics{white-space:normal}}
+
+
+/* ===== 1.10.0 mobile accessibility / interaction foundation ===== */
+html{scroll-padding-top:88px}
+button,.btn,.mini,.tab,.floatWidget,.filelabel,summary{touch-action:manipulation}
+@media(max-width:760px){
+  .toolnav button,.sourceActions>.btn,.sourceActions>.filelabel,.resultActions>.btn,.rewriteActionRow>.btn,.osPrimaryActions .btn,.osResultActions .btn{min-height:var(--touch-target)}
+  .mini,.osDailyTopicActions .mini,.osDailyEngineActions .mini,.iconBtn{min-height:var(--touch-target-compact)}
+  .sourceActions>.btn,.sourceActions>.filelabel{height:var(--touch-target)}
+  .resultHead .tab{min-height:var(--touch-target-compact);display:inline-flex;align-items:center}
+}
+@media(max-width:760px) and (pointer:coarse){textarea,input:not([type="checkbox"]):not([type="file"]),select{font-size:16px}}
+@media(prefers-contrast:more){
+  :root{--line:#cbb8a6;--muted:#665448}
+  button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-visible{outline-color:#005fcc;outline-width:3px}
+  .card,.floatPanel,.btn,.mini,.check,.tab.active{border-color:#b9a38f}
+}
+
+/* ===== 1.11.0 responsive / accessibility contract ===== */
+.toolnav[role="tablist"] button:focus-visible{outline:3px solid var(--focus-ring);outline-offset:2px}
+.osDailyTopic h3,.osDailyTopic p,.osDailyTopic dd,.osFactoryModeSummary span,.osCompilerSummary{overflow-wrap:anywhere;word-break:normal}
+@media(max-width:760px){
+  .wrap{padding-bottom:max(104px,calc(env(safe-area-inset-bottom) + 92px))}
+  .toptools,.toolnav,.osFactoryPresets,.osFactoryGrid,.osFactoryContextBody,.osDailyTopic,.osDailyTopicTop{min-width:0}
+  .toolnav button{font-size:10px;line-height:1.2}
+  .osFactoryContext>summary,.osAdvanced>summary{min-height:var(--touch-target)}
+  .osDailyTopicDetails>summary{display:flex;align-items:center;min-height:var(--touch-target-compact)}
+  .osFactoryPresets button,.osDailyTopicActions .mini,.osDailyEngineActions .mini{min-width:0}
+}
+@media(max-width:420px){
+  .toolnav{grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}
+  .toolnav button{padding-inline:3px;font-size:10px}
+  .osFactoryPresets{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .osFactoryPresets button{min-height:58px;padding:8px}
+  .osFactoryPresets button b{font-size:10.5px}.osFactoryPresets button span{font-size:10px}
+  .osFactoryModeSummary{padding:9px 10px}
+}
+@media(max-width:340px){
+  .toolnav button{font-size:9.5px}
+  .osFactoryPresets{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){
+  html:focus-within{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+  .floatWidget.attention,.floatWidget.attention .widgetIcon,.floatWidget.rewrite.rewriteReady,.rewriteReady,.resultarea.resultFlash,.resultarea.resultApplied,#typingPreviewButton.typewriterRecommended{animation:none!important}
+  .floatPanel,html.mobile-keyboard-visible .floatPanel{transition:none!important}
+  .resultarea.resultStale,.resultCard{transition:none}
+  .bridgeBtn:hover,.osFactoryPresets button:hover{transform:none}
+  .resultarea.resultApplied{outline:3px solid rgba(255,122,0,.20);outline-offset:2px}
+  .resultCard.resultDestinationPulse{animation:none;border-color:#92cf9d;box-shadow:0 0 0 3px #187a2b14}
+  #typingPreviewButton.typewriterRecommended{outline:3px solid rgba(255,122,0,.22);outline-offset:3px}
+}

@@ -1,6 +1,6 @@
 {
-  "version": "1.9.9",
-  "assetVersion": "199",
+  "version": "1.11.0",
+  "assetVersion": "1110",
   "channel": "stable",
-  "updateMode": "csp-loader-timeout-hardening"
+  "updateMode": "responsive-css-tool-tabs"
 }
