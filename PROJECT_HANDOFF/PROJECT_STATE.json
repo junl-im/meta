@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.9.6",
+  "version": "1.9.7",
   "date": "2026-08-20",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -52,12 +52,12 @@
     ".github/scripts/build-runtime-vendor.mjs"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.9.6",
-  "asset_version": "196",
+  "current_version": "1.9.7",
+  "asset_version": "197",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.9.6 Blog Factory hardening: resilient Daily Engine fetch/retry, git-backed 14-run anti-repeat history, explainable topic scoring, stale-date context guard, progressive topic cards, and prompt metrics",
+  "latestPatch": "1.9.7 hotfix: Blog Factory hidden-context E2E corrected; owner-managed OPTION changes no longer blocked by AI Cleaner CI while Pages packaging still excludes OPTION",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -140,7 +140,7 @@
     "breakpointExpansionReset": true,
     "safeAreaViewportFitCover": true
   },
-  "nextPhase": "Push 1.9.6, confirm browser-smoke and Daily Engine generation are green, then continue CSS consolidation/CSP/offline hardening",
+  "nextPhase": "Push 1.9.7 and confirm static-checks/browser-smoke are green; OPTION-only owner updates must remain independent from AI Cleaner CI",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -205,7 +205,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "196",
+  "assetVersion": "197",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -655,5 +655,6 @@
     "blogFactoryLazyLoaded": true,
     "minimumCssFontPx": 9.5,
     "optionPathTouched": false
-  }
+  },
+  "patchBaseline": "Delivered 1.9.6 FULL_PROJECT_HANDOFF -> 1.9.7"
 }

@@ -609,6 +609,8 @@ test('Blog Factory Daily Engine renders generated topics and sends a selected to
   await expect(page.locator('#osDailyTopics .osDailyTopicDetails').first()).not.toHaveAttribute('open','');
   await page.locator('#osDailyTopics .osDailyTopicDetails summary').first().click();
   await expect(page.locator('#osDailyTopics .osDailyTopicDetails').first()).toContainText('우선순위 근거 1');
+  await page.locator('#osFactoryContext > summary').click();
+  await expect(page.locator('#osFacts')).toBeVisible();
   await page.locator('#osFacts').fill('이전 주제의 실제 경험');
   await page.locator('[data-daily-topic-use="0"]').click();
   await expect(page.locator('#osFactoryPresets [data-factory-mode="daily_one"]')).toHaveClass(/active/);

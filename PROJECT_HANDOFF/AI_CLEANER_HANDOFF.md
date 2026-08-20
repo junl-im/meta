@@ -626,3 +626,9 @@
 - Daily generation compares up to 14 git revisions / 120 recent topic titles to reduce repeated themes without adding public history files.
 - Daily priority score is now rubric-based and includes priorityReason; runtime surfaces history comparison count and score rationale.
 - Blog compiler 1.3 removes rigid keyword/length targets and strengthens intent-first, mobile, title/body promise, freshness, and factual-source boundaries.
+
+
+## 1.9.7 browser-smoke / OPTION coexistence hotfix
+- `OPTION/**` 보호 규칙은 **AI Cleaner 작업/전달물에서 절대 건드리지 않는다**는 의미다. 저장소 소유자가 별도 서비스 목적으로 직접 갱신하는 것을 AI Cleaner CI가 차단하면 안 된다.
+- 따라서 AI Cleaner CI는 OPTION-only 변경에서 실행/실패하지 않고, Pages runtime allowlist만 OPTION을 계속 제외한다.
+- Blog Factory E2E는 접힌 `osFactoryContext`를 실제 사용자처럼 펼친 뒤 `osFacts`를 입력한다.
