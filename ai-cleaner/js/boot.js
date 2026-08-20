@@ -59,8 +59,10 @@
       'js/core/state-store.js','js/core/text-engine.js','js/core/diff-engine.js','js/services/analysis-worker-adapter.js','js/services/analysis-performance-governor.js','js/services/analysis-coordinator.js','js/services/update-manager.js',
       'js/ui/panel-manager.js','js/ui/diff-view.js','js/features/file-import.js','js/features/typewriter-engine.js','js/features/result-checkpoint-store.js'
     ];
-    for(const src of coreScripts)await loadScript(src+'?v='+av);
-    await loadScript('js/app.js?v='+av);
+    let bundled=false;
+    try{await loadScript('vendor/app-core.bundle.js?v='+av,6500);bundled=!!window.AICleanerApp;}
+    catch(err){console.warn('초기 런타임 bundle을 사용할 수 없어 개별 소스로 전환합니다.',err);}
+    if(!bundled){for(const src of coreScripts)await loadScript(src+'?v='+av);await loadScript('js/app.js?v='+av);}
     if(!window.AICleanerApp)throw new Error('앱 초기화 완료 객체가 없습니다.');
     window.AICleanerApp.ready=true;
     window.__AI_CLEANER_APP_READY__=true;
@@ -68,6 +70,9 @@
     document.documentElement.classList.add('app-ready');
     if(document.body){document.body.inert=false;document.body.setAttribute('aria-busy','false');}
     document.dispatchEvent(new CustomEvent('ai-cleaner:ready',{detail:{version:String(config.version||'local'),assetVersion:String(config.assetVersion||'')}}));
+    if('serviceWorker' in navigator&&location.protocol!=='file:'){
+      navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'}).catch(err=>console.warn('오프라인 캐시 등록 실패',err));
+    }
   }
   boot().catch(err=>{
     console.error(err);window.__AI_CLEANER_APP_READY__=false;document.documentElement.classList.remove('app-booting');document.documentElement.classList.add('boot-ready','app-boot-failed');

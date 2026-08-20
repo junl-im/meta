@@ -8,7 +8,7 @@ const OS = path.join(APP, 'ai-writing-os');
 
 const rootFiles = ['index.html'];
 const optionalSharedPublicFiles = ['OPTION/SS_OPTION.txt'];
-const appFiles = ['index.html', 'site.webmanifest', 'version.json'];
+const appFiles = ['index.html', 'site.webmanifest', 'version.json', 'sw.js'];
 const appDirs = ['css', 'data', 'js', 'vendor'];
 const assetFiles = [
   'favicon-v66.png',

@@ -1,6 +1,6 @@
 {
-  "version": "1.11.0",
-  "assetVersion": "1110",
+  "version": "1.11.1",
+  "assetVersion": "1111",
   "channel": "stable",
-  "updateMode": "responsive-css-tool-tabs"
+  "updateMode": "pwa-foundation-repair"
 }

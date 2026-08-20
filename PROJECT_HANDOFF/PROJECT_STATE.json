@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.11.0",
+  "version": "1.11.1",
   "date": "2026-08-20",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -53,12 +53,12 @@
     ".github/scripts/build-runtime-vendor.mjs"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.11.0",
-  "asset_version": "1110",
+  "current_version": "1.11.1",
+  "asset_version": "1111",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.11.0 UI contract: ARIA keyboard tool tabs, consolidated reduced-motion CSS, and explicit 390/320px Blog Factory responsiveness.",
+  "latestPatch": "1.11.1 CI/PWA foundation repair: restores the 1.10 bundle, service-worker registration/staging, PWA manifest metadata, and SW syntax checks on top of 1.11.0 UI.",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -84,7 +84,7 @@
     "protectedPathsExcluded": [
       "OPTION/**"
     ],
-    "patchBaseline": "Delivered 1.10.0 FULL_PROJECT_HANDOFF -> 1.11.0"
+    "patchBaseline": "Delivered 1.11.0 FULL_PROJECT_HANDOFF -> 1.11.1 cumulative repair"
   },
   "internalTypewriter": {
     "source": "visible-text projection of original",
@@ -141,7 +141,7 @@
     "breakpointExpansionReset": true,
     "safeAreaViewportFitCover": true
   },
-  "nextPhase": "Push 1.11.0 and confirm static-checks/browser-smoke/Pages deploy are green; then continue panel/CSS component extraction only with browser screenshots.",
+  "nextPhase": "Push 1.11.1 and confirm static-checks/browser-smoke/Pages deploy are green; only then continue UI/CSS extraction.",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -206,7 +206,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "1110",
+  "assetVersion": "1111",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -215,16 +215,16 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "285 passed / 0 failed (expected after 1.11.0 validation)",
+    "staticChecks": "285 passed / 0 failed (local 1.11.1 cumulative repair validation)",
     "moduleChecks": "PASS — includes update-request timeout abort/recovery coverage plus existing Blog Factory and Korean encoding checks",
     "jsSyntax": "PASS — all project JS/MJS syntax checks including boot.js and sw.js",
-    "workflowYaml": "PASS — ai-cleaner-ci.yml + daily-blog-factory-pages.yml parse",
+    "workflowYaml": "PASS — ai-cleaner-ci.yml + daily-blog-factory-pages.yml parse; both explicitly syntax-check sw.js",
     "protectedToolIntegrity": "PASS — OPTION/** remains absent from delivery artifacts and unmodified by AI Cleaner; the AI Cleaner service worker is scoped to /ai-cleaner/ and cannot intercept /OPTION/SS_OPTION.txt.",
     "localBrowserSmoke": "GITHUB-GATE — local Chromium still times out in this container; 58-case browser-smoke remains the final visual/runtime gate.",
     "browserE2EConfigured": "58 cases; adds keyboard tool-tab semantics and 390/320px Blog Factory overflow/layout coverage",
-    "patchRebuild": "PASS — 1.10.0 FULL baseline + 11-file 1.11.0 Patch reproduces the 1.11.0 source tree (132 source files, diff 0; generated/transient dirs excluded).",
+    "patchRebuild": "PASS — 1.11.0 FULL baseline + 13-file 1.11.1 cumulative repair Patch reproduces the 1.11.1 source tree (generated/transient dirs excluded).",
     "mockedDailyGenerator": "PASS — Responses request, gpt-5 default, web_search, strict JSON schema, exactly 10 topics/TOP3, API secret not persisted",
-    "runtimeVendorBuild": "PARTIAL LOCAL PASS — Pages allowlist staging passes with a temporary vendor fixture; full npm vendor generation remains GitHub-gated because dependencies are not installed in the handoff container."
+    "runtimeVendorBuild": "STATIC CONTRACT PASS — builder again generates app-core.bundle.js; dependency-backed full npm build remains GitHub-gated in this handoff environment."
   },
   "stabilityAudit131": {
     "updateOnlyWhenSemverNewer": true,
@@ -657,7 +657,7 @@
     "minimumCssFontPx": 9.5,
     "optionPathTouched": false
   },
-  "patchBaseline": "Delivered 1.10.0 FULL_PROJECT_HANDOFF -> 1.11.0",
+  "patchBaseline": "Delivered 1.11.0 FULL_PROJECT_HANDOFF -> 1.11.1 cumulative repair",
   "hardening199": {
     "externalBootScript": true,
     "contentSecurityPolicy": "default self; script self + wasm-unsafe-eval; object none; base none; form-action none",
@@ -697,6 +697,17 @@
     "blogFactoryPresetColumns390": 2,
     "blogFactoryPresetColumns320": 1,
     "mobileDisclosureTargetPx": 44,
+    "optionPathTouched": false,
+    "e2eCases": 58
+  },
+  "hardening1111": {
+    "restoredBootCoreBundleFallback": true,
+    "restoredServiceWorkerRegistration": true,
+    "restoredAppCoreBundleBuilder": true,
+    "restoredServiceWorkerPagesStaging": true,
+    "restoredPwaManifestMetadata": true,
+    "workflowChecksServiceWorkerSyntax": true,
+    "staticServiceWorkerCacheCheckUsesRuntimeVersion": true,
     "optionPathTouched": false,
     "e2eCases": 58
   }

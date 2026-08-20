@@ -1,6 +1,6 @@
 # AI Cleaner 프로젝트 인수인계 메모리
 
-업데이트: 2026-08-20 · 현재 패키지: 1.11.0
+업데이트: 2026-08-20 · 현재 패키지: 1.11.1
 
 ## 새 채팅에서 가장 먼저 읽을 것
 이 폴더를 새 채팅에 업로드한 뒤 `PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md 읽고 이어서 개발하자`라고 요청한다. 이 문서는 프로젝트의 결정사항, 보호 경로, UX 방향, 안전 제약, 배포 방식, 알려진 이슈를 보존하기 위한 인수인계 메모리다.
@@ -97,6 +97,16 @@
 - 오늘 프롬프트 캐시는 자동 준비 opt-in일 때만 저장하며, 임시 `실제 경험/사실`·`중복 방지 메모`가 있으면 캐시하지 않는다. 프로필/독자/조사 설정/주제 씨앗이 바뀌면 signature 불일치로 같은 날 캐시도 폐기한다.
 - 완전 무인 일일 생성은 정적 Pages에 비밀키를 넣지 말고, 향후 서버 스케줄러 + 서버 측 AI API + 지속 저장소 계층으로 분리한다.
 
+
+## 1.11.1 CI/PWA 기반 복구 핫픽스
+- GitHub main에서 1.11 UI 파일과 1.9.9/1.10 이전 기반 파일이 섞인 상태를 복구한다.
+- `ai-cleaner/js/boot.js`는 production `vendor/app-core.bundle.js` 우선 로드 + 기존 ordered source fallback + `./sw.js` 등록을 유지한다.
+- `.github/scripts/build-runtime-vendor.mjs`는 17개 first-load source를 `app-core.bundle.js`로 생성하며 이미지 vendor build와 함께 실행한다.
+- `.github/scripts/build-pages-artifact.mjs`는 `sw.js`를 명시적 runtime allowlist에 포함한다.
+- `site.webmanifest`의 `id`, `lang`, description/categories/orientation 등 PWA metadata를 유지한다.
+- 두 GitHub Actions workflow에서 `node --check ai-cleaner/sw.js`를 실행한다.
+- static check의 service-worker cache 버전 검사는 특정 릴리스 문자열을 하드코딩하지 않고 `version.json` 값과 동적으로 맞춘다.
+- `OPTION/**`은 수정/전달 대상에서 계속 제외한다. 기존 owner-managed `/OPTION/SS_OPTION.txt` public bridge 정책은 변경하지 않는다.
 
 ## 1.11.0 UI 구조 정리
 - 상단 도구 전환은 ARIA tablist/tab 구조로 고정하며 `←/→/Home/End` 키보드 이동과 roving tabindex를 유지한다.

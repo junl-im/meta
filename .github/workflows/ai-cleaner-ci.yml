@@ -70,6 +70,7 @@ jobs:
           node --check ai-cleaner/tests/e2e.spec.mjs
           node --check .github/scripts/build-pages-artifact.mjs
           node --check .github/scripts/build-runtime-vendor.mjs
+          node --check ai-cleaner/sw.js
       - name: Modular core unit checks
         run: node ai-cleaner/tests/module-check.mjs
       - name: Static checks

@@ -95,6 +95,7 @@ jobs:
           node --check ai-cleaner/tests/module-check.mjs
           node --check .github/scripts/build-pages-artifact.mjs
           node --check .github/scripts/build-runtime-vendor.mjs
+          node --check ai-cleaner/sw.js
 
       - name: Blog Factory static checks
         run: |
