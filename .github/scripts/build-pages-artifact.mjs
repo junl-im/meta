@@ -7,6 +7,7 @@ const APP = path.join(ROOT, 'ai-cleaner');
 const OS = path.join(APP, 'ai-writing-os');
 
 const rootFiles = ['index.html'];
+const optionalSharedPublicFiles = ['OPTION/SS_OPTION.txt'];
 const appFiles = ['index.html', 'site.webmanifest', 'version.json'];
 const appDirs = ['css', 'data', 'js', 'vendor'];
 const assetFiles = [
@@ -39,6 +40,19 @@ async function copyFileRelative(sourceRoot, relative, destRoot) {
   await ensureFile(source);
   await fs.mkdir(path.dirname(dest), { recursive: true });
   await fs.copyFile(source, dest);
+}
+
+async function copyOptionalFileRelative(sourceRoot, relative, destRoot) {
+  const source = path.join(sourceRoot, relative);
+  const stat = await fs.stat(source).catch(() => null);
+  if (!stat?.isFile()) {
+    console.log(`Optional shared public file not present; skipped: ${relative}`);
+    return false;
+  }
+  const dest = path.join(destRoot, relative);
+  await fs.mkdir(path.dirname(dest), { recursive: true });
+  await fs.copyFile(source, dest);
+  return true;
 }
 
 async function copyDirRelative(sourceRoot, relative, destRoot) {
@@ -82,6 +96,7 @@ async function main() {
   await fs.mkdir(appOut, { recursive: true });
 
   for (const file of rootFiles) await copyFileRelative(ROOT, file, OUT);
+  for (const file of optionalSharedPublicFiles) await copyOptionalFileRelative(ROOT, file, OUT);
   for (const file of appFiles) await copyFileRelative(APP, file, appOut);
   for (const dir of appDirs) await copyDirRelative(APP, dir, appOut);
   for (const file of assetFiles) await copyFileRelative(path.join(APP, 'assets'), file, assetOut);
@@ -94,7 +109,7 @@ async function main() {
     rel === 'package.json' ||
     rel.startsWith('.github/') ||
     rel.startsWith('PROJECT_HANDOFF/') ||
-    rel.startsWith('OPTION/') ||
+    (rel.startsWith('OPTION/') && rel !== 'OPTION/SS_OPTION.txt') ||
     rel.includes('/OPTION/') ||
     rel.startsWith('ai-cleaner/tests/') ||
     rel === 'ai-cleaner/MIGRATION.md' ||
@@ -106,7 +121,7 @@ async function main() {
 
   const totalBytes = (await Promise.all(files.map(async file => (await fs.stat(file)).size))).reduce((a, b) => a + b, 0);
   console.log(`Pages artifact ready: ${relativeFiles.length} files, ${(totalBytes / 1024 / 1024).toFixed(2)} MiB`);
-  console.log('Only explicit public runtime files were staged; protected/non-runtime repository paths were not copied.');
+  console.log('Only explicit public runtime files were staged. OPTION is excluded except the owner-managed public bridge OPTION/SS_OPTION.txt when present.');
 }
 
 main().catch(error => {

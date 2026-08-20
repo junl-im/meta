@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.9.7",
+  "version": "1.9.8",
   "date": "2026-08-20",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -52,12 +52,12 @@
     ".github/scripts/build-runtime-vendor.mjs"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.9.7",
-  "asset_version": "197",
+  "current_version": "1.9.8",
+  "asset_version": "198",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.9.7 hotfix: Blog Factory hidden-context E2E corrected; owner-managed OPTION changes no longer blocked by AI Cleaner CI while Pages packaging still excludes OPTION",
+  "latestPatch": "1.9.8 hotfix: OPTION/SS_OPTION.txt remains owner-managed and excluded from delivery ZIPs, but is explicitly republished at the legacy GitHub Pages path when present; OPTION edits now trigger a Pages refresh.",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -83,7 +83,7 @@
     "protectedPathsExcluded": [
       "OPTION/**"
     ],
-    "patchBaseline": "Delivered 1.9.5 FULL_PROJECT_HANDOFF -> 1.9.6"
+    "patchBaseline": "Delivered 1.9.7 FULL_PROJECT_HANDOFF -> 1.9.8"
   },
   "internalTypewriter": {
     "source": "visible-text projection of original",
@@ -140,7 +140,7 @@
     "breakpointExpansionReset": true,
     "safeAreaViewportFitCover": true
   },
-  "nextPhase": "Push 1.9.7 and confirm static-checks/browser-smoke are green; OPTION-only owner updates must remain independent from AI Cleaner CI",
+  "nextPhase": "Push 1.9.8, confirm Pages deployment is green, then verify https://junl-im.github.io/meta/OPTION/SS_OPTION.txt returns HTTP 200.",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -205,7 +205,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "197",
+  "assetVersion": "198",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -214,14 +214,14 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "270 passed / 0 failed",
+    "staticChecks": "271 passed / 0 failed",
     "moduleChecks": "PASS — includes CP949/EUC-KR TXT and CP949 RTF decoding unit coverage",
-    "jsSyntax": "PASS — 29 JS/MJS files",
+    "jsSyntax": "PASS — all project JS/MJS syntax checks",
     "workflowYaml": "PASS — ai-cleaner-ci.yml + daily-blog-factory-pages.yml parse",
-    "protectedToolIntegrity": "PASS — OPTION/** remains excluded from the 1.9.5 work tree and delivery artifacts; image-analyzer.js is intentionally changed only to replace runtime CDN loading with local version-pinned vendor assets",
-    "localBrowserSmoke": "ENVIRONMENT-LIMITED — local container cannot fetch npm packages / complete localhost Chromium validation; GitHub Actions builds vendor assets before browser-smoke and remains the final interactive gate",
+    "protectedToolIntegrity": "PASS — OPTION/** remains absent from delivery artifacts and unmodified by AI Cleaner; Pages builder has a single optional read/copy bridge for owner-managed OPTION/SS_OPTION.txt only.",
+    "localBrowserSmoke": "UNCHANGED — no browser runtime code changed in 1.9.8; existing 1.9.7 E2E suite remains the CI gate.",
     "browserE2EConfigured": "53 cases including CP949 import + Blog Factory lazy-load + prior 1.9.4 regressions",
-    "patchRebuild": "PASS — 1.9.4 FULL baseline + 17-file 1.9.5 Patch reproduces 1.9.5 source tree (124 files / diff 0)",
+    "patchRebuild": "PASS — 1.9.7 FULL baseline + 8-file 1.9.8 Patch reproduces the 1.9.8 source tree (diff 0).",
     "mockedDailyGenerator": "PASS — Responses request, gpt-5 default, web_search, strict JSON schema, exactly 10 topics/TOP3, API secret not persisted",
     "runtimeVendorBuild": "GITHUB-GATE — source/build pipeline configured; local container DNS prevents npm dependency fetch, so GitHub Actions must confirm npm run build:vendor and browser-smoke"
   },
@@ -656,5 +656,5 @@
     "minimumCssFontPx": 9.5,
     "optionPathTouched": false
   },
-  "patchBaseline": "Delivered 1.9.6 FULL_PROJECT_HANDOFF -> 1.9.7"
+  "patchBaseline": "Delivered 1.9.7 FULL_PROJECT_HANDOFF -> 1.9.8"
 }

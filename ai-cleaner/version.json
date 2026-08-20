@@ -1,6 +1,6 @@
 {
-  "version": "1.9.7",
-  "assetVersion": "197",
+  "version": "1.9.8",
+  "assetVersion": "198",
   "channel": "stable",
-  "updateMode": "browser-smoke-option-owner-coexistence-hotfix"
+  "updateMode": "option-pages-public-bridge-hotfix"
 }

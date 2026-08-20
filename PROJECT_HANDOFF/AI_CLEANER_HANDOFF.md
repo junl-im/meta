@@ -632,3 +632,11 @@
 - `OPTION/**` 보호 규칙은 **AI Cleaner 작업/전달물에서 절대 건드리지 않는다**는 의미다. 저장소 소유자가 별도 서비스 목적으로 직접 갱신하는 것을 AI Cleaner CI가 차단하면 안 된다.
 - 따라서 AI Cleaner CI는 OPTION-only 변경에서 실행/실패하지 않고, Pages runtime allowlist만 OPTION을 계속 제외한다.
 - Blog Factory E2E는 접힌 `osFactoryContext`를 실제 사용자처럼 펼친 뒤 `osFacts`를 입력한다.
+
+## 1.9.8 OPTION Pages public bridge hotfix
+- `OPTION/**` ownership is unchanged: AI Cleaner must not edit, rename, delete, reformat, or include it in FULL/Patch delivery ZIPs.
+- A separate owner-managed program depends on the legacy public URL `/OPTION/SS_OPTION.txt`. Pages artifact isolation in 1.9.3 unintentionally removed that URL and caused HTTP 404.
+- `.github/scripts/build-pages-artifact.mjs` now has one explicit exception: if repository file `OPTION/SS_OPTION.txt` exists, it is copied verbatim to `.pages-site/OPTION/SS_OPTION.txt`. No other OPTION file is staged.
+- Delivery bundles still omit `OPTION/**`; the bridge reads the repository-owned file only during Pages packaging and does not modify it. Missing `OPTION/SS_OPTION.txt` is non-fatal for source-only handoff bundles.
+- `ai-cleaner-ci.yml` push paths include only `OPTION/SS_OPTION.txt` so an owner update refreshes GitHub Pages. The old protected-path failure rule remains removed.
+- Expected compatibility URL after deployment: `https://junl-im.github.io/meta/OPTION/SS_OPTION.txt`.
