@@ -46,13 +46,14 @@ const analysisCoordinator=Modules.createAnalysisCoordinator({
   syncExecutor:(text,options)=>textEngine.analyze(text,options),
   onCancel:()=>analysisWorker.cancelPending()
 });
-const lazyScripts=new Map();
-function loadLazyScript(src){
+const lazyScripts=new Map(),LAZY_SCRIPT_TIMEOUT_MS=10000;
+function loadLazyScript(src,{timeoutMs=LAZY_SCRIPT_TIMEOUT_MS}={}){
   if(lazyScripts.has(src))return lazyScripts.get(src);
   const p=new Promise((resolve,reject)=>{
-    const script=document.createElement('script');script.src=src;script.async=true;
-    script.onload=()=>resolve(script);
-    script.onerror=()=>{lazyScripts.delete(src);script.remove();reject(new Error('도구 로드 실패: '+src));};
+    const script=document.createElement('script');let settled=false;
+    const finish=(error)=>{if(settled)return;settled=true;clearTimeout(timer);script.onload=null;script.onerror=null;if(error){lazyScripts.delete(src);script.remove();reject(error);}else resolve(script);};
+    const timer=setTimeout(()=>finish(new Error(`도구 로드 시간 초과 (${Math.round(timeoutMs/1000)}초): ${src}`)),timeoutMs);
+    script.src=src;script.async=true;script.onload=()=>finish();script.onerror=()=>finish(new Error('도구 로드 실패: '+src));
     document.body.appendChild(script);
   });
   lazyScripts.set(src,p);return p;

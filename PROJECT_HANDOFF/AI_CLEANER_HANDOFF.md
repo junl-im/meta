@@ -1,6 +1,6 @@
 # AI Cleaner 프로젝트 인수인계 메모리
 
-업데이트: 2026-08-18 · 현재 패키지: 1.9.1
+업데이트: 2026-08-20 · 현재 패키지: 1.9.9
 
 ## 새 채팅에서 가장 먼저 읽을 것
 이 폴더를 새 채팅에 업로드한 뒤 `PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md 읽고 이어서 개발하자`라고 요청한다. 이 문서는 프로젝트의 결정사항, 보호 경로, UX 방향, 안전 제약, 배포 방식, 알려진 이슈를 보존하기 위한 인수인계 메모리다.
@@ -75,7 +75,7 @@
 - 앱은 version.json을 no-store로 확인해 새 버전 발견 시 cache-busting query로 재진입한다.
 
 ## CI
-- `.github/workflows/ai-cleaner-ci.yml`: 일반 main push의 JS syntax, static-check, OPTION 보호, browser smoke를 수행하고 성공 후 Pages를 배포한다.
+- `.github/workflows/ai-cleaner-ci.yml`: AI Cleaner 관련 main push의 JS syntax, static-check, browser smoke를 수행하고 성공 후 Pages를 배포한다. `OPTION/SS_OPTION.txt`는 소유자 관리 파일이며 AI Cleaner가 수정하지 않는다. 해당 파일은 Pages public bridge 갱신을 위해 push trigger에만 포함될 수 있다.
 - `.github/workflows/daily-blog-factory-pages.yml`: 예약/수동 Daily Engine 생성 + Pages 배포 전용.
 - 일반 push와 예약 생성이 동시에 이중 실행되지 않도록 역할 분리를 유지하고, Pages Source는 GitHub Actions로 둔다.
 
@@ -640,3 +640,13 @@
 - Delivery bundles still omit `OPTION/**`; the bridge reads the repository-owned file only during Pages packaging and does not modify it. Missing `OPTION/SS_OPTION.txt` is non-fatal for source-only handoff bundles.
 - `ai-cleaner-ci.yml` push paths include only `OPTION/SS_OPTION.txt` so an owner update refreshes GitHub Pages. The old protected-path failure rule remains removed.
 - Expected compatibility URL after deployment: `https://junl-im.github.io/meta/OPTION/SS_OPTION.txt`.
+
+## 1.9.9 CSP / 로더 timeout hardening
+- 루트 redirect 페이지는 JavaScript를 제거하고 meta refresh + 링크 fallback만 유지하며 `script-src none` CSP를 사용한다.
+- 앱 head의 대형 inline boot JavaScript를 `ai-cleaner/js/boot.js`로 분리했다.
+- 앱 페이지에 Content Security Policy를 추가해 runtime script를 same-origin으로 제한하고 `object-src none`, `base-uri none`, `form-action none` 경계를 둔다. C2PA WASM 때문에 `wasm-unsafe-eval`만 명시적으로 허용한다.
+- 최초 `version.json` 확인은 3.5초 뒤 abort하고 로컬 fallback metadata로 계속 부팅한다.
+- core script와 lazy tool script는 각각 10초 timeout 후 명시적 오류/재시도 상태로 전환한다.
+- background update check는 8초 timeout으로 abort해 `busy`가 영구 고정되지 않게 한다.
+- 이미지 vendor는 ExifReader/C2PA module 10초, C2PA WASM init 12초 timeout을 둔다. 실패는 이미지 분석 전체 hang이 아니라 해당 metadata 신호의 실패 상태로 귀결된다.
+- `OPTION/**`은 수정/이동/삭제/전달 ZIP 포함 금지. 기존 Pages bridge는 owner-managed `OPTION/SS_OPTION.txt`를 존재할 때 그대로 읽어 복사하는 예외만 유지하며, AI Cleaner 코드가 내용을 변경하지 않는다.

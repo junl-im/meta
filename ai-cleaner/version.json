@@ -1,6 +1,6 @@
 {
-  "version": "1.9.8",
-  "assetVersion": "198",
+  "version": "1.9.9",
+  "assetVersion": "199",
   "channel": "stable",
-  "updateMode": "option-pages-public-bridge-hotfix"
+  "updateMode": "csp-loader-timeout-hardening"
 }

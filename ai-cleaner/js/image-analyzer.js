@@ -10,6 +10,7 @@ const MAX_IMAGE_FILE_BYTES=50*1024*1024;
 const MAX_IMAGE_PIXELS=60_000_000;
 const C2PA_WASM=vendorUrl('c2pa_bg.wasm');
 const EXIF_URL=vendorUrl('exif-reader.js');
+const VENDOR_LOAD_TIMEOUT_MS=10000,C2PA_INIT_TIMEOUT_MS=12000;
 const AI_SOURCE_TOKEN='trainedAlgorithmicMedia';
 const CAMERA_SOURCE_TOKEN='digitalCapture';
 
@@ -85,13 +86,13 @@ async function scanBinaryFile(file){
 function loadExifReader(){
   if(window.ExifReader&&typeof window.ExifReader.load==='function')return Promise.resolve(window.ExifReader);
   if(exifScriptPromise)return exifScriptPromise;
-  exifScriptPromise=new Promise((resolve,reject)=>{
+  exifScriptPromise=withRejectTimeout(new Promise((resolve,reject)=>{
     const s=document.createElement('script');
     s.src=EXIF_URL;s.crossOrigin='anonymous';s.async=true;
     s.onload=()=>window.ExifReader?resolve(window.ExifReader):reject(new Error('ExifReader export 없음'));
     s.onerror=()=>reject(new Error('로컬 ExifReader 리소스 로드 실패'));
     document.head.appendChild(s);
-  }).catch(err=>{exifScriptPromise=null;throw err;});
+  }),VENDOR_LOAD_TIMEOUT_MS,'로컬 ExifReader 리소스 로드 시간 초과').catch(err=>{exifScriptPromise=null;throw err;});
   return exifScriptPromise;
 }
 
@@ -126,11 +127,11 @@ async function inspectExif(file){
   }catch(err){return{ok:false,error:String(err&&err.message?err.message:err)};}
 }
 
-function loadC2paModule(){if(!c2paModulePromise)c2paModulePromise=import(C2PA_ESM);return c2paModulePromise;}
+function loadC2paModule(){if(!c2paModulePromise)c2paModulePromise=withRejectTimeout(import(C2PA_ESM),VENDOR_LOAD_TIMEOUT_MS,'로컬 C2PA 모듈 로드 시간 초과').catch(err=>{c2paModulePromise=null;throw err;});return c2paModulePromise;}
 async function getC2pa(){
   if(!c2paInstancePromise)c2paInstancePromise=loadC2paModule().then(mod=>{
     if(!mod||typeof mod.createC2pa!=='function')throw new Error('createC2pa export 없음');
-    return mod.createC2pa({wasmSrc:C2PA_WASM});
+    return withRejectTimeout(Promise.resolve(mod.createC2pa({wasmSrc:C2PA_WASM})),C2PA_INIT_TIMEOUT_MS,'C2PA WASM 초기화 시간 초과');
   }).catch(err=>{c2paInstancePromise=null;throw err;});
   return c2paInstancePromise;
 }

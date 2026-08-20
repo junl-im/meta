@@ -7,74 +7,9 @@
 <meta name="description" content="브라우저에서 로컬로 동작하는 AI 글 다듬기·이미지 출처 신호 검사·블로그 팩토리 도구">
 <meta name="theme-color" content="#fff8f0">
 <meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; font-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <style id="bootCritical">html:not(.boot-ready) body{visibility:hidden}html{background:#fff8f0}html.app-booting body{cursor:progress}html.app-booting body *{cursor:progress!important}</style>
-<script>
-(() => {
-  'use strict';
-  window.__AI_CLEANER_APP_READY__=false;
-  document.documentElement.classList.add('app-booting');
-  const domReady = document.readyState === 'loading' ? new Promise(r => document.addEventListener('DOMContentLoaded', r, {once:true})) : Promise.resolve();
-  const addLink = (rel, href, attrs={}) => { const l=document.createElement('link'); l.rel=rel; l.href=href; Object.entries(attrs).forEach(([k,v])=>l.setAttribute(k,v)); document.head.appendChild(l); return l; };
-  const loadScript = (src) => new Promise((resolve,reject) => { const s=document.createElement('script'); s.src=src; s.async=false; s.onload=resolve; s.onerror=()=>reject(new Error('스크립트 로드 실패: '+src)); document.body.appendChild(s); });
-  const showBootFailure = (err) => {
-    if(!document.body)return;
-    document.body.inert=false;
-    document.body.setAttribute('aria-busy','false');
-    let overlay=document.getElementById('bootErrorOverlay');
-    if(!overlay){
-      overlay=document.createElement('section');
-      overlay.id='bootErrorOverlay';
-      overlay.className='bootFailureOverlay';
-      overlay.setAttribute('role','alert');
-      overlay.setAttribute('aria-live','assertive');
-      const card=document.createElement('div');card.className='bootFailureCard';
-      const title=document.createElement('h1');title.textContent='앱을 불러오지 못했습니다.';
-      const help=document.createElement('p');help.textContent='네트워크 또는 캐시 문제일 수 있습니다. 다시 불러온 뒤에도 계속되면 아래 오류 내용을 확인해 주세요.';
-      const detail=document.createElement('pre');detail.id='bootErrorDetail';detail.className='bootError';
-      const retry=document.createElement('button');retry.id='bootRetry';retry.className='btn primary';retry.type='button';retry.textContent='다시 불러오기';retry.addEventListener('click',()=>location.reload());
-      card.append(title,help,detail,retry);overlay.appendChild(card);document.body.appendChild(overlay);
-    }
-    const detail=document.getElementById('bootErrorDetail');if(detail)detail.textContent=String(err?.message||err||'알 수 없는 초기화 오류');
-    requestAnimationFrame(()=>document.getElementById('bootRetry')?.focus({preventScroll:true}));
-  };
-  async function boot(){
-    let config={version:'local',assetVersion:String(Date.now()),channel:'local'};
-    try{ const r=await fetch('version.json?ts='+Date.now(),{cache:'no-store'}); if(r.ok)config={...config,...await r.json()}; }catch(_){}
-    window.__AI_CLEANER_VERSION__=config;
-    const av=encodeURIComponent(String(config.assetVersion||config.version||Date.now()));
-    addLink('icon','assets/favicon-v66.png?v='+av,{'type':'image/png','sizes':'32x32'});
-    addLink('apple-touch-icon','assets/apple-touch-icon-v66.png?v='+av,{'sizes':'180x180'});
-    addLink('manifest','site.webmanifest?v='+av);
-    const css=addLink('stylesheet','css/app.css?v='+av);
-    await Promise.race([new Promise(r=>{css.onload=r;css.onerror=r;}),new Promise(r=>setTimeout(r,1800))]);
-    await domReady;
-    const version=String(config.version||'').trim();
-    const badge=document.getElementById('versionBadge'); if(badge)badge.textContent=version?'v'+version:'version';
-    const footer=document.getElementById('footerVersion'); if(footer)footer.textContent=version?'v'+version:'';
-    if(version)document.title='곰같은여우의 AI 흔적 지우개 v'+version;
-    if(document.body){document.body.inert=true;document.body.setAttribute('aria-busy','true');}
-    document.documentElement.classList.add('boot-ready');
-    const coreScripts=[
-      'js/core/event-bus.js','js/core/history-store.js','js/core/work-lock.js','js/core/text-utils.js',
-      'js/core/state-store.js','js/core/text-engine.js','js/core/diff-engine.js','js/services/analysis-worker-adapter.js','js/services/analysis-performance-governor.js','js/services/analysis-coordinator.js','js/services/update-manager.js',
-      'js/ui/panel-manager.js','js/ui/diff-view.js','js/features/file-import.js','js/features/typewriter-engine.js','js/features/result-checkpoint-store.js'
-    ];
-    for(const src of coreScripts)await loadScript(src+'?v='+av);
-    await loadScript('js/app.js?v='+av);
-    if(!window.AICleanerApp)throw new Error('앱 초기화 완료 객체가 없습니다.');
-    window.AICleanerApp.ready=true;
-    window.__AI_CLEANER_APP_READY__=true;
-    document.documentElement.classList.remove('app-booting');
-    document.documentElement.classList.add('app-ready');
-    if(document.body){document.body.inert=false;document.body.setAttribute('aria-busy','false');}
-    document.dispatchEvent(new CustomEvent('ai-cleaner:ready',{detail:{version:String(config.version||'local'),assetVersion:String(config.assetVersion||'')}}));
-  }
-  boot().catch(err=>{
-    console.error(err);window.__AI_CLEANER_APP_READY__=false;document.documentElement.classList.remove('app-booting');document.documentElement.classList.add('boot-ready','app-boot-failed');
-    showBootFailure(err);
-  });
-})();
-</script>
+<script src="js/boot.js" defer></script>
 </head>
 <body>
 <div class="wrap">

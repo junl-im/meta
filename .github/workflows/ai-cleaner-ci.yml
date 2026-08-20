@@ -59,6 +59,7 @@ jobs:
           node --check ai-cleaner/js/ui/diff-view.js
           node --check ai-cleaner/js/features/file-import.js
           node --check ai-cleaner/js/features/typewriter-engine.js
+          node --check ai-cleaner/js/boot.js
           node --check ai-cleaner/js/app.js
           node --check ai-cleaner/js/rewrite-studio.js
           node --check ai-cleaner/js/image-analyzer.js

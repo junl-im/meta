@@ -89,6 +89,7 @@ jobs:
       - name: JavaScript syntax checks
         run: |
           node --check .github/scripts/generate-daily-topics.mjs
+          node --check ai-cleaner/js/boot.js
           node --check ai-cleaner/js/features/ai-writing-os.js
           node --check ai-cleaner/tests/static-check.mjs
           node --check ai-cleaner/tests/module-check.mjs
