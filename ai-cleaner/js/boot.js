@@ -45,8 +45,16 @@
     addLink('icon','assets/favicon-v66.png?v='+av,{'type':'image/png','sizes':'32x32'});
     addLink('apple-touch-icon','assets/apple-touch-icon-v66.png?v='+av,{'sizes':'180x180'});
     addLink('manifest','site.webmanifest?v='+av);
-    const css=addLink('stylesheet','css/app.css?v='+av);
-    await Promise.race([new Promise(r=>{css.onload=r;css.onerror=r;}),new Promise(r=>setTimeout(r,1800))]);
+    const versionedCssHref='css/app.css?v='+av;
+    let css=document.getElementById('appStylesheet');
+    if(!css)css=addLink('stylesheet',versionedCssHref,{id:'appStylesheet'});
+    if(css.getAttribute('href')!==versionedCssHref){
+      const cssSettled=new Promise(r=>{css.onload=r;css.onerror=r;});
+      css.href=versionedCssHref;
+      await Promise.race([cssSettled,new Promise(r=>setTimeout(r,1800))]);
+    }else if(!css.sheet){
+      await Promise.race([new Promise(r=>{css.onload=r;css.onerror=r;}),new Promise(r=>setTimeout(r,1800))]);
+    }
     await domReady;
     const version=String(config.version||'').trim();
     const badge=document.getElementById('versionBadge'); if(badge)badge.textContent=version?'v'+version:'version';

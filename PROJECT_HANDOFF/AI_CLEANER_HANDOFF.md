@@ -684,3 +684,11 @@
 - `ai-cleaner/sw.js` adds a scoped offline shell for `/ai-cleaner/` only. `version.json` and `data/daily-topics.json` use network-first freshness; other runtime assets use cache-first within the versioned cache.
 - The web app manifest now has an explicit id, language, description, categories, and orientation metadata.
 - Coarse-pointer mobile controls receive a larger touch floor; text fields/selects use 16px on mobile to avoid focus zoom. Reduced-motion and increased-contrast preferences receive stronger global handling.
+
+
+## 1.11.3 — PC F5 reload scroll stability
+
+- PC Chrome F5에서 스크롤 위치가 몇 px씩 누적 이동할 수 있는 초기 레이아웃 타이밍을 정리했습니다.
+- `app.css`는 HTML 파싱 단계에서 먼저 로드하며 `boot.js`는 해당 stylesheet를 재사용합니다.
+- 부팅 중에만 scroll anchoring을 비활성화하고, reload 시 강제 top 이동은 하지 않습니다.
+- Protected `OPTION/**` remains untouched/excluded.

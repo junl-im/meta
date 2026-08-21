@@ -1,6 +1,6 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.11.2",
+  "version": "1.11.3",
   "date": "2026-08-21",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -53,12 +53,12 @@
     ".github/scripts/build-runtime-vendor.mjs"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.11.2",
-  "asset_version": "1112",
+  "current_version": "1.11.3",
+  "asset_version": "1113",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.11.2 browser-smoke isolation hotfix: normal Playwright contexts block Service Workers so Daily Engine page.route mocks remain deterministic; the offline shell test uses its own SW-enabled context.",
+  "latestPatch": "1.11.3 PC F5 scroll-stability hotfix: app.css is linked in HTML before boot so Chrome restores against the final layout; boot reuses/version-corrects that stylesheet and disables scroll anchoring only during boot.",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -84,7 +84,7 @@
     "protectedPathsExcluded": [
       "OPTION/**"
     ],
-    "patchBaseline": "Delivered 1.11.0 FULL_PROJECT_HANDOFF -> 1.11.1 cumulative repair"
+    "patchBaseline": "Delivered 1.11.2 FULL_PROJECT_HANDOFF -> 1.11.3"
   },
   "internalTypewriter": {
     "source": "visible-text projection of original",
@@ -206,7 +206,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "1112",
+  "assetVersion": "1113",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -657,7 +657,7 @@
     "minimumCssFontPx": 9.5,
     "optionPathTouched": false
   },
-  "patchBaseline": "Delivered 1.11.1 FULL_PROJECT_HANDOFF -> 1.11.2",
+  "patchBaseline": "Delivered 1.11.2 FULL_PROJECT_HANDOFF -> 1.11.3",
   "hardening199": {
     "externalBootScript": true,
     "contentSecurityPolicy": "default self; script self + wasm-unsafe-eval; object none; base none; form-action none",
@@ -715,6 +715,14 @@
     "serviceWorkerBlockedInNormalE2e": true,
     "offlineServiceWorkerDedicatedContext": true,
     "dailyRouteMocksProtectedFromServiceWorker": true,
+    "optionPathTouched": false,
+    "e2eCases": 58
+  },
+  "hardening1113": {
+    "parserBlockingAppCss": true,
+    "bootReusesStylesheet": true,
+    "bootTimeScrollAnchoringDisabled": true,
+    "forcedScrollToTopOnReload": false,
     "optionPathTouched": false,
     "e2eCases": 58
   }
