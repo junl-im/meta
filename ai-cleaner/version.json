@@ -1,7 +1,7 @@
 {
-  "version": "1.11.3",
-  "assetVersion": "1113",
+  "version": "1.12.0",
+  "assetVersion": "1120",
   "channel": "stable",
-  "updateMode": "reload-scroll-stability",
-  "notes": "PC F5 새로고침에서 브라우저 스크롤 복원과 늦은 CSS 적용이 충돌하지 않도록 핵심 CSS를 HTML 파싱 단계에서 먼저 로드하고 부팅 중 scroll anchoring 보정을 억제했습니다."
+  "updateMode": "ai-playground-brand-platform-foundation",
+  "notes": "서비스 브랜드를 곰같은여우의 AI 놀이터로 확장하고 PWA/SEO/브라우저 제목을 플랫폼 기준으로 통일했습니다. 도구 전환 시 현재 도구명이 문서 제목에 반영됩니다."
 }

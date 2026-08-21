@@ -818,11 +818,11 @@ test('service worker keeps the core text cleaner available after the network dro
 test('top-level tool tabs support roving keyboard focus and synchronized panel state', async ({ page }) => {
   await gotoReady(page);
   const text=page.locator('#toolTabText'),image=page.locator('#toolTabImage'),writing=page.locator('#toolTabWriting');
-  await expect(text).toHaveAttribute('role','tab');await expect(text).toHaveAttribute('aria-selected','true');await expect(text).toHaveAttribute('tabindex','0');
+  await expect(text).toHaveAttribute('role','tab');await expect(text).toHaveAttribute('aria-selected','true');await expect(text).toHaveAttribute('tabindex','0');await expect(page).toHaveTitle(/AI 글 다듬기 \| 곰같은여우의 AI 놀이터/);
   await expect(image).toHaveAttribute('aria-selected','false');await expect(image).toHaveAttribute('tabindex','-1');
   await text.focus();await page.keyboard.press('ArrowRight');
-  await expect(image).toBeFocused();await expect(image).toHaveAttribute('aria-selected','true');await expect(page.locator('#imageTool')).toBeVisible();await expect(page.locator('#textTool')).toBeHidden();
-  await page.keyboard.press('End');await expect(writing).toBeFocused();await expect(writing).toHaveAttribute('aria-selected','true');await expect(page.locator('#writingTool')).toBeVisible();
+  await expect(image).toBeFocused();await expect(image).toHaveAttribute('aria-selected','true');await expect(page.locator('#imageTool')).toBeVisible();await expect(page.locator('#textTool')).toBeHidden();await expect(page).toHaveTitle(/AI 이미지 검사 \| 곰같은여우의 AI 놀이터/);
+  await page.keyboard.press('End');await expect(writing).toBeFocused();await expect(writing).toHaveAttribute('aria-selected','true');await expect(page.locator('#writingTool')).toBeVisible();await expect(page).toHaveTitle(/블로그 팩토리 \| 곰같은여우의 AI 놀이터/);
   await page.keyboard.press('Home');await expect(text).toBeFocused();await expect(text).toHaveAttribute('aria-selected','true');await expect(page.locator('#textTool')).toBeVisible();await expect(page.locator('#writingTool')).toBeHidden();
 });
 

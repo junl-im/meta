@@ -315,7 +315,7 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
 .check input[type="checkbox"]:disabled{opacity:.55;cursor:not-allowed}.check:has(input:disabled){opacity:.58}
 #directTarget:disabled{opacity:1;color:var(--ink);background:#f8f4ef;cursor:default}
 @media(max-width:620px){.resultActions{grid-template-columns:repeat(2,minmax(0,1fr))}.resultHead{align-items:flex-start}.resultHead .tabs{width:100%;margin-left:0;justify-content:flex-start}.tab{padding-left:9px;padding-right:9px}}
-@media(max-width:420px){.top{height:auto;min-height:68px;padding:7px 0;gap:6px;flex-wrap:wrap;align-content:center}.brand{width:100%}.brand .sub{display:none}.logo{width:36px;height:36px;flex-basis:36px}.toptools{width:100%}.toolnav{width:100%;display:grid;grid-template-columns:1fr 1fr}.toolnav button{width:100%}.resultActions{grid-template-columns:repeat(2,minmax(0,1fr))}.hero{padding-top:16px}.hero h1{font-size:21px}}
+@media(max-width:420px){.top{height:auto;min-height:68px;padding:7px 0;gap:6px;flex-wrap:wrap;align-content:center}.brand{width:100%}.brand .sub{display:none}.logo{width:36px;height:36px;flex-basis:36px}.toptools{width:100%}.toolnav{width:100%;display:grid}.toolnav button{width:100%}.resultActions{grid-template-columns:repeat(2,minmax(0,1fr))}.hero{padding-top:16px}.hero h1{font-size:21px}}
 @media(max-width:340px){.resultActions{grid-template-columns:1fr}}
 
 
@@ -540,8 +540,8 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
 .osConnectionState{display:flex;align-items:center;gap:8px;margin-bottom:8px}.osConnectionState b{font-size:11px}.osConnectionCopy{font-size:10px;line-height:1.65}.osConnectionCopy b{color:var(--ink)}.osPrefs{display:grid;gap:10px}.osPrefs label{display:grid;gap:6px}.osPrefs label small{font-weight:600;color:var(--muted)}.osPrefs input,.osPrefs textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff;color:var(--ink);font:inherit;font-size:11px;outline:none}.osPrefs textarea{resize:vertical;line-height:1.55}.osPrefs .actions{margin-top:0}
 @media(max-width:980px){.osGrid{grid-template-columns:1fr}.osTaskCard{grid-row:auto}.osTask{min-height:180px}.osPackPreview{height:230px}}
 @media(max-width:760px){.osHeroBadges{flex-wrap:wrap}.osCard .head{min-height:0}.osOptionRow{align-items:stretch;flex-direction:column;gap:7px}.osOptionRow label{min-width:0}.osOptionRow>.sub{padding-bottom:0;margin-left:0}.osActions{display:grid;grid-template-columns:1fr 1fr}.osActions .btn{width:100%;min-width:0}.osTask{min-height:170px}.osPackPreview{height:220px}}
-@media(max-width:420px){.toolnav{grid-template-columns:repeat(3,minmax(0,1fr))}.toolnav button{padding:7px 3px;font-size:9.5px;line-height:1.15}.osProviders{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.osProvider{width:100%;min-width:0;padding:0 5px;font-size:9.5px}.osActions{gap:5px}.osActions .btn{height:36px;padding-inline:7px;font-size:9.5px}.osSummary{font-size:9.5px}.osStep{width:24px;height:24px;border-radius:8px;margin-right:6px}.osTask{min-height:150px;font-size:11px;padding:10px}.osPackPreview{height:190px;font-size:9.5px}.osPrefs input,.osPrefs textarea{font-size:10px}}
-@media(max-width:340px){.toolnav button{font-size:9.5px}.osProviders{grid-template-columns:repeat(2,minmax(0,1fr))}.osActions{grid-template-columns:1fr}.osPackPreview{height:170px}}
+@media(max-width:420px){.osProviders{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.osProvider{width:100%;min-width:0;padding:0 5px;font-size:9.5px}.osActions{gap:5px}.osActions .btn{height:36px;padding-inline:7px;font-size:9.5px}.osSummary{font-size:9.5px}.osStep{width:24px;height:24px;border-radius:8px;margin-right:6px}.osTask{min-height:150px;font-size:11px;padding:10px}.osPackPreview{height:190px;font-size:9.5px}.osPrefs input,.osPrefs textarea{font-size:10px}}
+@media(max-width:340px){.osProviders{grid-template-columns:repeat(2,minmax(0,1fr))}.osActions{grid-template-columns:1fr}.osPackPreview{height:170px}}
 
 /* 1.8.1 AI Writing OS simple-start UX */
 .osSimpleHero{padding-bottom:14px}
@@ -796,7 +796,7 @@ button,.btn,.mini,.tab,.floatWidget,.filelabel,summary{touch-action:manipulation
 }
 @media(max-width:420px){
   .toolnav{grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}
-  .toolnav button{padding-inline:3px;font-size:10px}
+  .toolnav button{padding:7px 3px;font-size:10px}
   .osFactoryPresets{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
   .osFactoryPresets button{min-height:58px;padding:8px}
   .osFactoryPresets button b{font-size:10.5px}.osFactoryPresets button span{font-size:10px}

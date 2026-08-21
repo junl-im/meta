@@ -1,17 +1,22 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" data-app-name="곰같은여우의 AI 놀이터">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>곰같은여우의 AI 흔적 지우개</title>
-<meta name="description" content="브라우저에서 로컬로 동작하는 AI 글 다듬기·이미지 출처 신호 검사·블로그 팩토리 도구">
+<title>AI 글 다듬기 | 곰같은여우의 AI 놀이터</title>
+<meta name="description" content="AI 글 다듬기, 이미지 출처 신호 검사, 블로그 팩토리를 한곳에서 사용하는 곰같은여우의 브라우저 기반 AI 도구 모음">
+<meta name="application-name" content="곰같은여우의 AI 놀이터">
+<meta name="apple-mobile-web-app-title" content="AI 놀이터">
+<meta property="og:type" content="website">
+<meta property="og:title" content="곰같은여우의 AI 놀이터">
+<meta property="og:description" content="AI 글 다듬기 · 이미지 검사 · 블로그 팩토리를 한곳에서 사용하는 브라우저 기반 AI 도구 모음">
 <meta name="theme-color" content="#fff8f0">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; font-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1113">
+<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1120">
 <style id="bootCritical">html:not(.boot-ready) body{visibility:hidden}html{background:#fff8f0}html.app-booting{overflow-anchor:none}html.app-booting body{cursor:progress}html.app-booting body *{cursor:progress!important}</style>
 <script src="js/boot.js" defer></script>
 </head>
@@ -21,12 +26,12 @@
   <div class="brand">
     <div class="logo" id="brandIcon" role="img" aria-label="곰같은여우 아이콘"></div>
     <div>
-      <div><b>곰같은여우의 AI 흔적 지우개</b> <span class="pill" id="versionBadge">version</span></div>
-      <div class="sub">쉽게 다듬고 · 필요한 정보만 펼쳐보고 · 브라우저에서 로컬 처리</div>
+      <div><b>곰같은여우의 AI 놀이터</b> <span class="pill" id="versionBadge">version</span></div>
+      <div class="sub">AI 글 다듬기 · 이미지 검사 · 블로그 팩토리 · 브라우저 로컬 처리</div>
     </div>
   </div>
   <div class="toptools">
-    <div class="toolnav" role="tablist" aria-label="도구 전환">
+    <div class="toolnav" role="tablist" aria-label="AI 놀이터 도구 전환">
       <button class="active" id="toolTabText" type="button" role="tab" aria-selected="true" aria-controls="textTool" tabindex="0" data-tool="text">AI 글 다듬기</button>
       <button id="toolTabImage" type="button" role="tab" aria-selected="false" aria-controls="imageTool" tabindex="-1" data-tool="image">AI 이미지 검사</button>
       <button id="toolTabWriting" type="button" role="tab" aria-selected="false" aria-controls="writingTool" tabindex="-1" data-tool="writing">블로그 팩토리</button>
@@ -338,7 +343,7 @@
   </div>
 
 </main>
-<div class="footer">곰같은여우의 AI 흔적 지우개 <span id="footerVersion"></span> · 브라우저 로컬 처리</div>
+<div class="footer">곰같은여우의 AI 놀이터 <span id="footerVersion"></span> · 브라우저 로컬 처리</div>
 </div>
 
 <div class="floatingDock" id="floatingDock" aria-label="분석 도우미">

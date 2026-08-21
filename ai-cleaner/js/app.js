@@ -31,6 +31,8 @@ function checkpointCurrentSourceStamp(){const input=$('#input')?.value||'';if(!i
 
 const APP_META=window.__AI_CLEANER_VERSION__||{};
 const APP_VERSION=String(APP_META.version||'local');
+const APP_NAME=document.documentElement.dataset.appName||'곰같은여우의 AI 놀이터';
+const TOOL_TITLES={text:'AI 글 다듬기',image:'AI 이미지 검사',writing:'블로그 팩토리'};
 const ASSET_VERSION=encodeURIComponent(String(APP_META.assetVersion||APP_META.version||Date.now()));
 const ANALYSIS_WORKER_THRESHOLD=6000;
 const analysisWorker=Modules.createAnalysisWorkerAdapter({
@@ -133,11 +135,15 @@ function replaceSourceText(value,{analyzeNow=true,backgroundNow=false,resetPerfo
   const input=$('#input');if(!input)return false;input.value=String(value??'');input.scrollTop=0;return handleSourceMutation({analyzeNow,backgroundNow,resetPerformance,restartTypewriterCue:true});
 }
 
+function syncDocumentTitle(tool='text'){
+  const label=TOOL_TITLES[tool]||TOOL_TITLES.text;
+  document.title=`${label} | ${APP_NAME}${APP_VERSION==='local'?'':` v${APP_VERSION}`}`;
+}
 function applyVersionUi(){
   const badge=$('#versionBadge'),footer=$('#footerVersion');
   if(badge)badge.textContent=APP_VERSION==='local'?'local':'v'+APP_VERSION;
   if(footer)footer.textContent=APP_VERSION==='local'?'local':'v'+APP_VERSION;
-  if(APP_VERSION!=='local')document.title=`곰같은여우의 AI 흔적 지우개 v${APP_VERSION}`;
+  syncDocumentTitle(document.querySelector('[data-tool].active')?.dataset.tool||'text');
 }
 
 function captureUpdateDraftData(targetVersion){
@@ -837,7 +843,7 @@ function activateToolTab(b){
   if(nextTool!=='image'){invalidatePendingImageRun({status:'다른 도구로 이동해 이미지 분석을 중지했습니다.'});window.cancelImageAnalysis?.({status:'다른 도구로 이동해 이미지 분석을 중지했습니다.'});}
   if(nextTool==='writing')void aiWritingOs.activate().catch(err=>{console.error(err);showToast('블로그 팩토리를 초기화하지 못했습니다. 새로고침 후 다시 시도해 주세요.');});else aiWritingOs.deactivate();
   toolTabs.forEach(x=>{const active=x===b;x.classList.toggle('active',active);x.setAttribute('aria-selected',active?'true':'false');x.tabIndex=active?0:-1;});
-  for(const [tool,id] of Object.entries(TOOL_SECTION_IDS))$('#'+id)?.classList.toggle('hidden',tool!==nextTool);syncWidgets();
+  for(const [tool,id] of Object.entries(TOOL_SECTION_IDS))$('#'+id)?.classList.toggle('hidden',tool!==nextTool);syncDocumentTitle(nextTool);syncWidgets();
 }
 toolTabs.forEach(b=>{
   b.onclick=()=>activateToolTab(b);

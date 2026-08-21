@@ -1,6 +1,6 @@
 # AI Cleaner 프로젝트 인수인계 메모리
 
-업데이트: 2026-08-20 · 현재 패키지: 1.11.1
+업데이트: 2026-08-21 · 현재 패키지: 1.12.0
 
 ## 새 채팅에서 가장 먼저 읽을 것
 이 폴더를 새 채팅에 업로드한 뒤 `PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md 읽고 이어서 개발하자`라고 요청한다. 이 문서는 프로젝트의 결정사항, 보호 경로, UX 방향, 안전 제약, 배포 방식, 알려진 이슈를 보존하기 위한 인수인계 메모리다.
@@ -13,6 +13,15 @@
 - 일반 `main` push는 `.github/workflows/ai-cleaner-ci.yml`이 정적 검사 -> browser-smoke -> Pages 배포까지 한 흐름으로 담당한다.
 - `.github/workflows/daily-blog-factory-pages.yml`은 예약/수동 Daily Engine 생성 + Pages 배포 전용이다. 일반 push에서는 실행하지 않는다.
 - **`OPTION/**`은 다른 서비스가 사용하는 보호 경로. 어떤 경우에도 수정/이동/삭제/rename 금지.**
+
+
+## 1.12.0 브랜드 / 플랫폼 기준
+- 사용자-facing 서비스 브랜드는 **`곰같은여우의 AI 놀이터`** 다.
+- 개별 도구명은 `AI 글 다듬기`, `AI 이미지 검사`, `블로그 팩토리`로 유지한다. 과거 전체 서비스명 `곰같은여우의 AI 흔적 지우개`로 되돌리지 않는다.
+- `/ai-cleaner/`, manifest `id`/`scope`, GitHub Pages 경로는 호환성을 위해 그대로 유지한다. 브랜드 변경 때문에 URL이나 PWA identity를 새로 만들지 않는다.
+- 브라우저 제목은 현재 선택한 도구 + 플랫폼 브랜드를 조합한다. 예: `AI 이미지 검사 | 곰같은여우의 AI 놀이터 v1.12.0`.
+- PWA `name`, `short_name`, application/mobile title, SEO/OG 설명은 플랫폼 브랜드와 세 도구 범위를 일관되게 표현한다.
+- `OPTION/**`은 여전히 다른 서비스 영역이며 브랜드 전환/플랫폼 확장과 무관하다.
 
 ## 사용자의 작업 방식
 - 사용자는 GitHub Desktop을 주로 사용한다.
@@ -692,3 +701,11 @@
 - `app.css`는 HTML 파싱 단계에서 먼저 로드하며 `boot.js`는 해당 stylesheet를 재사용합니다.
 - 부팅 중에만 scroll anchoring을 비활성화하고, reload 시 강제 top 이동은 하지 않습니다.
 - Protected `OPTION/**` remains untouched/excluded.
+
+
+## 1.12.0 변경 요약
+- 전체 서비스 브랜드를 `곰같은여우의 AI 놀이터`로 전환했다. 개별 도구명과 기존 `/ai-cleaner/` URL은 유지한다.
+- HTML/PWA/root redirect/PROJECT_STATE의 사용자-facing 브랜드와 설명을 동기화했다.
+- 선택한 도구에 따라 브라우저 문서 제목이 바뀌도록 해 멀티탭 구분과 플랫폼 구조를 강화했다.
+- 모바일 toolnav에 누적되어 있던 중복 breakpoint 선언을 정리하면서 현재 390/320px 렌더 결과는 유지했다.
+- 정적 검사는 브랜드 일관성, 활성 도구 문서 제목, toolnav CSS 중복 상한을 회귀 계약으로 고정한다.

@@ -3,6 +3,7 @@
   window.__AI_CLEANER_APP_READY__=false;
   document.documentElement.classList.add('app-booting');
   const domReady = document.readyState === 'loading' ? new Promise(r => document.addEventListener('DOMContentLoaded', r, {once:true})) : Promise.resolve();
+  const APP_NAME=document.documentElement.dataset.appName||'곰같은여우의 AI 놀이터';
   const VERSION_FETCH_TIMEOUT_MS=3500, SCRIPT_LOAD_TIMEOUT_MS=10000;
   const addLink = (rel, href, attrs={}) => { const l=document.createElement('link'); l.rel=rel; l.href=href; Object.entries(attrs).forEach(([k,v])=>l.setAttribute(k,v)); document.head.appendChild(l); return l; };
   const loadScript = (src,timeoutMs=SCRIPT_LOAD_TIMEOUT_MS) => new Promise((resolve,reject) => {
@@ -59,7 +60,7 @@
     const version=String(config.version||'').trim();
     const badge=document.getElementById('versionBadge'); if(badge)badge.textContent=version?'v'+version:'version';
     const footer=document.getElementById('footerVersion'); if(footer)footer.textContent=version?'v'+version:'';
-    if(version)document.title='곰같은여우의 AI 흔적 지우개 v'+version;
+    if(version)document.title='AI 글 다듬기 | '+APP_NAME+' v'+version;
     if(document.body){document.body.inert=true;document.body.setAttribute('aria-busy','true');}
     document.documentElement.classList.add('boot-ready');
     const coreScripts=[
