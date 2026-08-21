@@ -1,7 +1,7 @@
 {
   "project": "AI Cleaner / 곰같은여우의 AI 흔적 지우개",
-  "version": "1.11.1",
-  "date": "2026-08-20",
+  "version": "1.11.2",
+  "date": "2026-08-21",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
   "appPath": "ai-cleaner/",
@@ -53,12 +53,12 @@
     ".github/scripts/build-runtime-vendor.mjs"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.11.1",
-  "asset_version": "1111",
+  "current_version": "1.11.2",
+  "asset_version": "1112",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.11.1 CI/PWA foundation repair: restores the 1.10 bundle, service-worker registration/staging, PWA manifest metadata, and SW syntax checks on top of 1.11.0 UI.",
+  "latestPatch": "1.11.2 browser-smoke isolation hotfix: normal Playwright contexts block Service Workers so Daily Engine page.route mocks remain deterministic; the offline shell test uses its own SW-enabled context.",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -141,7 +141,7 @@
     "breakpointExpansionReset": true,
     "safeAreaViewportFitCover": true
   },
-  "nextPhase": "Push 1.11.1 and confirm static-checks/browser-smoke/Pages deploy are green; only then continue UI/CSS extraction.",
+  "nextPhase": "Push 1.11.2 and confirm static-checks/browser-smoke/Pages deploy are green before continuing UI/CSS work.",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -206,7 +206,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "1111",
+  "assetVersion": "1112",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -215,14 +215,14 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "285 passed / 0 failed (local 1.11.1 cumulative repair validation)",
+    "staticChecks": "286 passed / 0 failed (local 1.11.2 service-worker test-isolation validation)",
     "moduleChecks": "PASS — includes update-request timeout abort/recovery coverage plus existing Blog Factory and Korean encoding checks",
     "jsSyntax": "PASS — all project JS/MJS syntax checks including boot.js and sw.js",
     "workflowYaml": "PASS — ai-cleaner-ci.yml + daily-blog-factory-pages.yml parse; both explicitly syntax-check sw.js",
     "protectedToolIntegrity": "PASS — OPTION/** remains absent from delivery artifacts and unmodified by AI Cleaner; the AI Cleaner service worker is scoped to /ai-cleaner/ and cannot intercept /OPTION/SS_OPTION.txt.",
-    "localBrowserSmoke": "GITHUB-GATE — local Chromium still times out in this container; 58-case browser-smoke remains the final visual/runtime gate.",
-    "browserE2EConfigured": "58 cases; adds keyboard tool-tab semantics and 390/320px Blog Factory overflow/layout coverage",
-    "patchRebuild": "PASS — 1.11.0 FULL baseline + 13-file 1.11.1 cumulative repair Patch reproduces the 1.11.1 source tree (generated/transient dirs excluded).",
+    "localBrowserSmoke": "GITHUB-GATE — browser-smoke remains the final runtime gate; normal tests now block SW and the offline test opts into an isolated SW-enabled context.",
+    "browserE2EConfigured": "58 cases; default contexts block Service Workers, with one dedicated offline-shell case using an explicit SW-enabled context.",
+    "patchRebuild": "PASS — 1.11.1 FULL baseline + 8-file 1.11.2 Patch reproduces the 1.11.2 source tree (generated/transient dirs excluded).",
     "mockedDailyGenerator": "PASS — Responses request, gpt-5 default, web_search, strict JSON schema, exactly 10 topics/TOP3, API secret not persisted",
     "runtimeVendorBuild": "STATIC CONTRACT PASS — builder again generates app-core.bundle.js; dependency-backed full npm build remains GitHub-gated in this handoff environment."
   },
@@ -657,7 +657,7 @@
     "minimumCssFontPx": 9.5,
     "optionPathTouched": false
   },
-  "patchBaseline": "Delivered 1.11.0 FULL_PROJECT_HANDOFF -> 1.11.1 cumulative repair",
+  "patchBaseline": "Delivered 1.11.1 FULL_PROJECT_HANDOFF -> 1.11.2",
   "hardening199": {
     "externalBootScript": true,
     "contentSecurityPolicy": "default self; script self + wasm-unsafe-eval; object none; base none; form-action none",
@@ -708,6 +708,13 @@
     "restoredPwaManifestMetadata": true,
     "workflowChecksServiceWorkerSyntax": true,
     "staticServiceWorkerCacheCheckUsesRuntimeVersion": true,
+    "optionPathTouched": false,
+    "e2eCases": 58
+  },
+  "hardening1112": {
+    "serviceWorkerBlockedInNormalE2e": true,
+    "offlineServiceWorkerDedicatedContext": true,
+    "dailyRouteMocksProtectedFromServiceWorker": true,
     "optionPathTouched": false,
     "e2eCases": 58
   }

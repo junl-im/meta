@@ -98,6 +98,13 @@
 - 완전 무인 일일 생성은 정적 Pages에 비밀키를 넣지 말고, 향후 서버 스케줄러 + 서버 측 AI API + 지속 저장소 계층으로 분리한다.
 
 
+## 1.11.2 browser-smoke Service Worker 격리 핫픽스
+- 일반 Playwright E2E는 Service Worker를 차단해 Daily Engine의 `page.route()` 네트워크 모킹이 활성 SW/cache에 의해 우회되지 않게 한다.
+- 오프라인 shell 검사는 별도의 `serviceWorkers: 'allow'` context를 직접 생성하고 테스트 종료 시 context를 닫는다.
+- production Service Worker, network-first Daily Topics, app-core bundle/PWA 동작은 그대로 유지한다. 테스트를 통과시키기 위해 실제 기능을 끄지 않는다.
+- 정적 검사에 SW test-isolation 계약을 추가한다.
+- `OPTION/**`은 수정/전달 대상에서 계속 제외하고 owner-managed `/OPTION/SS_OPTION.txt` bridge는 변경하지 않는다.
+
 ## 1.11.1 CI/PWA 기반 복구 핫픽스
 - GitHub main에서 1.11 UI 파일과 1.9.9/1.10 이전 기반 파일이 섞인 상태를 복구한다.
 - `ai-cleaner/js/boot.js`는 production `vendor/app-core.bundle.js` 우선 로드 + 기존 ordered source fallback + `./sw.js` 등록을 유지한다.

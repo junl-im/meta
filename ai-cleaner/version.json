@@ -1,6 +1,7 @@
 {
-  "version": "1.11.1",
-  "assetVersion": "1111",
+  "version": "1.11.2",
+  "assetVersion": "1112",
   "channel": "stable",
-  "updateMode": "pwa-foundation-repair"
+  "updateMode": "service-worker-test-isolation",
+  "notes": "Playwright 일반 E2E에서는 Service Worker를 차단하고 오프라인 전용 테스트만 독립 SW context를 사용해 Daily Engine 네트워크 모킹 간섭을 제거했습니다."
 }

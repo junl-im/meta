@@ -5,6 +5,9 @@ const BASE='http://127.0.0.1:4173/ai-cleaner/';
 const versionData=JSON.parse(fs.readFileSync(new URL('../version.json',import.meta.url),'utf8'));
 const APP_VERSION=String(versionData.version);
 
+// Keep request-mocking tests deterministic. Service Worker behavior is exercised in its own explicit context below.
+test.use({ serviceWorkers: 'block' });
+
 test.beforeEach(async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
 });
@@ -788,20 +791,28 @@ test('Blog Factory copy fallback never opens a provider and selects prompt when 
 
 
 
-test('service worker keeps the core text cleaner available after the network drops', async ({ page, context }) => {
-  await gotoReady(page);
-  await page.waitForFunction(async()=>{if(!('serviceWorker' in navigator))return false;const reg=await navigator.serviceWorker.ready;return !!reg?.active;},{timeout:10000});
-  await page.waitForFunction(()=>!!navigator.serviceWorker.controller,{timeout:10000});
-  const scope=await page.evaluate(async()=>String((await navigator.serviceWorker.ready).scope));
-  expect(scope).toContain('/ai-cleaner/');
-  await context.setOffline(true);
+test('service worker keeps the core text cleaner available after the network drops', async ({ browser }) => {
+  // Normal E2E contexts block SW so page.route() mocks cannot be bypassed by a controller.
+  // This one test opts into a fresh SW-enabled context and owns its lifecycle explicitly.
+  const context=await browser.newContext({serviceWorkers:'allow'});
+  const page=await context.newPage();
   try{
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await gotoReady(page);
+    await page.waitForFunction(async()=>{if(!('serviceWorker' in navigator))return false;const reg=await navigator.serviceWorker.ready;return !!reg?.active;},{timeout:10000});
+    await page.waitForFunction(()=>!!navigator.serviceWorker.controller,{timeout:10000});
+    const scope=await page.evaluate(async()=>String((await navigator.serviceWorker.ready).scope));
+    expect(scope).toContain('/ai-cleaner/');
+    await context.setOffline(true);
     await page.reload({waitUntil:'domcontentloaded',timeout:15000});
     await page.waitForFunction(()=>window.__AI_CLEANER_APP_READY__===true&&!!window.AICleanerApp,{timeout:15000});
     await page.locator('#input').fill('오프라인에서도 기본 텍스트 정리는 열려야 합니다.');
     await analyzeNow(page,{silent:true});
     await expect(page.locator('#output')).not.toHaveValue('');
-  } finally { await context.setOffline(false); }
+  } finally {
+    await context.setOffline(false).catch(()=>{});
+    await context.close();
+  }
 });
 
 test('top-level tool tabs support roving keyboard focus and synchronized panel state', async ({ page }) => {
