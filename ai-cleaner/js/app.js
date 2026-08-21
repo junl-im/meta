@@ -74,6 +74,7 @@ function invalidatePendingTextImport(){textImportSeq++;return textImportSeq;}
 const REWRITE_SESSION_KEY='ai-cleaner-rewrite-session-v3';
 const PANEL_TRIGGER_IDS={typingPreviewPanel:'typingPreviewButton',issuesPanel:'issuesWidget',reviewPanel:'reviewWidget',rewritePanel:'rewriteWidget',checkpointPanel:'checkpointOpen',techPanel:'techWidget'};
 let rewriteOpenSeq=0;
+let sourceMutationSeq=0;
 function invalidatePendingRewriteOpen(){rewriteOpenSeq++;return rewriteOpenSeq;}
 
 function syncPanelAria(){
@@ -116,6 +117,7 @@ function ensureFreshAnalysis({silent=true}={}){
   const input=$('#input')?.value||'';if(!input.trim())return false;if(!inputDirty&&state.original===input)return true;return !!analyze(silent);
 }
 function handleSourceMutation({analyzeNow=false,backgroundNow=false,resetPerformance=false,restartTypewriterCue=false}={}){
+  const mutationToken=++sourceMutationSeq;
   if(resultNavigationTimer)cancelResultNavigation();
   typewriterRecommendationSuppressed=false;checkpointSourceCache={source:null,stamp:''};
   const rewriteWidget=$('#rewriteWidget');if(rewriteWidget){clearTimeout(syncWidgets.rewriteReadyTimer);rewriteWidget.classList.remove('rewriteReady');delete rewriteWidget.dataset.seenReady;}
@@ -125,6 +127,14 @@ function handleSourceMutation({analyzeNow=false,backgroundNow=false,resetPerform
   if(!input?.value.trim()){
     clearTextAnalysis({keepInput:true});
     notifyTextChanged('original');
+    const enforceEmptySource=()=>{
+      if(mutationToken!==sourceMutationSeq||input.value.trim())return;
+      const staleState=!!(state.original||state.base||state.issueBase||state.working||state.issues.length||state.reviews.length||state.allChars.length||$('#output')?.value);
+      if(staleState)clearTextAnalysis({keepInput:true});
+    };
+    queueMicrotask(enforceEmptySource);
+    requestAnimationFrame(()=>requestAnimationFrame(enforceEmptySource));
+    setTimeout(enforceEmptySource,80);
     return false;
   }
   setInputDirty(true);queueStats();syncWidgets();notifyTextChanged('original');syncTypewriterRecommendation({restart:restartTypewriterCue});
@@ -295,6 +305,7 @@ function queueLiveAnalysis({force=false,immediate=false}={}){
 }
 
 function rebuild(){
+  if(!$('#input')?.value.trim()){state.working='';$('#output').value='';return;}
   let text=state.issueBase||state.base;
   for(const x of state.issues.filter(x=>state.applied.has(x.id)&&x.applicable&&x.start>=0).sort((a,b)=>b.start-a.start)){
     text=text.slice(0,x.start)+x.after+text.slice(x.end);
@@ -864,7 +875,7 @@ window.AICleanerApp={
     out.readOnly=true;$('#editResult').textContent='✎ 직접 수정';refreshSuggestionBaseline(next,{unread:false});renderAll({preserveOutput:true});recordHistory(label);notifyTextChanged('output');revealAppliedResult(`✓ 보이는 글씨를 한 글자씩 새로 썼습니다.${typingPreview.removedHidden?` 숨은 문자 ${typingPreview.removedHidden}개 제거.`:''}`,{closePanelsFirst:false,scroll:false,focusOutput:false});return true;
   },
   applyRewrite(text,label='새 글 재작성'){
-    const next=String(text||'');if(!next.trim())return false;
+    const next=String(text||'');if(!next.trim()||!$('#input')?.value.trim())return false;
     invalidateTypewriterVerification();const ww=$('#rewriteWidget');if(ww){ww.dataset.seenReady='1';ww.classList.remove('rewriteReady');}
     $('#output').readOnly=true;$('#output').value=next;$('#editResult').textContent='✎ 직접 수정';
     refreshSuggestionBaseline(next,{unread:false});renderAll();recordHistory(label);revealAppliedResult('✓ 새 글을 결과에 적용했습니다.');return true;

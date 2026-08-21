@@ -1,6 +1,6 @@
 {
   "project": "AI Playground / 곰같은여우의 AI 놀이터",
-  "version": "1.12.0",
+  "version": "1.12.1",
   "date": "2026-08-21",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -53,12 +53,12 @@
     ".github/scripts/build-runtime-vendor.mjs"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.12.0",
-  "asset_version": "1120",
+  "current_version": "1.12.1",
+  "asset_version": "1121",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.12.0 brand/platform foundation: service brand renamed to 곰같은여우의 AI 놀이터; PWA/SEO/header/footer/root redirect align to the platform brand while AI 글 다듬기, AI 이미지 검사, 블로그 팩토리 remain tool names; browser title follows the active tool.",
+  "latestPatch": "1.12.1 empty-source rewrite lifecycle hotfix: blank source remains authoritative after rewrite studio activity; post-mutation guards prevent stale output/analysis from resurfacing.",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -141,7 +141,7 @@
     "breakpointExpansionReset": true,
     "safeAreaViewportFitCover": true
   },
-  "nextPhase": "Consolidate remaining historical CSS overrides around floating panels and desktop/tablet layout after 1.12.0 browser-smoke is green.",
+  "nextPhase": "Continue platform UI/CSS consolidation after 1.12.1 browser-smoke is green.",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -206,7 +206,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "1120",
+  "assetVersion": "1121",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -215,13 +215,13 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "286 passed / 0 failed (local 1.11.2 service-worker test-isolation validation)",
+    "staticChecks": "291 passed / 0 failed (local 1.12.1 empty-source rewrite-lifecycle validation)",
     "moduleChecks": "PASS — includes update-request timeout abort/recovery coverage plus existing Blog Factory and Korean encoding checks",
     "jsSyntax": "PASS — all project JS/MJS syntax checks including boot.js and sw.js",
     "workflowYaml": "PASS — ai-cleaner-ci.yml + daily-blog-factory-pages.yml parse; both explicitly syntax-check sw.js",
     "protectedToolIntegrity": "PASS — OPTION/** remains absent from delivery artifacts and unmodified by AI Cleaner; the AI Cleaner service worker is scoped to /ai-cleaner/ and cannot intercept /OPTION/SS_OPTION.txt.",
     "localBrowserSmoke": "GITHUB-GATE — browser-smoke remains the final runtime gate; normal tests now block SW and the offline test opts into an isolated SW-enabled context.",
-    "browserE2EConfigured": "58 cases; default contexts block Service Workers, with one dedicated offline-shell case using an explicit SW-enabled context.",
+    "browserE2EConfigured": "59 cases; default contexts block Service Workers, with one dedicated offline-shell case using an explicit SW-enabled context.",
     "patchRebuild": "PASS — 1.11.1 FULL baseline + 8-file 1.11.2 Patch reproduces the 1.11.2 source tree (generated/transient dirs excluded).",
     "mockedDailyGenerator": "PASS — Responses request, gpt-5 default, web_search, strict JSON schema, exactly 10 topics/TOP3, API secret not persisted",
     "runtimeVendorBuild": "STATIC CONTRACT PASS — builder again generates app-core.bundle.js; dependency-backed full npm build remains GitHub-gated in this handoff environment."
@@ -657,7 +657,7 @@
     "minimumCssFontPx": 9.5,
     "optionPathTouched": false
   },
-  "patchBaseline": "Delivered 1.11.3 FULL_PROJECT_HANDOFF -> 1.12.0",
+  "patchBaseline": "Delivered 1.12.0 FULL_PROJECT_HANDOFF -> 1.12.1",
   "hardening199": {
     "externalBootScript": true,
     "contentSecurityPolicy": "default self; script self + wasm-unsafe-eval; object none; base none; form-action none",

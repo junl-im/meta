@@ -1,7 +1,7 @@
 {
-  "version": "1.12.0",
-  "assetVersion": "1120",
+  "version": "1.12.1",
+  "assetVersion": "1121",
   "channel": "stable",
-  "updateMode": "ai-playground-brand-platform-foundation",
-  "notes": "서비스 브랜드를 곰같은여우의 AI 놀이터로 확장하고 PWA/SEO/브라우저 제목을 플랫폼 기준으로 통일했습니다. 도구 전환 시 현재 도구명이 문서 제목에 반영됩니다."
+  "updateMode": "empty-source-rewrite-lifecycle-hotfix",
+  "notes": "재작성 스튜디오를 거친 긴 세션에서도 원본이 비면 결과/분석 상태가 다시 살아나지 않도록 빈 원본 불변식을 후속 콜백까지 강제합니다."
 }

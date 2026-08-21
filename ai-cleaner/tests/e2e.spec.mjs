@@ -347,6 +347,32 @@ test('clearing the source immediately clears stale output and analysis state', a
   await expect(page.locator('#detailSummary')).toHaveText('분석 전');
 });
 
+test('empty source stays authoritative after rewrite studio lifecycle callbacks settle', async ({ page }) => {
+  await gotoReady(page);
+  const input=page.locator('#input'),output=page.locator('#output');
+  await input.fill('결론적으로 재작성 도구를 거친 뒤에도 빈 원본은 최종 상태여야 합니다. 가격은 19,900원입니다.');
+  await analyzeNow(page,{silent:true});
+  await page.locator('#rewriteWidget').click();
+  await page.locator('#rewriteSource').selectOption('original');
+  await page.locator('#rewriteGenerate').click();
+  await expect(page.locator('#rewritePanel')).toHaveAttribute('aria-busy','false');
+  await expect(page.locator('#rewriteApply')).toBeEnabled();
+  await page.locator('#rewriteApply').click();
+  await expect(output).not.toHaveValue('');
+  await page.locator('#rewriteWidget').click();
+  await page.locator('[data-rewrite-tab="verify"]').click();
+  await page.locator('[data-close-panel="rewritePanel"]').click();
+  await input.fill('앞\u200B뒤\u00A0끝');
+  await analyzeNow(page,{silent:true});
+  await expect(output).toHaveValue('앞뒤 끝');
+  await input.fill('');
+  await expect(output).toHaveValue('');
+  await page.waitForTimeout(140);
+  await expect(output).toHaveValue('');
+  await expect(page.locator('#issuesWidget')).toBeHidden();
+  await expect(page.locator('#detailSummary')).toHaveText('분석 전');
+});
+
 test('foundation flow keeps state, layout and rewrite tools coherent', async ({ page }) => {
   await gotoReady(page);
   await expect(page.locator('#versionBadge')).toHaveText('v'+APP_VERSION);
