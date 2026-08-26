@@ -1,7 +1,7 @@
 {
   "project": "AI Playground / 곰같은여우의 AI 놀이터",
-  "version": "1.12.1",
-  "date": "2026-08-21",
+  "version": "1.13.0",
+  "date": "2026-08-26",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
   "appPath": "ai-cleaner/",
@@ -53,12 +53,12 @@
     ".github/scripts/build-runtime-vendor.mjs"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.12.1",
-  "asset_version": "1121",
+  "current_version": "1.13.0",
+  "asset_version": "1130",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.12.1 empty-source rewrite lifecycle hotfix: blank source remains authoritative after rewrite studio activity; post-mutation guards prevent stale output/analysis from resurfacing.",
+  "latestPatch": "1.13.0 exact-source incremental write: center auto-write now preserves the original string byte-for-byte at the JS string level, writes it incrementally into the result textarea, and verifies exact equality before success.",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -73,7 +73,7 @@
     "clipboardBlockedInDirectWrite": true,
     "syntheticInputBlockedInDirectWrite": true,
     "verifiedTypedResultApply": true,
-    "exactOriginalAutoClone": false
+    "exactOriginalAutoClone": true
   },
   "artifactDelivery": {
     "alwaysProvide": [
@@ -87,21 +87,23 @@
     "patchBaseline": "Delivered 1.11.2 FULL_PROJECT_HANDOFF -> 1.11.3"
   },
   "internalTypewriter": {
-    "source": "visible-text projection of original",
+    "source": "exact original input string",
     "target": "result textarea",
     "clipboard": false,
     "syntheticKeyboardEvents": false,
     "incrementalSetRangeText": true,
     "exactVerification": true,
-    "safeHiddenAutoRemoval": true,
-    "specialSpaceNormalization": true,
+    "safeHiddenAutoRemoval": false,
+    "specialSpaceNormalization": false,
     "meaningSensitiveUnicodePreserved": true,
     "standaloneFloatingPanel": true,
-    "postWriteSafeResidueAudit": true,
+    "postWriteSafeResidueAudit": false,
     "policyVersion": "old-v6-layer-a-safe-1.2.2",
     "completionButtonResultView": true,
     "mobileCompletionAutoNavigation": true,
-    "resultLandingBelowStickyHeader": true
+    "resultLandingBelowStickyHeader": true,
+    "exactOriginalPreservation": true,
+    "analysisSeparatedFromWrite": true
   },
   "foundationAudit": {
     "duplicateIssueRuleFixed": true,
@@ -141,7 +143,7 @@
     "breakpointExpansionReset": true,
     "safeAreaViewportFitCover": true
   },
-  "nextPhase": "Continue platform UI/CSS consolidation after 1.12.1 browser-smoke is green.",
+  "nextPhase": "Preserve the one-click workflow while extending diagnostics/widgets without changing the exact-source auto-write contract.",
   "versionPolicy": {
     "legacy": "6.x development history",
     "productBaseline": "1.0.0",
@@ -206,7 +208,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "1121",
+  "assetVersion": "1130",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -215,16 +217,17 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "291 passed / 0 failed (local 1.12.1 empty-source rewrite-lifecycle validation)",
-    "moduleChecks": "PASS — includes update-request timeout abort/recovery coverage plus existing Blog Factory and Korean encoding checks",
-    "jsSyntax": "PASS — all project JS/MJS syntax checks including boot.js and sw.js",
+    "staticChecks": "292 passed / 0 failed (local 1.13.0 exact-source incremental-write validation)",
+    "moduleChecks": "PASS — exact-source Typewriter contract plus existing Blog Factory, update, encoding, and Unicode module checks",
+    "jsSyntax": "PASS — all project JS/MJS syntax checks including rebuilt app-core bundle source set",
     "workflowYaml": "PASS — ai-cleaner-ci.yml + daily-blog-factory-pages.yml parse; both explicitly syntax-check sw.js",
     "protectedToolIntegrity": "PASS — OPTION/** remains absent from delivery artifacts and unmodified by AI Cleaner; the AI Cleaner service worker is scoped to /ai-cleaner/ and cannot intercept /OPTION/SS_OPTION.txt.",
     "localBrowserSmoke": "GITHUB-GATE — browser-smoke remains the final runtime gate; normal tests now block SW and the offline test opts into an isolated SW-enabled context.",
     "browserE2EConfigured": "59 cases; default contexts block Service Workers, with one dedicated offline-shell case using an explicit SW-enabled context.",
     "patchRebuild": "PASS — 1.11.1 FULL baseline + 8-file 1.11.2 Patch reproduces the 1.11.2 source tree (generated/transient dirs excluded).",
     "mockedDailyGenerator": "PASS — Responses request, gpt-5 default, web_search, strict JSON schema, exactly 10 topics/TOP3, API secret not persisted",
-    "runtimeVendorBuild": "STATIC CONTRACT PASS — builder again generates app-core.bundle.js; dependency-backed full npm build remains GitHub-gated in this handoff environment."
+    "runtimeVendorBuild": "STATIC CONTRACT PASS — builder again generates app-core.bundle.js; dependency-backed full npm build remains GitHub-gated in this handoff environment.",
+    "browserE2E": "CONFIG UPDATED — exact-source hidden/special-character preservation case updated; local Playwright runtime not installed in this handoff environment"
   },
   "stabilityAudit131": {
     "updateOnlyWhenSemverNewer": true,
@@ -657,7 +660,7 @@
     "minimumCssFontPx": 9.5,
     "optionPathTouched": false
   },
-  "patchBaseline": "Delivered 1.12.0 FULL_PROJECT_HANDOFF -> 1.12.1",
+  "patchBaseline": "Delivered 1.12.1 FULL_PROJECT_HANDOFF -> 1.13.0",
   "hardening199": {
     "externalBootScript": true,
     "contentSecurityPolicy": "default self; script self + wasm-unsafe-eval; object none; base none; form-action none",

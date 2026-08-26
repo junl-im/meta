@@ -1,7 +1,7 @@
 {
-  "version": "1.12.1",
-  "assetVersion": "1121",
+  "version": "1.13.0",
+  "assetVersion": "1130",
   "channel": "stable",
-  "updateMode": "empty-source-rewrite-lifecycle-hotfix",
-  "notes": "재작성 스튜디오를 거친 긴 세션에서도 원본이 비면 결과/분석 상태가 다시 살아나지 않도록 빈 원본 불변식을 후속 콜백까지 강제합니다."
+  "updateMode": "exact-source-incremental-write",
+  "notes": "자동작성 원본 새로쓰기가 원문 전체를 정리/정규화하지 않고 문자 단위로 처음부터 누적 작성하며 완료 시 원문과 100% 정확 일치를 검증합니다."
 }
