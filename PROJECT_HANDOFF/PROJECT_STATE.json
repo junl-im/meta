@@ -58,7 +58,7 @@
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.13.1 browser-smoke recovery: exact-source auto-write now has exact pre-write rollback, verified source-preserved hygiene reporting, and transactional Rewrite generation cancellation without weakening the 1.13.0 exact-source contract.",
+  "latestPatch": "1.13.1 browser-smoke timing hotfix: deterministic in-flight typewriter cancellation test; no production behavior change.",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,

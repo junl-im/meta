@@ -191,10 +191,14 @@ test('dirty input stays guarded and internal on-demand analysis restores coheren
 test('typewriter started from dirty input restores the current input result when cancelled', async ({ page }) => {
   await gotoReady(page);const input=page.locator('#input'),output=page.locator('#output');
   await input.fill('이전 결과입니다.');await analyzeNow(page);await expect(output).toHaveValue('이전 결과입니다.');
-  await page.locator('#liveScan').uncheck();await input.fill('현재​ 원본입니다.');await expect(output).toHaveValue('이전 결과입니다.');
-  await page.locator('#typingPreviewSpeed').evaluate(el=>{el.value='40';el.dispatchEvent(new Event('change',{bubbles:true}));});
-  await page.locator('#typingPreviewButton').click();await expect(page.locator('#typingPreviewPanel')).toBeVisible();await page.keyboard.press('Escape');
-  await expect(page.locator('#typingPreviewPanel')).toBeHidden();await expect(input).toHaveJSProperty('readOnly',false);await expect(output).toHaveValue('현재 원본입니다.');await expect(page.locator('#resultFreshness')).toBeHidden();
+  const tail=' 취소 시점 안정화용 긴 원본 문장입니다.'.repeat(30);
+  const dirtySource='현재​ 원본입니다.'+tail,cleanCurrent='현재 원본입니다.'+tail;
+  await page.locator('#liveScan').uncheck();await input.fill(dirtySource);await expect(output).toHaveValue('이전 결과입니다.');
+  // Use the slowest real UI speed plus a long source so CI cannot finish the write before Escape.
+  await page.locator('#typingPreviewSpeed').evaluate(el=>{el.value='85';el.dispatchEvent(new Event('change',{bubbles:true}));});
+  await page.locator('#typingPreviewButton').click();await expect(page.locator('#typingPreviewPanel')).toBeVisible();
+  await expect(output).toHaveAttribute('aria-busy','true');await page.keyboard.press('Escape');
+  await expect(page.locator('#typingPreviewPanel')).toBeHidden();await expect(input).toHaveJSProperty('readOnly',false);await expect(output).toHaveValue(cleanCurrent);await expect(page.locator('#resultFreshness')).toBeHidden();
 });
 
 test('rewrite generation reset cancels an in-flight draft transaction', async ({ page }) => {
