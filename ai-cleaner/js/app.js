@@ -636,7 +636,11 @@ function rememberPanelReturnFocus(id){
   panelReturnFocus.set(id,active);
 }
 function focusOpenedPanel(panel){
-  if(!panel)return;requestAnimationFrame(()=>{if(panel.hidden)return;try{panel.focus({preventScroll:true});}catch(_){try{panel.focus();}catch(__){}}});
+  if(!panel)return;
+  // Focus immediately so keyboard cancellation is available before the trigger button
+  // can be disabled by a work lock. Re-assert on the next frame after panel layout settles.
+  const focusNow=()=>{if(panel.hidden)return;try{panel.focus({preventScroll:true});}catch(_){try{panel.focus();}catch(__){}}};
+  focusNow();requestAnimationFrame(focusNow);
 }
 function restorePanelReturnFocus(id){
   const target=panelReturnFocus.get(id);panelReturnFocus.delete(id);if(!target||!target.isConnected||target.disabled)return;

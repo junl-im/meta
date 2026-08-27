@@ -1,6 +1,6 @@
 {
   "project": "AI Playground / 곰같은여우의 AI 놀이터",
-  "version": "1.13.3",
+  "version": "1.13.4",
   "date": "2026-08-27",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -53,12 +53,12 @@
     ".github/scripts/build-runtime-vendor.mjs"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.13.3",
-  "asset_version": "1133",
+  "current_version": "1.13.4",
+  "asset_version": "1134",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.13.3 ESC cancellation hardening: capture-phase Escape handling guarantees in-flight typewriter cancellation and exact rollback.",
+  "latestPatch": "1.13.4 typewriter focus race fix: panel receives focus synchronously before the trigger is disabled, making Escape cancellation deterministic.",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -208,7 +208,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "1133",
+  "assetVersion": "1134",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -217,7 +217,7 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "292 passed / 0 failed (local 1.13.3 ESC cancellation validation)",
+    "staticChecks": "292 passed / 0 failed (local 1.13.4 focus-race validation)",
     "moduleChecks": "PASS — existing module checks remain green after typewriter/rewrite transaction recovery",
     "jsSyntax": "PASS — all project JS/MJS syntax checks including rebuilt app-core bundle source set",
     "workflowYaml": "PASS — ai-cleaner-ci.yml + daily-blog-factory-pages.yml parse; both explicitly syntax-check sw.js",

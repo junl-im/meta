@@ -1,5 +1,5 @@
 'use strict';
-const CACHE_NAME='ai-cleaner-shell-1.13.3';
+const CACHE_NAME='ai-cleaner-shell-1.13.4';
 const CORE_ASSETS=[
   './','./index.html','./version.json','./site.webmanifest','./css/app.css','./js/boot.js',
   './js/core/event-bus.js','./js/core/history-store.js','./js/core/work-lock.js','./js/core/text-utils.js',

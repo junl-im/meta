@@ -197,7 +197,8 @@ test('typewriter started from dirty input restores the current input result when
   // Use the slowest real UI speed plus a long source so CI cannot finish the write before Escape.
   await page.locator('#typingPreviewSpeed').evaluate(el=>{el.value='85';el.dispatchEvent(new Event('change',{bubbles:true}));});
   await page.locator('#typingPreviewButton').click();await expect(page.locator('#typingPreviewPanel')).toBeVisible();
-  await expect(output).toHaveAttribute('aria-busy','true');await page.keyboard.press('Escape');
+  await expect(output).toHaveAttribute('aria-busy','true');
+  await expect(page.locator('#typingPreviewPanel')).toBeFocused();await page.keyboard.press('Escape');
   await expect(page.locator('#typingPreviewPanel')).toBeHidden();await expect(input).toHaveJSProperty('readOnly',false);await expect(output).toHaveValue(cleanCurrent);await expect(page.locator('#resultFreshness')).toBeHidden();
 });
 
