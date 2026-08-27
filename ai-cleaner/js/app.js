@@ -759,6 +759,13 @@ function handleGlobalEscape(e){
 // Window capture is intentionally used here so Escape cancellation does not depend on
 // which editor/panel currently owns focus or on an inner control's propagation policy.
 window.addEventListener('keydown',handleGlobalEscape,true);
+// Focused-panel fallback: Playwright/embedded browsers can occasionally deliver Escape
+// only to the active panel target. Keep cancellation deterministic at the target too.
+$('#typingPreviewPanel').addEventListener('keydown',e=>{
+  if(e.key!=='Escape'&&e.code!=='Escape')return;
+  e.preventDefault();e.stopPropagation();e.stopImmediatePropagation?.();
+  stopTypingPreview({restore:true});
+});
 window.addEventListener('resize',queueViewportSync);window.addEventListener('orientationchange',queueViewportSync);
 if(window.visualViewport){window.visualViewport.addEventListener('resize',queueViewportSync);window.visualViewport.addEventListener('scroll',queueViewportSync);}
 queueViewportSync();
