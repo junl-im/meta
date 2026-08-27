@@ -1,7 +1,7 @@
 {
   "project": "AI Playground / 곰같은여우의 AI 놀이터",
-  "version": "1.13.0",
-  "date": "2026-08-26",
+  "version": "1.13.1",
+  "date": "2026-08-27",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
   "appPath": "ai-cleaner/",
@@ -53,12 +53,12 @@
     ".github/scripts/build-runtime-vendor.mjs"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.13.0",
-  "asset_version": "1130",
+  "current_version": "1.13.1",
+  "asset_version": "1131",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.13.0 exact-source incremental write: center auto-write now preserves the original string byte-for-byte at the JS string level, writes it incrementally into the result textarea, and verifies exact equality before success.",
+  "latestPatch": "1.13.1 browser-smoke recovery: exact-source auto-write now has exact pre-write rollback, verified source-preserved hygiene reporting, and transactional Rewrite generation cancellation without weakening the 1.13.0 exact-source contract.",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -208,7 +208,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "1130",
+  "assetVersion": "1131",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -217,8 +217,8 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "292 passed / 0 failed (local 1.13.0 exact-source incremental-write validation)",
-    "moduleChecks": "PASS — exact-source Typewriter contract plus existing Blog Factory, update, encoding, and Unicode module checks",
+    "staticChecks": "292 passed / 0 failed (local 1.13.1 browser-smoke recovery validation)",
+    "moduleChecks": "PASS — existing module checks remain green after typewriter/rewrite transaction recovery",
     "jsSyntax": "PASS — all project JS/MJS syntax checks including rebuilt app-core bundle source set",
     "workflowYaml": "PASS — ai-cleaner-ci.yml + daily-blog-factory-pages.yml parse; both explicitly syntax-check sw.js",
     "protectedToolIntegrity": "PASS — OPTION/** remains absent from delivery artifacts and unmodified by AI Cleaner; the AI Cleaner service worker is scoped to /ai-cleaner/ and cannot intercept /OPTION/SS_OPTION.txt.",
@@ -660,7 +660,7 @@
     "minimumCssFontPx": 9.5,
     "optionPathTouched": false
   },
-  "patchBaseline": "Delivered 1.12.1 FULL_PROJECT_HANDOFF -> 1.13.0",
+  "patchBaseline": "Delivered 1.13.0 FULL_PROJECT_HANDOFF -> 1.13.1",
   "hardening199": {
     "externalBootScript": true,
     "contentSecurityPolicy": "default self; script self + wasm-unsafe-eval; object none; base none; form-action none",

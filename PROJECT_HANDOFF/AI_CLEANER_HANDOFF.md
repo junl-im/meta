@@ -1,6 +1,6 @@
 # AI Cleaner 프로젝트 인수인계 메모리
 
-업데이트: 2026-08-26 · 현재 패키지: 1.13.0
+업데이트: 2026-08-27 · 현재 패키지: 1.13.1
 
 ## 새 채팅에서 가장 먼저 읽을 것
 이 폴더를 새 채팅에 업로드한 뒤 `PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md 읽고 이어서 개발하자`라고 요청한다. 이 문서는 프로젝트의 결정사항, 보호 경로, UX 방향, 안전 제약, 배포 방식, 알려진 이슈를 보존하기 위한 인수인계 메모리다.
@@ -730,3 +730,13 @@
 - 업데이트 복원 시 `typewriterVerified` 역시 저장된 output과 저장된 input 원문이 정확히 같을 때만 복원한다.
 - UI 문구도 `보이는 텍스트 정리 후 작성`에서 `원본 전체를 내용 변경 없이 새 입력`으로 변경한다.
 - `OPTION/**` 보호 규칙, Rewrite Studio, 이미지 분석, Blog Factory, 기존 분석/위젯 기능은 변경하지 않는다.
+
+## 1.13.1 Browser Smoke 회귀 복구
+
+- 1.13.0 exact-source 자동작성 계약은 그대로 유지한다. 원문을 정리/정규화하지 않고 결과 textarea에 순차 삽입하며 완료 시 원문과 정확히 일치해야 성공한다.
+- 자동작성 실행은 독립 트랜잭션으로 취급한다. 시작 직전의 결과값/수정 상태/적용 상태/검증 마커를 rollback snapshot으로 보관하고, ESC 또는 패널 닫기로 진행 중 취소하면 history index 추정 대신 그 정확한 시작 직전 결과로 복원한다.
+- exact-source 자동작성 결과에 원본의 숨은 문자/특수 공백이 의도적으로 남아 있는 경우 기술 패널은 이를 `결과 잔여` 오류처럼 경고하지 않고 `원본 그대로 보존`으로 구분한다. 일반 분석/정리 결과의 실제 잔여 항목 표시는 기존 정책을 유지한다.
+- Rewrite Studio generation도 트랜잭션 rollback을 가진다. 생성 중 다른 도구 이동/패널 닫기/기준 글 변경 등으로 취소되면 첫 생성은 빈 초안으로, 변형 생성은 직전 완료 초안으로 복원하고 `rewrite-generation` work lock을 해제한다. 완료된 초안의 일반 닫기/재열기 persistence는 그대로 유지한다.
+- Browser E2E의 exact-source 기술 감사 기대값을 새 계약에 맞게 수정했다. 1.13.0 GitHub browser-smoke에서 보고된 3개 실패를 대상으로 회귀 복구했다.
+- 로컬 검증: static/architecture 292 passed / 0 failed, module PASS, app.js/rewrite-studio.js syntax PASS. 실제 Chromium browser-smoke는 Push 후 GitHub Actions가 최종 게이트다.
+

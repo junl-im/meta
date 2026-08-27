@@ -36,7 +36,7 @@ test('original auto typewriter preserves the exact source including hidden and s
   await expect(page.locator('#typingPreviewText')).toContainText('100% 원문 일치 확인',{timeout:7000});
   await expect(page.locator('#typingPreviewText')).toContainText('추가/삭제/정규화 0개',{timeout:7000});
   await expect(page.locator('#output')).toHaveAttribute('data-typewriter-verified','true',{timeout:7000});
-  await page.locator('#techWidget').click();await expect(page.locator('#techSummary')).toContainText('원본 발견');await expect(page.locator('#techSummary')).toContainText('결과 잔여 0');
+  await page.locator('#techWidget').click();await expect(page.locator('#techSummary')).toContainText('원본 발견');await expect(page.locator('#techSummary')).toContainText('원본 그대로 보존');
   await expect(page.locator('#input')).toHaveJSProperty('readOnly',false);
   await expect(page.locator('#cleanProfile')).toBeEnabled();
 });

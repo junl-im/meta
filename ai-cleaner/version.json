@@ -1,6 +1,6 @@
 {
-  "version": "1.13.0",
-  "assetVersion": "1130",
+  "version": "1.13.1",
+  "assetVersion": "1131",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
   "notes": "자동작성 원본 새로쓰기가 원문 전체를 정리/정규화하지 않고 문자 단위로 처음부터 누적 작성하며 완료 시 원문과 100% 정확 일치를 검증합니다."
