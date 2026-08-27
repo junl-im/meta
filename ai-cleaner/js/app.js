@@ -736,9 +736,15 @@ document.addEventListener('keydown',(e)=>{
   if(resultNavigationTimer)cancelResultNavigation();
   if(e.key!=='Escape')return;
   hideContextMenu();
-  if(!$('#typingPreviewPanel').hidden){stopTypingPreview();return;}
+  const typingPanel=$('#typingPreviewPanel');
+  if(typingPanel&&!typingPanel.hidden){
+    e.preventDefault();
+    e.stopPropagation();
+    stopTypingPreview({restore:true});
+    return;
+  }
   const closed=panelManager.closeTop();if(closed){if(closed.id==='typingPreviewPanel'&&typewriterEngine.running)stopTypingPreview({restore:true,silent:true});else restorePanelReturnFocus(closed.id);if(closed.id==='rewritePanel')window.AICleanerRewriteStudio?.cancelGeneration?.({status:'패널을 닫아 생성 작업을 취소했습니다.'});syncPanelAria();e.preventDefault();}
-});
+},true);
 window.addEventListener('resize',queueViewportSync);window.addEventListener('orientationchange',queueViewportSync);
 if(window.visualViewport){window.visualViewport.addEventListener('resize',queueViewportSync);window.visualViewport.addEventListener('scroll',queueViewportSync);}
 queueViewportSync();

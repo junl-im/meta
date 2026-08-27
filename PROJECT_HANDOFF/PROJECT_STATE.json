@@ -1,6 +1,6 @@
 {
   "project": "AI Playground / 곰같은여우의 AI 놀이터",
-  "version": "1.13.1",
+  "version": "1.13.2",
   "date": "2026-08-27",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -53,12 +53,12 @@
     ".github/scripts/build-runtime-vendor.mjs"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.13.1",
-  "asset_version": "1131",
+  "current_version": "1.13.2",
+  "asset_version": "1132",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.13.1 browser-smoke timing hotfix: deterministic in-flight typewriter cancellation test; no production behavior change.",
+  "latestPatch": "1.13.2 ESC cancellation hardening: capture-phase Escape handling guarantees in-flight typewriter cancellation and exact rollback.",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -208,7 +208,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "1131",
+  "assetVersion": "1132",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -217,7 +217,7 @@
     "latestOnlyLiveAnalysis": true
   },
   "validation": {
-    "staticChecks": "292 passed / 0 failed (local 1.13.1 browser-smoke recovery validation)",
+    "staticChecks": "292 passed / 0 failed (local 1.13.2 ESC cancellation validation)",
     "moduleChecks": "PASS — existing module checks remain green after typewriter/rewrite transaction recovery",
     "jsSyntax": "PASS — all project JS/MJS syntax checks including rebuilt app-core bundle source set",
     "workflowYaml": "PASS — ai-cleaner-ci.yml + daily-blog-factory-pages.yml parse; both explicitly syntax-check sw.js",
@@ -660,7 +660,7 @@
     "minimumCssFontPx": 9.5,
     "optionPathTouched": false
   },
-  "patchBaseline": "Delivered 1.13.0 FULL_PROJECT_HANDOFF -> 1.13.1",
+  "patchBaseline": "Delivered 1.13.1 browser-smoke hotfix -> 1.13.2",
   "hardening199": {
     "externalBootScript": true,
     "contentSecurityPolicy": "default self; script self + wasm-unsafe-eval; object none; base none; form-action none",

@@ -1,6 +1,6 @@
 # AI Cleaner 프로젝트 인수인계 메모리
 
-업데이트: 2026-08-27 · 현재 패키지: 1.13.1
+업데이트: 2026-08-27 · 현재 패키지: 1.13.2
 
 ## 새 채팅에서 가장 먼저 읽을 것
 이 폴더를 새 채팅에 업로드한 뒤 `PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md 읽고 이어서 개발하자`라고 요청한다. 이 문서는 프로젝트의 결정사항, 보호 경로, UX 방향, 안전 제약, 배포 방식, 알려진 이슈를 보존하기 위한 인수인계 메모리다.
@@ -740,3 +740,13 @@
 - Browser E2E의 exact-source 기술 감사 기대값을 새 계약에 맞게 수정했다. 1.13.0 GitHub browser-smoke에서 보고된 3개 실패를 대상으로 회귀 복구했다.
 - 로컬 검증: static/architecture 292 passed / 0 failed, module PASS, app.js/rewrite-studio.js syntax PASS. 실제 Chromium browser-smoke는 Push 후 GitHub Actions가 최종 게이트다.
 
+
+
+## 1.13.2 ESC 자동작성 취소 강화
+
+- 자동작성 원본 새로쓰기의 **원문 100% 동일 / 문자 단위 순차 작성** 계약은 변경하지 않는다.
+- 자동작성 패널이 열린 동안 `Escape` 키를 document capture 단계에서 우선 수신한다.
+- ESC 수신 시 기본 동작과 하위 전파를 차단하고 `stopTypingPreview({restore:true})`를 실행한다.
+- 진행 중 자동작성은 즉시 중지되고 시작 직전의 분석된 결과/상태 스냅샷으로 원자적으로 복원된다.
+- 일반 패널의 ESC 동작은 자동작성 패널이 열려 있지 않을 때 기존 `panelManager.closeTop()` 경로를 그대로 사용한다.
+- 목적: GitHub Actions Chromium 환경에서도 포커스/이벤트 버블링 차이와 무관하게 취소 계약을 결정적으로 보장한다.
