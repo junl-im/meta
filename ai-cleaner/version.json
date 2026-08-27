@@ -1,7 +1,7 @@
 {
-  "version": "1.13.2",
-  "assetVersion": "1132",
+  "version": "1.13.3",
+  "assetVersion": "1133",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "자동작성 원본 새로쓰기는 원문 100% 동일 문자 단위 작성 계약을 유지하며, 열린 작성 패널의 ESC 취소를 캡처 단계에서 최우선 처리해 진행 중 작업을 시작 직전 결과로 확실히 복원합니다."
+  "notes": "자동작성 원본 새로쓰기는 원문 100% 동일 문자 단위 작성 계약을 유지하며, ESC 취소를 window capture 단계에서 처리해 포커스/내부 전파 상태와 무관하게 진행 중 작업을 시작 직전 결과로 복원합니다."
 }

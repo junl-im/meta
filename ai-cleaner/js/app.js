@@ -732,19 +732,29 @@ document.addEventListener('pointerdown',(e)=>{if(resultNavigationTimer)cancelRes
 document.addEventListener('wheel',()=>{if(resultNavigationTimer)cancelResultNavigation();},{passive:true});
 $('#textContextMenu').addEventListener('click',(e)=>{const b=e.target.closest('[data-context-action]');if(b&&!b.disabled)contextAction(b.dataset.contextAction);});
 
-document.addEventListener('keydown',(e)=>{
+function handleGlobalEscape(e){
+  if(e.key!=='Escape'&&e.code!=='Escape')return false;
   if(resultNavigationTimer)cancelResultNavigation();
-  if(e.key!=='Escape')return;
   hideContextMenu();
   const typingPanel=$('#typingPreviewPanel');
   if(typingPanel&&!typingPanel.hidden){
     e.preventDefault();
     e.stopPropagation();
+    e.stopImmediatePropagation?.();
     stopTypingPreview({restore:true});
-    return;
+    return true;
   }
-  const closed=panelManager.closeTop();if(closed){if(closed.id==='typingPreviewPanel'&&typewriterEngine.running)stopTypingPreview({restore:true,silent:true});else restorePanelReturnFocus(closed.id);if(closed.id==='rewritePanel')window.AICleanerRewriteStudio?.cancelGeneration?.({status:'패널을 닫아 생성 작업을 취소했습니다.'});syncPanelAria();e.preventDefault();}
-},true);
+  const closed=panelManager.closeTop();
+  if(!closed)return false;
+  if(closed.id==='typingPreviewPanel'&&typewriterEngine.running)stopTypingPreview({restore:true,silent:true});
+  else restorePanelReturnFocus(closed.id);
+  if(closed.id==='rewritePanel')window.AICleanerRewriteStudio?.cancelGeneration?.({status:'패널을 닫아 생성 작업을 취소했습니다.'});
+  syncPanelAria();e.preventDefault();e.stopPropagation();
+  return true;
+}
+// Window capture is intentionally used here so Escape cancellation does not depend on
+// which editor/panel currently owns focus or on an inner control's propagation policy.
+window.addEventListener('keydown',handleGlobalEscape,true);
 window.addEventListener('resize',queueViewportSync);window.addEventListener('orientationchange',queueViewportSync);
 if(window.visualViewport){window.visualViewport.addEventListener('resize',queueViewportSync);window.visualViewport.addEventListener('scroll',queueViewportSync);}
 queueViewportSync();
