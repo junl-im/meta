@@ -1,7 +1,7 @@
 {
-  "version": "1.13.5",
-  "assetVersion": "1135",
+  "version": "1.15.2",
+  "assetVersion": "1152",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "자동작성 원본 새로쓰기는 원문 100% 동일 문자 단위 작성 계약을 유지하며, ESC 취소를 window capture + 포커스된 자동작성 패널 직접 keydown의 이중 경로로 처리해 진행 중 작업을 시작 직전 결과로 복원합니다."
+  "notes": "GomFox Reach 2.0을 4번째 독립 도구 탭으로 추가하고 URL 직접 수집 실패 시 읽기 전용 폴백, 원문 직접 붙여넣기, 원문 복사, 로컬 키워드·검색어·훅·재활용 팩 생성, TXT/복사 내보내기와 사설망 URL 차단/타임아웃 안전장치를 추가했습니다. 기존 원본 100% 동일 문자 단위 자동작성 계약은 변경하지 않습니다."
 }

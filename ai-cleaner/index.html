@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; font-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1135">
+<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1152">
 <style id="bootCritical">html:not(.boot-ready) body{visibility:hidden}html{background:#fff8f0}html.app-booting{overflow-anchor:none}html.app-booting body{cursor:progress}html.app-booting body *{cursor:progress!important}</style>
 <script src="js/boot.js" defer></script>
 </head>
@@ -27,7 +27,7 @@
     <div class="logo" id="brandIcon" role="img" aria-label="곰같은여우 아이콘"></div>
     <div>
       <div><b>곰같은여우의 AI 놀이터</b> <span class="pill" id="versionBadge">version</span></div>
-      <div class="sub">AI 글 다듬기 · 이미지 검사 · 블로그 팩토리 · 브라우저 로컬 처리</div>
+      <div class="sub">AI 글 다듬기 · 이미지 검사 · 블로그 팩토리 · GomFox Reach</div>
     </div>
   </div>
   <div class="toptools">
@@ -35,6 +35,7 @@
       <button class="active" id="toolTabText" type="button" role="tab" aria-selected="true" aria-controls="textTool" tabindex="0" data-tool="text">AI 글 다듬기</button>
       <button id="toolTabImage" type="button" role="tab" aria-selected="false" aria-controls="imageTool" tabindex="-1" data-tool="image">AI 이미지 검사</button>
       <button id="toolTabWriting" type="button" role="tab" aria-selected="false" aria-controls="writingTool" tabindex="-1" data-tool="writing">블로그 팩토리</button>
+      <button id="toolTabReach" type="button" role="tab" aria-selected="false" aria-controls="reachTool" tabindex="-1" data-tool="reach">GomFox Reach</button>
     </div>
   </div>
 </header>
@@ -350,9 +351,55 @@
   <button class="floatWidget rewrite" id="rewriteWidget" type="button" hidden aria-controls="rewritePanel" aria-expanded="false"><span class="widgetIcon">✦</span><span>새 글 재작성</span><b id="rewriteBadge">NEW</b></button>
   <button class="floatWidget" id="issuesWidget" type="button" hidden aria-controls="issuesPanel" aria-expanded="false"><span class="widgetIcon">✨</span><span>교정 제안</span><b id="issueCount">0</b></button>
   <button class="floatWidget review" id="reviewWidget" type="button" hidden aria-controls="reviewPanel" aria-expanded="false"><span class="widgetIcon">✍</span><span>문장 검토</span><b id="reviewCount">0</b></button>
+  <button class="floatWidget forensic" id="forensicWidget" type="button" hidden aria-controls="forensicPanel" aria-expanded="false"><span class="widgetIcon">⌁</span><span>텍스트 포렌식</span><b id="forensicCount">0</b></button>
   <button class="floatWidget tech" id="techWidget" type="button" hidden aria-controls="techPanel" aria-expanded="false"><span class="widgetIcon">⌘</span><span>기술 정보</span><b id="techCount">0</b></button>
 </div>
 
+
+<main id="reachTool" class="hidden reachTool" role="tabpanel" aria-labelledby="toolTabReach">
+  <section class="hero reachHero">
+    <div class="reachHeroMark"><span>GomFox</span> Reach <b>2.0</b></div>
+    <h1>링크나 원문을 넣고 <span>조사·재활용 준비</span>까지 한 번에.</h1>
+    <p>공개 웹페이지는 URL로 가져오고, 차단되거나 로그인 필요한 글은 원문 붙여넣기로 이어갑니다. 수집한 원문은 자동으로 바꾸지 않으며 언제든 그대로 복사할 수 있습니다.</p>
+  </section>
+
+  <div class="reachGrid">
+    <section class="card reachSourceCard">
+      <div class="head"><b>1. 원문 가져오기</b><span class="sub" id="reachSourceStatus">URL 또는 직접 붙여넣기</span></div>
+      <div class="body reachSourceBody">
+        <label class="reachLabel" for="reachUrl">공개 글 URL</label>
+        <div class="reachUrlRow">
+          <input id="reachUrl" class="reachInput" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://example.com/article">
+          <button id="reachFetch" class="btn primary" type="button">URL 가져오기</button>
+        </div>
+        <div class="reachStatus" id="reachFetchStatus" role="status" aria-live="polite">주소를 넣으면 직접 연결을 먼저 시도하고, 브라우저 차단 시 읽기 전용 폴백을 사용합니다.</div>
+        <div class="reachDivider"><span>또는</span></div>
+        <label class="reachLabel" for="reachRaw">원문 직접 붙여넣기</label>
+        <textarea id="reachRaw" class="textarea reachRaw" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false" placeholder="가져오기 어려운 글은 여기에 직접 붙여넣으세요. 원문은 자동 수정하지 않습니다."></textarea>
+        <div class="actions reachActions">
+          <button id="reachAnalyze" class="btn orange" type="button">Reach 분석</button>
+          <button id="reachCopySource" class="btn" type="button">원문 복사</button>
+          <button id="reachClear" class="btn" type="button">초기화</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card reachResultCard">
+      <div class="head"><b>2. Reach 분석</b><span class="sub" id="reachResultStatus">분석 대기</span></div>
+      <div class="body">
+        <div class="reachMetrics" id="reachMetrics">
+          <div><b id="reachChars">0</b><span>문자</span></div><div><b id="reachWords">0</b><span>단어</span></div><div><b id="reachParas">0</b><span>문단</span></div>
+        </div>
+        <section class="reachBlock"><div class="reachBlockHead"><b>핵심 키워드</b><button class="mini" id="reachGoogle" type="button" disabled>Google에서 확인</button></div><div class="reachChips" id="reachKeywords"><span class="sub">원문을 분석하면 표시됩니다.</span></div></section>
+        <section class="reachBlock"><div class="reachBlockHead"><b>검색어 확장</b></div><div class="reachSearches" id="reachQueries"><span class="sub">검색 의도에 맞는 확인용 검색어를 만듭니다.</span></div></section>
+        <section class="reachBlock"><div class="reachBlockHead"><b>제목·훅 후보</b></div><div class="reachSuggestions" id="reachHooks"><span class="sub">원문의 핵심어를 바탕으로 후보를 만듭니다.</span></div></section>
+        <section class="reachBlock"><div class="reachBlockHead"><b>콘텐츠 재활용 팩</b></div><div class="reachReuse" id="reachReuse"><span class="sub">네이버 블로그·숏츠/릴스·커뮤니티용 작업 가이드를 준비합니다.</span></div></section>
+        <div class="actions reachActions resultActions"><button id="reachCopyAll" class="btn primary" type="button" disabled>전체 결과 복사</button><button id="reachSaveTxt" class="btn" type="button" disabled>TXT 저장</button></div>
+        <p class="sub reachFootnote">Reach는 공개 페이지의 접근 가능 범위 안에서 동작합니다. 로그인·캡차·robots/CORS·사이트 정책에 따라 URL 자동 가져오기가 제한될 수 있으며, 그 경우 직접 붙여넣기를 사용하세요.</p>
+      </div>
+    </section>
+  </div>
+</main>
 
 <section class="floatPanel typingPreviewPanel" id="typingPreviewPanel" aria-label="자동작성 원본 새로쓰기" tabindex="-1" hidden aria-live="polite">
   <div class="floatHead" data-drag-handle>
@@ -360,7 +407,7 @@
     <div class="floatHeadActions"><button class="iconBtn mobilePanelSize" type="button" data-panel-size="typingPreviewPanel" aria-label="크게 보기" aria-expanded="false">↕</button><button class="iconBtn" id="typingPreviewClose" type="button" aria-label="중지 또는 닫기" title="작성 중이면 중지하고 이전 결과를 복원합니다.">×</button></div>
   </div>
   <div class="floatBody typingPreviewBody">
-    <div class="typingVisiblePolicy"><b>보이는 텍스트 기준</b><span>안전한 숨은 제어문자는 제거하고 특수 공백은 일반 공백으로 정리합니다. 문자 모양에 영향을 줄 수 있는 조이너·변형 선택자는 보존합니다.</span></div>
+    <div class="typingVisiblePolicy"><b>원본 100% 동일</b><span>숨은 문자·특수 공백·줄바꿈까지 원본 문자열을 바꾸지 않고 그대로 한 글자씩 새로 입력합니다. 분석에서 발견한 항목은 오른쪽 위젯에서만 알려드립니다.</span></div>
     <pre id="typingPreviewText" class="typingPreviewText">원본을 읽을 준비가 됐습니다.</pre>
     <div class="typingPreviewControls"><button class="mini passive" id="typingPreviewPause" type="button">일시정지</button><label class="sub">속도 <select id="typingPreviewSpeed" class="miniSelect"><option value="85">느리게</option><option value="35" selected>보통</option><option value="0">빠르게</option></select></label><span class="locateStatus" id="typingPreviewProgress">0%</span></div>
   </div>
@@ -451,6 +498,18 @@
   <div class="floatBody checkpointBody">
     <div class="checkpointToolbar"><span class="sub">원본이 같은 결과만 현재 결과로 복원할 수 있습니다.</span><button class="mini danger" id="checkpointClear" type="button" disabled>모두 비우기</button></div>
     <div id="checkpointList" class="checkpointList"><div class="empty">보관한 결과가 없습니다.</div></div>
+  </div>
+</section>
+
+<section class="floatPanel forensicPanel" id="forensicPanel" aria-label="텍스트 포렌식" tabindex="-1" hidden>
+  <div class="floatHead" data-drag-handle>
+    <div><b>텍스트 포렌식</b><span class="sub" id="forensicPanelStatus">숨은 문자·비정상 공백·인코딩 흔적을 원문 변경 없이 검사합니다.</span></div>
+    <div class="floatHeadActions"><button class="iconBtn mobilePanelSize" type="button" data-panel-size="forensicPanel" aria-label="크게 보기" aria-expanded="false">↕</button><button class="iconBtn" type="button" data-close-panel="forensicPanel" aria-label="닫기">×</button></div>
+  </div>
+  <div class="floatBody">
+    <div class="forensicSummary" id="forensicSummary"></div>
+    <div class="forensicList" id="forensicList"><div class="empty">검사할 원본이 없습니다.</div></div>
+    <p class="sub forensicNotice">이 검사는 문자·인코딩 이상 신호를 찾는 도구이며 특정 AI가 작성했다는 판정이나 워터마크 검출을 의미하지 않습니다.</p>
   </div>
 </section>
 

@@ -1,6 +1,6 @@
 {
   "project": "AI Playground / 곰같은여우의 AI 놀이터",
-  "version": "1.13.5",
+  "version": "1.15.2",
   "date": "2026-08-27",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -53,12 +53,12 @@
     ".github/scripts/build-runtime-vendor.mjs"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.13.5",
-  "asset_version": "1135",
+  "current_version": "1.15.2",
+  "asset_version": "1152",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.13.5 Escape cancellation hardening: focused typewriter panel now handles Escape directly in addition to the global window-capture fallback.",
+  "latestPatch": "1.15.2 Escape cancellation hardening: focused typewriter panel now handles Escape directly in addition to the global window-capture fallback.",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -208,7 +208,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "1135",
+  "assetVersion": "1152",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,
@@ -660,7 +660,7 @@
     "minimumCssFontPx": 9.5,
     "optionPathTouched": false
   },
-  "patchBaseline": "Delivered 1.13.4 FULL_PROJECT_HANDOFF -> 1.13.5",
+  "patchBaseline": "Delivered 1.13.4 FULL_PROJECT_HANDOFF -> 1.15.2",
   "hardening199": {
     "externalBootScript": true,
     "contentSecurityPolicy": "default self; script self + wasm-unsafe-eval; object none; base none; form-action none",

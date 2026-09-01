@@ -795,7 +795,7 @@ button,.btn,.mini,.tab,.floatWidget,.filelabel,summary{touch-action:manipulation
   .osFactoryPresets button,.osDailyTopicActions .mini,.osDailyEngineActions .mini{min-width:0}
 }
 @media(max-width:420px){
-  .toolnav{grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}
+  .toolnav{grid-template-columns:repeat(2,minmax(0,1fr));gap:3px}
   .toolnav button{padding:7px 3px;font-size:10px}
   .osFactoryPresets{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
   .osFactoryPresets button{min-height:58px;padding:8px}
@@ -817,3 +817,30 @@ button,.btn,.mini,.tab,.floatWidget,.filelabel,summary{touch-action:manipulation
   .resultCard.resultDestinationPulse{animation:none;border-color:#92cf9d;box-shadow:0 0 0 3px #187a2b14}
   #typingPreviewButton.typewriterRecommended{outline:3px solid rgba(255,122,0,.22);outline-offset:3px}
 }
+
+
+/* v1.14.0 · text forensics */
+.floatWidget.forensic .widgetIcon{font-weight:800}
+.forensicSummary{display:grid;gap:10px;margin-bottom:12px}
+.forensicClean,.forensicScore{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--soft)}
+.forensicClean span,.forensicScore span{font-size:12px;color:var(--muted)}
+.forensicScore b{font-size:22px}
+.forensicChips{display:flex;flex-wrap:wrap;gap:7px}
+.forensicChips span{padding:6px 9px;border-radius:999px;background:var(--soft);font-size:12px}
+.forensicList{display:grid;gap:7px;max-height:48vh;overflow:auto}
+.forensicRow{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;border:1px solid var(--line);border-radius:12px;background:var(--card);padding:10px 11px;color:inherit;cursor:pointer}
+.forensicRow:hover{border-color:var(--accent)}
+.forensicRow span{display:grid;gap:2px;min-width:0}
+.forensicRow small{color:var(--muted);overflow-wrap:anywhere}
+.forensicRow em{font-style:normal;font-size:11px;color:var(--muted);flex:0 0 auto}
+.forensicNotice{margin:12px 2px 0}
+
+
+/* v1.15.2 · GomFox Reach */
+.reachTool{padding-bottom:40px}.reachHeroMark{display:inline-flex;align-items:center;gap:5px;margin-bottom:8px;font-weight:900;font-size:14px}.reachHeroMark span{color:var(--accent)}.reachHeroMark b{font-size:11px;padding:3px 6px;border-radius:999px;background:var(--soft);color:var(--muted)}
+.reachGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}.reachSourceCard,.reachResultCard{min-width:0}.reachSourceBody{display:grid;gap:10px}.reachLabel{font-size:12px;font-weight:800;color:var(--muted)}
+.reachUrlRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}.reachInput{width:100%;min-width:0;border:1px solid var(--line);border-radius:12px;padding:12px 13px;background:var(--card);color:inherit;font:inherit;outline:none}.reachInput:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 13%,transparent)}
+.reachStatus{min-height:38px;padding:9px 11px;border-radius:11px;background:var(--soft);font-size:12px;color:var(--muted);line-height:1.5}.reachStatus.ok{color:var(--good)}.reachStatus.warn{color:var(--warn)}.reachStatus.bad{color:var(--bad)}
+.reachDivider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:11px}.reachDivider:before,.reachDivider:after{content:"";height:1px;background:var(--line);flex:1}.reachRaw{min-height:360px;resize:vertical}.reachActions{display:flex;flex-wrap:wrap;gap:8px}.reachMetrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}.reachMetrics>div{display:grid;gap:2px;text-align:center;padding:11px;border:1px solid var(--line);border-radius:12px;background:var(--soft)}.reachMetrics b{font-size:20px}.reachMetrics span{font-size:11px;color:var(--muted)}
+.reachBlock{padding:14px 0;border-top:1px solid var(--line)}.reachBlockHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}.reachChips{display:flex;flex-wrap:wrap;gap:7px}.reachChips button,.reachChips span:not(.sub){border:0;border-radius:999px;background:var(--soft);padding:7px 10px;font-size:12px;color:inherit}.reachSearches,.reachSuggestions,.reachReuse{display:grid;gap:7px}.reachItem{padding:10px 11px;border-radius:11px;background:var(--soft);font-size:13px;line-height:1.5;overflow-wrap:anywhere}.reachItem b{display:block;margin-bottom:2px}.reachItem small{color:var(--muted)}.reachFootnote{margin-top:12px;line-height:1.55}.resultActions{margin-top:2px}
+@media(max-width:900px){.reachGrid{grid-template-columns:1fr}.reachRaw{min-height:280px}}@media(max-width:560px){.reachUrlRow{grid-template-columns:1fr}.reachUrlRow .btn{width:100%}.reachMetrics b{font-size:18px}.reachActions .btn{flex:1 1 auto}}

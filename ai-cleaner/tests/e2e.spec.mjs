@@ -848,13 +848,25 @@ test('service worker keeps the core text cleaner available after the network dro
 
 test('top-level tool tabs support roving keyboard focus and synchronized panel state', async ({ page }) => {
   await gotoReady(page);
-  const text=page.locator('#toolTabText'),image=page.locator('#toolTabImage'),writing=page.locator('#toolTabWriting');
+  const text=page.locator('#toolTabText'),image=page.locator('#toolTabImage'),writing=page.locator('#toolTabWriting'),reach=page.locator('#toolTabReach');
   await expect(text).toHaveAttribute('role','tab');await expect(text).toHaveAttribute('aria-selected','true');await expect(text).toHaveAttribute('tabindex','0');await expect(page).toHaveTitle(/AI 글 다듬기 \| 곰같은여우의 AI 놀이터/);
   await expect(image).toHaveAttribute('aria-selected','false');await expect(image).toHaveAttribute('tabindex','-1');
   await text.focus();await page.keyboard.press('ArrowRight');
   await expect(image).toBeFocused();await expect(image).toHaveAttribute('aria-selected','true');await expect(page.locator('#imageTool')).toBeVisible();await expect(page.locator('#textTool')).toBeHidden();await expect(page).toHaveTitle(/AI 이미지 검사 \| 곰같은여우의 AI 놀이터/);
-  await page.keyboard.press('End');await expect(writing).toBeFocused();await expect(writing).toHaveAttribute('aria-selected','true');await expect(page.locator('#writingTool')).toBeVisible();await expect(page).toHaveTitle(/블로그 팩토리 \| 곰같은여우의 AI 놀이터/);
+  await page.keyboard.press('ArrowRight');await expect(writing).toBeFocused();await expect(writing).toHaveAttribute('aria-selected','true');await expect(page.locator('#writingTool')).toBeVisible();await expect(page).toHaveTitle(/블로그 팩토리 \| 곰같은여우의 AI 놀이터/);
+  await page.keyboard.press('End');await expect(reach).toBeFocused();await expect(reach).toHaveAttribute('aria-selected','true');await expect(page.locator('#reachTool')).toBeVisible();await expect(page).toHaveTitle(/GomFox Reach \| 곰같은여우의 AI 놀이터/);
   await page.keyboard.press('Home');await expect(text).toBeFocused();await expect(text).toHaveAttribute('aria-selected','true');await expect(page.locator('#textTool')).toBeVisible();await expect(page.locator('#writingTool')).toBeHidden();
+});
+
+test('GomFox Reach analyzes pasted source locally and keeps manual fallback usable', async ({ page }) => {
+  await gotoReady(page);await page.locator('#toolTabReach').click();
+  await page.waitForFunction(()=>!!window.GomFoxReach,{timeout:10000});
+  await page.locator('#reachRaw').fill('GomFox Reach 검색 품질 검증입니다. 검색 품질과 원문 검증을 반복해서 확인합니다. 원문은 자동 수정하지 않습니다.');
+  await page.locator('#reachAnalyze').click();
+  await expect(page.locator('#reachResultStatus')).toHaveText('분석 완료');
+  await expect(page.locator('#reachKeywords')).not.toContainText('원문을 분석하면 표시됩니다.');
+  await expect(page.locator('#reachCopyAll')).toBeEnabled();
+  await expect(page.locator('#reachSaveTxt')).toBeEnabled();
 });
 
 test('Blog Factory keeps compact presets and disclosure targets inside narrow mobile viewports', async ({ page }) => {

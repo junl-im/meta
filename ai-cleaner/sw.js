@@ -1,12 +1,12 @@
 'use strict';
-const CACHE_NAME='ai-cleaner-shell-1.13.5';
+const CACHE_NAME='ai-cleaner-shell-1.15.2';
 const CORE_ASSETS=[
   './','./index.html','./version.json','./site.webmanifest','./css/app.css','./js/boot.js',
   './js/core/event-bus.js','./js/core/history-store.js','./js/core/work-lock.js','./js/core/text-utils.js',
   './js/core/state-store.js','./js/core/text-engine.js','./js/core/diff-engine.js','./js/services/analysis-worker-adapter.js',
   './js/services/analysis-performance-governor.js','./js/services/analysis-coordinator.js','./js/services/update-manager.js',
   './js/ui/panel-manager.js','./js/ui/diff-view.js','./js/features/file-import.js','./js/features/typewriter-engine.js',
-  './js/features/result-checkpoint-store.js','./js/app.js','./vendor/app-core.bundle.js','./js/rewrite-studio.js','./js/features/ai-writing-os.js',
+  './js/features/result-checkpoint-store.js','./js/features/gomfox-reach.js','./js/app.js','./vendor/app-core.bundle.js','./js/rewrite-studio.js','./js/features/ai-writing-os.js',
   './data/daily-topics.json','./ai-writing-os/prompt-compiler.json','./ai-writing-os/os-manifest.json',
   './assets/fox-logo.png','./assets/favicon-v66.png','./assets/apple-touch-icon-v66.png','./assets/icon-v66-192.png','./assets/icon-v66-512.png'
 ];
