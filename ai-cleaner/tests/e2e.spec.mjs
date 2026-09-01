@@ -732,7 +732,7 @@ test('Blog Factory keeps its task state separate from text cleaner and survives 
   await page.locator('[data-tool="text"]').click();
   await expect(page.locator('#input')).toHaveValue(source);
   const navRows=await page.locator('.toolnav').evaluate(el=>({w:el.getBoundingClientRect().width,children:[...el.children].map(x=>x.getBoundingClientRect())}));
-  expect(navRows.children).toHaveLength(3);
+  expect(navRows.children).toHaveLength(4);
   expect(Math.max(...navRows.children.map(r=>r.right))-Math.min(...navRows.children.map(r=>r.left))).toBeLessThanOrEqual(navRows.w+1);
 });
 
