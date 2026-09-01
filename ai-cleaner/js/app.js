@@ -126,16 +126,22 @@ function handleSourceMutation({analyzeNow=false,backgroundNow=false,resetPerform
   const out=$('#output');if(out)delete out.dataset.typewriterVerified;
   const input=$('#input');
   if(!input?.value.trim()){
-    clearTextAnalysis({keepInput:true});
-    notifyTextChanged('original');
     const enforceEmptySource=()=>{
       if(mutationToken!==sourceMutationSeq||input.value.trim())return;
-      const staleState=!!(state.original||state.base||state.issueBase||state.working||state.issues.length||state.reviews.length||state.allChars.length||$('#output')?.value);
-      if(staleState)clearTextAnalysis({keepInput:true});
+      analysisCoordinator.cancel();analysisPerformance.reset();inputDirty=false;textStateStore.reset();manualEditBaseline='';checkpointSourceCache={source:null,stamp:''};
+      const currentOut=$('#output');if(currentOut){currentOut.value='';currentOut.scrollTop=0;currentOut.readOnly=true;delete currentOut.dataset.typewriterVerified;currentOut.classList.remove('resultApplied','resultFlash','resultStale');}
+      const edit=$('#editResult');if(edit)edit.textContent='✎ 직접 수정';
+      const details=$('#detailDiagnostics');if(details)details.open=false;
+      renderAll({preserveOutput:true});renderDiff();syncResultFreshnessUi();updateHistoryButtons();
     };
+    enforceEmptySource();
+    try{window.AICleanerRewriteStudio?.cancelGeneration?.({status:'원본이 비어 재작성 작업을 취소했습니다.'});}catch(_){}
+    clearTextAnalysis({keepInput:true});
+    notifyTextChanged('original');
     queueMicrotask(enforceEmptySource);
     requestAnimationFrame(()=>requestAnimationFrame(enforceEmptySource));
     setTimeout(enforceEmptySource,80);
+    setTimeout(enforceEmptySource,180);
     return false;
   }
   setInputDirty(true);queueStats();syncWidgets();notifyTextChanged('original');syncTypewriterRecommendation({restart:restartTypewriterCue});
