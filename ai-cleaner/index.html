@@ -15,8 +15,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; font-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1154">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://r.jina.ai; worker-src 'self' blob:; font-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1155">
 <style id="bootCritical">html:not(.boot-ready) body{visibility:hidden}html{background:#fff8f0}html.app-booting{overflow-anchor:none}html.app-booting body{cursor:progress}html.app-booting body *{cursor:progress!important}</style>
 <script src="js/boot.js" defer></script>
 </head>
@@ -361,6 +361,11 @@
     <div class="reachHeroMark"><span>GomFox</span> Reach <b>2.0</b></div>
     <h1>링크나 원문을 넣고 <span>조사·재활용 준비</span>까지 한 번에.</h1>
     <p>공개 웹페이지는 URL로 가져오고, 차단되거나 로그인 필요한 글은 원문 붙여넣기로 이어갑니다. 수집한 원문은 자동으로 바꾸지 않으며 언제든 그대로 복사할 수 있습니다.</p>
+  </section>
+
+  <section class="reachReadyBar" id="reachReadyBar" aria-label="GomFox Reach 준비 상태">
+    <div><b>GomFox Reach 2.0 준비 완료</b><span>URL 가져오기 · 직접 붙여넣기 · 원문 복사 · 핵심어 분석 · 검색어 확장 · 콘텐츠 재활용</span></div>
+    <span class="reachEngineBadge" id="reachEngineBadge">로컬 분석 엔진</span>
   </section>
 
   <div class="reachGrid">

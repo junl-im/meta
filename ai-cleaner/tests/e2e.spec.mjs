@@ -860,7 +860,19 @@ test('top-level tool tabs support roving keyboard focus and synchronized panel s
 
 test('GomFox Reach analyzes pasted source locally and keeps manual fallback usable', async ({ page }) => {
   await gotoReady(page);await page.locator('#toolTabReach').click();
+  await expect(page.locator('#reachTool')).toBeVisible();
+  await expect(page.locator('#reachReadyBar')).toBeVisible();
+  await expect(page.locator('#reachUrl')).toBeVisible();
+  await expect(page.locator('#reachFetch')).toBeVisible();
+  await expect(page.locator('#reachRaw')).toBeVisible();
+  await expect(page.locator('#reachAnalyze')).toBeVisible();
+  await expect(page.locator('#reachCopySource')).toBeVisible();
+  await expect(page.locator('#reachKeywords')).toBeVisible();
+  await expect(page.locator('#reachQueries')).toBeVisible();
+  await expect(page.locator('#reachHooks')).toBeVisible();
+  await expect(page.locator('#reachReuse')).toBeVisible();
   await page.waitForFunction(()=>!!window.GomFoxReach,{timeout:10000});
+  await expect(page.locator('#reachEngineBadge')).toContainText('연결 완료');
   await page.locator('#reachRaw').fill('GomFox Reach 검색 품질 검증입니다. 검색 품질과 원문 검증을 반복해서 확인합니다. 원문은 자동 수정하지 않습니다.');
   await page.locator('#reachAnalyze').click();
   await expect(page.locator('#reachResultStatus')).toHaveText('분석 완료');

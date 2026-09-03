@@ -1,6 +1,6 @@
 {
   "project": "AI Playground / 곰같은여우의 AI 놀이터",
-  "version": "1.15.4",
+  "version": "1.15.5",
   "date": "2026-08-27",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
@@ -50,15 +50,16 @@
     ".github/scripts/generate-daily-topics.mjs",
     "ai-cleaner/data/daily-topics.json",
     ".github/scripts/build-pages-artifact.mjs",
-    ".github/scripts/build-runtime-vendor.mjs"
+    ".github/scripts/build-runtime-vendor.mjs",
+    "ai-cleaner/js/features/gomfox-reach.js"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.15.4",
-  "asset_version": "1154",
+  "current_version": "1.15.5",
+  "asset_version": "1155",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
-  "latestPatch": "1.15.4 blank-source authority guard after Rewrite Studio lifecycle callbacks.",
+  "latestPatch": "1.15.5 GomFox Reach visible UI recovery + Reader CSP/network path + tab reveal hardening.",
   "rewriteStudio": {
     "factLock": true,
     "directTypingVerifier": true,
@@ -208,7 +209,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "1154",
+  "assetVersion": "1155",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,

@@ -933,7 +933,7 @@ function activateToolTab(b){
   if(nextTool==='writing')void aiWritingOs.activate().catch(err=>{console.error(err);showToast('블로그 팩토리를 초기화하지 못했습니다. 새로고침 후 다시 시도해 주세요.');});else aiWritingOs.deactivate();
   if(nextTool==='reach')void ensureGomFoxReach().then(reach=>reach.activate?.()).catch(err=>{console.error(err);showToast('GomFox Reach를 초기화하지 못했습니다. 새로고침 후 다시 시도해 주세요.');});else window.GomFoxReach?.deactivate?.();
   toolTabs.forEach(x=>{const active=x===b;x.classList.toggle('active',active);x.setAttribute('aria-selected',active?'true':'false');x.tabIndex=active?0:-1;});
-  for(const [tool,id] of Object.entries(TOOL_SECTION_IDS))$('#'+id)?.classList.toggle('hidden',tool!==nextTool);syncDocumentTitle(nextTool);syncWidgets();
+  for(const [tool,id] of Object.entries(TOOL_SECTION_IDS)){const panel=$('#'+id);if(!panel)continue;const hidden=tool!==nextTool;panel.classList.toggle('hidden',hidden);panel.hidden=false;panel.setAttribute('aria-hidden',hidden?'true':'false');}syncDocumentTitle(nextTool);syncWidgets();
 }
 toolTabs.forEach(b=>{
   b.onclick=()=>activateToolTab(b);
