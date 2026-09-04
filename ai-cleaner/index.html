@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://r.jina.ai; worker-src 'self' blob:; font-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1155">
+<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1156">
 <style id="bootCritical">html:not(.boot-ready) body{visibility:hidden}html{background:#fff8f0}html.app-booting{overflow-anchor:none}html.app-booting body{cursor:progress}html.app-booting body *{cursor:progress!important}</style>
 <script src="js/boot.js" defer></script>
 </head>
@@ -358,53 +358,94 @@
 
 <main id="reachTool" class="hidden reachTool" role="tabpanel" aria-labelledby="toolTabReach">
   <section class="hero reachHero">
-    <div class="reachHeroMark"><span>GomFox</span> Reach <b>2.0</b></div>
-    <h1>링크나 원문을 넣고 <span>조사·재활용 준비</span>까지 한 번에.</h1>
-    <p>공개 웹페이지는 URL로 가져오고, 차단되거나 로그인 필요한 글은 원문 붙여넣기로 이어갑니다. 수집한 원문은 자동으로 바꾸지 않으며 언제든 그대로 복사할 수 있습니다.</p>
+    <div class="reachHeroMark"><span>GomFox</span> Reach <b>3.0</b></div>
+    <h1>검색부터 <span>여러 출처 교차검증</span>까지 한 번에.</h1>
+    <p>질문을 검색어로 확장하고, 검색에서 찾은 여러 공개 URL을 한꺼번에 수집해 중복·날짜·핵심 주장·상충 신호를 비교합니다. 키 없이 가능한 조사 흐름을 우선 제공하며 원문은 자동 수정하지 않습니다.</p>
   </section>
 
   <section class="reachReadyBar" id="reachReadyBar" aria-label="GomFox Reach 준비 상태">
-    <div><b>GomFox Reach 2.0 준비 완료</b><span>URL 가져오기 · 직접 붙여넣기 · 원문 복사 · 핵심어 분석 · 검색어 확장 · 콘텐츠 재활용</span></div>
-    <span class="reachEngineBadge" id="reachEngineBadge">로컬 분석 엔진</span>
+    <div><b>GomFox Reach 3.0 Research Engine</b><span>질문 분석 · 검색어 확장 · 다중 URL 수집 · 중복 제거 · 주장 교차검증 · 상충 탐지 · 근거팩</span></div>
+    <span class="reachEngineBadge" id="reachEngineBadge">엔진 로드 대기</span>
   </section>
 
-  <div class="reachGrid">
-    <section class="card reachSourceCard">
-      <div class="head"><b>1. 원문 가져오기</b><span class="sub" id="reachSourceStatus">URL 또는 직접 붙여넣기</span></div>
+  <div class="reachResearchFlow">
+    <section class="card reachResearchCard">
+      <div class="head"><b>1. 조사 질문</b><span class="sub">무엇을 확인할지 먼저 입력</span></div>
       <div class="body reachSourceBody">
-        <label class="reachLabel" for="reachUrl">공개 글 URL</label>
-        <div class="reachUrlRow">
-          <input id="reachUrl" class="reachInput" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://example.com/article">
-          <button id="reachFetch" class="btn primary" type="button">URL 가져오기</button>
-        </div>
-        <div class="reachStatus" id="reachFetchStatus" role="status" aria-live="polite">주소를 넣으면 직접 연결을 먼저 시도하고, 브라우저 차단 시 읽기 전용 폴백을 사용합니다.</div>
-        <div class="reachDivider"><span>또는</span></div>
-        <label class="reachLabel" for="reachRaw">원문 직접 붙여넣기</label>
-        <textarea id="reachRaw" class="textarea reachRaw" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false" placeholder="가져오기 어려운 글은 여기에 직접 붙여넣으세요. 원문은 자동 수정하지 않습니다."></textarea>
+        <label class="reachLabel" for="reachQuestion">조사할 질문 / 주제</label>
+        <textarea id="reachQuestion" class="textarea reachQuestion" spellcheck="false" placeholder="예: 2026년 서울시 육아 지원 정책 중 실제 신청 가능한 것은 무엇인가?"></textarea>
         <div class="actions reachActions">
-          <button id="reachAnalyze" class="btn orange" type="button">Reach 분석</button>
-          <button id="reachCopySource" class="btn" type="button">원문 복사</button>
-          <button id="reachClear" class="btn" type="button">초기화</button>
+          <button id="reachPlan" class="btn orange" type="button">검색 계획 만들기</button>
+          <button id="reachOpenSearch" class="btn" type="button" disabled>Google 검색 열기</button>
+          <button id="reachOpenSearchAll" class="btn" type="button" disabled>확장 검색 5개 열기</button>
         </div>
+        <div class="reachStatus" id="reachPlanStatus" role="status" aria-live="polite">질문을 입력하면 핵심어와 확인용 검색어를 만듭니다.</div>
+        <section class="reachBlock"><div class="reachBlockHead"><b>검색어 확장</b></div><div class="reachSearches" id="reachQueries"><span class="sub">질문을 분석하면 검색어가 표시됩니다.</span></div></section>
       </div>
     </section>
 
-    <section class="card reachResultCard">
-      <div class="head"><b>2. Reach 분석</b><span class="sub" id="reachResultStatus">분석 대기</span></div>
-      <div class="body">
-        <div class="reachMetrics" id="reachMetrics">
-          <div><b id="reachChars">0</b><span>문자</span></div><div><b id="reachWords">0</b><span>단어</span></div><div><b id="reachParas">0</b><span>문단</span></div>
+    <section class="card reachCollectCard">
+      <div class="head"><b>2. 출처 수집</b><span class="sub" id="reachSourceStatus">최대 6개 URL 일괄 수집</span></div>
+      <div class="body reachSourceBody">
+        <label class="reachLabel" for="reachUrls">검색에서 찾은 출처 URL · 한 줄에 하나</label>
+        <textarea id="reachUrls" class="textarea reachUrls" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" placeholder="https://example.com/source-1\nhttps://example.org/source-2"></textarea>
+        <div class="actions reachActions">
+          <button id="reachFetchMany" class="btn primary" type="button">URL 일괄 수집</button>
+          <button id="reachAddCurrent" class="btn" type="button">아래 원문을 출처로 추가</button>
         </div>
-        <section class="reachBlock"><div class="reachBlockHead"><b>핵심 키워드</b><button class="mini" id="reachGoogle" type="button" disabled>Google에서 확인</button></div><div class="reachChips" id="reachKeywords"><span class="sub">원문을 분석하면 표시됩니다.</span></div></section>
-        <section class="reachBlock"><div class="reachBlockHead"><b>검색어 확장</b></div><div class="reachSearches" id="reachQueries"><span class="sub">검색 의도에 맞는 확인용 검색어를 만듭니다.</span></div></section>
-        <section class="reachBlock"><div class="reachBlockHead"><b>제목·훅 후보</b></div><div class="reachSuggestions" id="reachHooks"><span class="sub">원문의 핵심어를 바탕으로 후보를 만듭니다.</span></div></section>
-        <section class="reachBlock"><div class="reachBlockHead"><b>콘텐츠 재활용 팩</b></div><div class="reachReuse" id="reachReuse"><span class="sub">네이버 블로그·숏츠/릴스·커뮤니티용 작업 가이드를 준비합니다.</span></div></section>
-        <div class="actions reachActions resultActions"><button id="reachCopyAll" class="btn primary" type="button" disabled>전체 결과 복사</button><button id="reachSaveTxt" class="btn" type="button" disabled>TXT 저장</button></div>
-        <p class="sub reachFootnote">Reach는 공개 페이지의 접근 가능 범위 안에서 동작합니다. 로그인·캡차·robots/CORS·사이트 정책에 따라 URL 자동 가져오기가 제한될 수 있으며, 그 경우 직접 붙여넣기를 사용하세요.</p>
+        <div class="reachStatus" id="reachFetchStatus" role="status" aria-live="polite">공개 URL은 읽기 전용 Reader를 통해 가져옵니다. 로그인·캡차가 필요한 글은 아래에 직접 붙여넣으세요.</div>
+        <label class="reachLabel" for="reachManualLabel">직접 붙여넣기 출처 이름</label>
+        <input id="reachManualLabel" class="reachInput" type="text" autocomplete="off" placeholder="예: 서울시 공식 안내문">
+        <label class="reachLabel" for="reachRaw">원문 직접 붙여넣기</label>
+        <textarea id="reachRaw" class="textarea reachRaw" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" data-gramm="false" placeholder="자동 수집이 어려운 글을 그대로 붙여넣으세요. 원문은 자동 수정하지 않습니다."></textarea>
+        <div class="actions reachActions">
+          <button id="reachCopySource" class="btn" type="button">원문 복사</button>
+          <button id="reachClear" class="btn" type="button">전체 초기화</button>
+        </div>
       </div>
     </section>
   </div>
+
+  <section class="card reachEvidenceCard">
+    <div class="head"><b>3. 수집된 출처</b><span class="sub" id="reachSourceCount">0개</span></div>
+    <div class="body">
+      <div id="reachSources" class="reachSources"><div class="empty">아직 수집된 출처가 없습니다.</div></div>
+    </div>
+  </section>
+
+  <div class="reachGrid reachAnalysisGrid">
+    <section class="card reachResultCard">
+      <div class="head"><b>4. 교차검증</b><span class="sub" id="reachResultStatus">분석 대기</span></div>
+      <div class="body">
+        <div class="actions reachActions reachAnalyzeActions">
+          <button id="reachAnalyze" class="btn orange" type="button" disabled>출처 교차검증</button>
+          <button id="reachCopyAll" class="btn primary" type="button" disabled>근거팩 복사</button>
+          <button id="reachSaveTxt" class="btn" type="button" disabled>TXT 저장</button>
+        </div>
+        <div class="reachMetrics" id="reachMetrics">
+          <div><b id="reachSourceMetric">0</b><span>출처</span></div><div><b id="reachClaimMetric">0</b><span>주장</span></div><div><b id="reachConflictMetric">0</b><span>상충</span></div>
+        </div>
+        <section class="reachBlock"><div class="reachBlockHead"><b>핵심 키워드</b></div><div class="reachChips" id="reachKeywords"><span class="sub">출처를 분석하면 표시됩니다.</span></div></section>
+        <section class="reachBlock"><div class="reachBlockHead"><b>핵심 주장 · 지지 출처</b></div><div class="reachClaims" id="reachClaims"><span class="sub">여러 출처에서 반복되는 주장과 근거를 찾습니다.</span></div></section>
+        <section class="reachBlock"><div class="reachBlockHead"><b>상충 정보</b></div><div class="reachConflicts" id="reachConflicts"><span class="sub">숫자·날짜·핵심 표현이 충돌하는 경우 표시합니다.</span></div></section>
+        <section class="reachBlock"><div class="reachBlockHead"><b>출처 품질</b></div><div class="reachQuality" id="reachQuality"><span class="sub">원출처 가능성·날짜·독립 출처 여부를 점검합니다.</span></div></section>
+      </div>
+    </section>
+
+    <section class="card reachPackCard">
+      <div class="head"><b>5. 글쓰기용 근거팩</b><span class="sub" id="reachPackStatus">근거 대기</span></div>
+      <div class="body">
+        <div class="reachSafetyNote"><b>출처 없는 문장 차단 원칙</b><span>2개 이상 독립 출처가 지지하거나 공식/원출처 성격이 강한 항목을 우선 근거로 표시합니다. 자동 생성된 표현은 사실 확정으로 취급하지 않습니다.</span></div>
+        <div class="reachEvidencePack" id="reachEvidencePack"><div class="empty">교차검증을 실행하면 근거팩이 생성됩니다.</div></div>
+        <section class="reachBlock"><div class="reachBlockHead"><b>콘텐츠 재활용 가이드</b></div><div class="reachReuse" id="reachReuse"><span class="sub">검증 결과를 바탕으로 블로그·숏폼용 작업 가이드를 만듭니다.</span></div></section>
+        <section class="reachBlock"><div class="reachBlockHead"><b>제목·훅 후보</b></div><div class="reachSuggestions" id="reachHooks"><span class="sub">조사 질문과 검증된 핵심어를 바탕으로 후보를 만듭니다.</span></div></section>
+      </div>
+    </section>
+  </div>
+
+  <p class="sub reachFootnote">자동 웹검색 결과 자체를 긁어오는 기능은 검색 서비스 정책·API 제한에 따라 달라집니다. Reach는 키 없이 검색 계획과 다중 출처 수집·교차검증을 수행하며, 공개 URL 본문 수집에는 Reader를 사용합니다.</p>
 </main>
+
 
 <section class="floatPanel typingPreviewPanel" id="typingPreviewPanel" aria-label="자동작성 원본 새로쓰기" tabindex="-1" hidden aria-live="polite">
   <div class="floatHead" data-drag-handle>

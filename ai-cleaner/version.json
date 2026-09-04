@@ -1,7 +1,7 @@
 {
-  "version": "1.15.5",
-  "assetVersion": "1155",
+  "version": "1.15.6",
+  "assetVersion": "1156",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "GomFox Reach visible UI contract, Reader CSP/network path, and tab reveal hardening."
+  "notes": "GomFox Reach 3.0 functional research engine: query planning, multi-source collection, dedupe, claim cross-check, conflict detection, source quality, and evidence pack."
 }

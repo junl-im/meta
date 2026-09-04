@@ -1,0 +1,19 @@
+{
+  "from": "1.15.5",
+  "to": "1.15.6",
+  "changed_files": [
+    "package.json",
+    "PROJECT_HANDOFF/CHANGELOG_1.15.6.md",
+    "PROJECT_HANDOFF/PROJECT_STATE.json",
+    "PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md",
+    "ai-cleaner/sw.js",
+    "ai-cleaner/version.json",
+    "ai-cleaner/index.html",
+    "ai-cleaner/css/app.css",
+    "ai-cleaner/tests/e2e.spec.mjs",
+    "ai-cleaner/tests/static-check.mjs",
+    "ai-cleaner/js/features/gomfox-reach.js"
+  ],
+  "deleted_files": [],
+  "purpose": "GomFox Reach 3.0 functional research engine"
+}
