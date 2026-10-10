@@ -1,7 +1,7 @@
 {
   "project": "AI Playground / 곰같은여우의 AI 놀이터",
-  "version": "1.15.6",
-  "date": "2026-08-27",
+  "version": "1.16.0",
+  "date": "2026-10-10",
   "repo": "junl-im/meta",
   "pages": "https://junl-im.github.io/meta/",
   "appPath": "ai-cleaner/",
@@ -10,7 +10,7 @@
   "protectedPaths": [
     "OPTION/**"
   ],
-  "userWorkflow": "receive ZIP -> overwrite local meta -> GitHub Desktop commit -> push",
+  "userWorkflow": "Codex edits local meta -> tests -> commit/push -> CI and Pages verification; GitHub Desktop shares the same checkout",
   "criticalSafety": [
     "preserve meaning-sensitive Unicode by default",
     "no detector-bypass scoring",
@@ -54,8 +54,8 @@
     "ai-cleaner/js/features/gomfox-reach.js"
   ],
   "handoff": "Read PROJECT_HANDOFF/AI_CLEANER_HANDOFF.md first.",
-  "current_version": "1.15.6",
-  "asset_version": "1156",
+  "current_version": "1.16.0",
+  "asset_version": "1160",
   "browser_ci": "Playwright 1.62.1",
   "update_restore": true,
   "undo_redo_diff": true,
@@ -209,7 +209,7 @@
     "jsonAuditExport": true,
     "layerBStylePatternsNotTreatedAsWatermarks": true
   },
-  "assetVersion": "1156",
+  "assetVersion": "1160",
   "modularCorePhase3": {
     "diffEngine": true,
     "analysisCoordinator": true,

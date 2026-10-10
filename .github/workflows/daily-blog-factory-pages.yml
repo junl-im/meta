@@ -38,7 +38,7 @@ jobs:
           package-manager-cache: false
 
       - name: Install runtime build dependencies
-        run: npm install --no-audit --no-fund --omit=dev
+        run: npm ci --no-audit --no-fund --omit=dev
 
       - name: Build local runtime vendor
         run: npm run build:vendor
@@ -137,6 +137,13 @@ jobs:
         run: |
           git fetch origin main
           git merge --ff-only origin/main
+
+      - name: Rebuild and validate the synchronized runtime
+        run: |
+          npm ci --no-audit --no-fund --omit=dev
+          npm run build:vendor
+          node ai-cleaner/tests/module-check.mjs
+          node ai-cleaner/tests/static-check.mjs
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5

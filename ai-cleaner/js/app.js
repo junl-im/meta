@@ -826,7 +826,7 @@ const typewriterEngine=Modules.createTypewriterEngine({split:splitGraphemesExact
 function setTypewriterBusy(busy){
   window.__AI_CLEANER_TYPEWRITER_BUSY__=!!busy;if(busy)workLock.acquire('typewriter');else workLock.release('typewriter');
   const controls=[...new Set([
-    ...['copy','downloadTxt','editResult','undoStep','redoStep','undoAll','checkpointSave','checkpointOpen','sample','reset','textFileInput','cleanProfile','norm','repeat','length','liveScan','openImage','imageInput'].map(id=>$('#'+id)).filter(Boolean),
+    ...['copy','downloadTxt','editResult','undoStep','redoStep','undoAll','checkpointSave','checkpointOpen','analyzeText','sample','reset','textFileInput','cleanProfile','norm','repeat','length','liveScan','openImage','imageInput'].map(id=>$('#'+id)).filter(Boolean),
     ...$$('[data-tool]'),...$$('[data-resulttab]'),...$$('.floatWidget')
   ])];
   if(busy){typewriterDisabledState=new Map();for(const el of controls){typewriterDisabledState.set(el,!!el.disabled);el.disabled=true;}}
@@ -897,6 +897,7 @@ $('#typingPreviewPause').onclick=()=>{
 };
 
 $('#input').addEventListener('input',()=>{invalidatePendingTextImport();handleSourceMutation({analyzeNow:false,resetPerformance:false});});
+$('#analyzeText').addEventListener('click',()=>{if(window.__AI_CLEANER_TYPEWRITER_BUSY__)return;if(analyze())showToast('선택한 정리 강도로 결과를 갱신했습니다. 원본 타이핑은 별도 기능입니다.');});
 $('#sample').addEventListener('click',()=>{invalidatePendingTextImport();if(replaceSourceText(sample,{analyzeNow:true,resetPerformance:true}))showToast('샘플을 불러오고 바로 다듬었습니다.');});
 $('#reset').addEventListener('click',resetTextWorkspace);
 ['norm','repeat','length','liveScan','cleanProfile'].forEach(id=>$('#'+id).addEventListener('change',()=>{if(!$('#input').value.trim())return;if(id==='liveScan'){if($('#liveScan').checked)queueLiveAnalysis();else{analysisCoordinator.cancel();analysisPerformance.reset();syncResultFreshnessUi();}return;}analyze(true);}));

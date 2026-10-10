@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://r.jina.ai; worker-src 'self' blob:; font-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1156">
+<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1160">
 <style id="bootCritical">html:not(.boot-ready) body{visibility:hidden}html{background:#fff8f0}html.app-booting{overflow-anchor:none}html.app-booting body{cursor:progress}html.app-booting body *{cursor:progress!important}</style>
 <script src="js/boot.js" defer></script>
 </head>
@@ -43,7 +43,7 @@
 <main id="textTool" role="tabpanel" aria-labelledby="toolTabText">
   <section class="hero">
     <h1>붙여넣고 바로 <span>다듬어진 결과</span>를 확인하세요.</h1>
-    <p>원문을 넣고 결과창에 내용 변경 없이 처음부터 한 글자씩 새로 입력하려면 <b>자동작성 원본 새로쓰기</b> 버튼을 누르세요. 오른쪽 분석은 문제점을 따로 알려주지만, 자동작성은 원문의 문자·공백·줄바꿈까지 그대로 보존합니다.</p>
+    <p>숨은 문자·특수 공백을 정리하려면 <b>글 정리 실행</b>을 누르세요. 문장 재작성은 결과를 확인한 뒤 별도 도구에서 진행합니다. 원문을 넣고 결과창에 내용 변경 없이 처음부터 한 글자씩 새로 입력하려면 <b>자동작성 원본 새로쓰기</b> 버튼을 누르세요. 오른쪽 분석은 문제점을 따로 알려주지만, 자동작성은 원문의 문자·공백·줄바꿈까지 그대로 보존합니다.</p>
   </section>
 
   <div class="workspace">
@@ -63,6 +63,7 @@
           <label class="check"><input type="checkbox" id="length" checked> 긴 문장 찾기</label>
         </div>
         <div class="v6toolbar">
+          <button class="btn primary" id="analyzeText" type="button">글 정리 실행</button>
           <label class="sub" for="cleanProfile"><b>정리 강도</b></label>
           <select id="cleanProfile" class="v6select">
             <option value="inspect">검사만 · 원문 유지</option>
@@ -169,7 +170,7 @@
 
     <section class="card imageScore">
       <div class="head scoreHead">
-        <div><b>출처 신호 참고 지수</b><div class="sub">확률이 아닌 내부 비교 지수입니다.</div></div>
+        <div><b>출처 신호 참고 지수 · AI 확률 아님</b><div class="sub">고정 가중치로 계산한 참고값입니다. 아래 명시적 출처 증거와 시각 통계를 따로 확인하세요.</div></div>
         <div class="bigscore"><div class="num" id="imageScoreNum">—</div><b>/ 100</b></div>
       </div>
       <div class="progress"><div id="imageProgress"></div></div>
@@ -179,9 +180,9 @@
         <div class="signal"><b>생성 도구 메타데이터</b><p id="sigGenerator">—</p></div>
         <div class="signal"><b>프롬프트·워크플로 흔적</b><p id="sigPrompt">—</p></div>
         <div class="signal"><b>알파/투명 채널</b><p id="sigAlpha">—</p></div>
-        <div class="signal"><b>잔차 노이즈</b><p id="sigNoise">—</p></div>
-        <div class="signal"><b>주기성·격자 패턴</b><p id="sigPeriodic">—</p></div>
-        <div class="signal"><b>국소 통계</b><p id="sigLocal">—</p></div>
+        <div class="signal"><b>잔차 노이즈 · 통계 참고</b><p id="sigNoise">—</p></div>
+        <div class="signal"><b>주기성·격자 패턴 · 통계 참고</b><p id="sigPeriodic">—</p></div>
+        <div class="signal"><b>국소 통계 · 판정 근거 아님</b><p id="sigLocal">—</p></div>
         <div class="signal"><b>파일 구조</b><p id="sigFile">—</p></div>
       </div>
       <div id="evidenceList" class="evidenceList"></div>
@@ -359,12 +360,12 @@
 <main id="reachTool" class="hidden reachTool" role="tabpanel" aria-labelledby="toolTabReach">
   <section class="hero reachHero">
     <div class="reachHeroMark"><span>GomFox</span> Reach <b>3.0</b></div>
-    <h1>검색부터 <span>여러 출처 교차검증</span>까지 한 번에.</h1>
+    <h1>검색 계획부터 <span>여러 출처 비교</span>까지 한 번에.</h1>
     <p>질문을 검색어로 확장하고, 검색에서 찾은 여러 공개 URL을 한꺼번에 수집해 중복·날짜·핵심 주장·상충 신호를 비교합니다. 키 없이 가능한 조사 흐름을 우선 제공하며 원문은 자동 수정하지 않습니다.</p>
   </section>
 
   <section class="reachReadyBar" id="reachReadyBar" aria-label="GomFox Reach 준비 상태">
-    <div><b>GomFox Reach 3.0 Research Engine</b><span>질문 분석 · 검색어 확장 · 다중 URL 수집 · 중복 제거 · 주장 교차검증 · 상충 탐지 · 근거팩</span></div>
+    <div><b>GomFox Reach 3.0 Research Engine</b><span>질문 분석 · 검색어 확장 · 다중 URL 수집 · 중복 제거 · 유사 주장 비교 · 상충 후보 탐지 · 근거팩</span></div>
     <span class="reachEngineBadge" id="reachEngineBadge">엔진 로드 대기</span>
   </section>
 
@@ -391,11 +392,14 @@
         <textarea id="reachUrls" class="textarea reachUrls" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" placeholder="https://example.com/source-1\nhttps://example.org/source-2"></textarea>
         <div class="actions reachActions">
           <button id="reachFetchMany" class="btn primary" type="button">URL 일괄 수집</button>
+          <button id="reachCancelFetch" class="btn" type="button">수집 중지</button>
           <button id="reachAddCurrent" class="btn" type="button">아래 원문을 출처로 추가</button>
         </div>
-        <div class="reachStatus" id="reachFetchStatus" role="status" aria-live="polite">공개 URL은 읽기 전용 Reader를 통해 가져옵니다. 로그인·캡차가 필요한 글은 아래에 직접 붙여넣으세요.</div>
+        <div class="reachStatus" id="reachFetchStatus" role="status" aria-live="polite">입력한 공개 URL은 외부 Jina Reader(r.jina.ai)에 전달됩니다. 비공개·인증 주소는 넣지 마세요. 본문 직접 입력은 외부로 전송하지 않습니다.</div>
         <label class="reachLabel" for="reachManualLabel">직접 붙여넣기 출처 이름</label>
         <input id="reachManualLabel" class="reachInput" type="text" autocomplete="off" placeholder="예: 서울시 공식 안내문">
+        <label class="reachLabel" for="reachManualUrl">원문 URL · 선택 사항, 자동 전송하지 않음</label>
+        <input id="reachManualUrl" class="reachInput" type="url" autocomplete="off" placeholder="https://example.com/original">
         <label class="reachLabel" for="reachRaw">원문 직접 붙여넣기</label>
         <textarea id="reachRaw" class="textarea reachRaw" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" data-gramm="false" placeholder="자동 수집이 어려운 글을 그대로 붙여넣으세요. 원문은 자동 수정하지 않습니다."></textarea>
         <div class="actions reachActions">
@@ -415,10 +419,10 @@
 
   <div class="reachGrid reachAnalysisGrid">
     <section class="card reachResultCard">
-      <div class="head"><b>4. 교차검증</b><span class="sub" id="reachResultStatus">분석 대기</span></div>
+      <div class="head"><b>4. 출처 비교</b><span class="sub" id="reachResultStatus">분석 대기</span></div>
       <div class="body">
         <div class="actions reachActions reachAnalyzeActions">
-          <button id="reachAnalyze" class="btn orange" type="button" disabled>출처 교차검증</button>
+          <button id="reachAnalyze" class="btn orange" type="button" disabled>출처 비교 실행</button>
           <button id="reachCopyAll" class="btn primary" type="button" disabled>근거팩 복사</button>
           <button id="reachSaveTxt" class="btn" type="button" disabled>TXT 저장</button>
         </div>
@@ -427,16 +431,16 @@
         </div>
         <section class="reachBlock"><div class="reachBlockHead"><b>핵심 키워드</b></div><div class="reachChips" id="reachKeywords"><span class="sub">출처를 분석하면 표시됩니다.</span></div></section>
         <section class="reachBlock"><div class="reachBlockHead"><b>핵심 주장 · 지지 출처</b></div><div class="reachClaims" id="reachClaims"><span class="sub">여러 출처에서 반복되는 주장과 근거를 찾습니다.</span></div></section>
-        <section class="reachBlock"><div class="reachBlockHead"><b>상충 정보</b></div><div class="reachConflicts" id="reachConflicts"><span class="sub">숫자·날짜·핵심 표현이 충돌하는 경우 표시합니다.</span></div></section>
-        <section class="reachBlock"><div class="reachBlockHead"><b>출처 품질</b></div><div class="reachQuality" id="reachQuality"><span class="sub">원출처 가능성·날짜·독립 출처 여부를 점검합니다.</span></div></section>
+        <section class="reachBlock"><div class="reachBlockHead"><b>상충 후보 · 직접 확인</b></div><div class="reachConflicts" id="reachConflicts"><span class="sub">숫자·날짜·핵심 표현이 충돌하는 경우 표시합니다.</span></div></section>
+        <section class="reachBlock"><div class="reachBlockHead"><b>출처 참고 정보</b></div><div class="reachQuality" id="reachQuality"><span class="sub">원출처 가능성·날짜·독립 출처 여부를 점검합니다.</span></div></section>
       </div>
     </section>
 
     <section class="card reachPackCard">
       <div class="head"><b>5. 글쓰기용 근거팩</b><span class="sub" id="reachPackStatus">근거 대기</span></div>
       <div class="body">
-        <div class="reachSafetyNote"><b>출처 없는 문장 차단 원칙</b><span>2개 이상 독립 출처가 지지하거나 공식/원출처 성격이 강한 항목을 우선 근거로 표시합니다. 자동 생성된 표현은 사실 확정으로 취급하지 않습니다.</span></div>
-        <div class="reachEvidencePack" id="reachEvidencePack"><div class="empty">교차검증을 실행하면 근거팩이 생성됩니다.</div></div>
+        <div class="reachSafetyNote"><b>자동 비교의 한계</b><span>유사한 단어·숫자로 검토 후보를 묶습니다. 다른 도메인도 같은 원출처를 인용할 수 있습니다. 상충 후보는 기간·단위·대상을 확인해야 하며, 근거 후보는 사실 검증 완료를 뜻하지 않습니다.</span></div>
+        <div class="reachEvidencePack" id="reachEvidencePack"><div class="empty">출처 비교를 실행하면 근거 후보가 표시됩니다.</div></div>
         <section class="reachBlock"><div class="reachBlockHead"><b>콘텐츠 재활용 가이드</b></div><div class="reachReuse" id="reachReuse"><span class="sub">검증 결과를 바탕으로 블로그·숏폼용 작업 가이드를 만듭니다.</span></div></section>
         <section class="reachBlock"><div class="reachBlockHead"><b>제목·훅 후보</b></div><div class="reachSuggestions" id="reachHooks"><span class="sub">조사 질문과 검증된 핵심어를 바탕으로 후보를 만듭니다.</span></div></section>
       </div>
@@ -583,5 +587,6 @@
 </div>
 <div class="appToast" id="appToast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
 
+<noscript><style>html:not(.boot-ready) body{visibility:visible}</style><p class="notice">이 도구는 브라우저에서 실행됩니다. JavaScript를 켠 뒤 페이지를 다시 불러와 주세요.</p></noscript>
 </body>
 </html>

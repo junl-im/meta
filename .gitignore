@@ -1,0 +1,7 @@
+node_modules/
+test-results/
+playwright-report/
+.pages-site/
+ai-cleaner/vendor/
+*-check-results.txt
+dependency-audit.json

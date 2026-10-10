@@ -13,6 +13,7 @@ const EXIF_URL=vendorUrl('exif-reader.js');
 const VENDOR_LOAD_TIMEOUT_MS=10000,C2PA_INIT_TIMEOUT_MS=12000;
 const AI_SOURCE_TOKEN='trainedAlgorithmicMedia';
 const CAMERA_SOURCE_TOKEN='digitalCapture';
+const AI_TOOL_NAME=/(openai|chatgpt|dall.?e|firefly|stable.?diffusion|sdxl|comfyui|midjourney|imagen|gemini|flux\.1|black forest labs)/i;
 
 let currentObjectUrl=null;
 let c2paModulePromise=null;
@@ -246,9 +247,10 @@ function addEvidence(container,cls,title,body){
 
 function renderResults(file,img,binary,exif,c2pa,visual){
   const sourceTypes=c2pa.ok&&c2pa.present?c2pa.sourceTypes:[],c2paAi=sourceTypes.some(s=>s.includes(AI_SOURCE_TOKEN)),c2paCamera=sourceTypes.some(s=>s.includes(CAMERA_SOURCE_TOKEN));
-  const generatorHits=uniq([...binary.generatorHits,...(exif.ok?exif.generatorHits:[]),...(c2pa.ok&&c2pa.present?c2pa.generatorInfo:[])]),promptHits=uniq([...binary.promptHits,...(exif.ok?exif.promptHits:[])]);
+  const generatorHits=uniq([...binary.generatorHits,...(exif.ok?exif.generatorHits:[]),...(c2pa.ok&&c2pa.present?c2pa.generatorInfo.filter(name=>AI_TOOL_NAME.test(name)):[])]),promptHits=uniq([...binary.promptHits,...(exif.ok?exif.promptHits:[])]);
   const alphaSusp=clamp(visual.nearAlphaRate*80+visual.hiddenRgbRate*120),noiseSignal=clamp((visual.noiseCorr-.38)/.42),periodicSignal=clamp((visual.periodicBest.score-.12)/.38),localSignal=clamp((visual.localStrength-.72)/.28);
-  let score=5;if(c2paAi)score+=45;if(generatorHits.length)score+=28;if(promptHits.length)score+=14;score+=alphaSusp*5+noiseSignal*5+periodicSignal*6+localSignal*5;if(c2paCamera&&!c2paAi&&!generatorHits.length&&!promptHits.length)score-=12;score=Math.round(Math.max(2,Math.min(98,score)));
+  const c2paValidated=c2pa.failures===0&&/^(?:valid|trusted)$/i.test(c2pa.validationState||'');
+  let score=5;if(c2paAi&&c2paValidated)score+=45;if(generatorHits.length)score+=28;if(promptHits.length)score+=14;score+=alphaSusp*5+noiseSignal*5+periodicSignal*6+localSignal*5;if(c2paCamera&&c2paValidated&&!c2paAi&&!generatorHits.length&&!promptHits.length)score-=12;score=Math.round(Math.max(2,Math.min(98,score)));
 
   q('#sourceImage').src=currentObjectUrl;q('#imageResults').classList.remove('hidden');setText('imageMeta',`${img.naturalWidth}×${img.naturalHeight} · ${(file.size/1024/1024).toFixed(2)}MB · ${binary.format}`);
   setText('imageScoreNum',score);q('#imageProgress').style.width=score+'%';setText('sigWatermark','공급자 전용 비가시 워터마크는 직접 인증하지 않음');
@@ -263,8 +265,8 @@ function renderResults(file,img,binary,exif,c2pa,visual){
 
   renderMetadata(exif,binary);renderC2pa(c2pa,binary);
   const evidence=q('#evidenceList');evidence.textContent='';
-  if(c2paAi)addEvidence(evidence,'strong','C2PA digitalSourceType','공식 manifest에서 trainedAlgorithmicMedia 계열 출처가 확인되었습니다.');
-  else if(c2paCamera)addEvidence(evidence,'ok','C2PA digitalCapture','공식 manifest에서 디지털 카메라 캡처 출처 유형이 확인되었습니다.');
+  if(c2paAi)addEvidence(evidence,c2paValidated?'strong':'warn','C2PA digitalSourceType',c2paValidated?'검증 상태가 유효한 manifest에 AI 출처 유형이 기록되어 있습니다.':'manifest에 AI 출처 유형이 기록되어 있으나 검증 상태를 신뢰할 수 없어 확정 증거로 취급하지 않습니다.');
+  else if(c2paCamera)addEvidence(evidence,c2paValidated?'ok':'warn','C2PA digitalCapture',c2paValidated?'검증 상태가 유효한 manifest에 디지털 카메라 캡처 유형이 기록되어 있습니다.':'카메라 캡처 유형이 기록되어 있으나 manifest 검증 상태 확인이 필요합니다.');
   else if(c2pa.ok&&c2pa.present)addEvidence(evidence,'','C2PA manifest',`공식 manifest가 있으며 validation 상태는 ${c2pa.validationState||'미표시'}입니다.`);
   if(generatorHits.length)addEvidence(evidence,'strong','생성 도구 메타데이터',generatorHits.join(', ').slice(0,420));
   if(promptHits.length)addEvidence(evidence,'strong','프롬프트/워크플로 메타데이터',`${promptHits.length}개 관련 항목이 발견되었습니다.`);

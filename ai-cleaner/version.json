@@ -1,7 +1,7 @@
 {
-  "version": "1.15.6",
-  "assetVersion": "1156",
+  "version": "1.16.0",
+  "assetVersion": "1160",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "GomFox Reach 3.0 functional research engine: query planning, multi-source collection, dedupe, claim cross-check, conflict detection, source quality, and evidence pack."
+  "notes": "Explicit text cleanup; cancellable source collection; honest evidence labels, source links and stale-report invalidation; reproducible dependency installation."
 }

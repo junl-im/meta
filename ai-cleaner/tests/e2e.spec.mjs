@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import fs from 'node:fs';
 
-const BASE='http://127.0.0.1:4173/ai-cleaner/';
+const BASE=process.env.AI_CLEANER_TEST_URL||'http://127.0.0.1:4173/ai-cleaner/';
 const versionData=JSON.parse(fs.readFileSync(new URL('../version.json',import.meta.url),'utf8'));
 const APP_VERSION=String(versionData.version);
 
@@ -887,7 +887,7 @@ test('GomFox Reach 3.0 builds a search plan, accepts multiple sources, and produ
   await expect(page.locator('#reachSources .reachSourceItem')).toHaveCount(2);
   await expect(page.locator('#reachAnalyze')).toBeEnabled();
   await page.locator('#reachAnalyze').click();
-  await expect(page.locator('#reachResultStatus')).toHaveText('교차검증 완료');
+  await expect(page.locator('#reachResultStatus')).toHaveText('출처 비교 완료 · 사실 확인 필요');
   await expect(page.locator('#reachClaims')).not.toContainText('반복되는 주장과 근거를 찾습니다');
   await expect(page.locator('#reachEvidencePack')).not.toContainText('교차검증을 실행하면');
   await expect(page.locator('#reachCopyAll')).toBeEnabled();
