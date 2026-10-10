@@ -6,6 +6,9 @@ const versionData=JSON.parse(fs.readFileSync(new URL('../version.json',import.me
 const APP_VERSION=String(versionData.version);
 
 // Keep request-mocking tests deterministic. Service Worker behavior is exercised in its own explicit context below.
+const uncaughtErrors=new WeakMap();
+test.beforeEach(async({page})=>{const errors=[];uncaughtErrors.set(page,errors);page.on('pageerror',error=>errors.push(error.message));});
+test.afterEach(async({page})=>{expect(uncaughtErrors.get(page)||[]).toEqual([]);});
 test.use({ serviceWorkers: 'block' });
 
 test.beforeEach(async ({ page }) => {

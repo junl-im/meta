@@ -1,5 +1,8 @@
 import {test,expect} from '@playwright/test';
 const BASE=process.env.AI_CLEANER_TEST_URL||'http://127.0.0.1:4173/ai-cleaner/';
+const uncaughtErrors=new WeakMap();
+test.beforeEach(async({page})=>{const errors=[];uncaughtErrors.set(page,errors);page.on('pageerror',error=>errors.push(error.message));});
+test.afterEach(async({page})=>{expect(uncaughtErrors.get(page)||[]).toEqual([]);});
 test.use({serviceWorkers:'block'});
 async function ready(page,reach=true){await page.goto(BASE);await page.waitForFunction(()=>window.__AI_CLEANER_APP_READY__);if(reach){await page.locator('#toolTabReach').click();await page.waitForFunction(()=>window.GomFoxReach?.active);}}
 const articles=[
@@ -54,4 +57,8 @@ test('numerically conflicting government claims are excluded from reusable evide
  window.GomFoxReach.addSource({url:'https://www.seoul.go.kr/a',text:'서울시 육아 지원 신청 금액은 가구마다 매월 100만원으로 안내합니다. 서울에 거주하는 가족들은 신청 가능합니다. 주민센터 방문 서류 절차 접수 문의 상담 준비'});
  window.GomFoxReach.addSource({url:'https://www.gov.uk/b',text:'서울시 육아 지원 신청 금액은 가구마다 매월 200만원으로 안내합니다. 다른 항목으로 해양 생태계와 우주 과학 전시관 및 미술 작품 소식도 소개합니다.'});
  });await page.locator('#reachAnalyze').click();await expect(page.locator('#reachConflicts')).toContainText('상충 후보');const claims=await page.locator('#reachEvidencePack .reachEvidenceItem > b').allTextContents();expect(claims.join(' ')).not.toContain('100만원');expect(claims.join(' ')).not.toContain('200만원');
+});
+
+test('desktop custom editor menu selects text and closes without uncaught errors',async({page})=>{
+ await ready(page,false);await page.locator('#input').fill('컨텍스트 메뉴 선택 테스트');await page.locator('#input').click({button:'right'});await expect(page.locator('#textContextMenu')).toBeVisible();await page.locator('[data-context-action="selectAll"]').click();expect(await page.locator('#input').evaluate(el=>el.selectionEnd-el.selectionStart)).toBe('컨텍스트 메뉴 선택 테스트'.length);await page.keyboard.press('Escape');await expect(page.locator('#textContextMenu')).toBeHidden();
 });
