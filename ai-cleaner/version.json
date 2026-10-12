@@ -1,7 +1,7 @@
 {
-  "version": "1.18.1",
-  "assetVersion": "1181",
+  "version": "1.18.2",
+  "assetVersion": "1182",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Reduced studio navigation vertical padding and group spacing on desktop and mobile."
+  "notes": "Warm rounded scrollbars for page and nested editors, with hover and system high-contrast support."
 }

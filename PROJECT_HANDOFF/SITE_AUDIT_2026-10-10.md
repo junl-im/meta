@@ -97,3 +97,7 @@ Reach 질문·URL 입력창은 공용 글 편집기의 높이를 상속받지 �
 ### 2026-10-12 — 1.18.1 studio navigation density
 - Reduced desktop studio buttons from 28px to 24px and mobile buttons from 32px to 28px. Reduced group gaps and header vertical padding while preserving tab selection and keyboard focus.
 - Validation: 79 browser tests, 298 static checks and module checks passed; 320/390/768/1280/1920px navigation geometry and desktop/mobile screenshots verified.
+
+### 2026-10-12 — 1.18.2 scrollbar styling
+- Shared warm beige track and rounded brown thumb for page, editors and scrollable panels; hover/drag colors, horizontal corner and forced-colors support. Native scrolling and mobile gestures preserved.
+- Validation: 298 static checks, module checks and 8 focused browser regression tests passed. Page/editor scrolling, themed 10px scrollbars, no horizontal overflow at five viewport widths, high contrast and screenshot verified.

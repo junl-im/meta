@@ -860,3 +860,22 @@ button,.btn,.mini,.tab,.floatWidget,.filelabel,summary{touch-action:manipulation
 .reachTool .reachUrls{height:148px;min-height:132px;resize:vertical}
 .reachTool .reachRaw{height:240px;min-height:180px;resize:vertical}
 @media(max-width:600px){.workspaceNav>.studioGroup:first-child{display:grid;gap:4px}.workspaceNav>.studioGroup:first-child .studioGroupLabel{padding-top:0}}
+
+/* Warm, restrained scrollbars for the page and nested editors. */
+:root{--scroll-track:#fff4e7;--scroll-thumb:#c89b73;--scroll-thumb-hover:#ae7544;--scroll-thumb-active:#905a2e}
+*{scrollbar-width:thin;scrollbar-color:var(--scroll-thumb) var(--scroll-track)}
+@supports selector(::-webkit-scrollbar){
+  *{scrollbar-width:auto;scrollbar-color:auto}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-track{background:var(--scroll-track);border-radius:999px}
+  ::-webkit-scrollbar-thumb{background:var(--scroll-thumb);border:2px solid var(--scroll-track);border-radius:999px;min-height:32px}
+  ::-webkit-scrollbar-thumb:hover{background:var(--scroll-thumb-hover)}
+  ::-webkit-scrollbar-thumb:active{background:var(--scroll-thumb-active)}
+  ::-webkit-scrollbar-corner{background:var(--scroll-track)}
+}
+@media(forced-colors:active){
+  *{scrollbar-width:auto;scrollbar-color:auto}
+  ::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:Canvas}
+  ::-webkit-scrollbar-thumb{background:ButtonText;border-color:Canvas}
+  ::-webkit-scrollbar-thumb:hover,::-webkit-scrollbar-thumb:active{background:Highlight}
+}
