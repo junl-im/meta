@@ -89,6 +89,10 @@ async function walk(dir, out = []) {
 }
 
 async function main() {
+  // Validate this checkout before replacing the generated staging directory.
+  const pkg=JSON.parse(await fs.readFile(path.join(ROOT,'package.json'),'utf8'));
+  if(pkg.name!=='ai-cleaner-browser-checks'||!inside(ROOT,OUT)||path.basename(OUT)!=='.pages-site')throw new Error('Run the Pages builder from the meta repository root.');
+  await ensureFile(path.join(APP,'version.json'));
   await fs.rm(OUT, { recursive: true, force: true });
   const appOut = path.join(OUT, 'ai-cleaner');
   const osOut = path.join(appOut, 'ai-writing-os');
@@ -99,6 +103,11 @@ async function main() {
   for (const file of optionalSharedPublicFiles) await copyOptionalFileRelative(ROOT, file, OUT);
   for (const file of appFiles) await copyFileRelative(APP, file, appOut);
   for (const dir of appDirs) await copyDirRelative(APP, dir, appOut);
+  // Publish configuration booleans only; credentials never enter the public artifact.
+  if (['true','false'].includes(process.env.DAILY_HAS_KEY) && ['true','false'].includes(process.env.DAILY_HAS_SEED)) {
+    const configured=process.env.DAILY_HAS_KEY==='true'&&process.env.DAILY_HAS_SEED==='true';
+    await fs.writeFile(path.join(appOut,'data','daily-engine-status.json'),JSON.stringify({schemaVersion:1,status:configured?'configured':'not_configured',checkedAt:new Date().toISOString()},null,2)+'\n');
+  }
   for (const file of assetFiles) await copyFileRelative(path.join(APP, 'assets'), file, assetOut);
   for (const file of osFiles) await copyFileRelative(OS, file, osOut);
   await copyFileRelative(OS, await portableOsZip(), osOut);

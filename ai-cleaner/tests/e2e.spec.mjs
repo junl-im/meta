@@ -239,8 +239,8 @@ test('rewrite draft survives an immediate close and reopen before debounce persi
 
 test('switching to image tool cancels an in-flight rewrite generation and releases the work lock', async ({ page }) => {
   await gotoReady(page);await page.locator('#input').fill('다른 도구 이동 중 재작성 취소 테스트입니다. 가격은 19,900원입니다.');await analyzeNow(page);await page.locator('#rewriteWidget').click();
-  await expect(page.locator('#rewritePanel')).toBeVisible();await page.locator('#rewriteGenerate').click();await expect(page.locator('#rewritePanel')).toHaveAttribute('aria-busy','true');
-  await page.locator('[data-tool="image"]').click();
+  await expect(page.locator('#rewritePanel')).toBeVisible();
+  const started=await page.evaluate(async()=>{const pending=window.AICleanerRewriteStudio.generate();const busy=document.querySelector('#rewritePanel').getAttribute('aria-busy');document.querySelector('[data-tool="image"]').click();await pending;return busy;});expect(started).toBe('true');
   await expect(page.locator('#imageTool')).toBeVisible();await expect(page.locator('#rewritePanel')).toBeHidden();await expect(page.locator('#rewritePanel')).toHaveAttribute('aria-busy','false');
   const lock=await page.evaluate(()=>window.AICleanerApp.workLock.isLocked('rewrite-generation'));expect(lock).toBeFalsy();await expect(page.locator('#rewriteDraft')).toHaveValue('');
 });
@@ -696,7 +696,7 @@ test('Blog Factory builds today topics prompt and never exposes provider launch 
   await expect(page.locator('#imageTool')).toBeHidden();
   await expect(page.locator('[data-tool="writing"]')).toHaveText('블로그 팩토리');
   await expect(page.locator('#osStatus')).toBeVisible();await expect(page.locator('#osStatus')).not.toContainText('V7');
-  await expect(page.locator('#osStaticMode')).toContainText('오늘의 주제 자동 준비');
+  await expect(page.locator('#osStaticMode')).toContainText('로컬 프롬프트 준비');
   await expect(page.locator('#osFactoryPresets [data-factory-mode="daily_topics"]')).toHaveClass(/active/);
   await expect(page.locator('#osProviders')).toHaveCount(0);
   await expect(page.locator('#osOpenAi')).toHaveCount(0);
@@ -742,7 +742,7 @@ test('Blog Factory keeps its task state separate from text cleaner and survives 
 test('Blog Factory copy-first flow stays simple on mobile', async ({ page }) => {
   await page.setViewportSize({width:390,height:844});
   await gotoReady(page);await page.locator('[data-tool="writing"]').click();
-  await expect(page.locator('.osSimpleSteps')).toContainText('자동 주제');
+  await expect(page.locator('.osSimpleSteps')).toContainText('주제 준비');
   await expect(page.locator('.osSimpleSteps')).toContainText('하나 선택');
   await expect(page.locator('.osSimpleSteps')).toContainText('글 프롬프트');
   await expect(page.locator('.osSimpleSteps')).toContainText('복사');

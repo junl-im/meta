@@ -855,3 +855,19 @@ button,.btn,.mini,.tab,.floatWidget,.filelabel,summary{touch-action:manipulation
 /* Research evidence: preserve readable URLs and collection errors on narrow screens. */
 .reachStatus{white-space:pre-line;overflow-wrap:anywhere}
 .reachEvidenceItem a{overflow-wrap:anywhere;text-decoration:underline}
+
+/* Linked audio workspaces stay separate from the in-page tool tabs. */
+.audioStudios{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid var(--line)}
+.audioStudiosLabel{font-size:12px;font-weight:800;color:var(--muted)}
+.audioStudios a{display:flex;align-items:center;gap:10px;min-height:44px;padding:10px 14px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);text-decoration:none}
+.audioStudios a:hover{background:var(--soft);border-color:var(--orange)}
+.audioStudios a:focus-visible{outline:3px solid var(--orange);outline-offset:3px}
+.audioStudios b{font-size:13px}.audioStudios small{font-size:11px;color:var(--muted)}
+.researchAttachment{margin-bottom:14px}.researchAttachment p,.factoryBoundary{font-size:12px;line-height:1.7;color:var(--muted)}
+.researchAttachment textarea{width:100%;margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:12px;resize:vertical;background:var(--bg);color:var(--ink)}
+@media(max-width:600px){.audioStudiosLabel{width:100%}.audioStudios a{flex:1;min-width:0;flex-direction:column;align-items:flex-start;gap:4px}}
+
+.osDailyEngineHead{padding-top:12px;padding-bottom:12px;align-items:flex-start}
+.osDailyEngineHead>div{min-width:0;display:grid;gap:5px}
+.osDailyEngineHead .sub{display:block;line-height:1.5}
+.osDailyEngineHead .osStep{min-width:42px;width:auto;padding:0 6px;font-size:10px}

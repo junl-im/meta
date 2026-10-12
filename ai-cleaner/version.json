@@ -1,7 +1,7 @@
 {
-  "version": "1.16.1",
-  "assetVersion": "1161",
+  "version": "1.17.0",
+  "assetVersion": "1170",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Explicit text cleanup; cancellable source collection; honest evidence labels, source links and stale-report invalidation; reproducible dependency installation. Fix undeclared desktop context-menu target; fail all browser regressions on uncaught page errors."
+  "notes": "Linked audio studios; reviewed Reach-to-blog research attachments; deployment-aware daily generation status."
 }

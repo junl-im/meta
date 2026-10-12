@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://r.jina.ai; worker-src 'self' blob:; font-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1161">
+<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1170">
 <style id="bootCritical">html:not(.boot-ready) body{visibility:hidden}html{background:#fff8f0}html.app-booting{overflow-anchor:none}html.app-booting body{cursor:progress}html.app-booting body *{cursor:progress!important}</style>
 <script src="js/boot.js" defer></script>
 </head>
@@ -39,6 +39,11 @@
     </div>
   </div>
 </header>
+<nav class="audioStudios" aria-label="오디오 작업 도구">
+  <span class="audioStudiosLabel">오디오 스튜디오</span>
+  <a id="openMastering" href="https://junl-im.github.io/foxbear-mastering-studio/" target="_blank" rel="noopener noreferrer"><b>마스터링 ↗</b><small>음질 정리 · 새창 열기</small></a>
+  <a id="openSorion" href="https://junl-im.github.io/AI-/" target="_blank" rel="noopener noreferrer"><b>소리온 ↗</b><small>음성 제작 · 새창 열기</small></a>
+</nav>
 
 <main id="textTool" role="tabpanel" aria-labelledby="toolTabText">
   <section class="hero">
@@ -220,17 +225,17 @@
 <main id="writingTool" class="hidden" role="tabpanel" aria-labelledby="toolTabWriting">
   <section class="hero osHero osSimpleHero osFactoryHero">
     <div class="osHeroBadges"><span class="tag orange">블로그 팩토리</span><span class="tag blue">TODAY BLOG</span><span class="perfPill" id="osStatus">내 기기에서 준비 중…</span></div>
-    <h1>아침에 열면 오늘 주제가 준비되고, <span>고른 주제는 글 프롬프트로.</span></h1>
-    <p>매일 새로운 주제를 준비해두고, 마음에 드는 소재를 고르면 아래 생산 도구로 바로 넘겨 <b>글 1편 · 3편 생산 · 소재 비축</b> 프롬프트를 만들고 복사할 수 있습니다.</p>
+    <h1>조사 자료와 관심 주제를 모아, <span>나만의 글 프롬프트로.</span></h1>
+    <p>관심 분야를 직접 적거나 준비된 자동 주제·Reach 조사 자료를 활용해 <b>글 1편 · 3편 생산 · 소재 비축</b> 프롬프트를 만들고 복사할 수 있습니다.</p>
     <div class="osSimpleSteps osFactorySteps" aria-label="블로그 팩토리 사용 순서">
-      <span><b>1</b> 자동 주제</span><span><b>2</b> 하나 선택</span><span><b>3</b> 글 프롬프트</span><span><b>4</b> 복사</span>
+      <span><b>1</b> 주제 준비</span><span><b>2</b> 하나 선택</span><span><b>3</b> 글 프롬프트</span><span><b>4</b> 복사</span>
     </div>
   </section>
 
   <div class="osSimpleWorkspace">
     <section class="card osCard osDailyEngineCard" id="osDailyEngineCard" aria-labelledby="osDailyEngineTitle">
       <div class="head osDailyEngineHead">
-        <div><b id="osDailyEngineTitle"><span class="osStep">AUTO</span> 오늘 자동 주제</b><span class="sub">매일 아침 새로운 주제를 준비합니다.</span></div>
+        <div><b id="osDailyEngineTitle"><span class="osStep">AUTO</span> 오늘 자동 주제</b><span class="sub">자동 생성 설정이 연결되면 매일 아침 주제를 준비합니다.</span></div>
         <span class="perfPill" id="osDailyEngineStatus">확인 중…</span>
       </div>
       <div class="body">
@@ -241,11 +246,16 @@
         <div class="osDailyTopics" id="osDailyTopics" aria-live="polite"></div>
         <div class="osDailyEngineEmpty" id="osDailyEngineEmpty" hidden>
           <b>오늘의 주제가 아직 준비되지 않았습니다.</b>
-          <span>잠시 후 다시 확인하거나, 아래에서 직접 주제 프롬프트를 만들어 보세요.</span>
+          <span>아래 프롬프트 빌더는 자동 주제와 관계없이 사용할 수 있습니다.</span>
         </div>
       </div>
     </section>
 
+    <section id="osResearchAttachment" class="card researchAttachment" hidden aria-labelledby="osResearchTitle">
+      <div class="head"><b id="osResearchTitle">Reach에서 가져온 조사 자료</b><button id="osClearResearch" class="mini passive" type="button">첨부 해제</button></div>
+      <div class="body"><p>기존 요청은 유지됩니다. 이 자료는 사실로 확정된 내용이나 나의 경험이 아닙니다. 원문과 상충 항목을 검토한 뒤 프롬프트를 만들어 주세요.</p><details><summary>전달된 출처와 근거 보기</summary><textarea id="osResearchPreview" rows="8" readonly aria-label="Reach 조사 자료"></textarea></details></div>
+    </section>
+    <p class="factoryBoundary">이곳에서는 다른 AI에 붙여 넣을 프롬프트를 만듭니다. 글 본문과 이미지를 직접 생성하지 않습니다.</p>
     <section class="card osCard osTaskCard osSimpleCard osFactoryCard">
       <div class="head"><div><b><span class="osStep">1</span> 오늘 무엇을 준비할까요?</b><span class="sub">가장 자주 쓰는 흐름은 ‘오늘의 주제’입니다. 관심 분야를 넓게 적어도 됩니다.</span></div></div>
       <div class="body">
@@ -424,6 +434,7 @@
         <div class="actions reachActions reachAnalyzeActions">
           <button id="reachAnalyze" class="btn orange" type="button" disabled>출처 비교 실행</button>
           <button id="reachCopyAll" class="btn primary" type="button" disabled>근거팩 복사</button>
+          <button id="reachSendToBlog" class="btn" type="button" disabled>블로그 팩토리로 보내기</button>
           <button id="reachSaveTxt" class="btn" type="button" disabled>TXT 저장</button>
         </div>
         <div class="reachMetrics" id="reachMetrics">

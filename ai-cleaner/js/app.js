@@ -61,7 +61,21 @@ function loadLazyScript(src,{timeoutMs=LAZY_SCRIPT_TIMEOUT_MS}={}){
   lazyScripts.set(src,p);return p;
 }
 async function ensureImageAnalyzer(){if(typeof window.loadImage==='function')return window.loadImage;await loadLazyScript(`js/image-analyzer.js?v=${ASSET_VERSION}`);if(typeof window.loadImage!=='function')throw new Error('이미지 검사 엔진 초기화 실패');return window.loadImage;}
-async function ensureGomFoxReach(){if(window.GomFoxReach)return window.GomFoxReach;await loadLazyScript(`js/features/gomfox-reach.js?v=${ASSET_VERSION}`);if(!window.GomFoxReach)throw new Error('GomFox Reach 초기화 실패');window.GomFoxReach.init?.({showToast});return window.GomFoxReach;}
+async function sendResearchToBlog(payload){
+  const controller=await ensureAiWritingOsController();
+  await controller.init();
+  controller.importResearch(payload);
+  activateToolTab(document.getElementById('toolTabWriting'));
+  document.getElementById('osResearchAttachment')?.scrollIntoView({behavior:'auto',block:'center'});
+  document.getElementById('osBuildPrompt')?.focus({preventScroll:true});
+  showToast('조사 자료를 첨부했습니다. 확인 후 프롬프트를 만들어 주세요.');
+}
+async function ensureGomFoxReach(){
+  if(!window.GomFoxReach)await loadLazyScript(`js/features/gomfox-reach.js?v=${ASSET_VERSION}`);
+  if(!window.GomFoxReach)throw new Error('GomFox Reach 초기화 실패');
+  window.GomFoxReach.init?.({showToast,onSendToBlog:sendResearchToBlog});
+  return window.GomFoxReach;
+}
 async function ensureRewriteStudio(){if(window.AICleanerRewriteStudio)return window.AICleanerRewriteStudio;await loadLazyScript(`js/rewrite-studio.js?v=${ASSET_VERSION}`);if(!window.AICleanerRewriteStudio)throw new Error('재작성 스튜디오 초기화 실패');return window.AICleanerRewriteStudio;}
 async function ensureAiWritingOsController(){if(aiWritingController)return aiWritingController;await loadLazyScript(`js/features/ai-writing-os.js?v=${ASSET_VERSION}`);const factory=window.AICleanerModules?.createAiWritingOsController;if(typeof factory!=='function')throw new Error('블로그 팩토리 모듈 초기화 실패');const controller=factory({storage:aiWritingStorage,workLock,showToast:(message)=>showToast(message)});aiWritingController=controller;if(pendingAiWritingRestore){const pending=pendingAiWritingRestore;pendingAiWritingRestore=null;controller.restoreState(pending);}return controller;}
 const historyStore=Modules.createHistoryStore({limit:60,signature:s=>JSON.stringify([s.output,s.manual,s.applied,s.issueBase])});

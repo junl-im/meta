@@ -149,6 +149,9 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Prepare isolated GitHub Pages artifact
+        env:
+          DAILY_HAS_KEY: ${{ secrets.OPENAI_API_KEY != '' }}
+          DAILY_HAS_SEED: ${{ vars.BLOG_FACTORY_SEED != '' }}
         run: node .github/scripts/build-pages-artifact.mjs
 
       - name: Upload GitHub Pages artifact

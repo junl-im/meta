@@ -1,5 +1,5 @@
 'use strict';
-const CACHE_NAME='ai-cleaner-shell-1.16.1';
+const CACHE_NAME='ai-cleaner-shell-1.17.0';
 const CORE_ASSETS=[
   './','./index.html','./version.json','./site.webmanifest','./css/app.css','./js/boot.js',
   './js/core/event-bus.js','./js/core/history-store.js','./js/core/work-lock.js','./js/core/text-utils.js',
@@ -7,10 +7,10 @@ const CORE_ASSETS=[
   './js/services/analysis-performance-governor.js','./js/services/analysis-coordinator.js','./js/services/update-manager.js',
   './js/ui/panel-manager.js','./js/ui/diff-view.js','./js/features/file-import.js','./js/features/typewriter-engine.js',
   './js/features/result-checkpoint-store.js','./js/features/gomfox-reach.js','./js/app.js','./vendor/app-core.bundle.js','./js/rewrite-studio.js','./js/features/ai-writing-os.js',
-  './data/daily-topics.json','./ai-writing-os/prompt-compiler.json','./ai-writing-os/os-manifest.json',
+  './data/daily-engine-status.json','./data/daily-topics.json','./ai-writing-os/prompt-compiler.json','./ai-writing-os/os-manifest.json',
   './assets/fox-logo.png','./assets/favicon-v66.png','./assets/apple-touch-icon-v66.png','./assets/icon-v66-192.png','./assets/icon-v66-512.png'
 ];
-const FRESH_PATHS=new Set(['/version.json','/data/daily-topics.json']);
+const FRESH_PATHS=new Set(['/version.json','/data/daily-topics.json','/data/daily-engine-status.json']);
 const normalizeKey=request=>{
   const url=new URL(request.url);
   return new Request(url.origin+url.pathname,{method:'GET',headers:{accept:request.headers.get('accept')||'*/*'},credentials:'same-origin'});
