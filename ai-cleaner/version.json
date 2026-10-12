@@ -1,7 +1,7 @@
 {
-  "version": "1.17.1",
-  "assetVersion": "1171",
+  "version": "1.17.2",
+  "assetVersion": "1172",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Consistent spacious studio cards for all tools with responsive layout and accessible tab navigation."
+  "notes": "Refined studio navigation with compact padding, spacing and readable labels."
 }
