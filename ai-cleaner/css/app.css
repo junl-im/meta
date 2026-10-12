@@ -17,10 +17,8 @@ button,textarea,input,select{font:inherit}button{cursor:pointer}.hidden{display:
 .logo{width:42px;height:42px;border-radius:50%;overflow:hidden;display:grid;place-items:center;flex:0 0 42px;font-size:0;
   background:#fff url("../assets/fox-logo.png") center/cover no-repeat;box-shadow:0 2px 8px rgba(43,29,18,.12)}
 .brand b{font-size:16px}.pill{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:800;background:var(--orange);color:white}
-.sub{font-size:11px;color:var(--muted);margin-top:2px}.toptools{display:flex;align-items:center;gap:8px}
-.toolnav{display:flex;gap:4px;background:#f4e8dc;padding:4px;border-radius:999px}
-.toolnav button{border:0;background:transparent;border-radius:999px;padding:8px 12px;font-size:10px;font-weight:900;color:var(--muted)}
-.toolnav button.active{background:#fff;color:var(--ink);box-shadow:0 2px 8px #00000010}
+.sub{font-size:11px;color:var(--muted);margin-top:2px}
+
 .hero{padding:22px 0 14px}.hero h1{font-size:28px;line-height:1.15;margin:0;font-weight:900}.hero h1 span{color:var(--orange)}
 .hero p{color:var(--muted);font-size:12px;line-height:1.65;max-width:900px;margin:8px 0 0}
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
@@ -100,11 +98,11 @@ th{background:#fff7ee;color:var(--muted);position:sticky;top:0}.footer{text-alig
 
 @media(max-width:980px){
   .workspace,.imageGrid{grid-template-columns:1fr}.textarea,.resultarea{height:340px;min-height:340px}.signalgrid,.evidenceList,.metaDetailGrid{grid-template-columns:1fr}
-  .toolnav button{padding:8px 10px}.top .sub{display:none}
+  .top .sub{display:none}
 }
 @media(max-width:760px){
   .wrap{padding:0 12px 42px}.top{height:auto;min-height:64px;padding:8px 0;gap:8px}.brand b{font-size:13px}.logo{width:38px;height:38px;flex-basis:38px}
-  .toolnav button{font-size:9.5px;padding:8px}.hero h1{font-size:23px}.v6select{max-width:100%}.xray{min-height:240px}
+  .hero h1{font-size:23px}.v6select{max-width:100%}.xray{min-height:240px}
   .floatingDock{right:10px;bottom:10px}.floatWidget{min-width:116px}
   .floatPanel,.floatPanel.techPanel{left:8px!important;right:8px!important;top:auto!important;bottom:64px!important;width:auto;max-height:72vh;border-radius:18px}
   .floatHead{cursor:default}.v62compare{grid-template-columns:1fr}
@@ -163,7 +161,6 @@ img{-webkit-user-drag:none;user-drag:none}
 .floatPanel::after{content:"◢";position:absolute;right:5px;bottom:3px;font-size:11px;color:#c9b7a8;pointer-events:none;opacity:.75}
 @media(max-width:760px){.floatPanel::after{display:none}.floatWidget{width:132px}}
 
-
 /* v6.6 usability */
 #cleanedPane{position:relative}
 .typingPreviewOverlay{position:absolute;inset:0;z-index:8;background:#fffdf9;border:1px solid #ffc98d;border-radius:15px;box-shadow:0 14px 38px rgba(43,29,18,.16);display:flex;flex-direction:column;overflow:hidden}
@@ -174,7 +171,6 @@ img{-webkit-user-drag:none;user-drag:none}
 .btn:disabled,.mini:disabled{cursor:not-allowed;opacity:.46;transform:none!important}.mini.suggest{background:#fff7ed;border-color:#ffd0a0;color:#754100}
 .reviewChanged{border-color:#bfe0c5!important;box-shadow:0 0 0 2px rgba(24,122,43,.08)}
 @media(max-width:760px){.typingPreviewOverlay{position:fixed;left:8px;right:8px;top:74px;bottom:66px;inset:auto;z-index:240;border-radius:18px}.typingPreviewText{font-size:13px}.bridgeBtn.previewBridge{width:min(300px,88vw)}}
-
 
 /* v6.7 completion pass */
 .detailDiagnostics{margin-top:12px;overflow:hidden}
@@ -206,7 +202,6 @@ img{-webkit-user-drag:none;user-drag:none}
 @media(max-width:760px){
   .detailDiagnostics>summary{padding:0 12px}.detailSummary{max-width:48%;overflow:hidden;text-overflow:ellipsis}.diffRow{grid-template-columns:42px 1fr}.historyBtn{min-width:0}
 }
-
 
 /* v6.8 rewrite studio */
 .floatWidget.rewrite{background:#fff4e8;color:#8a4300;border-color:#ffbd78;position:relative}
@@ -243,7 +238,6 @@ img{-webkit-user-drag:none;user-drag:none}
   .rewriteOptions{grid-template-columns:1fr}.rewriteDraft{min-height:180px}.directTyped{min-height:150px}.factLockHead{align-items:center}.factLockHead>div .sub{display:none}
 }
 
-
 /* ===== v6.8.1 precision UI polish ===== */
 .btn,.filelabel,.check,.statpill,.cleanScore,.perfPill,.mini,.reviewEditCount{box-sizing:border-box;line-height:1.2}
 .workspace>.card:first-child .actions{display:grid;grid-template-columns:92px minmax(126px,1fr) 92px;gap:8px;align-items:center}
@@ -271,11 +265,9 @@ img{-webkit-user-drag:none;user-drag:none}
 @media(max-width:620px){.v6toolbar{grid-template-columns:auto minmax(0,1fr);gap:8px}.v6toolbar>.sub{justify-content:flex-start}.cleanScore{grid-column:1/2;justify-self:start;min-width:0;width:100%}.perfPill{grid-column:2/3;justify-self:start;min-width:72px}.workspace>.card:first-child .actions{grid-template-columns:minmax(74px,.8fr) minmax(116px,1.25fr) minmax(74px,.8fr)}}
 @media(max-width:360px){.settings{grid-template-columns:1fr}.workspace>.card:first-child .actions{grid-template-columns:1fr 1.25fr 1fr;gap:6px}.workspace>.card:first-child .actions>.btn,.workspace>.card:first-child .actions>.filelabel{font-size:10px;padding:0 8px}}
 
-
 /* ===== v6.8.2 focus flow ===== */
 .resultarea.resultApplied{animation:resultAppliedFocus 1.2s ease}
 @keyframes resultAppliedFocus{0%{box-shadow:0 0 0 0 rgba(255,122,0,0);border-color:var(--line)}25%{box-shadow:0 0 0 7px rgba(255,122,0,.20),0 14px 34px rgba(255,122,0,.14);border-color:#ff8d24}70%{box-shadow:0 0 0 3px rgba(255,122,0,.08);border-color:#ffb36f}100%{box-shadow:0 0 0 0 rgba(255,122,0,0);border-color:var(--line)}}
-
 
 /* ===== v6.8.3 cohesion & integrity ===== */
 .rewriteValidation.warn{box-shadow:inset 3px 0 0 #b42318}
@@ -284,7 +276,6 @@ img{-webkit-user-drag:none;user-drag:none}
   .floatPanel,.floatPanel.reviewPanel,.floatPanel.techPanel,.floatPanel.rewritePanel{left:8px!important;right:8px!important;top:auto!important;bottom:66px!important;width:auto!important;height:min(78vh,690px)!important;min-width:0!important;min-height:0!important;max-width:none!important;max-height:78vh!important;resize:none!important;border-radius:20px 20px 14px 14px}
   .floatPanel::after{display:none}.floatHead{cursor:default}.floatingDock{right:10px;bottom:10px}
 }
-
 
 /* ===== v6.8.3 original direct-write mode ===== */
 .directOriginalNote{border-color:#cfe9cf;background:#f5fbf5}
@@ -295,7 +286,6 @@ img{-webkit-user-drag:none;user-drag:none}
 .directTyped:focus{border-color:#ff9b3d;box-shadow:0 0 0 3px rgba(255,122,0,.13)}
 @media(max-width:620px){.directInputBadge{align-items:flex-start;flex-direction:column}.directInputBadge span{text-align:left}}
 
-
 /* ===== v6.8.4 internal result typewriter ===== */
 .typingPreviewOverlay{inset:8px 8px auto auto;width:min(390px,calc(100% - 16px));height:auto;max-height:none;z-index:12;border-radius:14px;box-shadow:0 12px 30px rgba(43,29,18,.16);background:#fffdf9}
 .typingPreviewHead{min-height:46px}.typingPreviewHead>div{align-items:flex-start;flex-direction:column;gap:1px}.typingPreviewHead .sub{margin:0;font-size:9.5px;line-height:1.35}
@@ -303,7 +293,6 @@ img{-webkit-user-drag:none;user-drag:none}
 .typingPreviewControls{padding:7px 10px}.resultarea.typewriterActive{outline:2px solid rgba(255,122,0,.26);box-shadow:0 0 0 4px rgba(255,122,0,.08) inset;caret-color:transparent}
 #typingPreviewButton.typewriterRunning{cursor:progress;opacity:.82}
 @media(max-width:980px){.typingPreviewOverlay{position:absolute;left:8px;right:8px;top:8px;bottom:auto;width:auto;max-width:none;border-radius:14px}.typingPreviewHead .sub{display:block}.typingPreviewText{font-size:9.5px}.bridgeBtn.previewBridge small{display:block}}
-
 
 /* ===== v6.8.5 foundation audit ===== */
 .v6toolbar{grid-template-columns:auto minmax(0,1fr)}
@@ -315,9 +304,8 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
 .check input[type="checkbox"]:disabled{opacity:.55;cursor:not-allowed}.check:has(input:disabled){opacity:.58}
 #directTarget:disabled{opacity:1;color:var(--ink);background:#f8f4ef;cursor:default}
 @media(max-width:620px){.resultActions{grid-template-columns:repeat(2,minmax(0,1fr))}.resultHead{align-items:flex-start}.resultHead .tabs{width:100%;margin-left:0;justify-content:flex-start}.tab{padding-left:9px;padding-right:9px}}
-@media(max-width:420px){.top{height:auto;min-height:68px;padding:7px 0;gap:6px;flex-wrap:wrap;align-content:center}.brand{width:100%}.brand .sub{display:none}.logo{width:36px;height:36px;flex-basis:36px}.toptools{width:100%}.toolnav{width:100%;display:grid}.toolnav button{width:100%}.resultActions{grid-template-columns:repeat(2,minmax(0,1fr))}.hero{padding-top:16px}.hero h1{font-size:21px}}
+@media(max-width:420px){.top{height:auto;min-height:68px;padding:7px 0;gap:6px;flex-wrap:wrap;align-content:center}.brand{width:100%}.brand .sub{display:none}.logo{width:36px;height:36px;flex-basis:36px}.resultActions{grid-template-columns:repeat(2,minmax(0,1fr))}.hero{padding-top:16px}.hero h1{font-size:21px}}
 @media(max-width:340px){.resultActions{grid-template-columns:1fr}}
-
 
 /* ===== v6.8.6 UI / layout stabilization ===== */
 .workspace{position:relative;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:stretch}
@@ -347,7 +335,6 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
 }
 @media(max-width:620px){.workspace{gap:10px}.bridgeAction{min-height:50px}.bridgeBtn,.bridgeBtn.previewBridge{width:min(300px,88vw);max-width:88vw;height:44px;min-height:44px}.workspace>.card>.head{gap:8px}}
 @media(max-width:420px){.bridgeBtn,.bridgeBtn.previewBridge{width:min(280px,90vw);max-width:90vw;padding:0 12px}.bridgeBtn.previewBridge small{font-size:9.5px}.workspace>.card>.head{padding-left:12px;padding-right:12px}}
-
 
 /* ===== 1.0.0 mobile compact panels / product baseline ===== */
 .floatHeadActions{display:flex;align-items:center;gap:4px;flex:0 0 auto}.mobilePanelSize{display:none;font-size:16px;font-weight:900}
@@ -382,7 +369,6 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
   .floatWidget{min-width:0;width:38px;height:38px;padding:0;justify-content:center}.floatWidget>span:not(.widgetIcon),.floatWidget>b{display:none}.widgetIcon{font-size:14px}
 }
 
-
 /* ===== 1.1.1 visible-text write + widget labels ===== */
 .bridgeBtn.previewBridge{max-width:min(360px,calc(100vw - 30px));white-space:nowrap}
 @media(max-width:620px){.bridgeBtn.previewBridge{font-size:9.5px;padding-inline:9px;gap:5px}.bridgeBtn.previewBridge b{font-size:9.5px}.bridgeBtn.previewBridge small{font-size:9.5px}}
@@ -392,7 +378,6 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
   .floatWidget>span:not(.widgetIcon){display:inline;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .floatWidget>b{display:none}.widgetIcon{font-size:13px;flex:0 0 auto}
 }
-
 
 /* ===== 1.2.1 standalone visible-text typewriter panel ===== */
 .floatPanel.typingPreviewPanel{width:min(430px,calc(100vw - 32px));height:auto;min-height:0;max-height:min(360px,calc(100vh - 100px));right:178px;bottom:18px;resize:none}
@@ -459,7 +444,6 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
 }
 @media(max-width:420px){.top{height:auto;min-height:calc(68px + env(safe-area-inset-top));padding:calc(7px + env(safe-area-inset-top)) 0 7px}}
 
-
 /* ===== 1.6.4 simplified source -> typewriter result flow ===== */
 #typingPreviewButton.typewriterRecommended{border-color:#ff7a00;box-shadow:0 0 0 5px rgba(255,248,240,.98),0 0 0 8px rgba(255,122,0,.18),0 12px 28px rgba(255,122,0,.34);animation:typewriterRecommendCue 1.15s ease 3}
 #typingPreviewButton.typewriterRecommended b{font-size:11px}
@@ -469,7 +453,6 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
 .resultCard.typewriterDestinationActive .resultTitle>b:after{content:" · 자동작성 중";color:#b85b00;font-size:9.5px;font-weight:850}
 @keyframes typewriterRecommendCue{0%,100%{transform:translateY(0) scale(1)}42%{transform:translateY(-2px) scale(1.025);box-shadow:0 0 0 5px rgba(255,248,240,.98),0 0 0 12px rgba(255,122,0,.10),0 14px 30px rgba(255,122,0,.38)}}
 @media(max-width:980px){#typingPreviewButton.typewriterRecommended{width:min(330px,88vw)}.resultCard.typewriterDestinationActive{box-shadow:0 0 0 3px rgba(255,122,0,.11),var(--shadow)}}
-
 
 /* ===== 1.6.5 async intent + compact mobile action flow ===== */
 .hero p b,.notice b{color:var(--ink)}
@@ -489,7 +472,6 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
   .workspace>.card:first-child .actions.sourceActions>.btn,.workspace>.card:first-child .actions.sourceActions>.filelabel{height:40px;padding:0 5px;font-size:10.5px}
   .resultHead .tab{padding:7px 7px;font-size:10px}
 }
-
 
 /* ===== 1.6.6 UX priority + completion flow ===== */
 .resultNextStep{margin:9px 0 2px;padding:8px 10px;border:1px solid #eadfce;border-radius:12px;background:#fbf8f3;color:var(--muted);font-size:9.5px;font-weight:750;line-height:1.45}
@@ -651,7 +633,6 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
   .osCompareNote p{font-size:9.5px}
 }
 
-
 /* 1.8.3 AI Writing OS linkage + clarity UX */
 .osProvider.active::after{content:'내 AI';margin-left:6px;padding:2px 5px;border-radius:999px;background:rgba(255,255,255,.22);font-size:9.5px;font-weight:950;letter-spacing:-.02em}
 .osDeliveryPlan{display:flex;align-items:flex-start;gap:9px;margin-top:10px;padding:10px 11px;border:1px solid #eadfce;border-radius:12px;background:#fffaf4}
@@ -717,7 +698,6 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
   .osFactorySteps,.osFactoryPresets,.osFactoryGrid{grid-template-columns:1fr}.osFactoryPipeline{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
-
 /* 1.8.7 Blog Factory copy-first + daily prompt preparation */
 .osFactoryPresets{grid-template-columns:repeat(5,minmax(0,1fr))}
 .osAutoDaily{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:11px;margin-top:12px;padding:11px 12px;border:1px solid #eadfce;border-radius:12px;background:linear-gradient(135deg,#fffaf4,#fff)}
@@ -766,7 +746,6 @@ button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visi
 .osPromptMetrics{flex:0 0 auto;color:var(--muted);font-size:10px;font-weight:800;white-space:nowrap}
 @media(max-width:760px){.osDailyEngineActions{width:100%}.osDailyEngineActions .mini{flex:1}.osDailyTopicActions{justify-content:stretch}.osDailyTopicActions .mini{flex:1;min-height:36px}.osCompilerSummaryRow{display:grid;gap:4px}.osPromptMetrics{white-space:normal}}
 
-
 /* ===== 1.10.0 mobile accessibility / interaction foundation ===== */
 html{scroll-padding-top:88px}
 button,.btn,.mini,.tab,.floatWidget,.filelabel,summary{touch-action:manipulation}
@@ -788,22 +767,21 @@ button,.btn,.mini,.tab,.floatWidget,.filelabel,summary{touch-action:manipulation
 .osDailyTopic h3,.osDailyTopic p,.osDailyTopic dd,.osFactoryModeSummary span,.osCompilerSummary{overflow-wrap:anywhere;word-break:normal}
 @media(max-width:760px){
   .wrap{padding-bottom:max(104px,calc(env(safe-area-inset-bottom) + 92px))}
-  .toptools,.toolnav,.osFactoryPresets,.osFactoryGrid,.osFactoryContextBody,.osDailyTopic,.osDailyTopicTop{min-width:0}
-  .toolnav button{font-size:10px;line-height:1.2}
+  .toolnav,.osFactoryPresets,.osFactoryGrid,.osFactoryContextBody,.osDailyTopic,.osDailyTopicTop{min-width:0}
+
   .osFactoryContext>summary,.osAdvanced>summary{min-height:var(--touch-target)}
   .osDailyTopicDetails>summary{display:flex;align-items:center;min-height:var(--touch-target-compact)}
   .osFactoryPresets button,.osDailyTopicActions .mini,.osDailyEngineActions .mini{min-width:0}
 }
 @media(max-width:420px){
-  .toolnav{grid-template-columns:repeat(2,minmax(0,1fr));gap:3px}
-  .toolnav button{padding:7px 3px;font-size:10px}
+
   .osFactoryPresets{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
   .osFactoryPresets button{min-height:58px;padding:8px}
   .osFactoryPresets button b{font-size:10.5px}.osFactoryPresets button span{font-size:10px}
   .osFactoryModeSummary{padding:9px 10px}
 }
 @media(max-width:340px){
-  .toolnav button{font-size:9.5px}
+
   .osFactoryPresets{grid-template-columns:1fr}
 }
 @media(prefers-reduced-motion:reduce){
@@ -817,7 +795,6 @@ button,.btn,.mini,.tab,.floatWidget,.filelabel,summary{touch-action:manipulation
   .resultCard.resultDestinationPulse{animation:none;border-color:#92cf9d;box-shadow:0 0 0 3px #187a2b14}
   #typingPreviewButton.typewriterRecommended{outline:3px solid rgba(255,122,0,.22);outline-offset:3px}
 }
-
 
 /* v1.14.0 · text forensics */
 .floatWidget.forensic .widgetIcon{font-weight:800}
@@ -834,7 +811,6 @@ button,.btn,.mini,.tab,.floatWidget,.filelabel,summary{touch-action:manipulation
 .forensicRow small{color:var(--muted);overflow-wrap:anywhere}
 .forensicRow em{font-style:normal;font-size:11px;color:var(--muted);flex:0 0 auto}
 .forensicNotice{margin:12px 2px 0}
-
 
 /* v1.15.2 · GomFox Reach */
 .reachTool{padding-bottom:40px}.reachHeroMark{display:inline-flex;align-items:center;gap:5px;margin-bottom:8px;font-weight:900;font-size:14px}.reachHeroMark span{color:var(--accent)}.reachHeroMark b{font-size:11px;padding:3px 6px;border-radius:999px;background:var(--soft);color:var(--muted)}
@@ -856,18 +832,26 @@ button,.btn,.mini,.tab,.floatWidget,.filelabel,summary{touch-action:manipulation
 .reachStatus{white-space:pre-line;overflow-wrap:anywhere}
 .reachEvidenceItem a{overflow-wrap:anywhere;text-decoration:underline}
 
-/* Linked audio workspaces stay separate from the in-page tool tabs. */
-.audioStudios{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid var(--line)}
-.audioStudiosLabel{font-size:12px;font-weight:800;color:var(--muted)}
-.audioStudios a{display:flex;align-items:center;gap:10px;min-height:44px;padding:10px 14px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);text-decoration:none}
-.audioStudios a:hover{background:var(--soft);border-color:var(--orange)}
-.audioStudios a:focus-visible{outline:3px solid var(--orange);outline-offset:3px}
-.audioStudios b{font-size:13px}.audioStudios small{font-size:11px;color:var(--muted)}
 .researchAttachment{margin-bottom:14px}.researchAttachment p,.factoryBoundary{font-size:12px;line-height:1.7;color:var(--muted)}
 .researchAttachment textarea{width:100%;margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:12px;resize:vertical;background:var(--bg);color:var(--ink)}
-@media(max-width:600px){.audioStudiosLabel{width:100%}.audioStudios a{flex:1;min-width:0;flex-direction:column;align-items:flex-start;gap:4px}}
 
 .osDailyEngineHead{padding-top:12px;padding-bottom:12px;align-items:flex-start}
 .osDailyEngineHead>div{min-width:0;display:grid;gap:5px}
 .osDailyEngineHead .sub{display:block;line-height:1.5}
 .osDailyEngineHead .osStep{min-width:42px;width:auto;padding:0 6px;font-size:10px}
+
+/* One card system for the four local tools and two linked audio studios. */
+.top{height:auto;min-height:calc(76px + env(safe-area-inset-top));padding:calc(12px + env(safe-area-inset-top)) 0 12px}
+.workspaceNav{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:24px;padding:20px 0 22px;border-bottom:1px solid var(--line)}
+.studioGroup{min-width:0}.studioGroupLabel{display:flex;align-items:center;gap:10px;margin:0 0 10px;font-size:12px;line-height:1.5;font-weight:800;color:var(--muted)}
+.studioGroupLabel span{font-size:10px;font-weight:500}
+.toolnav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;background:none;padding:0;border-radius:0}
+.audioStudios{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.workspaceNav .studioCard{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:7px;min-width:0;min-height:76px;padding:15px 16px;border:1px solid var(--line);border-radius:16px;background:var(--card);color:var(--ink);text-align:left;text-decoration:none;box-shadow:0 3px 12px rgba(43,29,18,.025)}
+.studioCard b{font-size:13px;line-height:1.4;font-weight:800;word-break:keep-all}.studioCard small{font-size:10.5px;line-height:1.5;color:var(--muted);word-break:keep-all}
+.workspaceNav .studioCard:hover{background:var(--soft);border-color:#e4ad75}
+.workspaceNav .studioCard.active{background:#fff0df;border-color:var(--orange);box-shadow:inset 0 0 0 1px var(--orange)}
+.workspaceNav .studioCard.active b{color:#a34800}
+.workspaceNav .studioCard:focus-visible{outline:3px solid var(--orange);outline-offset:3px}
+@media(max-width:1100px){.workspaceNav{grid-template-columns:1fr;gap:18px}.audioStudios{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:600px){.workspaceNav{gap:18px;padding:16px 0 20px}.toolnav,.audioStudios{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.workspaceNav .studioCard{min-height:70px;padding:12px 14px;gap:5px}.studioGroupLabel{margin-bottom:9px}}

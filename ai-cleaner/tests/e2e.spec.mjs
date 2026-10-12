@@ -694,7 +694,7 @@ test('Blog Factory builds today topics prompt and never exposes provider launch 
   await expect(page.locator('#writingTool')).toBeVisible();
   await expect(page.locator('#textTool')).toBeHidden();
   await expect(page.locator('#imageTool')).toBeHidden();
-  await expect(page.locator('[data-tool="writing"]')).toHaveText('블로그 팩토리');
+  await expect(page.locator('[data-tool="writing"]')).toHaveAccessibleName('블로그 팩토리');
   await expect(page.locator('#osStatus')).toBeVisible();await expect(page.locator('#osStatus')).not.toContainText('V7');
   await expect(page.locator('#osStaticMode')).toContainText('로컬 프롬프트 준비');
   await expect(page.locator('#osFactoryPresets [data-factory-mode="daily_topics"]')).toHaveClass(/active/);
