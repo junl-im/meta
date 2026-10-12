@@ -93,3 +93,28 @@ test('research attachment survives an update draft restore and avoids the daily 
  await ready(page);await page.locator('#reachQuestion').fill('출처와 함께 보존할 질문');await page.locator('#reachRaw').fill(articles[0]);await page.locator('#reachAddCurrent').click();await page.locator('#reachAnalyze').click();await page.locator('#reachSendToBlog').click();
  await expect(page.locator('#osResearchAttachment')).toBeVisible();const snapshot=await page.evaluate(()=>window.AICleanerApp.aiWritingOs.captureState());expect(snapshot.researchAttachment).toContain(articles[0]);await page.reload();await page.waitForFunction(()=>window.__AI_CLEANER_APP_READY__);await page.evaluate(value=>window.AICleanerApp.aiWritingOs.restoreState(value),snapshot);await page.locator('#toolTabWriting').click();await expect(page.locator('#osResearchAttachment')).toBeVisible();await expect(page.locator('#osTask')).toHaveValue('출처와 함께 보존할 질문');await page.locator('[data-factory-mode="daily_topics"]').click();await page.locator('#osAutoDaily').check();await expect(page.locator('#osTaskPackPreview')).toHaveValue(/검증되지 않은 외부 자료/);expect(await page.evaluate(()=>localStorage.getItem('blog-factory-daily-prompt-v1'))).toBeNull();
 });
+
+
+test('all tool panels share the same page inset and compact navigation stays inside the header',async({page})=>{
+ for(const width of [320,390,768,1280,1920]){
+  await page.setViewportSize({width,height:900});await ready(page,false);
+  expect(await page.locator('.top .workspaceNav').count()).toBe(1);
+  for(const [tab,panel] of [['#toolTabText','#textTool'],['#toolTabImage','#imageTool'],['#toolTabWriting','#writingTool'],['#toolTabReach','#reachTool']]){
+   await page.locator(tab).click();await expect(page.locator(panel)).toBeVisible();
+   const layout=await page.locator(panel).evaluate(el=>{const wrap=document.querySelector('.wrap'),style=getComputedStyle(wrap),rect=wrap.getBoundingClientRect(),p=el.getBoundingClientRect();return{sameParent:el.parentElement===wrap,left:p.left,right:p.right,expectedLeft:rect.left+parseFloat(style.paddingLeft),expectedRight:rect.right-parseFloat(style.paddingRight),overflow:document.documentElement.scrollWidth>innerWidth+1,headerBottom:document.querySelector('.top').getBoundingClientRect().bottom,top:p.top}});
+   expect(layout.sameParent).toBe(true);expect(layout.left).toBeCloseTo(layout.expectedLeft,0);expect(layout.right).toBeCloseTo(layout.expectedRight,0);expect(layout.overflow).toBe(false);expect(layout.top).toBeGreaterThanOrEqual(layout.headerBottom-1);
+  }
+ }
+});
+
+
+test('Reach inputs use task-sized heights and URL examples contain real line breaks',async({page})=>{
+ await ready(page);for(const id of ['#reachQuestion','#reachUrls'])expect(await page.locator(id).evaluate(el=>el.getBoundingClientRect().height)).toBeLessThan(200);expect(await page.locator('#reachUrls').getAttribute('placeholder')).toContain('\n');expect(await page.locator('#reachUrls').getAttribute('placeholder')).not.toContain('\\n');await expect(page.locator('.wrap > .footer')).toBeVisible();expect(await page.locator('#reachTool').evaluate(el=>getComputedStyle(el).getPropertyValue('--accent').trim())).not.toBe('');
+});
+
+
+test('rewrite fact protection never rewrites digits inside its own generated tokens',async({page})=>{
+ await ready(page,false);await page.locator('#input').fill('모델은 M60입니다. 가격은 19,900원입니다. 같은 모델 M60을 다시 확인합니다.');await page.locator('#analyzeText').click();await page.locator('#rewriteWidget').click();await expect(page.locator('#rewritePanel')).toBeVisible();
+ await page.evaluate(async()=>{const originalRandom=Math.random;Math.random=()=>parseInt('tbdb60wi',36)/36**8;try{await window.AICleanerRewriteStudio.generate();}finally{Math.random=originalRandom;}});
+ await expect(page.locator('#rewriteDraft')).toHaveValue(/M60/);await expect(page.locator('#rewriteDraft')).toHaveValue(/19,900원/);await expect(page.locator('#rewriteDraft')).not.toHaveValue(/AI_FACT_/);expect((await page.locator('#rewriteDraft').inputValue()).match(/M60/g)).toHaveLength(2);await expect(page.locator('#rewriteApply')).toBeEnabled();
+});

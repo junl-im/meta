@@ -1,7 +1,7 @@
 {
-  "version": "1.17.2",
-  "assetVersion": "1172",
+  "version": "1.18.0",
+  "assetVersion": "1180",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Refined studio navigation with compact padding, spacing and readable labels."
+  "notes": "Compact upper-right grouped menus; shared content inset and footer for Reach; restored research status colors."
 }

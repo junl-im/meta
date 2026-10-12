@@ -37,7 +37,15 @@ function extractFactLocks(text){
   const list=[...counts.values()];const limited=list.slice(0,FACT_LOCK_LIMIT);limited.overflow=Math.max(0,list.length-limited.length);return limited;
 }
 function uniqueFactToken(text,i){let nonce;do{nonce=`AI_FACT_${i}_${Math.random().toString(36).slice(2,10)}`;}while(text.includes(nonce));return `\uE000${nonce}\uE001`;}
-function protectFacts(text,locks){let out=text;const map=[];locks.forEach((lock,i)=>{const token=uniqueFactToken(out,i);if(out.includes(lock.value)){out=out.split(lock.value).join(token);map.push([token,lock.value]);}});return{out,map};}
+function protectFacts(text,locks){
+  // Match the original once so later numeric locks cannot alter generated tokens.
+  const values=[...new Set(locks.map(lock=>lock.value).filter(Boolean))].sort((a,b)=>b.length-a.length);
+  if(!values.length)return{out:text,map:[]};
+  const pattern=new RegExp(values.map(value=>value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'),'g');
+  const map=[],tokens=new Map();
+  const out=text.replace(pattern,value=>{if(tokens.has(value))return tokens.get(value);const token=uniqueFactToken(text,map.length);tokens.set(value,token);map.push([token,value]);return token;});
+  return{out,map};
+}
 function restoreFacts(text,map){let out=text;for(const [token,value] of map)out=out.split(token).join(value);return out;}
 function pick(arr,variant,offset=0){return arr[(variant+offset)%arr.length];}
 function phraseRewrite(text,style,variant){

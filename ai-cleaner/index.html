@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://r.jina.ai; worker-src 'self' blob:; font-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1172">
+<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1180">
 <style id="bootCritical">html:not(.boot-ready) body{visibility:hidden}html{background:#fff8f0}html.app-booting{overflow-anchor:none}html.app-booting body{cursor:progress}html.app-booting body *{cursor:progress!important}</style>
 <script src="js/boot.js" defer></script>
 </head>
@@ -30,25 +30,25 @@
       <div class="sub">AI 글 다듬기 · 이미지 검사 · 블로그 팩토리 · GomFox Reach</div>
     </div>
   </div>
-</header>
 <section class="workspaceNav" aria-label="AI 놀이터 작업 도구">
   <div class="studioGroup">
     <div class="studioGroupLabel" id="creativeStudioLabel">콘텐츠 스튜디오</div>
     <div class="toolnav" role="tablist" aria-labelledby="creativeStudioLabel">
-      <button class="studioCard active" id="toolTabText" type="button" role="tab" aria-label="AI 글 다듬기" aria-selected="true" aria-controls="textTool" tabindex="0" data-tool="text"><b>AI 글 다듬기</b><small>숨은 문자 · 공백 정리</small></button>
-      <button class="studioCard" id="toolTabImage" type="button" role="tab" aria-label="AI 이미지 검사" aria-selected="false" aria-controls="imageTool" tabindex="-1" data-tool="image"><b>AI 이미지 검사</b><small>이미지 출처 신호 확인</small></button>
-      <button class="studioCard" id="toolTabWriting" type="button" role="tab" aria-label="블로그 팩토리" aria-selected="false" aria-controls="writingTool" tabindex="-1" data-tool="writing"><b>블로그 팩토리</b><small>주제 · 글 프롬프트 준비</small></button>
-      <button class="studioCard" id="toolTabReach" type="button" role="tab" aria-label="GomFox Reach" aria-selected="false" aria-controls="reachTool" tabindex="-1" data-tool="reach"><b>GomFox Reach</b><small>자료 수집 · 출처 비교</small></button>
+      <button class="studioCard active" id="toolTabText" type="button" role="tab" aria-label="AI 글 다듬기" aria-selected="true" aria-controls="textTool" tabindex="0" data-tool="text" title="숨은 문자 · 공백 정리"><b>AI 글 다듬기</b></button>
+      <button class="studioCard" id="toolTabImage" type="button" role="tab" aria-label="AI 이미지 검사" aria-selected="false" aria-controls="imageTool" tabindex="-1" data-tool="image" title="이미지 출처 신호 확인"><b>AI 이미지 검사</b></button>
+      <button class="studioCard" id="toolTabWriting" type="button" role="tab" aria-label="블로그 팩토리" aria-selected="false" aria-controls="writingTool" tabindex="-1" data-tool="writing" title="주제 · 글 프롬프트 준비"><b>블로그 팩토리</b></button>
+      <button class="studioCard" id="toolTabReach" type="button" role="tab" aria-label="GomFox Reach" aria-selected="false" aria-controls="reachTool" tabindex="-1" data-tool="reach" title="GomFox Reach · 자료 수집 · 출처 비교"><b>Reach</b></button>
     </div>
   </div>
   <nav class="studioGroup" aria-labelledby="audioStudioLabel">
-    <div class="studioGroupLabel" id="audioStudioLabel">오디오 스튜디오 <span>새창으로 열기 ↗</span></div>
+    <div class="studioGroupLabel" id="audioStudioLabel">오디오 스튜디오</div>
     <div class="audioStudios">
-      <a class="studioCard" id="openMastering" href="https://junl-im.github.io/foxbear-mastering-studio/" target="_blank" rel="noopener noreferrer" aria-label="마스터링 · 새창 열기"><b>마스터링 ↗</b><small>음질 정리 · 마스터링</small></a>
-      <a class="studioCard" id="openSorion" href="https://junl-im.github.io/AI-/" target="_blank" rel="noopener noreferrer" aria-label="소리온 · 새창 열기"><b>소리온 ↗</b><small>대본 · 음성 제작</small></a>
+      <a class="studioCard" id="openMastering" href="https://junl-im.github.io/foxbear-mastering-studio/" target="_blank" rel="noopener noreferrer" aria-label="마스터링 · 새창 열기" title="음질 정리 · 마스터링"><b>마스터링 ↗</b></a>
+      <a class="studioCard" id="openSorion" href="https://junl-im.github.io/AI-/" target="_blank" rel="noopener noreferrer" aria-label="소리온 · 새창 열기" title="대본 · 음성 제작"><b>소리온 ↗</b></a>
     </div>
   </nav>
 </section>
+</header>
 
 <main id="textTool" role="tabpanel" aria-labelledby="toolTabText">
   <section class="hero">
@@ -360,18 +360,6 @@
   </div>
 
 </main>
-<div class="footer">곰같은여우의 AI 놀이터 <span id="footerVersion"></span> · 브라우저 로컬 처리</div>
-</div>
-
-<div class="floatingDock" id="floatingDock" aria-label="분석 도우미">
-  <button class="floatWidget rewrite" id="rewriteWidget" type="button" hidden aria-controls="rewritePanel" aria-expanded="false"><span class="widgetIcon">✦</span><span>새 글 재작성</span><b id="rewriteBadge">NEW</b></button>
-  <button class="floatWidget" id="issuesWidget" type="button" hidden aria-controls="issuesPanel" aria-expanded="false"><span class="widgetIcon">✨</span><span>교정 제안</span><b id="issueCount">0</b></button>
-  <button class="floatWidget review" id="reviewWidget" type="button" hidden aria-controls="reviewPanel" aria-expanded="false"><span class="widgetIcon">✍</span><span>문장 검토</span><b id="reviewCount">0</b></button>
-  <button class="floatWidget forensic" id="forensicWidget" type="button" hidden aria-controls="forensicPanel" aria-expanded="false"><span class="widgetIcon">⌁</span><span>텍스트 포렌식</span><b id="forensicCount">0</b></button>
-  <button class="floatWidget tech" id="techWidget" type="button" hidden aria-controls="techPanel" aria-expanded="false"><span class="widgetIcon">⌘</span><span>기술 정보</span><b id="techCount">0</b></button>
-</div>
-
-
 <main id="reachTool" class="hidden reachTool" role="tabpanel" aria-labelledby="toolTabReach">
   <section class="hero reachHero">
     <div class="reachHeroMark"><span>GomFox</span> Reach <b>3.0</b></div>
@@ -404,7 +392,7 @@
       <div class="head"><b>2. 출처 수집</b><span class="sub" id="reachSourceStatus">최대 6개 URL 일괄 수집</span></div>
       <div class="body reachSourceBody">
         <label class="reachLabel" for="reachUrls">검색에서 찾은 출처 URL · 한 줄에 하나</label>
-        <textarea id="reachUrls" class="textarea reachUrls" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" placeholder="https://example.com/source-1\nhttps://example.org/source-2"></textarea>
+        <textarea id="reachUrls" class="textarea reachUrls" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" placeholder="https://example.com/source-1&#10;https://example.org/source-2"></textarea>
         <div class="actions reachActions">
           <button id="reachFetchMany" class="btn primary" type="button">URL 일괄 수집</button>
           <button id="reachCancelFetch" class="btn" type="button">수집 중지</button>
@@ -465,6 +453,19 @@
 
   <p class="sub reachFootnote">자동 웹검색 결과 자체를 긁어오는 기능은 검색 서비스 정책·API 제한에 따라 달라집니다. Reach는 키 없이 검색 계획과 다중 출처 수집·교차검증을 수행하며, 공개 URL 본문 수집에는 Reader를 사용합니다.</p>
 </main>
+<div class="footer">곰같은여우의 AI 놀이터 <span id="footerVersion"></span> · 브라우저 로컬 처리</div>
+</div>
+
+<div class="floatingDock" id="floatingDock" aria-label="분석 도우미">
+  <button class="floatWidget rewrite" id="rewriteWidget" type="button" hidden aria-controls="rewritePanel" aria-expanded="false"><span class="widgetIcon">✦</span><span>새 글 재작성</span><b id="rewriteBadge">NEW</b></button>
+  <button class="floatWidget" id="issuesWidget" type="button" hidden aria-controls="issuesPanel" aria-expanded="false"><span class="widgetIcon">✨</span><span>교정 제안</span><b id="issueCount">0</b></button>
+  <button class="floatWidget review" id="reviewWidget" type="button" hidden aria-controls="reviewPanel" aria-expanded="false"><span class="widgetIcon">✍</span><span>문장 검토</span><b id="reviewCount">0</b></button>
+  <button class="floatWidget forensic" id="forensicWidget" type="button" hidden aria-controls="forensicPanel" aria-expanded="false"><span class="widgetIcon">⌁</span><span>텍스트 포렌식</span><b id="forensicCount">0</b></button>
+  <button class="floatWidget tech" id="techWidget" type="button" hidden aria-controls="techPanel" aria-expanded="false"><span class="widgetIcon">⌘</span><span>기술 정보</span><b id="techCount">0</b></button>
+</div>
+
+
+
 
 
 <section class="floatPanel typingPreviewPanel" id="typingPreviewPanel" aria-label="자동작성 원본 새로쓰기" tabindex="-1" hidden aria-live="polite">
