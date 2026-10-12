@@ -93,3 +93,7 @@ Reach 출처 비교 후 블로그 팩토리로 근거팩과 출처별 본문 발
 Reach 질문·URL 입력창은 공용 글 편집기의 높이를 상속받지 않도록 각각 132/148px, 원문 입력은 240px로 지정하고 세로 크기 조절을 제공한다. URL 예시의 문자 그대로인 역슬래시-n을 실제 줄바꿈으로 수정했다. Reach에서 미정의였던 accent/good/bad/warn 색상 변수는 기존 팔레트에 연결해 상태 구분 색상을 복원했다. 전체 CSS 변수 사용에 미정의 토큰이 없는지 점검했다.
 
 전체 회귀 검사에서 모델명 M60 보호 토큰의 난수 문자열에 60이 포함되면 후속 숫자 보호가 토큰 자체를 다시 치환하는 오류를 발견했다. 보호 값을 길이순 literal 정규식으로 원본에서 한 번만 치환하도록 고쳤다. 난수를 고정해 토큰 내부에 60을 강제로 넣는 재현 검사를 추가해 모델명 반복과 가격 복원을 확인한다.
+
+### 2026-10-12 — 1.18.1 studio navigation density
+- Reduced desktop studio buttons from 28px to 24px and mobile buttons from 32px to 28px. Reduced group gaps and header vertical padding while preserving tab selection and keyboard focus.
+- Validation: 79 browser tests, 298 static checks and module checks passed; 320/390/768/1280/1920px navigation geometry and desktop/mobile screenshots verified.
