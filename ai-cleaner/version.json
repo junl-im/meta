@@ -3,5 +3,5 @@
   "assetVersion": "1190",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Renamed complete source writing, default fast speed, optional double-asterisk removal with source preserved."
+  "notes": "Renamed complete source writing, default fast speed, and source-setting double-asterisk removal with source preserved."
 }
