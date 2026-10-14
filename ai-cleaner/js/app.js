@@ -103,14 +103,14 @@ function syncCompletionFlowUi(){
   if(window.__AI_CLEANER_TYPEWRITER_BUSY__){set('writing','자동작성 중 · 결과창에 한 글자씩 새로 쓰고 있습니다.');return;}
   if(out?.readOnly===false){set('editing','직접 수정 중 · 수정을 완료하면 교정 제안과 실행 취소 기록을 현재 결과에 맞춰 다시 정리합니다.');return;}
   if(inputDirty){set('pending','원본 변경됨 · 최신 결과가 준비되면 복사·저장을 사용할 수 있습니다.');return;}
-  if(hasResult&&out?.dataset.typewriterVerified==='true'){set('done','자동작성 완료 ✓ · 결과를 복사하거나 TXT로 저장하세요. 필요하면 새 글 재작성도 이어서 사용할 수 있습니다.');return;}
+  if(hasResult&&out?.dataset.typewriterVerified==='true'){set('done',out.dataset.typewriterFilter==='strip-stars'?'자동작성 완료 ✓ · 결과에서 **를 제거했습니다. 원본 입력은 유지됩니다.':'자동작성 완료 ✓ · 결과를 복사하거나 TXT로 저장하세요.');return;}
   if(hasResult&&typewriterRecommendationSuppressed){set('custom','결과를 수정했습니다 · 복사하거나 TXT로 저장할 수 있고, 필요한 도구를 계속 사용할 수 있습니다.');return;}
-  if(hasResult){set('ready','결과 준비 ✓ · 복사·저장할 수 있습니다. 처음부터 새로 쓰려면 자동작성 원본 새로쓰기를 이용하세요.');return;}
+  if(hasResult){set('ready','결과 준비 ✓ · 복사·저장할 수 있습니다. 처음부터 새로 쓰려면 원본을 자동으로 완전새로쓰기를 이용하세요.');return;}
   set('pending','분석 중 · 결과를 준비하고 있습니다.');
 }
 function invalidateTypewriterVerification({suppressRecommendation=true}={}){
   const out=$('#output');const hadVerified=out?.dataset.typewriterVerified==='true',suppressionChanged=suppressRecommendation&&!typewriterRecommendationSuppressed;
-  if(out)delete out.dataset.typewriterVerified;if(suppressRecommendation)typewriterRecommendationSuppressed=true;
+  if(out){delete out.dataset.typewriterVerified;delete out.dataset.typewriterFilter;}if(suppressRecommendation)typewriterRecommendationSuppressed=true;
   if(hadVerified||suppressionChanged){syncTypewriterRecommendation();syncCompletionFlowUi();}
   return hadVerified||suppressionChanged;
 }
@@ -186,7 +186,7 @@ function captureUpdateDraftData(targetVersion){
     analysisFresh:!inputDirty&&state.original===($('#input')?.value||''),
     outputBasis:state.original||'',
     typewriterRecommendationSuppressed,
-    typewriterVerified:!inputDirty&&$('#output')?.dataset.typewriterVerified==='true',
+    typewriterVerified:!inputDirty&&$('#output')?.dataset.typewriterVerified==='true',typewriterFilter:$('#output')?.dataset.typewriterFilter||'',
     settings:{profile:$('#cleanProfile')?.value||'standard',norm:!!$('#norm')?.checked,repeat:!!$('#repeat')?.checked,length:!!$('#length')?.checked,liveScan:!!$('#liveScan')?.checked},
     aiWritingOs:aiWritingOs.captureState(),
     activeTool:document.querySelector('[data-tool].active')?.dataset.tool||'text',
@@ -247,8 +247,8 @@ function restoreUpdateDraftData(draft){
     if(outputWasCurrent&&draft.outputReadOnly===false&&typeof draft.output==='string'){
       manualEditBaseline=draft.output;state.manual=true;$('#output').readOnly=false;$('#editResult').textContent='✓ 수정 완료';
     }
-    const verifiedRestored=outputWasCurrent&&draft.typewriterVerified===true&&typeof draft.output==='string'&&draft.output===String(draft.input||'');
-    if(verifiedRestored)$('#output').dataset.typewriterVerified='true';else delete $('#output').dataset.typewriterVerified;
+    const verifiedRestored=outputWasCurrent&&draft.typewriterVerified===true&&typeof draft.output==='string'&&draft.output===(draft.typewriterFilter==='strip-stars'?removePairedStars(draft.input):String(draft.input||''));
+    if(verifiedRestored){$('#output').dataset.typewriterVerified='true';if(draft.typewriterFilter==='strip-stars')$('#output').dataset.typewriterFilter='strip-stars';else delete $('#output').dataset.typewriterFilter;}else{delete $('#output').dataset.typewriterVerified;delete $('#output').dataset.typewriterFilter;}
     typewriterRecommendationSuppressed=!verifiedRestored&&outputWasCurrent&&!!draft.typewriterRecommendationSuppressed;syncTypewriterRecommendation();syncCompletionFlowUi();
     resetHistory('업데이트 복원');
   }else if($('#input')){$('#input').value='';clearTextAnalysis({keepInput:true});}
@@ -536,7 +536,8 @@ function renderTech(){
   for(const x of state.homoglyphs.slice(0,100))rows.push(`<tr><td>${x.pos}</td><td><b>${x.code}</b><div class="sub">${esc(x.name||'')}</div></td><td>유사문자</td><td>확인</td><td>보존</td></tr>`);
   $('#removalTable').innerHTML=rows.length?rows.join(''):'<tr><td colspan="5" class="empty">기술 정보가 없습니다.</td></tr>';
   const audit=textHygieneAudit(),exactTypewriter=$('#output')?.dataset.typewriterVerified==='true'&&($('#output')?.value||'')===($('#input')?.value||'');
-  const resultChip=exactTypewriter&&audit.resultResidue?`<span class="techChip good">원본 그대로 보존 <b>${audit.resultResidue}</b></span>`:`<span class="techChip ${audit.resultResidue?'warn':'good'}">결과 잔여 <b>${audit.resultResidue}</b></span>`;
+  const filteredTypewriter=$('#output')?.dataset.typewriterVerified==='true'&&$('#output')?.dataset.typewriterFilter==='strip-stars'&&($('#output')?.value||'')===removePairedStars($('#input')?.value||'');
+  const resultChip=filteredTypewriter?`<span class="techChip good">** 제거 적용 <b>${(($('#input')?.value||'').length-($('#output')?.value||'').length)/2}쌍</b></span>`:exactTypewriter&&audit.resultResidue?`<span class="techChip good">원본 그대로 보존 <b>${audit.resultResidue}</b></span>`:`<span class="techChip ${audit.resultResidue?'warn':'good'}">결과 잔여 <b>${audit.resultResidue}</b></span>`;
   $('#techSummary').innerHTML=[`<span class="techChip">원본 발견 <b>${audit.originalFound}</b></span>`,`<span class="techChip">자동 정리 <b>${audit.autoCleaned}</b></span>`,`<span class="techChip">의미상 보존 <b>${audit.preserved}</b></span>`,resultChip].join('');
   const status=$('#techPanelStatus');if(status)status.textContent=state.original?`원본과 결과를 분리해서 표시합니다 · ${audit.policyVersion}`:'숨은 문자와 보존 항목을 확인합니다.';
 }
@@ -835,15 +836,16 @@ function syncTypewriterRecommendation({restart=false}={}){
   const recommend=hasSource&&!busy&&!verified&&!typewriterRecommendationSuppressed;button.disabled=!hasSource||busy;
   if(restart&&recommend){button.classList.remove('typewriterRecommended');void button.offsetWidth;}
   button.classList.toggle('typewriterRecommended',recommend);
-  button.setAttribute('aria-label',!hasSource?'자동작성 원본 새로쓰기 · 원본 입력 후 사용':recommend?'자동작성 원본 새로쓰기 · 다음 단계, 눌러서 새로쓰기':typewriterRecommendationSuppressed?'자동작성 원본 새로쓰기 · 필요할 때 다시 사용':'자동작성 원본 새로쓰기');
+  button.setAttribute('aria-label',!hasSource?'원본을 자동으로 완전새로쓰기 · 원본 입력 후 사용':recommend?'원본을 자동으로 완전새로쓰기 · 다음 단계, 눌러서 새로쓰기':typewriterRecommendationSuppressed?'원본을 자동으로 완전새로쓰기 · 필요할 때 다시 사용':'원본을 자동으로 완전새로쓰기');
   if(busy)return;
-  status.textContent=!hasSource?'원본 입력 후 사용':verified?'다시 새로쓰기':typewriterRecommendationSuppressed?'필요할 때 새로쓰기':'다음 단계 · 눌러서 새로쓰기';
+  status.textContent=!hasSource?'원본 입력 후 사용':verified?'다시 실행':typewriterRecommendationSuppressed?'필요할 때 새로쓰기':'다음 단계 · 눌러서 새로쓰기';
 }
 const typewriterEngine=Modules.createTypewriterEngine({split:splitGraphemesExact});
+const removePairedStars=text=>String(text??'').replace(/\*\*/g,'');
 function setTypewriterBusy(busy){
   window.__AI_CLEANER_TYPEWRITER_BUSY__=!!busy;if(busy)workLock.acquire('typewriter');else workLock.release('typewriter');
   const controls=[...new Set([
-    ...['copy','downloadTxt','editResult','undoStep','redoStep','undoAll','checkpointSave','checkpointOpen','analyzeText','sample','reset','textFileInput','cleanProfile','norm','repeat','length','liveScan','openImage','imageInput'].map(id=>$('#'+id)).filter(Boolean),
+    ...['typingPreviewStripStars','copy','downloadTxt','editResult','undoStep','redoStep','undoAll','checkpointSave','checkpointOpen','analyzeText','sample','reset','textFileInput','cleanProfile','norm','repeat','length','liveScan','openImage','imageInput'].map(id=>$('#'+id)).filter(Boolean),
     ...$$('[data-tool]'),...$$('[data-resulttab]'),...$$('.floatWidget')
   ])];
   if(busy){typewriterDisabledState=new Map();for(const el of controls){typewriterDisabledState.set(el,!!el.disabled);el.disabled=true;}}
@@ -860,7 +862,7 @@ function restoreTypewriterRollback(){
   const rollback=typingPreview.rollback;if(!rollback)return false;
   state.issueBase=rollback.issueBase;state.working=rollback.working;state.manual=rollback.manual;state.applied=new Set(rollback.applied||[]);
   const out=$('#output');out.value=rollback.output;out.readOnly=rollback.outputReadOnly;$('#editResult').textContent=out.readOnly?'✎ 직접 수정':'✓ 수정 완료';
-  if(rollback.typewriterVerified)out.dataset.typewriterVerified='true';else delete out.dataset.typewriterVerified;
+  if(rollback.typewriterVerified){out.dataset.typewriterVerified='true';if(rollback.typewriterFilter)out.dataset.typewriterFilter=rollback.typewriterFilter;else delete out.dataset.typewriterFilter;}else{delete out.dataset.typewriterVerified;delete out.dataset.typewriterFilter;}
   typewriterRecommendationSuppressed=!!rollback.typewriterRecommendationSuppressed;
   renderAll({preserveOutput:true});renderDiff();syncResultFreshnessUi();syncTypewriterRecommendation();updateHistoryButtons();notifyTextChanged('output');
   return true;
@@ -874,25 +876,25 @@ function stopTypingPreview({restore=true,silent=false}={}){
   restorePanelReturnFocus('typingPreviewPanel');
 }
 function finishTypingPreview(snapshot){
-  const out=$('#output'),source=snapshot.source,exact=out.value===source;$('#input').readOnly=typingPreview.inputWasReadOnly;setTypewriterBusy(false);
+  const out=$('#output'),source=snapshot.source,exact=out.value===source&&source===(typingPreview.stripStars?removePairedStars(typingPreview.rawSource):typingPreview.rawSource);$('#input').readOnly=typingPreview.inputWasReadOnly;setTypewriterBusy(false);
   if(!exact){typewriterStatus(`일치 검증 실패 · 원본 ${source.length} UTF-16 / 결과 ${out.value.length} UTF-16`);$('#typingPreviewPause').textContent='오류';if(typingPreview.historyIndex>=0)restoreHistoryIndex(typingPreview.historyIndex,{announce:false,suppressTypewriterRecommendation:false});const panel=$('#typingPreviewPanel');panel.hidden=true;setMobilePanelExpanded(panel,false);syncPanelAria();typewriterBridgeStatus();showToast('자동 작성 검증에 실패해 이전 결과로 복원했습니다.');return;}
   const audit=sanitizeVisibleTypingSource(source),nonVisible=audit.removed.length+audit.normalizedSpaces.length;
-  typewriterStatus(`100% 원문 일치 확인 ✓ · ${snapshot.chars.length.toLocaleString()} 글자 단위 · 추가/삭제/정규화 0개${nonVisible?` · 숨은/특수 문자 ${nonVisible}개도 원문 그대로 보존`:''}${typingPreview.preservedSensitive?` · 의미 민감 ${typingPreview.preservedSensitive}개 원문 그대로 보존`:''}`);
+  typewriterStatus(`${typingPreview.removedStars?`필터 적용 확인 ✓ · ** ${typingPreview.removedStars}쌍 제거 · 원본 입력 유지`:'100% 원문 일치 확인 ✓ · 추가/삭제/정규화 0개'} · ${snapshot.chars.length.toLocaleString()} 글자 단위${nonVisible?` · 숨은/특수 문자 ${nonVisible}개도 원문 그대로 보존`:''}${typingPreview.preservedSensitive?` · 의미 민감 ${typingPreview.preservedSensitive}개 원문 그대로 보존`:''}`);
   const panel=$('#typingPreviewPanel');typingPreview.completed=true;panel.classList.add('typewriterComplete');
-  $('#typingPreviewProgress').textContent='100%';$('#typingPreviewPause').textContent='완료 · 결과 보기';$('#typingPreviewPause').setAttribute('aria-label','자동작성 완료, 결과 보기');$('#typingPreviewPause').title='팝업을 닫고 결과 위치로 이동합니다.';typewriterBridgeStatus('완료');out.dataset.typewriterVerified='true';$('#typingPreviewButton').classList.remove('typewriterRecommended');
-  if(window.AICleanerApp.commitProgressiveResult(source,'자동작성 원본 새로쓰기')){if(innerWidth<=PANEL_SHEET_BREAKPOINT)resultNavigationTimer=setTimeout(()=>navigateTypewriterResult({announce:false}),1100);else navigateTypewriterResult({announce:false});}
+  $('#typingPreviewProgress').textContent='100%';$('#typingPreviewPause').textContent='완료 · 결과 보기';$('#typingPreviewPause').setAttribute('aria-label','자동작성 완료, 결과 보기');$('#typingPreviewPause').title='팝업을 닫고 결과 위치로 이동합니다.';typewriterBridgeStatus('완료');out.dataset.typewriterVerified='true';if(typingPreview.removedStars)out.dataset.typewriterFilter='strip-stars';else delete out.dataset.typewriterFilter;$('#typingPreviewButton').classList.remove('typewriterRecommended');
+  if(window.AICleanerApp.commitProgressiveResult(source,'원본을 자동으로 완전새로쓰기')){if(innerWidth<=PANEL_SHEET_BREAKPOINT)resultNavigationTimer=setTimeout(()=>navigateTypewriterResult({announce:false}),1100);else navigateTypewriterResult({announce:false});}
 }
 function startTypingPreview(){
   if(typewriterEngine.running)return;invalidatePendingTextImport();typewriterRecommendationSuppressed=false;
   const rawSource=$('#input').value;if(!rawSource)return showToast('먼저 원본 글을 입력해 주세요.');
-  const source=String(rawSource);
-  if(!source)return showToast('새로 쓸 원본 글이 없습니다.');
+  const stripStars=$('#typingPreviewStripStars').checked,source=stripStars?removePairedStars(rawSource):String(rawSource),removedStars=stripStars?(rawSource.length-source.length)/2:0;
+  if(!source)return showToast('** 제거 후 남는 글이 없습니다. 원본을 확인하거나 필터를 끄세요.');
   const sourceAudit=sanitizeVisibleTypingSource(source);
   analysisCoordinator.cancel();if(!$('#output').readOnly)$('#editResult').click();if(inputDirty||state.original!==rawSource){if(!analyze(true))return;}if(historyStore.index<0)resetHistory('자동 작성 전');
   closeAllPanels();activateResultTab('cleaned');
   const prewriteOutput=$('#output');
-  typingPreview={source,rawSource,historyIndex:historyStore.index,inputWasReadOnly:$('#input').readOnly,bridgePct:-1,originalHidden:sourceAudit.removed.length,originalSpecialSpaces:sourceAudit.normalizedSpaces.length,preservedSensitive:sourceAudit.preservedSensitive.length,completed:false,rollback:{output:prewriteOutput.value,outputReadOnly:prewriteOutput.readOnly,working:state.working,issueBase:state.issueBase,manual:state.manual,applied:[...state.applied],typewriterVerified:prewriteOutput.dataset.typewriterVerified==='true',typewriterRecommendationSuppressed}};
-  const out=prewriteOutput;delete out.dataset.typewriterVerified;out.readOnly=true;out.value='';out.scrollTop=0;$('#input').readOnly=true;openPanel('typingPreviewPanel');
+  typingPreview={source,rawSource,removedStars,stripStars,historyIndex:historyStore.index,inputWasReadOnly:$('#input').readOnly,bridgePct:-1,originalHidden:sourceAudit.removed.length,originalSpecialSpaces:sourceAudit.normalizedSpaces.length,preservedSensitive:sourceAudit.preservedSensitive.length,completed:false,rollback:{output:prewriteOutput.value,outputReadOnly:prewriteOutput.readOnly,working:state.working,issueBase:state.issueBase,manual:state.manual,applied:[...state.applied],typewriterVerified:prewriteOutput.dataset.typewriterVerified==='true',typewriterFilter:prewriteOutput.dataset.typewriterFilter||'',typewriterRecommendationSuppressed}};
+  const out=prewriteOutput;delete out.dataset.typewriterVerified;delete out.dataset.typewriterFilter;out.readOnly=true;out.value='';out.scrollTop=0;$('#input').readOnly=true;openPanel('typingPreviewPanel');
   cancelResultNavigation();$('#typingPreviewPanel').classList.remove('typewriterComplete');$('#typingPreviewPause').textContent='일시정지';$('#typingPreviewPause').removeAttribute('title');$('#typingPreviewPause').setAttribute('aria-label','자동작성 일시정지');$('#typingPreviewProgress').textContent='0%';typewriterBridgeStatus('0%');setTypewriterBusy(true);
   scrollToResultDestination({focusOutput:false,emphasize:false});showToast('자동작성 시작 · 결과 화면에서 새로 쓰는 과정을 확인하세요.');
   typewriterEngine.start(source,{
@@ -967,9 +969,9 @@ window.AICleanerApp={
   version:APP_VERSION,assetVersion:ASSET_VERSION,showToast,configureEditors,eventBus,workLock,historyStore,textStateStore,textEngine,diffEngine,diffView,analysisWorker,analysisPerformance,analysisCoordinator,fileImport,checkpointStore,aiWritingOs,updateManager,panelManager,typewriterEngine,
   analyzeNow(silent=false){return analyze(!!silent);},
   getText(kind='output'){if(kind==='original')return $('#input').value||'';if($('#input').value.trim()&&(inputDirty||!$('#output').value||state.original!==$('#input').value))analyze(true);return $('#output').value||state.working||'';},
-  commitProgressiveResult(text,label='자동작성 원본 새로쓰기'){
+  commitProgressiveResult(text,label='원본을 자동으로 완전새로쓰기'){
     const next=String(text??''),out=$('#output');if(out.value!==next)return false;
-    out.readOnly=true;$('#editResult').textContent='✎ 직접 수정';refreshSuggestionBaseline(next,{unread:false});renderAll({preserveOutput:true});recordHistory(label);notifyTextChanged('output');revealAppliedResult(`✓ 원본을 내용 변경 없이 한 글자씩 처음부터 새로 입력했습니다.`,{closePanelsFirst:false,scroll:false,focusOutput:false});return true;
+    out.readOnly=true;$('#editResult').textContent='✎ 직접 수정';refreshSuggestionBaseline(next,{unread:false});renderAll({preserveOutput:true});recordHistory(label);notifyTextChanged('output');revealAppliedResult(out.dataset.typewriterFilter==='strip-stars'?'✓ 원본을 새로 쓰고 결과의 **를 제거했습니다. 원본 입력은 유지됩니다.':'✓ 원본을 내용 변경 없이 한 글자씩 처음부터 새로 입력했습니다.',{closePanelsFirst:false,scroll:false,focusOutput:false});return true;
   },
   applyRewrite(text,label='새 글 재작성'){
     const next=String(text||'');if(!next.trim()||!$('#input')?.value.trim())return false;

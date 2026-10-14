@@ -101,3 +101,5 @@ Reach 질문·URL 입력창은 공용 글 편집기의 높이를 상속받지 �
 ### 2026-10-12 — 1.18.2 scrollbar styling
 - Shared warm beige track and rounded brown thumb for page, editors and scrollable panels; hover/drag colors, horizontal corner and forced-colors support. Native scrolling and mobile gestures preserved.
 - Validation: 298 static checks, module checks and 8 focused browser regression tests passed. Page/editor scrolling, themed 10px scrollbars, no horizontal overflow at five viewport widths, high contrast and screenshot verified.
+- 2026-10-14 v1.19.0: Renamed complete source writing, defaulted speed to fast, and added an enabled-by-default paired-asterisk filter in source settings. Filter changes the output only; verification, technical summary, draft restore and cancellation track the chosen transformation. Compact mobile writing panel.
+- 2026-10-15 validation: 80 browser tests, 298 static checks and module checks passed. Mobile 320/390px and desktop 1280px layouts visually checked; no horizontal overflow.

@@ -1,7 +1,7 @@
 {
-  "version": "1.18.2",
-  "assetVersion": "1182",
+  "version": "1.19.0",
+  "assetVersion": "1190",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Warm rounded scrollbars for page and nested editors, with hover and system high-contrast support."
+  "notes": "Renamed complete source writing, default fast speed, optional double-asterisk removal with source preserved."
 }

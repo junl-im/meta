@@ -44,6 +44,28 @@ test('original auto typewriter preserves the exact source including hidden and s
   await expect(page.locator('#cleanProfile')).toBeEnabled();
 });
 
+test('complete source writing defaults to fast and removes only paired stars from the result', async ({ page }) => {
+  await gotoReady(page);
+  const input=page.locator('#input'),output=page.locator('#output'),filter=page.locator('#typingPreviewStripStars');
+  await expect(page.locator('#typingPreviewSpeed')).toHaveValue('0');
+  await expect(filter).toBeChecked();
+  const source='**제목**\n가격은 19,900원 *표시* 👩‍💻';
+  await input.fill(source);
+  await page.locator('#typingPreviewButton').click();
+  await expect(output).toHaveValue('제목\n가격은 19,900원 *표시* 👩‍💻',{timeout:7000});
+  await expect(output).toHaveAttribute('data-typewriter-filter','strip-stars');
+  await expect(page.locator('#typingPreviewText')).toContainText('** 2쌍 제거');
+  await expect(input).toHaveValue(source);
+  await page.locator('#techWidget').click();
+  await expect(page.locator('#techSummary')).toContainText('** 제거 적용');
+  await page.locator('[data-close-panel="techPanel"]').click();
+  await filter.uncheck();
+  await page.locator('#typingPreviewButton').click();
+  await expect(output).toHaveValue(source,{timeout:7000});
+  await expect(output).not.toHaveAttribute('data-typewriter-filter','strip-stars');
+  await expect(page.locator('#typingPreviewText')).toContainText('100% 원문 일치 확인');
+});
+
 test('source arrival highlights typewriter as the next step and start navigates immediately while progress stays open', async ({ page }) => {
   await page.setViewportSize({width:390,height:844});await gotoReady(page);
   const typewriter=page.locator('#typingPreviewButton');await expect(typewriter).toBeDisabled();
@@ -215,7 +237,9 @@ test('rewrite generation reset cancels an in-flight draft transaction', async ({
 test('rewrite draft locks immediately when original changes behind current-result source', async ({ page }) => {
   await gotoReady(page);const input=page.locator('#input');await input.fill('결론적으로 기존 원본입니다. 가격은 19,900원입니다.');await analyzeNow(page);
   await page.locator('#rewriteWidget').click();await page.locator('#rewriteGenerate').click();await expect(page.locator('#rewriteDraft')).not.toHaveValue('');await expect(page.locator('#rewriteApply')).toBeEnabled();
+  await page.locator('[data-close-panel="rewritePanel"]').click();
   await page.locator('#liveScan').uncheck();await input.fill('결론적으로 바뀐 원본입니다. 가격은 19,900원입니다.');
+  await page.locator('#rewriteWidget').click();
   await expect(page.locator('#rewriteApply')).toBeDisabled();await expect(page.locator('#rewriteValidation')).toContainText('기준 글이');
 });
 
