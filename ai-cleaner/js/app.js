@@ -216,6 +216,7 @@ function updateHistoryButtons(){
 function resetHistory(label='분석 결과'){historyStore.reset(historySnapshot(label));updateHistoryButtons();}
 function recordHistory(label){historyStore.record(historySnapshot(label));updateHistoryButtons();}
 function restoreHistoryIndex(nextIndex,{announce=true,suppressTypewriterRecommendation=true}={}){
+  if(!$('#input')?.value.trim())return;
   const snap=historyStore.beginRestore(nextIndex);if(!snap)return;
   try{
     invalidateTypewriterVerification({suppressRecommendation:suppressTypewriterRecommendation});
@@ -344,6 +345,7 @@ function refreshSuggestionBaseline(text,{unread=true}={}){
 }
 
 function renderAll({preserveOutput=false,deferHeavy=false}={}){
+  if(!$('#input')?.value.trim()){state.working='';$('#output').value='';preserveOutput=true;}
   if(!preserveOutput)rebuild();
   if(!deferHeavy||!$('#reviewPanel').hidden)buildReviews();
   if(!deferHeavy||!$('#issuesPanel').hidden)renderIssues();
@@ -859,7 +861,7 @@ function setTypewriterBusy(busy){
 function typewriterStatus(text){const el=$('#typingPreviewText');if(el)el.textContent=text;}
 function typewriterBridgeStatus(text){const el=$('#typingBridgeStatus');if(!el)return;if(typeof text==='string')el.textContent=text;else syncTypewriterRecommendation();}
 function restoreTypewriterRollback(){
-  const rollback=typingPreview.rollback;if(!rollback)return false;
+  const rollback=typingPreview.rollback;if(!rollback||!$('#input')?.value.trim())return false;
   state.issueBase=rollback.issueBase;state.working=rollback.working;state.manual=rollback.manual;state.applied=new Set(rollback.applied||[]);
   const out=$('#output');out.value=rollback.output;out.readOnly=rollback.outputReadOnly;$('#editResult').textContent=out.readOnly?'✎ 직접 수정':'✓ 수정 완료';
   if(rollback.typewriterVerified){out.dataset.typewriterVerified='true';if(rollback.typewriterFilter)out.dataset.typewriterFilter=rollback.typewriterFilter;else delete out.dataset.typewriterFilter;}else{delete out.dataset.typewriterVerified;delete out.dataset.typewriterFilter;}
@@ -970,7 +972,7 @@ window.AICleanerApp={
   analyzeNow(silent=false){return analyze(!!silent);},
   getText(kind='output'){if(kind==='original')return $('#input').value||'';if($('#input').value.trim()&&(inputDirty||!$('#output').value||state.original!==$('#input').value))analyze(true);return $('#output').value||state.working||'';},
   commitProgressiveResult(text,label='원본을 자동으로 완전새로쓰기'){
-    const next=String(text??''),out=$('#output');if(out.value!==next)return false;
+    const next=String(text??''),out=$('#output');if(!$('#input')?.value.trim()||out.value!==next)return false;
     out.readOnly=true;$('#editResult').textContent='✎ 직접 수정';refreshSuggestionBaseline(next,{unread:false});renderAll({preserveOutput:true});recordHistory(label);notifyTextChanged('output');revealAppliedResult(out.dataset.typewriterFilter==='strip-stars'?'✓ 원본을 새로 쓰고 결과의 **를 제거했습니다. 원본 입력은 유지됩니다.':'✓ 원본을 내용 변경 없이 한 글자씩 처음부터 새로 입력했습니다.',{closePanelsFirst:false,scroll:false,focusOutput:false});return true;
   },
   applyRewrite(text,label='새 글 재작성'){

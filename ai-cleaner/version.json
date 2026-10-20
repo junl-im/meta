@@ -3,5 +3,5 @@
   "assetVersion": "1191",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Clear stale star-filter state and restore mouse context menus on touch-capable PCs."
+  "notes": "Keep empty-source results empty, clear stale filter state, and restore mouse menus on touch-capable PCs."
 }

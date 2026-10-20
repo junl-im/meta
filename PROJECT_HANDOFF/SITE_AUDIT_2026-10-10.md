@@ -106,3 +106,4 @@ Reach 질문·URL 입력창은 공용 글 편집기의 높이를 상속받지 �
 
 - 2026-10-20 v1.19.1: Clear stale ** filter metadata whenever the source changes, becomes empty, or the workspace resets. Preserve the prior result while edited input is pending.
 - Hybrid touch-capable PC audit: mouse right-click now opens the editor menu; touch context menus remain native.
+- Empty-source invariant: late history, typewriter rollback, rendering and progressive commit cannot restore a result after the source is cleared.
