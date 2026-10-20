@@ -66,6 +66,25 @@ test('complete source writing defaults to fast and removes only paired stars fro
   await expect(page.locator('#typingPreviewText')).toContainText('100% 원문 일치 확인');
 });
 
+test('star filter state clears when the source changes or the workspace resets', async ({ page }) => {
+  await gotoReady(page);
+  const input=page.locator('#input'),output=page.locator('#output'),button=page.locator('#typingPreviewButton');
+  await input.fill('**제목**과 본문');
+  await button.click();
+  await expect(output).toHaveAttribute('data-typewriter-filter','strip-stars',{timeout:7000});
+  await input.fill('새 원본');
+  await expect(output).not.toHaveAttribute('data-typewriter-filter','strip-stars');
+  await button.click();
+  await expect(output).toHaveValue('새 원본',{timeout:7000});
+  await input.fill('**다시**');
+  await button.click();
+  await expect(output).toHaveAttribute('data-typewriter-filter','strip-stars',{timeout:7000});
+  await page.locator('#reset').click();
+  await expect(output).toHaveValue('');
+  await expect(output).not.toHaveAttribute('data-typewriter-filter','strip-stars');
+  await expect(output).not.toHaveAttribute('data-typewriter-verified','true');
+});
+
 test('source arrival highlights typewriter as the next step and start navigates immediately while progress stays open', async ({ page }) => {
   await page.setViewportSize({width:390,height:844});await gotoReady(page);
   const typewriter=page.locator('#typingPreviewButton');await expect(typewriter).toBeDisabled();
@@ -179,8 +198,8 @@ test('panel expansion state resets when crossing the mobile breakpoint', async (
 
 
 test('touch devices keep the native editor context menu while direct typing paste protection remains separate', async ({ page }) => {
-  await page.addInitScript(()=>{try{Object.defineProperty(navigator,'maxTouchPoints',{configurable:true,get:()=>5});}catch(_){}});await page.setViewportSize({width:390,height:844});await gotoReady(page);
-  const nativeAllowed=await page.locator('#input').evaluate(el=>el.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:30,clientY:30})));
+  await page.setViewportSize({width:390,height:844});await gotoReady(page);
+  const nativeAllowed=await page.locator('#input').evaluate(el=>el.dispatchEvent(new PointerEvent('contextmenu',{bubbles:true,cancelable:true,pointerType:'touch',clientX:30,clientY:30})));
   expect(nativeAllowed).toBeTruthy();await expect(page.locator('#textContextMenu')).toBeHidden();
   await page.locator('#input').fill('직접 쓰기 보호 확인');await analyzeNow(page);await page.locator('#rewriteWidget').click();await page.locator('[data-rewrite-tab="verify"]').click();
   await page.locator('#directTyped').evaluate(el=>{const ev=new InputEvent('beforeinput',{bubbles:true,cancelable:true,inputType:'insertFromPaste',data:'PASTE'});el.dispatchEvent(ev);});await expect(page.locator('#directTyped')).toHaveValue('');
@@ -245,9 +264,14 @@ test('rewrite draft locks immediately when original changes behind current-resul
 
 test('rewrite source change cancels an in-flight draft transaction', async ({ page }) => {
   await gotoReady(page);const input=page.locator('#input');await input.fill('결론적으로 생성 중 취소를 확인합니다. 가격은 19,900원입니다.');await analyzeNow(page);
-  await page.locator('#rewriteWidget').click();await page.locator('#rewriteSource').selectOption('original');await page.locator('#rewriteGenerate').click();
-  await expect(page.locator('#rewritePanel')).toHaveAttribute('aria-busy','true');
-  await input.fill('결론적으로 생성 중 기준 글을 바꿨습니다. 가격은 19,900원입니다.');
+  await page.locator('#rewriteWidget').click();await page.locator('#rewriteSource').selectOption('original');
+  const during=await page.evaluate(async()=>{
+    const pending=window.AICleanerRewriteStudio.generate();
+    const busy=document.querySelector('#rewritePanel').getAttribute('aria-busy');
+    const editor=document.querySelector('#input');editor.value='결론적으로 생성 중 기준 글을 바꿨습니다. 가격은 19,900원입니다.';editor.dispatchEvent(new Event('input',{bubbles:true}));
+    await pending;return busy;
+  });
+  expect(during).toBe('true');
   await expect(page.locator('#rewritePanel')).toHaveAttribute('aria-busy','false');await expect(page.locator('#rewritePanelStatus')).toContainText('기준 글이 바뀌어 생성 작업을 취소했습니다.');
   await expect(page.locator('#rewriteDraft')).toHaveValue('');await expect(page.locator('#rewriteApply')).toBeDisabled();
 });

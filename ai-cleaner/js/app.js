@@ -137,13 +137,13 @@ function handleSourceMutation({analyzeNow=false,backgroundNow=false,resetPerform
   typewriterRecommendationSuppressed=false;checkpointSourceCache={source:null,stamp:''};
   const rewriteWidget=$('#rewriteWidget');if(rewriteWidget){clearTimeout(syncWidgets.rewriteReadyTimer);rewriteWidget.classList.remove('rewriteReady');delete rewriteWidget.dataset.seenReady;}
   if(resetPerformance){analysisCoordinator.cancel();analysisPerformance.reset();}
-  const out=$('#output');if(out)delete out.dataset.typewriterVerified;
+  const out=$('#output');if(out){delete out.dataset.typewriterVerified;delete out.dataset.typewriterFilter;}
   const input=$('#input');
   if(!input?.value.trim()){
     const enforceEmptySource=()=>{
       if(mutationToken!==sourceMutationSeq||input.value.trim())return;
       analysisCoordinator.cancel();analysisPerformance.reset();inputDirty=false;textStateStore.reset();manualEditBaseline='';checkpointSourceCache={source:null,stamp:''};
-      const currentOut=$('#output');if(currentOut){currentOut.value='';currentOut.scrollTop=0;currentOut.readOnly=true;delete currentOut.dataset.typewriterVerified;currentOut.classList.remove('resultApplied','resultFlash','resultStale');}
+      const currentOut=$('#output');if(currentOut){currentOut.value='';currentOut.scrollTop=0;currentOut.readOnly=true;delete currentOut.dataset.typewriterVerified;delete currentOut.dataset.typewriterFilter;currentOut.classList.remove('resultApplied','resultFlash','resultStale');}
       const edit=$('#editResult');if(edit)edit.textContent='✎ 직접 수정';
       const details=$('#detailDiagnostics');if(details)details.open=false;
       renderAll({preserveOutput:true});renderDiff();syncResultFreshnessUi();updateHistoryButtons();
@@ -285,7 +285,7 @@ function clearTextAnalysis({keepInput=true,clearRewrite=false,announce=false}={}
   cancelResultNavigation();typewriterRecommendationSuppressed=false;
   if(window.__AI_CLEANER_TYPEWRITER_BUSY__)stopTypingPreview({restore:false,silent:true});
   analysisCoordinator.cancel();analysisPerformance.reset();inputDirty=false;textStateStore.reset();manualEditBaseline='';checkpointSourceCache={source:null,stamp:''};
-  if(!keepInput)$('#input').value='';$('#input').readOnly=false;$('#input').scrollTop=0;$('#output').value='';$('#output').scrollTop=0;$('#output').readOnly=true;$('#editResult').textContent='✎ 직접 수정';delete $('#output').dataset.typewriterVerified;const details=$('#detailDiagnostics');if(details)details.open=false;
+  if(!keepInput)$('#input').value='';$('#input').readOnly=false;$('#input').scrollTop=0;$('#output').value='';$('#output').scrollTop=0;$('#output').readOnly=true;$('#editResult').textContent='✎ 직접 수정';delete $('#output').dataset.typewriterVerified;delete $('#output').dataset.typewriterFilter;const details=$('#detailDiagnostics');if(details)details.open=false;
   const previewPanel=$('#typingPreviewPanel');if(previewPanel)previewPanel.classList.remove('typewriterComplete');typingPreview.completed=false;
   $('#resultCard')?.classList.remove('resultDestinationPulse','typewriterDestinationActive');clearTimeout(pulseResultDestination.timer);clearTimeout(scrollToResultDestination.resultAppliedTimer);
   closeAllPanels();activateResultTab('cleaned');renderAll({preserveOutput:true});renderDiff();$('#textPerf').textContent='대기';resetHistory('빈 상태');
@@ -784,11 +784,11 @@ async function contextAction(action){
   hideContextMenu();
 }
 
-function prefersNativeTouchContextMenu(){try{return Number(navigator.maxTouchPoints||0)>0||matchMedia('(pointer: coarse)').matches;}catch(_){return false;}}
+function prefersNativeTouchContextMenu(event){try{return event.pointerType==='touch'||matchMedia('(pointer: coarse)').matches;}catch(_){return event.pointerType==='touch';}}
 document.addEventListener('contextmenu',(e)=>{
   const editor=e.target.closest&&e.target.closest('textarea,input[type="text"],input[type="search"],input[type="url"],input[type="email"]');
   if(!editor){hideContextMenu();return;}
-  if(prefersNativeTouchContextMenu()){hideContextMenu();return;}
+  if(prefersNativeTouchContextMenu(e)){hideContextMenu();return;}
   e.preventDefault();showContextMenu(e.clientX,e.clientY,editor);
 });
 document.addEventListener('pointerdown',(e)=>{if(resultNavigationTimer)cancelResultNavigation();if(!e.target.closest('#textContextMenu'))hideContextMenu();});
