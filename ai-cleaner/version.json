@@ -1,7 +1,7 @@
 {
-  "version": "1.19.1",
-  "assetVersion": "1191",
+  "version": "1.19.2",
+  "assetVersion": "1192",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Keep empty-source results empty, clear stale filter state, and restore mouse menus on touch-capable PCs."
+  "notes": "Avoid duplicate Reach sources and repeated URL fetches for tracking-link variants."
 }

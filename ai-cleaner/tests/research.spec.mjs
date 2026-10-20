@@ -22,6 +22,19 @@ test('adding sources or editing the question invalidates copyable research resul
 test('manual sources respect the same six-source limit and official wording does not certify a source',async({page})=>{
  await ready(page);for(const text of articles){await page.locator('#reachRaw').fill(text);await page.locator('#reachAddCurrent').click();}await expect(page.locator('.reachSourceItem')).toHaveCount(6);await page.locator('#reachRaw').fill('추가 출처는 여섯 개 제한을 넘겨서는 안 됩니다. 이 원문은 목록에 추가할 수 없어야 합니다.');await page.locator('#reachAddCurrent').click();await expect(page.locator('.reachSourceItem')).toHaveCount(6);await expect(page.locator('#reachFetchStatus')).toContainText('최대 6개');await page.locator('#reachAnalyze').click();await expect(page.locator('#reachEvidencePack')).not.toContainText('원출처 우선');await expect(page.locator('#reachEvidencePack')).toContainText('충분한 지지 근거를 찾지 못했습니다');
 });
+test('Reach keeps one source for the same URL despite tracking links or changed text',async({page})=>{
+ await ready(page);await page.locator('#reachManualUrl').fill('https://example.com/report?topic=ai&utm_source=first');await page.locator('#reachRaw').fill(articles[0]);await page.locator('#reachAddCurrent').click();await page.locator('#reachAnalyze').click();await expect(page.locator('#reachCopyAll')).toBeEnabled();
+ await page.locator('#reachManualUrl').fill('https://example.com/report?utm_source=second&topic=ai');await page.locator('#reachRaw').fill(articles[1]);await page.locator('#reachAddCurrent').click();
+ await expect(page.locator('.reachSourceItem')).toHaveCount(1);await expect(page.locator('#reachFetchStatus')).toContainText('중복');await expect(page.locator('#reachCopyAll')).toBeEnabled();
+ await page.locator('#reachManualUrl').fill('https://example.org/other');await page.locator('#reachRaw').fill(articles[1]);await page.locator('#reachAddCurrent').click();await expect(page.locator('.reachSourceItem')).toHaveCount(2);await expect(page.locator('#reachCopyAll')).toBeDisabled();
+});
+
+test('Reach fetches tracking-link variants only once per batch',async({page})=>{
+ await ready(page);let requests=0;await page.route('https://r.jina.ai/**',route=>{requests++;return route.fulfill({body:articles[0].repeat(2)});});
+ await page.locator('#reachUrls').fill('https://example.com/report?utm_source=one&topic=ai\nhttps://example.com/report?topic=ai&utm_source=two');await page.locator('#reachFetchMany').click();
+ await expect(page.locator('#reachFetchStatus')).toContainText('추가 1 · 중복 1');await expect(page.locator('.reachSourceItem')).toHaveCount(1);expect(requests).toBe(1);
+});
+
 test('clear and tool switching cancel the whole URL batch rather than continuing later requests',async({page})=>{
  for(const action of ['clear','switch','stop']){
   await ready(page);let requests=0;
