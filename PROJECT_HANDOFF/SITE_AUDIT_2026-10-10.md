@@ -111,3 +111,5 @@ Reach 질문·URL 입력창은 공용 글 편집기의 높이를 상속받지 �
 - 2026-10-21 v1.19.2: Reach recognizes the same public URL despite tracking query parameters and query order. Different article text at the same URL no longer counts as another source or invalidates an existing report. A URL batch fetches tracking-link variants once. Browser regressions cover manual and batch intake.
 
 - 2026-10-21 v1.19.3: Added Game Studio / Ranipang beside Audio Studio in the compact header. The verified cardville.web.app link opens in a separate tab with noopener/noreferrer. Responsive browser coverage checks 320–1280px and same-row alignment on desktop.
+
+- 2026-10-21 v1.19.4: Keep Audio Studio followed by Game Studio on one header line. Removed wrapping from the external-link row and tightened only those labels/buttons on small screens. Browser geometry asserts same-row placement and no viewport overflow from 320px through desktop.

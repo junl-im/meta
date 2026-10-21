@@ -1,7 +1,7 @@
 {
-  "version": "1.19.3",
-  "assetVersion": "1193",
+  "version": "1.19.4",
+  "assetVersion": "1194",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Add a Ranipang Game Studio shortcut beside Audio Studio."
+  "notes": "Keep Audio Studio and Game Studio on the same header line at all viewport widths."
 }
