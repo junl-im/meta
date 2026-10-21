@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://r.jina.ai; worker-src 'self' blob:; font-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1192">
+<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1193">
 <style id="bootCritical">html:not(.boot-ready) body{visibility:hidden}html{background:#fff8f0}html.app-booting{overflow-anchor:none}html.app-booting body{cursor:progress}html.app-booting body *{cursor:progress!important}</style>
 <script src="js/boot.js" defer></script>
 </head>
@@ -40,13 +40,21 @@
       <button class="studioCard" id="toolTabReach" type="button" role="tab" aria-label="GomFox Reach" aria-selected="false" aria-controls="reachTool" tabindex="-1" data-tool="reach" title="GomFox Reach · 자료 수집 · 출처 비교"><b>Reach</b></button>
     </div>
   </div>
-  <nav class="studioGroup" aria-labelledby="audioStudioLabel">
-    <div class="studioGroupLabel" id="audioStudioLabel">오디오 스튜디오</div>
-    <div class="audioStudios">
-      <a class="studioCard" id="openMastering" href="https://junl-im.github.io/foxbear-mastering-studio/" target="_blank" rel="noopener noreferrer" aria-label="마스터링 · 새창 열기" title="음질 정리 · 마스터링"><b>마스터링 ↗</b></a>
-      <a class="studioCard" id="openSorion" href="https://junl-im.github.io/AI-/" target="_blank" rel="noopener noreferrer" aria-label="소리온 · 새창 열기" title="대본 · 음성 제작"><b>소리온 ↗</b></a>
-    </div>
-  </nav>
+  <div class="studioExternalRow">
+    <nav class="studioGroup" aria-labelledby="audioStudioLabel">
+      <div class="studioGroupLabel" id="audioStudioLabel">오디오 스튜디오</div>
+      <div class="audioStudios">
+        <a class="studioCard" id="openMastering" href="https://junl-im.github.io/foxbear-mastering-studio/" target="_blank" rel="noopener noreferrer" aria-label="마스터링 · 새창 열기" title="음질 정리 · 마스터링"><b>마스터링 ↗</b></a>
+        <a class="studioCard" id="openSorion" href="https://junl-im.github.io/AI-/" target="_blank" rel="noopener noreferrer" aria-label="소리온 · 새창 열기" title="대본 · 음성 제작"><b>소리온 ↗</b></a>
+      </div>
+    </nav>
+    <nav class="studioGroup" aria-labelledby="gameStudioLabel">
+      <div class="studioGroupLabel" id="gameStudioLabel">게임 스튜디오</div>
+      <div class="audioStudios">
+        <a class="studioCard" id="openRanipang" href="https://cardville.web.app/" target="_blank" rel="noopener noreferrer" aria-label="라니팡 · 새창 열기" title="라니팡 게임 열기"><b>라니팡 ↗</b></a>
+      </div>
+    </nav>
+  </div>
 </section>
 </header>
 

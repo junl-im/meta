@@ -1,7 +1,7 @@
 {
-  "version": "1.19.2",
-  "assetVersion": "1192",
+  "version": "1.19.3",
+  "assetVersion": "1193",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Avoid duplicate Reach sources and repeated URL fetches for tracking-link variants."
+  "notes": "Add a Ranipang Game Studio shortcut beside Audio Studio."
 }

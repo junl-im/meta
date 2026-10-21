@@ -96,9 +96,9 @@ test('Daily generation distinguishes missing configuration from no generated dat
  }
 });
 
-test('audio studio links open separate tabs and fit small screens',async({page})=>{
- await ready(page,false);for(const [id,url] of [['#openMastering','https://junl-im.github.io/foxbear-mastering-studio/'],['#openSorion','https://junl-im.github.io/AI-/']]){await expect(page.locator(id)).toHaveAttribute('href',url);await expect(page.locator(id)).toHaveAttribute('target','_blank');await expect(page.locator(id)).toHaveAttribute('rel','noopener noreferrer');}
- for(const width of [320,390,768,1280]){await page.setViewportSize({width,height:900});await expect(page.locator('#openMastering')).toBeVisible();await expect(page.locator('#openSorion')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);}
+test('audio and game studio links open separate tabs and fit small screens',async({page})=>{
+ await ready(page,false);for(const [id,url] of [['#openMastering','https://junl-im.github.io/foxbear-mastering-studio/'],['#openSorion','https://junl-im.github.io/AI-/'],['#openRanipang','https://cardville.web.app/']]){await expect(page.locator(id)).toHaveAttribute('href',url);await expect(page.locator(id)).toHaveAttribute('target','_blank');await expect(page.locator(id)).toHaveAttribute('rel','noopener noreferrer');}
+ for(const width of [320,390,768,1280]){await page.setViewportSize({width,height:900});await expect(page.locator('#openMastering')).toBeVisible();await expect(page.locator('#openSorion')).toBeVisible();await expect(page.locator('#openRanipang')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);if(width===1280){const row=await page.evaluate(()=>({audio:document.querySelector('#audioStudioLabel').getBoundingClientRect().top,game:document.querySelector('#gameStudioLabel').getBoundingClientRect().top}));expect(Math.abs(row.audio-row.game)).toBeLessThan(2);}}
 });
 
 
