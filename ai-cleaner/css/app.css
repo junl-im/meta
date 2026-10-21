@@ -860,7 +860,7 @@ button,.btn,.mini,.tab,.floatWidget,.filelabel,summary{touch-action:manipulation
 .reachTool .reachQuestion{height:132px;min-height:116px;resize:vertical}
 .reachTool .reachUrls{height:148px;min-height:132px;resize:vertical}
 .reachTool .reachRaw{height:240px;min-height:180px;resize:vertical}
-@media(max-width:600px){.workspaceNav>.studioGroup:first-child{display:grid;gap:4px}.workspaceNav>.studioGroup:first-child .studioGroupLabel{padding-top:0}.studioExternalRow{justify-content:flex-start;gap:4px}.studioExternalRow .studioGroup{align-items:center;gap:2px;flex:0 0 auto}.studioExternalRow .studioGroupLabel{flex:0 0 auto;padding-top:0;font-size:9.5px}.studioExternalRow .audioStudios{flex-wrap:nowrap;gap:2px}.studioExternalRow .studioCard{min-height:26px;padding:3px 2px}.studioExternalRow .studioCard b{font-size:9.5px}}
+@media(max-width:600px){.workspaceNav>.studioGroup:first-child{display:grid;gap:4px}.workspaceNav>.studioGroup:first-child .studioGroupLabel{padding-top:0}.studioExternalRow{justify-content:flex-start;gap:2px}.studioExternalRow .studioGroup{align-items:center;gap:2px;flex:0 0 auto}.studioExternalRow .studioGroupLabel{flex:0 0 auto;padding-top:0;font-size:9.5px}.studioExternalRow .audioStudios{flex-wrap:nowrap;gap:1px}.studioExternalRow .studioCard{min-height:26px;padding:3px 2px}.studioExternalRow .studioCard b{font-size:9.5px}}
 
 /* Warm, restrained scrollbars for the page and nested editors. */
 :root{--scroll-track:#fff4e7;--scroll-thumb:#c89b73;--scroll-thumb-hover:#ae7544;--scroll-thumb-active:#905a2e}
