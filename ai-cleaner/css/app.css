@@ -956,3 +956,37 @@ button,.btn,.mini,.tab,.floatWidget,.filelabel,summary{touch-action:manipulation
   .hero:has(.mobileBriefToggle) p.mobileBrief{margin-bottom:0}
   .notice.mobileBrief{margin-bottom:0}
 }
+
+/* Refined compact mobile reading layout. */
+@media(max-width:600px){
+  .wrap{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
+  .top{padding-top:9px;padding-bottom:11px;gap:9px;border-bottom-color:#eadbca;background:rgba(255,248,240,.97)}
+  .brand{gap:9px}
+  .brand b{font-size:14px;letter-spacing:-.02em}
+  .brand .pill{margin-left:3px;padding:3px 7px;font-size:10px}
+  .workspaceNav{gap:9px}
+  .workspaceNav>.studioGroup:first-child,.studioExternalRow .studioGroup{gap:5px}
+  .workspaceNav>.studioGroup:first-child .studioGroupLabel,.studioExternalRow .studioGroupLabel{font-size:10.5px;line-height:1.3;font-weight:800;letter-spacing:-.01em;color:#735c49}
+  .workspaceNav .toolnav{gap:5px;max-width:none}
+  .workspaceNav .toolnav .studioCard{min-height:34px;border-radius:10px;background:#fffdf9;box-shadow:0 1px 2px rgba(43,29,18,.04)}
+  .workspaceNav .toolnav .studioCard b{font-size:clamp(9.5px,2.7vw,11px);letter-spacing:-.035em}
+  .workspaceNav .studioCard.active{background:#fff0df;border-color:#ed8b36;box-shadow:inset 0 0 0 1px #ed8b36}
+  .workspaceNav .studioExternalRow,.workspaceNav .studioExternalRow.studioLinksOpen{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:12px;max-width:none}
+  .studioExternalRow .audioStudios{gap:5px}
+  .studioExternalRow .studioCard{min-height:34px;border-radius:10px;background:#fffdf9;box-shadow:0 1px 2px rgba(43,29,18,.04)}
+  .studioExternalRow .studioCard b{font-size:10.5px;letter-spacing:-.025em}
+  .hero{padding-top:18px;padding-bottom:13px}
+  .hero h1{font-size:22px;line-height:1.28;letter-spacing:-.035em}
+  .hero p.mobileBrief{margin-top:9px;color:#685448;font-size:13px;line-height:1.6}
+  .mobileBriefToggle:not([hidden]){min-height:31px;margin-top:3px;padding:3px 2px;border:0;border-radius:0;background:transparent;color:#a34800;font-size:11px;font-weight:800;text-decoration:underline;text-underline-offset:3px}
+  .notice.mobileBrief{font-size:12px;line-height:1.6}
+  #textTool .workspace>.card:first-child .textarea{height:270px;min-height:270px}
+  .workspace>.card>.head{min-height:48px}
+  .workspace>.card>.body{padding:12px}
+  .textarea::placeholder,.resultarea::placeholder{color:#8f7969;opacity:1}
+}
+@media(max-width:350px){
+  .workspaceNav .toolnav{gap:4px}
+  .workspaceNav .toolnav .studioCard b{font-size:9.5px}
+  .studioExternalRow .studioCard b{font-size:10px}
+}

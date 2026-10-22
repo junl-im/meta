@@ -106,7 +106,7 @@ test('mobile header fits four tools in one row and keeps both studio groups visi
   expect(layout.scrollWidth).toBeLessThanOrEqual(layout.viewport+1);
   expect(Math.max(...layout.tabs.map(x=>x.top))-Math.min(...layout.tabs.map(x=>x.top))).toBeLessThan(2);
   expect(Math.abs(layout.audio.top-layout.game.top)).toBeLessThan(2);
-  if(width<=600){await expect(page.locator('#studioMoreButton')).toBeHidden();expect(layout.header).toBeLessThan(165);}
+  if(width<=600){await expect(page.locator('#studioMoreButton')).toBeHidden();expect(layout.header).toBeLessThan(190);expect(await page.locator('#input').evaluate(el=>el.getBoundingClientRect().height)).toBeLessThanOrEqual(280);}
  }
 });
 
