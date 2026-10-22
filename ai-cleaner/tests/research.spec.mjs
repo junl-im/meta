@@ -96,11 +96,24 @@ test('Daily generation distinguishes missing configuration from no generated dat
  }
 });
 
-test('audio and game studio links open separate tabs and fit small screens',async({page})=>{
- await ready(page,false);for(const [id,url] of [['#openMastering','https://junl-im.github.io/foxbear-mastering-studio/'],['#openSorion','https://junl-im.github.io/AI-/'],['#openRanipang','https://cardville.web.app/']]){await expect(page.locator(id)).toHaveAttribute('href',url);await expect(page.locator(id)).toHaveAttribute('target','_blank');await expect(page.locator(id)).toHaveAttribute('rel','noopener noreferrer');}
- for(const width of [320,360,390,600,768,1024,1280]){await page.setViewportSize({width,height:900});await expect(page.locator('#openMastering')).toBeVisible();await expect(page.locator('#openSorion')).toBeVisible();await expect(page.locator('#openRanipang')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);const row=await page.evaluate(()=>({audio:document.querySelector('#audioStudioLabel').getBoundingClientRect(),game:document.querySelector('#gameStudioLabel').getBoundingClientRect(),link:document.querySelector('#openRanipang').getBoundingClientRect(),viewport:innerWidth}));expect(Math.abs(row.audio.top-row.game.top)).toBeLessThan(2);expect(row.link.right).toBeLessThanOrEqual(row.viewport-2);}
+test('mobile header keeps primary tools compact and cross-studio links discoverable',async({page})=>{
+ await ready(page,false);
+ for(const [id,url] of [['#openMastering','https://junl-im.github.io/foxbear-mastering-studio/'],['#openSorion','https://junl-im.github.io/AI-/'],['#openRanipang','https://cardville.web.app/']]){await expect(page.locator(id)).toHaveAttribute('href',url);await expect(page.locator(id)).toHaveAttribute('target','_blank');await expect(page.locator(id)).toHaveAttribute('rel','noopener noreferrer');}
+ for(const width of [320,360,390,600,768,1024,1280]){
+  await page.setViewportSize({width,height:900});const more=page.locator('#studioMoreButton');
+  if(width<=600){
+   await expect(more).toBeVisible();await expect(more).toHaveAttribute('aria-expanded','false');await expect(page.locator('#openMastering')).toBeHidden();
+   const header=await page.locator('.top').boundingBox();expect(header.height).toBeLessThan(205);
+   await more.click();await expect(more).toHaveAttribute('aria-expanded','true');
+   for(const id of ['#openMastering','#openSorion','#openRanipang'])await expect(page.locator(id)).toBeVisible();
+   const row=await page.evaluate(()=>['openMastering','openSorion','openRanipang'].map(id=>document.getElementById(id).getBoundingClientRect()));expect(Math.max(...row.map(x=>x.top))-Math.min(...row.map(x=>x.top))).toBeLessThan(2);expect(row[2].right).toBeLessThanOrEqual(width-2);
+   await page.locator('#openRanipang').focus();await page.keyboard.press('Escape');await expect(more).toHaveAttribute('aria-expanded','false');await expect(more).toBeFocused();await expect(page.locator('#openRanipang')).toBeHidden();
+  }else{
+   await expect(more).toBeHidden();for(const id of ['#openMastering','#openSorion','#openRanipang'])await expect(page.locator(id)).toBeVisible();
+  }
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+ }
 });
-
 
 test('research attachment survives an update draft restore and avoids the daily prompt cache',async({page})=>{
  await ready(page);await page.locator('#reachQuestion').fill('출처와 함께 보존할 질문');await page.locator('#reachRaw').fill(articles[0]);await page.locator('#reachAddCurrent').click();await page.locator('#reachAnalyze').click();await page.locator('#reachSendToBlog').click();

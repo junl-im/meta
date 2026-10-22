@@ -1,7 +1,7 @@
 {
-  "version": "1.19.4",
-  "assetVersion": "1194",
+  "version": "1.19.5",
+  "assetVersion": "1195",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Keep Audio Studio and Game Studio on the same header line at all viewport widths."
+  "notes": "Compact mobile tool navigation with disclosed audio and game studio links."
 }

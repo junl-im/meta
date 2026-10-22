@@ -957,8 +957,15 @@ function activateToolTab(b){
   toolTabs.forEach(x=>{const active=x===b;x.classList.toggle('active',active);x.setAttribute('aria-selected',active?'true':'false');x.tabIndex=active?0:-1;});
   for(const [tool,id] of Object.entries(TOOL_SECTION_IDS)){const panel=$('#'+id);if(!panel)continue;const hidden=tool!==nextTool;panel.classList.toggle('hidden',hidden);panel.hidden=false;panel.setAttribute('aria-hidden',hidden?'true':'false');}syncDocumentTitle(nextTool);syncWidgets();
 }
+const studioMoreButton=$('#studioMoreButton'),studioExternalRow=$('#studioExternalRow');
+function setStudioLinksOpen(open){
+  studioMoreButton?.setAttribute('aria-expanded',open?'true':'false');
+  studioExternalRow?.classList.toggle('studioLinksOpen',open);
+}
+studioMoreButton?.addEventListener('click',()=>setStudioLinksOpen(studioMoreButton.getAttribute('aria-expanded')!=='true'));
+studioExternalRow?.addEventListener('keydown',e=>{if(e.key!=='Escape'||innerWidth>600)return;e.preventDefault();setStudioLinksOpen(false);studioMoreButton?.focus();});
 toolTabs.forEach(b=>{
-  b.onclick=()=>activateToolTab(b);
+  b.onclick=()=>{setStudioLinksOpen(false);activateToolTab(b);};
   b.addEventListener('keydown',e=>{
     if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;
     const current=toolTabs.indexOf(b),dir=e.key==='ArrowLeft'?-1:1;

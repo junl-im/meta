@@ -905,3 +905,31 @@ button,.btn,.mini,.tab,.floatWidget,.filelabel,summary{touch-action:manipulation
 
 .typingSourceFilter{border-color:#f0cda6;background:#fff8ee}
 .typingSourceFilter input{accent-color:var(--orange)}
+
+/* Mobile header: prioritize the four tools and reveal cross-studio links on demand. */
+.studioMoreButton{display:none}
+@media(max-width:600px){
+  .top{gap:7px;padding-bottom:8px}
+  .brand{gap:8px;min-height:36px}
+  .brand .logo{width:36px;height:36px;flex-basis:36px}
+  .brand b{font-size:14px}
+  .brand .pill{padding:3px 6px;font-size:9.5px}
+  .workspaceNav{gap:5px}
+  .workspaceNav>.studioGroup:first-child{display:block}
+  .workspaceNav>.studioGroup:first-child .studioGroupLabel{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .workspaceNav .toolnav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;width:100%;padding:0;background:transparent;border:0;border-radius:0}
+  .workspaceNav .toolnav .studioCard{width:100%;min-height:38px;padding:6px 7px;border-radius:10px}
+  .workspaceNav .toolnav .studioCard b{font-size:11px}
+  .studioMoreButton{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:32px;padding:5px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--muted);font-size:10px;font-weight:700;text-align:left}
+  .studioMoreButton span{font-size:17px;line-height:1;transition:transform .2s ease}
+  .studioMoreButton[aria-expanded="true"] span{transform:rotate(180deg)}
+  .studioMoreButton:focus-visible{outline:3px solid var(--focus-ring);outline-offset:2px}
+  .workspaceNav .studioExternalRow{display:none}
+  .workspaceNav .studioExternalRow.studioLinksOpen{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:5px;width:100%}
+  .studioExternalRow .studioGroup{display:block;min-width:0}
+  .studioExternalRow .studioGroupLabel{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .studioExternalRow .audioStudios{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;width:100%}
+  .studioExternalRow .studioGroup:last-child .audioStudios{grid-template-columns:1fr}
+  .studioExternalRow .studioCard{width:100%;min-height:36px;padding:5px 4px}
+  .studioExternalRow .studioCard b{font-size:10px}
+}
