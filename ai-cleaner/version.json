@@ -1,7 +1,7 @@
 {
-  "version": "1.19.5",
-  "assetVersion": "1195",
+  "version": "1.19.6",
+  "assetVersion": "1196",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Compact mobile tool navigation with disclosed audio and game studio links."
+  "notes": "Mobile one-row tool navigation and expandable two-line descriptions."
 }

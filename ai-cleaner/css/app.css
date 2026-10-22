@@ -933,3 +933,26 @@ button,.btn,.mini,.tab,.floatWidget,.filelabel,summary{touch-action:manipulation
   .studioExternalRow .studioCard{width:100%;min-height:36px;padding:5px 4px}
   .studioExternalRow .studioCard b{font-size:10px}
 }
+
+/* Mobile studio directory and concise descriptions. */
+.mobileBriefToggle{display:none}
+@media(max-width:600px){
+  .top{gap:6px}
+  .workspaceNav{gap:6px}
+  .workspaceNav>.studioGroup:first-child{display:grid;gap:3px}
+  .workspaceNav>.studioGroup:first-child .studioGroupLabel,.studioExternalRow .studioGroupLabel{position:static;width:auto;height:auto;padding:0;margin:0;overflow:visible;clip:auto;white-space:nowrap;border:0;font-size:9.5px;line-height:1.25;color:var(--muted)}
+  .workspaceNav .toolnav{grid-template-columns:minmax(0,1.05fr) minmax(0,1.15fr) minmax(0,1.12fr) minmax(0,.58fr);gap:4px;max-width:380px}
+  .workspaceNav .toolnav .studioCard{min-height:30px;padding:3px 2px;border-radius:8px}
+  .workspaceNav .toolnav .studioCard b{font-size:9.5px;white-space:nowrap}
+  .studioMoreButton{display:none}
+  .workspaceNav .studioExternalRow,.workspaceNav .studioExternalRow.studioLinksOpen{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:9px;width:100%;max-width:380px}
+  .studioExternalRow .studioGroup{display:grid;gap:3px}
+  .studioExternalRow .audioStudios{gap:4px}
+  .studioExternalRow .studioCard{min-height:30px;padding:3px 2px;border-radius:8px}
+  .studioExternalRow .studioCard b{font-size:9.5px;white-space:nowrap}
+  .mobileBrief:not(.isExpanded){display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden}
+  .mobileBriefToggle:not([hidden]){display:inline-flex;align-items:center;min-height:28px;margin-top:3px;padding:2px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:#a34800;font-size:10px;font-weight:700}
+  .mobileBriefToggle:focus-visible{outline:3px solid var(--focus-ring);outline-offset:2px}
+  .hero:has(.mobileBriefToggle) p.mobileBrief{margin-bottom:0}
+  .notice.mobileBrief{margin-bottom:0}
+}

@@ -955,8 +955,24 @@ function activateToolTab(b){
   if(nextTool==='writing')void aiWritingOs.activate().catch(err=>{console.error(err);showToast('블로그 팩토리를 초기화하지 못했습니다. 새로고침 후 다시 시도해 주세요.');});else aiWritingOs.deactivate();
   if(nextTool==='reach')void ensureGomFoxReach().then(reach=>reach.activate?.()).catch(err=>{console.error(err);showToast('GomFox Reach를 초기화하지 못했습니다. 새로고침 후 다시 시도해 주세요.');});else window.GomFoxReach?.deactivate?.();
   toolTabs.forEach(x=>{const active=x===b;x.classList.toggle('active',active);x.setAttribute('aria-selected',active?'true':'false');x.tabIndex=active?0:-1;});
-  for(const [tool,id] of Object.entries(TOOL_SECTION_IDS)){const panel=$('#'+id);if(!panel)continue;const hidden=tool!==nextTool;panel.classList.toggle('hidden',hidden);panel.hidden=false;panel.setAttribute('aria-hidden',hidden?'true':'false');}syncDocumentTitle(nextTool);syncWidgets();
+  for(const [tool,id] of Object.entries(TOOL_SECTION_IDS)){const panel=$('#'+id);if(!panel)continue;const hidden=tool!==nextTool;panel.classList.toggle('hidden',hidden);panel.hidden=false;panel.setAttribute('aria-hidden',hidden?'true':'false');}syncDocumentTitle(nextTool);syncWidgets();requestAnimationFrame(syncMobileBriefs);
 }
+const mobileBriefs=[...document.querySelectorAll('.mobileBrief')];
+mobileBriefs.forEach((el,index)=>{
+  el.id ||= 'mobileBrief'+(index+1);
+  const button=document.createElement('button');
+  button.type='button';button.className='mobileBriefToggle';button.textContent='더보기';
+  button.setAttribute('aria-controls',el.id);button.setAttribute('aria-expanded','false');
+  el.insertAdjacentElement('afterend',button);
+  button.addEventListener('click',()=>{const open=button.getAttribute('aria-expanded')!=='true';el.classList.toggle('isExpanded',open);button.setAttribute('aria-expanded',String(open));button.textContent=open?'접기':'더보기';});
+});
+function syncMobileBriefs(){
+  mobileBriefs.forEach(el=>{const button=el.nextElementSibling;if(!button?.classList.contains('mobileBriefToggle'))return;
+    button.hidden=innerWidth>600||(!el.classList.contains('isExpanded')&&el.scrollHeight<=el.clientHeight+2);
+  });
+}
+requestAnimationFrame(syncMobileBriefs);
+window.addEventListener('resize',syncMobileBriefs,{passive:true});
 const studioMoreButton=$('#studioMoreButton'),studioExternalRow=$('#studioExternalRow');
 function setStudioLinksOpen(open){
   studioMoreButton?.setAttribute('aria-expanded',open?'true':'false');
