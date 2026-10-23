@@ -973,15 +973,8 @@ function syncMobileBriefs(){
 }
 requestAnimationFrame(syncMobileBriefs);
 window.addEventListener('resize',syncMobileBriefs,{passive:true});
-const studioMoreButton=$('#studioMoreButton'),studioExternalRow=$('#studioExternalRow');
-function setStudioLinksOpen(open){
-  studioMoreButton?.setAttribute('aria-expanded',open?'true':'false');
-  studioExternalRow?.classList.toggle('studioLinksOpen',open);
-}
-studioMoreButton?.addEventListener('click',()=>setStudioLinksOpen(studioMoreButton.getAttribute('aria-expanded')!=='true'));
-studioExternalRow?.addEventListener('keydown',e=>{if(e.key!=='Escape'||innerWidth>600)return;e.preventDefault();setStudioLinksOpen(false);studioMoreButton?.focus();});
 toolTabs.forEach(b=>{
-  b.onclick=()=>{setStudioLinksOpen(false);activateToolTab(b);};
+  b.onclick=()=>activateToolTab(b);
   b.addEventListener('keydown',e=>{
     if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;
     const current=toolTabs.indexOf(b),dir=e.key==='ArrowLeft'?-1:1;

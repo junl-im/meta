@@ -1,7 +1,7 @@
 {
-  "version": "1.19.7",
-  "assetVersion": "1197",
+  "version": "1.20.0",
+  "assetVersion": "1200",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Refined mobile typography, studio links and reading layout."
+  "notes": "Unified studio navigation, buttons, cards and responsive reading layout."
 }

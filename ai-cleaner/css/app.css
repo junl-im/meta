@@ -906,84 +906,135 @@ button,.btn,.mini,.tab,.floatWidget,.filelabel,summary{touch-action:manipulation
 .typingSourceFilter{border-color:#f0cda6;background:#fff8ee}
 .typingSourceFilter input{accent-color:var(--orange)}
 
-/* Mobile header: prioritize the four tools and reveal cross-studio links on demand. */
-.studioMoreButton{display:none}
-@media(max-width:600px){
-  .top{gap:7px;padding-bottom:8px}
-  .brand{gap:8px;min-height:36px}
-  .brand .logo{width:36px;height:36px;flex-basis:36px}
-  .brand b{font-size:14px}
-  .brand .pill{padding:3px 6px;font-size:9.5px}
-  .workspaceNav{gap:5px}
-  .workspaceNav>.studioGroup:first-child{display:block}
-  .workspaceNav>.studioGroup:first-child .studioGroupLabel{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-  .workspaceNav .toolnav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;width:100%;padding:0;background:transparent;border:0;border-radius:0}
-  .workspaceNav .toolnav .studioCard{width:100%;min-height:38px;padding:6px 7px;border-radius:10px}
-  .workspaceNav .toolnav .studioCard b{font-size:11px}
-  .studioMoreButton{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:32px;padding:5px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--muted);font-size:10px;font-weight:700;text-align:left}
-  .studioMoreButton span{font-size:17px;line-height:1;transition:transform .2s ease}
-  .studioMoreButton[aria-expanded="true"] span{transform:rotate(180deg)}
-  .studioMoreButton:focus-visible{outline:3px solid var(--focus-ring);outline-offset:2px}
-  .workspaceNav .studioExternalRow{display:none}
-  .workspaceNav .studioExternalRow.studioLinksOpen{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:5px;width:100%}
-  .studioExternalRow .studioGroup{display:block;min-width:0}
-  .studioExternalRow .studioGroupLabel{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-  .studioExternalRow .audioStudios{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;width:100%}
-  .studioExternalRow .studioGroup:last-child .audioStudios{grid-template-columns:1fr}
-  .studioExternalRow .studioCard{width:100%;min-height:36px;padding:5px 4px}
-  .studioExternalRow .studioCard b{font-size:10px}
-}
-
-/* Mobile studio directory and concise descriptions. */
+/* Short mobile explanations stay readable and expand only when needed. */
 .mobileBriefToggle{display:none}
 @media(max-width:600px){
-  .top{gap:6px}
-  .workspaceNav{gap:6px}
-  .workspaceNav>.studioGroup:first-child{display:grid;gap:3px}
-  .workspaceNav>.studioGroup:first-child .studioGroupLabel,.studioExternalRow .studioGroupLabel{position:static;width:auto;height:auto;padding:0;margin:0;overflow:visible;clip:auto;white-space:nowrap;border:0;font-size:9.5px;line-height:1.25;color:var(--muted)}
-  .workspaceNav .toolnav{grid-template-columns:minmax(0,1.05fr) minmax(0,1.15fr) minmax(0,1.12fr) minmax(0,.58fr);gap:4px;max-width:380px}
-  .workspaceNav .toolnav .studioCard{min-height:30px;padding:3px 2px;border-radius:8px}
-  .workspaceNav .toolnav .studioCard b{font-size:9.5px;white-space:nowrap}
-  .studioMoreButton{display:none}
-  .workspaceNav .studioExternalRow,.workspaceNav .studioExternalRow.studioLinksOpen{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:9px;width:100%;max-width:380px}
-  .studioExternalRow .studioGroup{display:grid;gap:3px}
-  .studioExternalRow .audioStudios{gap:4px}
-  .studioExternalRow .studioCard{min-height:30px;padding:3px 2px;border-radius:8px}
-  .studioExternalRow .studioCard b{font-size:9.5px;white-space:nowrap}
   .mobileBrief:not(.isExpanded){display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden}
-  .mobileBriefToggle:not([hidden]){display:inline-flex;align-items:center;min-height:28px;margin-top:3px;padding:2px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:#a34800;font-size:10px;font-weight:700}
+  .mobileBriefToggle:not([hidden]){display:inline-flex;align-items:center}
   .mobileBriefToggle:focus-visible{outline:3px solid var(--focus-ring);outline-offset:2px}
   .hero:has(.mobileBriefToggle) p.mobileBrief{margin-bottom:0}
-  .notice.mobileBrief{margin-bottom:0}
+  .notice.mobileBrief{margin-bottom:0;font-size:12px;line-height:1.6}
 }
 
-/* Refined compact mobile reading layout. */
+/* v1.20 visual system: one restrained surface language across studios and tools. */
+:root{
+  --ink:#2d241e;--muted:#6e6259;--bg:#f8f7f4;--card:#fffefa;--line:#e7ded3;
+  --orange:#e96d16;--soft:#fff0e4;
+  --shadow:0 9px 28px rgba(58,39,23,.055);--focus-ring:rgba(233,109,22,.28)
+}
+body{background:linear-gradient(180deg,#f9f4ed 0,#fcfaf6 280px,#f9f8f5 100%)}
+.wrap{max-width:1380px}
+.top{
+  height:auto;min-height:82px;top:10px;margin-top:12px;padding:12px 17px;gap:28px;
+  border:1px solid #e9dfd3;border-radius:19px;background:rgba(255,254,251,.96);
+  box-shadow:0 9px 28px rgba(58,39,23,.075);backdrop-filter:blur(18px)
+}
+.brand{gap:12px;min-width:0}
+.brand .logo{border:2px solid #fff;box-shadow:0 3px 10px rgba(80,48,24,.15)}
+.brand b{font-size:16px;letter-spacing:-.025em}
+.brand .pill{margin-left:5px;padding:4px 7px;background:#ef791f;font-size:10px}
+.workspaceNav{display:grid;gap:7px;justify-items:end;min-width:0;margin-left:auto}
+.workspaceNav>.studioGroup:first-child{display:grid;gap:5px;justify-items:end}
+.studioGroupLabel{padding:0;color:#826a58;font-size:10.5px;font-weight:800;line-height:1.25;letter-spacing:-.01em}
+.toolnav,.audioStudios{gap:6px}
+.workspaceNav .studioCard{
+  min-height:35px;padding:6px 11px;border:1px solid #e8ddd1;border-radius:10px;
+  background:#fffefa;box-shadow:0 1px 2px rgba(48,32,20,.035);
+  transition:background-color .16s,border-color .16s,box-shadow .16s,transform .16s
+}
+.workspaceNav .studioCard b{font-size:11px;line-height:1.3;letter-spacing:-.025em}
+.workspaceNav .studioCard:hover{background:#fff7ee;border-color:#eda96e;box-shadow:0 4px 11px rgba(91,52,23,.09)}
+.workspaceNav .studioCard:active{transform:translateY(1px)}
+.workspaceNav .studioCard.active{background:#fff0e2;border-color:#e98134;box-shadow:inset 0 0 0 1px #e98134,0 2px 6px rgba(169,72,0,.08)}
+.workspaceNav .studioCard.active b{color:#9b4105}
+.studioExternalRow{gap:17px;align-items:center}
+.studioExternalRow .studioGroup{gap:7px}
+.studioExternalRow .studioCard{min-height:31px;padding:5px 9px;background:#faf7f2}
+.studioExternalRow .studioCard b{font-size:10.5px}
+.hero{padding:26px 0 18px}
+.hero h1{font-size:clamp(26px,2.4vw,34px);line-height:1.22;letter-spacing:-.035em}
+.hero p{max-width:780px;margin-top:10px;color:#6e5d50;font-size:13px;line-height:1.65}
+.card{border-color:#e9e0d6;border-radius:18px;background:#fffefa;box-shadow:var(--shadow)}
+.head{min-height:54px;background:#fffdf9;border-bottom-color:#ece3d8}
+.head b{font-size:13.5px;letter-spacing:-.01em}
+.body{padding:16px}
+.textarea,.resultarea{
+  border-color:#e6dacf;border-radius:13px;background:#fffcf8;color:var(--ink);font-size:14px;line-height:1.75
+}
+.textarea:focus,.resultarea:focus{border-color:#e89958;box-shadow:0 0 0 3px rgba(233,109,22,.12)}
+.btn,.mini,.v6select{
+  border-radius:10px;font-weight:800;transition:background-color .16s,border-color .16s,box-shadow .16s,transform .16s
+}
+.btn{height:39px;padding-inline:13px;font-size:11px}
+.btn:hover:not(:disabled),.mini:hover:not(:disabled){border-color:#e6a46d;box-shadow:0 3px 10px rgba(86,49,24,.08)}
+.btn.primary{background:#342920;border-color:#342920;color:#fff}
+.btn.primary:hover:not(:disabled){background:#49372a;border-color:#49372a}
+.btn.orange{background:#e96d16;border-color:#e96d16}
+.btn.orange:hover:not(:disabled){background:#d45d0c;border-color:#d45d0c}
+.btn.soft{background:#fff0e4;border-color:#f1cdaa;color:#87420b}
+.check{border-radius:9px;padding:7px 10px;background:#fffcf8;color:#67574a;font-size:10.5px}
+.check:has(input:checked){border-color:#e9c4a5;background:#fff6ec}
+.tabs{gap:3px;padding:3px;border:1px solid #ece1d6;border-radius:11px;background:#f8f2eb}
+.tab{border-radius:8px;padding:7px 11px;font-size:10.5px}
+.tab.active{background:#fffefa;box-shadow:0 1px 4px rgba(66,41,21,.11);color:#8d4108}
+.v6select{height:38px;background:#fffefa;font-size:10.5px}
+.notice{border:1px solid #d8e5f7;background:#f3f8ff}
+.dropzone{background:#fffbf5;border-color:#d9c8b7}
+.mobileBriefToggle:not([hidden]){color:#9b4105}
+@media(max-width:1000px){
+  .top{gap:12px}
+  .workspaceNav{width:100%;justify-items:start;margin-left:0}
+  .workspaceNav>.studioGroup:first-child{justify-items:start}
+  .studioExternalRow{justify-content:flex-start}
+}
 @media(max-width:600px){
   .wrap{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
-  .top{padding-top:9px;padding-bottom:11px;gap:9px;border-bottom-color:#eadbca;background:rgba(255,248,240,.97)}
-  .brand{gap:9px}
-  .brand b{font-size:14px;letter-spacing:-.02em}
-  .brand .pill{margin-left:3px;padding:3px 7px;font-size:10px}
-  .workspaceNav{gap:9px}
-  .workspaceNav>.studioGroup:first-child,.studioExternalRow .studioGroup{gap:5px}
-  .workspaceNav>.studioGroup:first-child .studioGroupLabel,.studioExternalRow .studioGroupLabel{font-size:10.5px;line-height:1.3;font-weight:800;letter-spacing:-.01em;color:#735c49}
-  .workspaceNav .toolnav{gap:5px;max-width:none}
-  .workspaceNav .toolnav .studioCard{min-height:34px;border-radius:10px;background:#fffdf9;box-shadow:0 1px 2px rgba(43,29,18,.04)}
-  .workspaceNav .toolnav .studioCard b{font-size:clamp(9.5px,2.7vw,11px);letter-spacing:-.035em}
-  .workspaceNav .studioCard.active{background:#fff0df;border-color:#ed8b36;box-shadow:inset 0 0 0 1px #ed8b36}
-  .workspaceNav .studioExternalRow,.workspaceNav .studioExternalRow.studioLinksOpen{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:12px;max-width:none}
-  .studioExternalRow .audioStudios{gap:5px}
-  .studioExternalRow .studioCard{min-height:34px;border-radius:10px;background:#fffdf9;box-shadow:0 1px 2px rgba(43,29,18,.04)}
-  .studioExternalRow .studioCard b{font-size:10.5px;letter-spacing:-.025em}
-  .hero{padding-top:18px;padding-bottom:13px}
-  .hero h1{font-size:22px;line-height:1.28;letter-spacing:-.035em}
-  .hero p.mobileBrief{margin-top:9px;color:#685448;font-size:13px;line-height:1.6}
-  .mobileBriefToggle:not([hidden]){min-height:31px;margin-top:3px;padding:3px 2px;border:0;border-radius:0;background:transparent;color:#a34800;font-size:11px;font-weight:800;text-decoration:underline;text-underline-offset:3px}
-  .notice.mobileBrief{font-size:12px;line-height:1.6}
-  #textTool .workspace>.card:first-child .textarea{height:270px;min-height:270px}
-  .workspace>.card>.head{min-height:48px}
+  .top{
+    position:sticky;top:0;min-height:0;margin:0 -16px;padding:9px 16px 10px;
+    border:0;border-bottom:1px solid #e8ddd0;border-radius:0;box-shadow:none;
+    background:rgba(255,253,249,.96);gap:10px
+  }
+  .brand{gap:9px;min-height:35px}
+  .brand .logo{width:35px;height:35px;flex-basis:35px}
+  .brand b{font-size:14px}
+  .brand .pill{font-size:9.5px}
+  .workspaceNav{gap:7px;width:100%}
+  .workspaceNav>.studioGroup:first-child{width:100%;gap:4px;justify-items:stretch}
+  .workspaceNav>.studioGroup:first-child .studioGroupLabel,.studioExternalRow .studioGroupLabel{
+    position:static;width:auto;height:auto;margin:0;padding:0;overflow:visible;clip:auto;
+    color:#806956;font-size:10.5px;line-height:1.3;font-weight:800
+  }
+  .workspaceNav .toolnav{
+    display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1.15fr) minmax(0,1.12fr) minmax(0,.58fr);
+    gap:5px;width:100%;max-width:420px
+  }
+  .workspaceNav .toolnav .studioCard{min-height:35px;padding:4px 2px;border-radius:9px}
+  .workspaceNav .toolnav .studioCard b{font-size:clamp(9.5px,2.7vw,11px);white-space:nowrap}
+  .workspaceNav .studioExternalRow{
+    display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:11px;width:100%;max-width:420px;
+    padding-top:6px;border-top:1px solid #eee4d9
+  }
+  .studioExternalRow .studioGroup{display:grid;gap:4px;min-width:0}
+  .studioExternalRow .audioStudios{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;width:100%}
+  .studioExternalRow .studioGroup:last-child .audioStudios{grid-template-columns:1fr}
+  .studioExternalRow .studioCard{width:100%;min-height:34px;padding:4px 3px;border-radius:9px}
+  .studioExternalRow .studioCard b{font-size:10.5px;white-space:nowrap}
+  .hero{padding:20px 0 16px}
+  .hero h1{font-size:22px;line-height:1.27}
+  .hero p.mobileBrief{margin-top:8px;color:#67564a;font-size:12.5px;line-height:1.58}
+  .mobileBriefToggle:not([hidden]){margin-top:2px;min-height:30px;padding:3px 2px;border:0;background:transparent;font-size:11px;text-decoration:underline;text-underline-offset:3px}
+  .card{border-radius:15px}
+  .workspace>.card>.head{min-height:49px;padding-inline:13px}
   .workspace>.card>.body{padding:12px}
-  .textarea::placeholder,.resultarea::placeholder{color:#8f7969;opacity:1}
+  #textTool .workspace>.card:first-child .textarea{height:275px;min-height:275px}
+  .textarea,.resultarea{font-size:14px}
+  .sourceActions,.resultActions{gap:6px}
+  .btn{height:39px}
+  .check{font-size:10.5px}
+  .resultHead{align-items:flex-start;flex-wrap:nowrap}
+  .resultHead .resultTitle{margin-top:6px}
+  .resultHead .tabs{width:auto;margin-left:auto;flex-wrap:nowrap;justify-content:flex-end;gap:2px}
+  .resultHead .tab{padding:6px 7px;font-size:9.5px}
 }
 @media(max-width:350px){
   .workspaceNav .toolnav{gap:4px}
