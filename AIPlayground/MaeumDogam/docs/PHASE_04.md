@@ -14,7 +14,7 @@
 - 소스 구조와 데이터 테스트 코드를 추가했다. 저장소 실행 환경 및 실제 기기 브라우저에서 통과했는지는 별도로 확인해야 한다.
 - 아직 미검증: 320/360/390/430px 휴대전화 시각 QA, iOS 공유·클립보드, Android 키보드·스크린리더, 캐릭터 원화의 투명도·통일성.
 - ISTJ 고슴도치 원화는 여전히 검수용 시안이고, 승인 전 실제 카드에 연결하지 않는다.
-- v0.2 ZIP은 Drive에 보존 중이다. **v0.4 소스·원화 전체 ZIP 백업은 아직 미완료.**
+- [v0.4.1 전체 소스·원화 백업 ZIP](https://drive.google.com/file/d/1TGFC6_75jtBeZNOEBgmx6gqGKzbuuESH/view?usp=drivesdk) 구글드라이브 보관 및 압축 검사 완료. SHA256: `9e66469987f328cf609c58e6dab8f45f4e58e1d92d4ba111f4383d187c898532`. 기존 v0.2·v0.4 ZIP도 보존.
 
 ## 수동 QA 절차
 1. 320/360/390/430px 너비에서 사이트 상단과 16유형 카드/소다상점/탐험 선택지의 가로 넘침 여부를 확인한다.
@@ -26,3 +26,11 @@
 
 ## 변경 제한
 모든 소스는 `AIPlayground/MaeumDogam/` 하위에서만 변경하며, 사용자 승인 전 `main` 병합·배포는 하지 않는다.
+
+## v0.4.1 추가 검증과 원화 동기화 (2026-10-25)
+- 실제 체크아웃에서 `node tests/verify-content.mjs` 및 `node tests/verify-no-svg.mjs` **PASS**.
+- SVG가 필요한 상황에도 동등한 PNG 원화를 확보·변환한 후 검수한 WebP/PNG만 사용하는 규칙을 MASTER 및 STYLE BIBLE에 추가.
+- ISTJ·ISFJ 원본 PNG는 RGBA, 투명 알파 검사 통과. 두 파일 모두 구글드라이브 `01_MASTER_원화_투명PNG`에 개별 저장.
+- WebP 미리보기: ISTJ 592×664 / 약 55KB, ISFJ 512×768 / 약 58KB. 알파를 보존하여 `02_WEB_경량WebP`에 개별 저장.
+- GitHub `ASSET_MANIFEST.json` v0.4.1에 파일 SHA256·Drive ID·승인 상태(미승인) 기록. 노션 자산 DB에도 시안 경로·원본 링크와 '생성' 상태 기록.
+- **웹앱 실제 카드 적용은 여전히 보류**. 스타일 정합성 및 모바일/키보드 시각 QA 후 승인.
