@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fff9ef">
+  <meta name="description" content="곰같은여우와 떠나는 무료 마음 이야기 여행. 16유형과 4가지 소다 캐릭터, 64개의 창작 에피소드를 만나 보세요.">
+  <title>곰같은여우의 마음도감 | 나를 발견하는 가장 재미있는 방법</title>
+  <link rel="icon" type="image/png" href="./assets/branding/mascot-fox-guide-v01.png">
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">본문으로 바로가기</a>
+  <header class="site-header">
+    <a class="brand" href="#home" aria-label="곰같은여우의 마음도감 첫 화면">🦊 <span>곰같은여우의 <strong>마음도감</strong></span></a>
+    <nav aria-label="주요 메뉴">
+      <a href="#types">성격마을</a><a href="#blood">소다상점</a><a href="#bridge">관계 다리</a><a href="#theater">마음 극장</a>
+    </nav>
+  </header>
+  <main id="main">
+    <section class="hero" id="home">
+      <div class="hero-sky" aria-hidden="true"></div>
+      <div class="hero-content">
+        <span class="eyebrow"><span class="sparkle">✦</span> FREE STORY ATLAS <span class="sparkle">✦</span></span>
+        <h1><span>곰같은여우의</span>마음도감</h1>
+        <p class="hero-tag">나를 발견하는 가장 재미있는 방법</p>
+        <p class="hero-description">16가지 성격마을과 4가지 소다상점에서<br>지금의 나에게 어울리는 이야기를 골라봐!</p>
+        <a class="primary-link" href="#types">무료 마음 탐험 시작 <span aria-hidden="true">↗</span></a>
+        <p class="hero-caption">가입 없이 무료 · 64개 조합 이야기 · 결과 공유</p>
+      </div>
+      <img class="hero-mascot" src="./assets/branding/mascot-fox-guide-v01.png" alt="책을 안고 탐험을 안내하는 둥근 곰같은여우" width="480" height="480" fetchpriority="high">
+      <div class="hero-meadow" aria-hidden="true"></div>
+    </section>
+
+    <div class="chapter-trail" aria-hidden="true"><span>✿</span><span>❀</span><span>✿</span></div>
+
+    <section class="chapter village" id="types" aria-labelledby="types-title">
+      <p class="eyebrow">CHAPTER 01 · THE PERSONALITY VILLAGE</p>
+      <h2 id="types-title">16가지 성격마을</h2>
+      <p class="section-lead">마음의 이름표를 하나 골라 봐. 나와 꼭 똑같아야 할 필요는 없어. 오늘 가장 끌리는 이야기도 좋아.</p>
+      <div class="selection-status" role="status" aria-live="polite"><span class="dot"></span><span id="chosen-type">아직 선택한 유형이 없어요</span></div>
+      <div id="types-grid" class="types-grid" role="group" aria-label="16가지 유형 중 한 가지 선택"></div>
+      <p class="fineprint">직접 선택하는 창작 이야기입니다. 공식 MBTI® 검사나 전문 심리 진단이 아닙니다.</p>
+    </section>
+
+    <section class="chapter soda-shop" id="blood" aria-labelledby="blood-title">
+      <p class="eyebrow">CHAPTER 02 · THE SODA SHOP</p>
+      <h2 id="blood-title">혈액형 소다상점</h2>
+      <p class="section-lead">혈액형을 골라서 소다 친구를 만나 봐! 4가지 캐릭터는 재미를 위한 가상 인물이고, 혈액형과 성격의 관련성을 뜻하지 않아.</p>
+      <div id="blood-grid" class="soda-grid" role="group" aria-label="네 가지 혈액형 이야기 캐릭터 중 한 가지 선택"></div>
+      <a id="result-link" class="primary-link result-link" href="#theater" hidden>나의 이야기 보러 가기 <span aria-hidden="true">↗</span></a>
+    </section>
+
+    <section class="chapter bridge" id="bridge" aria-labelledby="bridge-title">
+      <p class="eyebrow">CHAPTER 03 · THE FRIENDSHIP BRIDGE</p>
+      <h2 id="bridge-title">우리 사이, 마음의 다리</h2>
+      <p class="section-lead">친구나 연인의 유형도 골라 봐. 점수 대신 서로에게 건넬 수 있는 한마디를 찾아줄게.</p>
+      <div class="bridge-card">
+        <div class="bridge-selects">
+          <div><span class="bridge-field-label">나의 유형</span><output id="my-type-label">아직 선택 전</output></div>
+          <span class="bridge-heart" aria-hidden="true">♡</span>
+          <div><label for="friend-type">함께 볼 유형</label><select id="friend-type"><option value="">선택해 주세요</option></select></div>
+        </div>
+        <article id="bridge-result" class="bridge-result" hidden aria-live="polite">
+          <h3 id="bridge-headline"></h3><p id="bridge-story"></p><p id="bridge-tip"></p>
+        </article>
+        <p id="bridge-prompt" class="fineprint">성격마을에서 나의 유형을 고르고, 상대 유형을 선택하면 이야기가 열려요.</p>
+      </div>
+    </section>
+
+    <section class="chapter theater" id="theater" aria-labelledby="theater-title">
+      <p class="eyebrow">CHAPTER 04 · THE LITTLE THEATER</p>
+      <h2 id="theater-title">오늘의 마음 극장</h2>
+      <p class="section-lead">어느 날의 주인공이 될까? 유형과 소다를 고르면 나만의 짧은 에피소드가 열려.</p>
+      <div class="theater-stage">
+        <div id="story-placeholder" class="stage-placeholder">
+          <div class="curtain-star" aria-hidden="true">✦</div><p>아직 무대가 준비 중이야!</p><span>성격마을과 소다상점에서 하나씩 선택해 줘.</span>
+          <a href="#types" class="secondary-link">성격마을로 가기</a>
+        </div>
+        <article id="result" hidden aria-live="polite">
+          <span class="story-stamp" id="stamp"></span>
+          <h3 id="headline"></h3>
+          <p class="story-lead" id="story-lead"></p>
+          <p class="story-body" id="storyline"></p>
+          <div class="story-advice"><strong>마음의 한 줄</strong><p id="story-tip"></p></div>
+          <div class="scene-switch" role="group" aria-label="이야기 끝 질문 선택">
+            <button type="button" class="scene-button" data-scene="friend" aria-pressed="true">친구</button>
+            <button type="button" class="scene-button" data-scene="love" aria-pressed="false">연인</button>
+            <button type="button" class="scene-button" data-scene="work" aria-pressed="false">동료</button>
+          </div>
+          <p class="scene-question" id="scene-question"></p>
+          <div class="story-actions">
+            <button id="share" class="action-button" type="button">링크 공유하기</button>
+            <button id="copy" class="action-button subtle" type="button">이야기 복사</button>
+            <button id="reset" class="action-button subtle" type="button">다시 선택</button>
+          </div>
+          <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
+        </article>
+      </div>
+      <p class="fineprint">혈액형은 성격을 예측하는 과학적 지표가 아닙니다. 모든 결과는 소다상점 세계관의 창작 이야기예요.</p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <span>🦊 곰같은여우의 마음도감</span><span>매일 다른 마음을 만나는 무료 이야기 여행</span><small>v0.3 개발 검수판 · 진단 서비스 아님</small>
+  </footer>
+</body>
+</html>
