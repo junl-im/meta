@@ -1,7 +1,7 @@
 {
   "project": "곰같은여우의 마음도감",
   "projectId": "maeumdogam",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "updatedAt": "2026-10-24",
   "repository": "junl-im/meta",
   "projectRoot": "AIPlayground/MaeumDogam",
@@ -16,19 +16,19 @@
     "exported",
     "synced"
   ],
-  "note": "Paths under projectRoot. Entries with planned status are NOT generated or uploaded; do not display until approved and synced. Never overwrite siblings or production files.",
+  "note": "Entries without final approval or verified SHA256 remain generated/planned, even if files exist in GitHub. Never display drafts as approved. Upload and verify high-quality originals in Drive before marking SYNCED.",
   "assets": [
     {
       "id": "BRAND-001",
       "category": "brand",
       "name": "시그니처 곰같은여우 안내자 기본",
       "path": "assets/branding/mascot-fox-guide-v01.png",
-      "status": "planned",
+      "status": "generated",
       "source": "original",
       "approved": false,
       "originalDriveFileId": null,
       "sha256": null,
-      "notes": "투명, 둥근 체형, 여우 꼬리, 책·가방, 일관된 비율"
+      "notes": "투명, 둥근 체형, 여우 꼬리, 책·가방, 일관된 비율; GitHub/Drive 확인, 품질 승인 및 SHA256 재확인 필요"
     },
     {
       "id": "BRAND-002",
@@ -58,11 +58,12 @@
       "category": "background",
       "name": "시작 입구 mobile 배경",
       "path": "assets/backgrounds/entry-mobile-v01.webp",
-      "status": "planned",
+      "status": "generated",
       "source": "original",
       "approved": false,
       "originalDriveFileId": null,
-      "sha256": null
+      "sha256": null,
+      "notes": "; 웹용 WebP GitHub/Drive 보존, 원화 품질 승인 필요"
     },
     {
       "id": "BG-ENTRY-DESKTOP",
@@ -167,13 +168,13 @@
       "id": "CHAR-ISTJ",
       "category": "character",
       "name": "ISTJ 오리지널 캐릭터",
-      "path": "assets/characters/mbti/ISTJ/base-v01.png",
-      "status": "planned",
+      "path": "assets/characters/mbti/istj-hedgehog-draft-v01.png",
+      "status": "generated",
       "source": "original",
       "approved": false,
       "originalDriveFileId": null,
       "sha256": null,
-      "notes": "투명 배경, 개별 원화, 동일 세계관, 16Personalities 기존 아바타 사용 불가"
+      "notes": "수첩을 든 오리지널 고슴도치 기록가 시안. GitHub에만 저장. 배경 완전 투명 확인 실패, 스타일 승인 및 Drive 백업 전. 웹 UI 미사용."
     },
     {
       "id": "CHAR-ISFJ",
