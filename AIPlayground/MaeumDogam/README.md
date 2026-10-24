@@ -54,3 +54,8 @@
 - `assets/characters/mbti/isfj-gardener-draft-v01.png`: ISFJ '마음의 정원사' 신규 원화 **생성 시안**. 투명도·스타일 정합성과 Drive 저장이 미검증이라 **웹 UI에서는 사용하지 않음**.
 - 상세 QA: [docs/PHASE_04.md](docs/PHASE_04.md).
 - 변경은 Draft PR #5에서만 진행했고 `main`·기존 서비스에는 반영하지 않았습니다.
+
+## 필수 원화 정책 — SVG 전면 금지
+- SVG 파일·인라인 SVG·SVG 스프라이트·SVG data URI 및 SVG 기반 아이콘 라이브러리를 **절대 사용하지 않습니다**.
+- 모든 로고·아이콘·캐릭터·배경·장식은 개별 PNG 원화와 검수된 WebP/PNG 배포본으로만 사용합니다.
+- `node tests/verify-no-svg.mjs`로 프로젝트 내 SVG 자산·참조를 확인합니다.
