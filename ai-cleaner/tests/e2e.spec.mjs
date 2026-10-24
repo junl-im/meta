@@ -808,6 +808,7 @@ test('Blog Factory copy-first flow stays simple on mobile', async ({ page }) => 
 
 test('Blog Factory switches pipeline semantics across topic and production modes', async ({ page }) => {
   await gotoReady(page);await page.locator('[data-tool="writing"]').click();
+  await expect(page.locator('#osStatus')).toContainText('프롬프트 빌더 준비 완료');
   await expect(page.locator('#osFactoryPipeline')).toContainText('TOP 3');
   await expect(page.locator('#osImageCount')).toBeDisabled();
   await page.locator('#osFactoryPresets [data-factory-mode="idea_bank"]').click();
