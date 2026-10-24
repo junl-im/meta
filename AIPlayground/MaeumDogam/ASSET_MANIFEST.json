@@ -1,7 +1,7 @@
 {
   "project": "곰같은여우의 마음도감",
   "projectId": "maeumdogam",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "updatedAt": "2026-10-25",
   "repository": "junl-im/meta",
   "projectRoot": "AIPlayground/MaeumDogam",
@@ -677,16 +677,48 @@
   ],
   "reviewDrafts": [
     {
+      "id": "CHAR-ISTJ",
+      "category": "character",
+      "name": "ISTJ 약속의 기록가 고슴도치 시안",
+      "path": "assets/characters/mbti/istj-hedgehog-draft-v01.png",
+      "status": "generated",
+      "approved": false,
+      "originalDriveFileId": "1L3ISA0Wbf0YTRc06aqLt8qXDh8pBwa4F",
+      "sha256": "1869a596a1efbd076410049f8427e223ac96a50c4799c65b89491f7f318ea8cb",
+      "webPreview": {
+        "format": "webp",
+        "size": "592x664",
+        "sha256": "de50d211cce09db799b91464349df989e842cf21527b0d74627c409e7aef3412",
+        "driveFileId": "1h3AfghOvMb3GQUP6gLSqqGtD0scoqlTk"
+      },
+      "notes": "RGBA 알파 확인. 개별 WebP 미리보기 생성·Drive 동기화. 스타일 일치·원화 승인·기기별 시각 QA 미완료."
+    },
+    {
       "id": "CHAR-ISFJ",
       "category": "character",
-      "name": "ISFJ 마음의 정원사 신규 원화 시안",
+      "name": "ISFJ 마음의 정원사 토끼 시안",
       "path": "assets/characters/mbti/isfj-gardener-draft-v01.png",
       "status": "generated",
       "approved": false,
-      "driveBackedUp": false,
-      "sha256": null,
+      "originalDriveFileId": "1G_Bolp3fwNip1edjDwK1Awpp1ZYGQdCj",
+      "sha256": "0b9de429c2cb764c43d3910d59bfcfd60a3cf789b5b4969bf38d6694df6ad69b",
       "githubBlobSha": "a966eedd55077288d19939cf7dc5e20f3b903af0",
-      "notes": "1차 시안. PNG 투명도·가장자리·ISTJ 및 마스코트와 일관성 미검증. 최종 캐릭터 본 자산으로 승격 금지."
+      "webPreview": {
+        "format": "webp",
+        "size": "512x768",
+        "sha256": "c1a200a03ea86cdc56780b81219aa84975138bb7d4b6262754693b3f8a6af433",
+        "driveFileId": "1RT-D_7h7TSgi6GaUVIHzCEUPHybNVOrp"
+      },
+      "notes": "RGBA 알파 확인. 개별 WebP 미리보기 생성·Drive 동기화. 스타일 일치·원화 승인·기기별 시각 QA 미완료."
     }
-  ]
+  ],
+  "rasterOnlyPolicy": {
+    "svgAllowed": false,
+    "whenSvgWouldBeRequired": "obtain-license-cleared-png-or-generate-original-png-first",
+    "webFormats": [
+      "webp",
+      "png"
+    ],
+    "approvalBeforeUse": true
+  }
 }
