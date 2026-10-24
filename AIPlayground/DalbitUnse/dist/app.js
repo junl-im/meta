@@ -254,7 +254,7 @@
     toggle.addEventListener('click',()=>{nav.hidden=!nav.hidden;toggle.setAttribute('aria-expanded',String(!nav.hidden));toggle.setAttribute('aria-label',nav.hidden?'메뉴 열기':'메뉴 닫기');});
     $$('#mobileNav a').forEach(a=>a.addEventListener('click',()=>{nav.hidden=true;toggle.setAttribute('aria-expanded','false');}));
     const sections=$$('main section[id]');
-    const observer=new IntersectionObserver(entries=>{const current=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(!current)return;$$('.nav-link').forEach(a=>a.classList.toggle('active',a.getAttribute('href')===`#${current.target.id}`));},{rootMargin:'-25% 0px -55% 0px'});
+    const observer=new IntersectionObserver(entries=>{const current=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(!current)return;const id=current.target.id==='services'?'home':current.target.id;$$('.nav-link,.mobile-dock a').forEach(a=>{const active=a.getAttribute('href')===`#${id}`;a.classList.toggle('active',active);if(a.closest('.mobile-dock')){if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');}});},{rootMargin:'-25% 0px -55% 0px'});
     sections.forEach(s=>observer.observe(s));
   }
   function start(){

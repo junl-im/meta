@@ -70,3 +70,18 @@
   .newyear-visual .big-year{font-size:98px}
   .saju-placeholder{min-height:390px}
 }
+.mobile-dock{display:none}
+@media(max-width:850px){
+  body{padding-bottom:calc(74px + env(safe-area-inset-bottom,0px))}
+  .site-header .menu-toggle{display:none}
+  .mobile-dock{position:fixed;z-index:75;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(5,1fr);padding:7px 7px calc(8px + env(safe-area-inset-bottom,0px));background:rgba(17,15,37,.94);backdrop-filter:blur(22px);box-shadow:0 -9px 32px #08051688;border-top:1px solid #e0c18b40}
+  .mobile-dock a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:50px;padding:3px 0;border-radius:9px;color:#a99cbd;font-size:10px;font-weight:700;transition:all .2s}
+  .mobile-dock a.active{background:#e3c58b17;color:#f3d9a9}
+  .dock-icon{display:block;width:28px;height:28px;border:1px solid #e9d19b66;border-radius:50%;background-position:center;background-size:cover;background-repeat:no-repeat;box-shadow:0 2px 8px #0a081a6d}
+  .dock-home{background-image:url('./assets/favicon.png')}
+  .dock-zodiac{background-image:url('./assets/zodiac-atlas.webp');background-size:400% 300%;background-position:66.6667% 50%}
+  .dock-saju{background-image:url('./assets/saju-celestial.webp')}
+  .dock-tarot{background-image:url('./assets/tarot-back.webp')}
+  .dock-year{background-image:url('./assets/newyear-gate.webp')}
+  .site-footer{padding-bottom:26px}
+}
