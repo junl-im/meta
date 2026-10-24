@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#100f25">
+  <meta name="description" content="오늘의 운세, 12띠별 일간·주간·월간·연간 운세, 사주팔자, 78장 타로와 신년운세를 무료로 즐기는 달빛운세.">
+  <meta property="og:title" content="달빛운세 | 모든 운세를 무료로">
+  <meta property="og:description" content="오늘, 당신의 별빛을 발견하세요. 무료 사주·타로·띠별 운세·신년운세.">
+  <title>달빛운세 — 당신의 하루에 작은 별빛</title>
+  <link rel="icon" type="image/png" href="./assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./art.css">
+</head>
+<body>
+  <div class="sky" aria-hidden="true"><div class="stars stars-a"></div><div class="stars stars-b"></div><div class="sky-glow"></div></div>
+  <div class="announce"><span class="announce-star">✦</span> 모든 운세, 가입 없이 <strong>100% 무료</strong> <span class="announce-star">✦</span></div>
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="brand" href="#home" aria-label="달빛운세 홈"><span class="brand-mark">☾</span><span>달빛<span class="brand-accent">운세</span><small>MOONLIT FORTUNE</small></span></a>
+      <nav class="desktop-nav" aria-label="주요 메뉴">
+        <a class="nav-link active" href="#home">홈</a><a class="nav-link" href="#zodiac">띠별운세</a><a class="nav-link" href="#saju">사주풀이</a><a class="nav-link" href="#tarot">타로카드</a><a class="nav-link" href="#newyear">신년운세</a>
+      </nav>
+      <a class="nav-cta" href="#tarot"><span>✧</span> 무료 타로 보기 <span aria-hidden="true">↗</span></a>
+      <button class="menu-toggle" id="menuToggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav"><span></span><span></span><span></span></button>
+    </div>
+    <nav id="mobileNav" class="mobile-nav" aria-label="모바일 메뉴" hidden><a href="#home">홈</a><a href="#zodiac">띠별운세</a><a href="#saju">사주풀이</a><a href="#tarot">타로카드</a><a href="#newyear">신년운세</a></nav>
+  </header>
+
+  <main>
+    <section id="home" class="hero section-shell">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-line"></span> THE MAGIC OF YOUR DAY <span class="eyebrow-line"></span></div>
+        <p class="hero-overline"><span class="spark">✦</span> 오늘 당신에게 찾아온 작은 이야기</p>
+        <h1>운명이 궁금한 순간,<br><em>달빛을</em> 펼쳐보세요.</h1>
+        <p class="hero-sub">별처럼 반짝이는 오늘의 운세부터<br>신비로운 타로와 나만의 사주 이야기까지.</p>
+        <div class="hero-buttons"><a class="button button-gold" href="#zodiac">오늘의 운세 보기 <span>↗</span></a><a class="button button-glass" href="#tarot">타로 카드 뽑기 <span>✧</span></a></div>
+        <div class="hero-promises"><span><b>✓</b> 완전 무료</span><i></i><span><b>✓</b> 회원가입 없음</span><i></i><span><b>✓</b> 매일 새로운 운세</span></div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="orbit orbit-outer"></div><div class="orbit orbit-mid"></div><div class="orbit orbit-inner"></div><span class="hero-spark s1">✦</span><span class="hero-spark s2">✧</span><span class="hero-spark s3">✶</span>
+        <div class="hero-card hero-card-left"><div class="hero-card-illustration moon-art"><span>☽</span><i></i><b>☾</b></div><div class="hero-card-title">THE MOON</div></div>
+        <div class="hero-card hero-card-center"><div class="hero-card-illustration star-art"><span>✦</span><i>✧</i><b>♒</b></div><div class="hero-card-title">THE STAR</div></div>
+        <div class="hero-card hero-card-right"><div class="hero-card-illustration sun-art"><span>☼</span><i>✺</i></div><div class="hero-card-title">THE SUN</div></div>
+        <div class="hero-moon">☾</div><div class="hero-caption">✧  TRUST THE STARS  ✧</div>
+      </div>
+      <a href="#services" class="scroll-hint">SCROLL TO EXPLORE <span>↓</span></a>
+    </section>
+
+    <div class="ornate-divider section-shell"><span></span><b>✧</b><span></span></div>
+
+    <section id="services" class="services section-shell">
+      <div class="section-heading centered"><p class="kicker">YOUR LITTLE UNIVERSE</p><h2>오늘은 어떤 <em>이야기</em>가 궁금하세요?</h2><p>가볍게 시작해도 좋아요. 당신만의 순간을 골라보세요.</p></div>
+      <div class="service-grid">
+        <a class="service-card service-lavender" href="#zodiac"><div class="service-symbol">♧</div><span class="free-chip">FREE</span><h3>띠별 운세</h3><p>12띠의 오늘·이번 주·이번 달·올해</p><span class="service-arrow">자세히 보기 ↗</span></a>
+        <a class="service-card service-blue" href="#saju"><div class="service-symbol hanja">命</div><span class="free-chip">FREE</span><h3>나의 사주</h3><p>생년월일시로 살펴보는 사주팔자</p><span class="service-arrow">사주 풀이하기 ↗</span></a>
+        <a class="service-card service-purple" href="#tarot"><div class="service-symbol">✧</div><span class="free-chip">FREE</span><h3>마법의 타로</h3><p>78장의 카드가 건네는 한마디</p><span class="service-arrow">카드 선택하기 ↗</span></a>
+        <a class="service-card service-rose" href="#newyear"><div class="service-symbol">☼</div><span class="free-chip">FREE</span><h3>신년 운세</h3><p>다가오는 한 해의 흐름과 조언</p><span class="service-arrow">새해 운세 보기 ↗</span></a>
+      </div>
+    </section>
+
+    <section id="zodiac" class="feature-section zodiac-section"><div class="section-shell">
+      <div class="section-heading"><p class="kicker">DAILY HOROSCOPE <span>✧</span></p><h2>열두 동물의 <em>오늘</em></h2><p>나의 띠를 선택하고, 궁금한 기간의 운세를 읽어보세요.</p></div>
+      <div class="zodiac-layout">
+        <div class="zodiac-pick"><div class="panel-overline">SELECT YOUR ZODIAC <span id="zodiacCounter">05 / 12</span></div><div class="zodiac-grid" id="zodiacGrid"></div><div class="zodiac-help">✦ 태어난 연도로 찾고 싶나요? <label for="birthYear">출생 연도</label><input id="birthYear" type="number" min="1900" max="2100" inputmode="numeric" placeholder="예: 1995"><button id="findZodiac" class="text-button" type="button">띠 찾기 →</button></div></div>
+        <div class="fortune-panel" id="fortunePanel"><div class="fortune-top"><div><div class="panel-overline">YOUR FORTUNE · <span id="fortuneDate"></span></div><h3><span id="chosenAnimal">🐉</span> <span id="chosenZodiacName">용띠</span> 운세</h3></div><div class="fortune-moon">☯</div></div>
+          <div class="period-tabs" role="tablist" aria-label="운세 기간"><button type="button" class="period-tab active" data-period="daily" role="tab" aria-selected="true">오늘</button><button type="button" class="period-tab" data-period="weekly" role="tab" aria-selected="false">이번 주</button><button type="button" class="period-tab" data-period="monthly" role="tab" aria-selected="false">이번 달</button><button type="button" class="period-tab" data-period="yearly" role="tab" aria-selected="false">올해</button><button type="button" class="period-tab" data-period="date" role="tab" aria-selected="false">날짜 선택</button></div>
+          <div class="date-choice" id="dateChoice" hidden><label for="fortuneInputDate">운세를 볼 날짜</label><input id="fortuneInputDate" type="date"><button class="small-button" id="showDateFortune">확인</button></div>
+          <div class="fortune-content" aria-live="polite"><div class="fortune-rating"><span id="fortuneStars" aria-label="오늘의 별점">★★★★☆</span><span id="fortuneScoreText">좋은 흐름이 찾아오는 날</span></div><h4 id="fortuneHeadline">당신의 하루에 따뜻한 기운이 스며들어요.</h4><p id="fortuneDescription"></p><div class="fortune-stats" id="fortuneStats"></div><div class="lucky-row"><span>행운의 색 <b id="luckyColor"></b></span><span>행운의 숫자 <b id="luckyNumber"></b></span><span>행운의 방향 <b id="luckyDirection"></b></span></div></div>
+          <div class="fortune-panel-foot"><span>✧ 12띠 전부, 매일 무료로</span><button class="subtle-button" id="copyFortune" type="button">↗ 결과 복사</button></div>
+        </div>
+      </div></div></section>
+
+    <section id="tarot" class="tarot-section"><div class="section-shell">
+      <div class="tarot-intro"><div class="section-heading centered"><p class="kicker">LET THE CARDS SPEAK</p><h2>카드가 전하는 <em>비밀스러운 속삭임</em></h2><p>잠시 숨을 고르고 마음속으로 질문을 떠올려보세요.<br>끌리는 카드를 선택하면 당신을 위한 이야기가 펼쳐집니다.</p></div></div>
+      <div class="tarot-experience" id="tarotExperience">
+        <div class="tarot-settings" id="tarotSettings"><div class="tarot-step-label">✦ STEP 01 · 질문을 마음에 담아요</div><div class="tarot-question-wrap"><label for="tarotQuestion">어떤 이야기가 궁금하세요?</label><input id="tarotQuestion" type="text" maxlength="90" placeholder="예: 요즘 마음에 걸리는 일이 잘 풀릴까요? (선택)"></div><div class="tarot-choices"><div><p class="choice-label">관심 주제</p><div class="segmented" id="tarotCategories" role="group" aria-label="타로 주제"><button class="selected" type="button" data-category="general">전체</button><button type="button" data-category="love">사랑</button><button type="button" data-category="work">일·학업</button><button type="button" data-category="money">금전</button></div></div><div><p class="choice-label">카드 펼침</p><div class="segmented" id="tarotCount" role="group" aria-label="카드 장수"><button class="selected" type="button" data-count="1">1장 메시지</button><button type="button" data-count="3">3장 리딩</button></div></div></div><button type="button" class="button button-gold tarot-start" id="startTarot">카드 섞고 펼치기 <span>✧</span></button></div>
+        <div class="tarot-draw" id="tarotDraw" hidden><div class="tarot-step-label">✦ STEP 02 · 마음이 끌리는 카드를 선택하세요</div><h3 id="tarotDrawTitle">1장의 카드를 골라주세요</h3><p id="tarotDrawSub">모든 카드는 동일한 확률로 섞여 있어요.</p><div class="tarot-fan" id="tarotFan"></div><div class="selection-dots" id="selectionDots"></div><button type="button" class="subtle-button tarot-back" id="resetTarotDraw">← 처음으로</button></div>
+        <div class="tarot-results" id="tarotResults" hidden><div class="tarot-step-label">✦ STEP 03 · 당신에게 도착한 카드</div><h3>별들이 건네는 오늘의 메시지</h3><p id="tarotResultQuestion" class="tarot-result-question"></p><div class="drawn-cards" id="drawnCards"></div><div class="tarot-summary" id="tarotSummary"></div><div class="tarot-result-actions"><button type="button" class="button button-gold" id="againTarot">다시 카드 뽑기 ↗</button><button type="button" class="button button-glass" id="copyTarot">결과 복사</button></div></div>
+        <p class="tarot-fineprint">✧ 78장 클래식 타로 · 정방향·역방향 · 무료 리딩</p>
+      </div>
+    </div></section>
+
+    <section id="saju" class="saju-section feature-section"><div class="section-shell"><div class="section-heading"><p class="kicker">THE FOUR PILLARS OF DESTINY</p><h2>태어난 순간에 담긴 <em>네 개의 기둥</em></h2><p>생년월일과 시간을 입력하면 천간·지지, 오행을 바탕으로 간단한 전통 풀이를 볼 수 있어요.</p></div>
+      <div class="saju-layout"><form id="sajuForm" class="saju-form"><div class="form-topline"><span>✧ 나만의 사주 알아보기</span><span class="free-chip">무료 · 가입 불필요</span></div>
+          <div class="field"><label for="sajuName">이름 <small>선택 사항</small></label><input id="sajuName" type="text" maxlength="20" placeholder="어떻게 불러드릴까요?"></div>
+          <div class="field"><label for="sajuBirth">태어난 날짜</label><input id="sajuBirth" type="date" min="1900-01-01" max="2099-12-31" required></div>
+          <div class="field"><span class="field-label">날짜 기준</span><div class="segmented full" id="sajuCalendarType" role="radiogroup" aria-label="날짜 기준"><button type="button" class="selected" role="radio" aria-checked="true" data-cal="solar">양력</button><button type="button" role="radio" aria-checked="false" data-cal="lunar">음력</button></div><label class="checkline" id="leapLine" hidden><input type="checkbox" id="sajuLeap"> 음력 윤달로 태어났어요</label></div>
+          <div class="field"><label for="sajuTime">태어난 시간</label><select id="sajuTime"><option value="unknown">잘 모르겠어요 (시간주 제외)</option><option value="0">자시 · 23:00~00:59</option><option value="2">축시 · 01:00~02:59</option><option value="4">인시 · 03:00~04:59</option><option value="6">묘시 · 05:00~06:59</option><option value="8">진시 · 07:00~08:59</option><option value="10">사시 · 09:00~10:59</option><option value="12">오시 · 11:00~12:59</option><option value="14">미시 · 13:00~14:59</option><option value="16">신시 · 15:00~16:59</option><option value="18">유시 · 17:00~18:59</option><option value="20">술시 · 19:00~20:59</option><option value="22">해시 · 21:00~22:59</option></select></div>
+          <button type="submit" class="button button-gold full-button">나의 사주 무료로 풀어보기 <span>↗</span></button><p class="privacy-note">🔒 입력 정보는 기기에서만 계산하며 서버에 저장하지 않아요.</p>
+        </form>
+        <div class="saju-placeholder" id="sajuPlaceholder"><div class="saju-circle"><span class="ring ring-a"></span><span class="ring ring-b"></span><div class="saju-yin-yang">☯</div><i class="saju-sigil a">木</i><i class="saju-sigil b">火</i><i class="saju-sigil c">土</i><i class="saju-sigil d">金</i><i class="saju-sigil e">水</i></div><p>하늘의 시간과 땅의 기운이 만나<br>당신만의 이야기가 시작됩니다.</p><span>生 · 年 · 月 · 日 · 時</span></div>
+        <div class="saju-result" id="sajuResult" hidden aria-live="polite"><p class="kicker">YOUR SAJU CHART</p><h3 id="sajuResultTitle">당신의 사주팔자</h3><p id="sajuDateInfo" class="result-muted"></p><div class="pillar-grid" id="pillarGrid"></div><div class="elements-chart" id="elementsChart"></div><div class="saju-reading" id="sajuReading"></div><div class="calculation-note">※ 전통 명리학의 간지·오행을 이용한 간단 풀이입니다. 절입 시각, 지역 태양시, 자시의 날짜 경계에 따라 만세력마다 결과가 달라질 수 있어요. 정밀 감정이나 미래 예측을 보장하지 않습니다.</div></div>
+      </div></div></section>
+
+    <section id="newyear" class="newyear-section feature-section"><div class="section-shell"><div class="newyear-shell"><div class="newyear-heading"><p class="kicker">A NEW CHAPTER BEGINS</p><h2><span id="newyearTitle">2027</span>년,<br><em>새로운 별빛을 맞이하세요</em></h2><p>새해의 큰 흐름부터 계절별 기운까지,<br>조금 더 다정하게 내일을 준비하는 시간.</p><div class="newyear-selects"><label for="newyearYear">보고 싶은 해</label><select id="newyearYear"></select><label for="newyearZodiac">나의 띠</label><select id="newyearZodiac"></select></div><button type="button" class="button button-gold" id="showNewyear">무료 신년운세 확인하기 ↗</button></div><div class="newyear-visual" aria-hidden="true"><div class="newyear-halo"></div><span class="big-year" id="bigYear">2027</span><div class="big-glyph">✶</div><div class="newyear-visual-bottom">A NEW BEGINNING · A BRIGHTER YOU</div></div></div>
+        <div class="newyear-result" id="newyearResult" hidden><div class="newyear-result-head"><span>✧ NEW YEAR READING</span><h3 id="newyearResultTitle"></h3><p id="newyearResultText"></p></div><div class="season-grid" id="seasonGrid"></div><div class="newyear-advice" id="newyearAdvice"></div></div>
+      </div></section>
+
+    <section class="trust-section section-shell"><div class="trust-symbol">✦</div><div><p class="kicker">FREE TO EXPLORE, ALWAYS</p><h2>좋은 하루의 시작은, <em>작은 기대</em>만으로도 충분하니까.</h2><p>운세는 미래를 확정하는 답이 아니라 오늘을 돌아보는 이야기예요.<br>마음에 닿는 문장은 간직하고, 중요한 결정은 스스로의 판단을 믿어주세요.</p></div><a href="#home" class="button button-glass">처음으로 ↑</a></section>
+  </main>
+
+  <footer class="site-footer"><div class="section-shell"><div class="footer-top"><div class="footer-brand"><a class="brand" href="#home"><span class="brand-mark">☾</span><span>달빛<span class="brand-accent">운세</span></span></a><p>당신의 하루에, 작은 별빛 하나.</p></div><div class="footer-links"><a href="#zodiac">띠별운세</a><a href="#saju">사주풀이</a><a href="#tarot">타로카드</a><a href="#newyear">신년운세</a></div></div><div class="footer-bottom"><p>© <span id="currentYear"></span> 달빛운세. 모든 운세는 무료로 제공됩니다.</p><p>오락·자기성찰용 콘텐츠 · 의료·법률·재정적 판단의 근거가 아닙니다.</p></div><details class="sources"><summary>계산 기준·자료 출처 보기</summary><ul><li>음양력·절기 검증 참고: <a href="https://astro.kasi.re.kr/" target="_blank" rel="noopener">한국천문연구원 천문우주지식정보</a></li><li>간지 및 사주 계산: <a href="https://github.com/6tail/lunar-javascript" target="_blank" rel="noopener">lunar-javascript (MIT)</a> · 내부 동봉 라이브러리</li><li>타로의 역사적 덱 참고: <a href="https://www.britishmuseum.org/collection/object/P_1904-0511-49-1-78" target="_blank" rel="noopener">영국박물관 78장 타로 소장품</a></li><li>운세 문구는 전통적인 상징에서 영감을 받아 작성한 창작 콘텐츠입니다. 예측 정확도를 보장하지 않습니다.</li></ul></details></div></footer>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="./assets/lunar.js"></script>
+  <script src="./app.js" defer></script>
+</body>
+</html>

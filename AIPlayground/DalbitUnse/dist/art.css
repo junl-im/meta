@@ -1,0 +1,72 @@
+/* Generated original illustrations, separate responsive art direction for PC and mobile. */
+.hero{isolation:isolate;min-height:635px;border:1px solid #e7c98918;border-radius:14px;margin-top:24px;background:#121126;overflow:hidden;padding-left:44px;padding-right:44px}
+.hero::before{content:'';position:absolute;z-index:-1;inset:0;background-image:linear-gradient(90deg,#14132b 0%,rgba(20,19,43,.91) 23%,rgba(20,19,43,.36) 48%,rgba(20,19,43,0) 72%),url('./assets/hero-desktop.webp');background-size:cover;background-position:center center}
+.hero::after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;box-shadow:inset 0 0 90px #17112677}
+.hero-copy{position:relative;z-index:2}
+.hero-art{display:none}
+.hero h1{font-size:clamp(40px,4.3vw,61px);text-shadow:0 3px 20px #17112666}
+.hero-sub{color:#eee5ec;text-shadow:0 2px 18px #09071e99}
+.hero .scroll-hint{left:44px;bottom:26px}
+.service-card::after{display:none}
+.service-symbol{width:86px;height:86px;border-radius:10px;border:1px solid #e6c68f65;box-shadow:0 6px 23px #09071a88;background-repeat:no-repeat;background-size:cover;background-position:center;font-size:0!important;margin-bottom:17px}
+.service-lavender .service-symbol{background-image:url('./assets/zodiac-atlas.webp');background-size:400% 300%;background-position:66.6667% 50%}
+.service-blue .service-symbol{background-image:url('./assets/saju-celestial.webp')}
+.service-purple .service-symbol{background-image:url('./assets/tarot-back.webp')}
+.service-rose .service-symbol{background-image:url('./assets/newyear-gate.webp')}
+.animal-button{min-height:119px;gap:5px;background:linear-gradient(165deg,#302742,#211e39)}
+.animal-portrait,.selected-portrait{display:block;background-image:url('./assets/zodiac-atlas.webp');background-size:400% 300%;background-repeat:no-repeat;aspect-ratio:1;border-radius:50%;border:1px solid #d2b88672;box-shadow:0 0 0 2px #161327,0 4px 10px #0908198c}
+.animal-portrait{width:71px;height:71px;transition:transform .3s}
+.animal-button:hover .animal-portrait,.animal-button.selected .animal-portrait{transform:scale(1.07);box-shadow:0 0 0 2px #e7c58b,0 0 20px #e7c58b50}
+.fortune-top h3{display:flex;gap:10px;align-items:center}
+.fortune-top h3 .selected-portrait{width:53px;height:53px;flex:0 0 53px}
+.tarot-back-art{background-image:url('./assets/tarot-back.webp');background-size:100% 100%;background-repeat:no-repeat;border:1px solid #e6cd976e;box-shadow:0 13px 31px #08071688}
+.tarot-back-art::before,.tarot-back-art::after,.tarot-back-art .back-orbit,.tarot-back-art .back-sun{display:none}
+.fan-card .tarot-back-art{border-radius:8px}
+.reading-back .tarot-back-art{border-radius:8px}
+.tarot-face-art{background-image:linear-gradient(180deg,#080c1b15,#10182d22),url('./assets/tarot-face.webp');background-size:100% 100%;background-position:center;border:1px solid #d7bb84;box-shadow:0 6px 25px #0b0a2199}
+.tarot-face-art::before,.tarot-face-art .face-arch{display:none}
+.tarot-face-art .face-symbol{font-size:62px;color:#fff4ca;text-shadow:0 0 7px #161328,0 0 17px #090b1c,0 0 31px #fbe5b8;filter:drop-shadow(0 2px 4px #11142b);margin-top:10px}
+.tarot-face-art .face-stars{color:#f5dcac;text-shadow:0 0 11px #081129;font-size:13px}
+.tarot-face-art .face-caption{background:#11162dcb;border:1px solid #e0c18780;border-radius:4px;padding:4px 0;bottom:8px;left:8px;right:8px;font-size:8px;letter-spacing:.6px}
+.saju-placeholder{background-image:linear-gradient(0deg,#17142f 0,transparent 45%),url('./assets/saju-celestial.webp');background-size:cover;background-position:center;justify-content:end;padding:20px;min-height:470px;position:relative;overflow:hidden}
+.saju-placeholder .saju-circle{visibility:hidden;flex:1}
+.saju-placeholder p{font-size:14px;color:#fff6df;text-shadow:0 0 16px #0c0b20,0 2px 6px #0c0b20;font-weight:700}
+.saju-placeholder>span{color:#f7dfaa;text-shadow:0 0 10px #0e0a1c}
+.saju-result{background-image:linear-gradient(180deg,#25213de6,#25213df9),url('./assets/saju-celestial.webp');background-size:cover;background-position:center}
+.newyear-visual{background-image:linear-gradient(0deg,#141128b0,transparent 65%),url('./assets/newyear-gate.webp');background-size:cover;background-position:center}
+.newyear-halo{display:none}
+.big-year{color:#fff5de;text-shadow:0 0 20px #1a132b,0 0 60px #16112c,0 7px 22px #120e20}
+.big-glyph{text-shadow:0 0 13px #16102c}
+.newyear-visual-bottom{color:#fff6dc;text-shadow:0 2px 7px #110b1c}
+@media(max-width:850px){
+  .hero{display:block;min-height:780px;padding:66px 30px 48px;margin-top:15px;text-align:center}
+  .hero::before{background-image:linear-gradient(180deg,#11112d8e 0%,#17132d42 37%,#100e2300 57%),url('./assets/hero-mobile.webp');background-size:cover;background-position:center center}
+  .hero-copy{width:100%;max-width:560px;margin:auto}
+  .hero h1{font-size:clamp(37px,6.1vw,51px)}
+  .hero-overline{margin-bottom:9px}
+  .eyebrow{margin-bottom:25px}
+  .hero-sub{font-size:13px;margin-bottom:21px}
+  .hero .scroll-hint{display:none}
+  .animal-portrait{width:74px;height:74px}
+  .animal-button{min-height:125px}
+  .service-symbol{width:82px;height:82px}
+  .newyear-visual{min-height:360px}
+}
+@media(max-width:520px){
+  .hero{min-height:735px;padding:29px 14px 28px;border-radius:11px}
+  .hero::before{background-image:linear-gradient(180deg,rgba(15,14,36,.77) 0%,rgba(15,14,36,.62) 33%,rgba(15,14,36,.11) 55%,transparent 75%),url('./assets/hero-mobile.webp');background-position:center center;background-size:cover}
+  .hero-overline{font-size:10px;margin-bottom:8px}
+  .hero h1{font-size:clamp(31px,8vw,42px);line-height:1.45;margin-bottom:10px}
+  .hero-sub{font-size:11px;line-height:1.8;margin-bottom:15px}
+  .hero .eyebrow{font-size:8px;letter-spacing:2px;margin-bottom:14px}
+  .hero-promises{margin-top:15px;color:#fff6df;text-shadow:0 1px 7px #171126}
+  .hero-buttons .button{backdrop-filter:blur(12px);box-shadow:0 4px 18px #09081844}
+  .service-symbol{width:70px;height:70px;margin-bottom:9px}
+  .animal-portrait{width:53px;height:53px}
+  .animal-button{min-height:95px}
+  .fortune-top h3 .selected-portrait{width:43px;height:43px;flex-basis:43px}
+  .tarot-face-art .face-symbol{font-size:65px}
+  .newyear-visual{min-height:280px}
+  .newyear-visual .big-year{font-size:98px}
+  .saju-placeholder{min-height:390px}
+}
