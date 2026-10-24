@@ -130,67 +130,76 @@ function o() {
 	return e.find((e) => t.test(e.name)) ?? e.find((e) => e.default) ?? e[0];
 }
 function s(e) {
-	let t = !1, n = 0, r = !1, i = () => window.SoriOn?.voices?.byeolha, s = () => {
-		r && (r = !1, window.dispatchEvent(new Event("dalbit:voice-end")));
-	}, c = () => {
+	let t = !1, n = 0, r = !1, i = null, s = null, c = () => {
+		s?.remove(), s = null, e.removeAttribute("data-loading");
+	}, l = (n) => {
+		t && (s ??= document.createElement("div"), s.className = "voice-loading-note", s.setAttribute("role", "status"), s.setAttribute("aria-live", "polite"), s.textContent = n, s.isConnected || document.body.append(s), e.dataset.loading = "true", e.title = n);
+	}, u = () => window.SoriOn?.voices?.byeolha, d = () => {
+		c(), r && (r = !1, window.dispatchEvent(new Event("dalbit:voice-end")));
+	}, f = () => {
 		if (n += 1, a()) try {
 			window.speechSynthesis.cancel();
 		} catch {}
-		s();
+		i = null, c(), d();
 		try {
-			Promise.resolve(i()?.stop?.()).catch(() => void 0);
+			Promise.resolve(u()?.stop?.()).catch(() => void 0);
 		} catch {}
-	}, l = () => {
-		let n = !!i(), r = a(), o = n || r;
-		e.classList.toggle("enabled", t), e.classList.toggle("pending", !o), e.dataset.voice = t ? "on" : "off", e.dataset.engine = n ? "byeolha" : r ? "browser" : "none", e.setAttribute("aria-pressed", String(t));
-		let s = n ? "소리온 별하" : r ? "임시 한국어 음성" : "음성 기능";
-		e.setAttribute("aria-label", t ? `${s} 결과 낭독 켜짐, 끄기` : `${s} 결과 낭독 꺼짐, 켜기`), e.title = o ? t ? `결과가 나올 때 ${s}으로 읽습니다 · 끄려면 누르세요` : `결과 읽어주기 끔 · 누르면 ${s} 사용` : "이 브라우저에서는 음성 낭독을 지원하지 않아요";
-		let c = e.querySelector(".sound-state");
-		c && (c.textContent = t ? o ? "ON" : "대기" : "OFF");
-		let l = e.querySelector(".sound-title");
-		l && (l.textContent = n ? "별하 낭독" : "음성 낭독");
+	}, p = () => {
+		let n = !!u(), r = a(), i = n || r;
+		e.classList.toggle("enabled", t), e.classList.toggle("pending", !i), e.dataset.voice = t ? "on" : "off", e.dataset.engine = n ? "byeolha" : r ? "browser" : "none", e.setAttribute("aria-pressed", String(t));
+		let o = n ? "소리온 별하" : r ? "임시 한국어 음성" : "음성 기능";
+		e.setAttribute("aria-label", t ? `${o} 결과 낭독 켜짐, 끄기` : `${o} 결과 낭독 꺼짐, 켜기`), e.title = i ? t ? `결과가 나올 때 ${o}으로 읽습니다 · 끄려면 누르세요` : `결과 읽어주기 끔 · 누르면 ${o} 사용` : "이 브라우저에서는 음성 낭독을 지원하지 않아요";
+		let s = e.querySelector(".sound-state");
+		s && (s.textContent = t ? i ? "ON" : "대기" : "OFF");
+		let c = e.querySelector(".sound-title");
+		c && (c.textContent = n ? "별하 낭독" : "음성 낭독");
 	};
 	e.addEventListener("click", () => {
-		t = !t, t ? a() && o() : c(), l();
-	}), window.DalbitByeolha = {
+		t = !t, t ? (u()?.unlock?.(), a() && o()) : f(), p();
+	});
+	let m = (e, s) => {
+		if (!a() || !t || n !== s) p();
+		else try {
+			let a = new SpeechSynthesisUtterance(e);
+			a.lang = "ko-KR", a.rate = .89, a.pitch = 1.07, a.volume = .93;
+			let c = o();
+			c && (a.voice = c), a.onstart = () => {
+				t && s === n && (r = !0, window.dispatchEvent(new Event("dalbit:voice-start")));
+			}, a.onend = () => {
+				s === n && d();
+			}, a.onerror = () => {
+				s === n && d();
+			}, i = a, window.speechSynthesis.speak(a);
+		} catch {
+			d();
+		}
+	};
+	window.DalbitByeolha = {
 		read: (e) => {
 			if (!t) return;
-			let u = String(e).replace(/\s+/g, " ").trim().slice(0, 8e3);
-			if (!u) return;
-			c();
-			let d = n, f = i();
-			if (f) (async () => {
+			let a = String(e).replace(/\s+/g, " ").trim().slice(0, 8e3);
+			if (!a) return;
+			f();
+			let o = n, s = u();
+			s ? (async () => {
 				try {
-					if (await f.stop?.(), !t || n !== d) return;
-					r = !0, window.dispatchEvent(new Event("dalbit:voice-start")), await f.speak({
-						text: u,
+					if (await s.stop?.(), !t || n !== o) return;
+					r = !0, window.dispatchEvent(new Event("dalbit:voice-start")), await s.speak({
+						text: a,
 						voice: "byeolha",
 						style: "mystical-gentle"
 					});
-				} catch {} finally {
-					n === d && s();
+				} catch (e) {
+					n === o && (d(), window.dispatchEvent(new CustomEvent("dalbit:voice-fallback", { detail: e })), m(a, o));
+				} finally {
+					n === o && !i && d();
 				}
-			})();
-			else if (!a()) l();
-			else try {
-				let e = new SpeechSynthesisUtterance(u);
-				e.lang = "ko-KR", e.rate = .89, e.pitch = 1.07, e.volume = .93;
-				let i = o();
-				i && (e.voice = i), e.onstart = () => {
-					t && d === n && (r = !0, window.dispatchEvent(new Event("dalbit:voice-start")));
-				}, e.onend = () => {
-					d === n && s();
-				}, e.onerror = () => {
-					d === n && s();
-				}, window.speechSynthesis.speak(e);
-			} catch {
-				s();
-			}
+			})() : m(a, o);
 		},
-		silence: c
-	}, a() && window.speechSynthesis.addEventListener("voiceschanged", l), window.addEventListener("sorion:byeolha-ready", () => {
-		c(), l();
-	}), window.addEventListener("pagehide", c), l();
+		silence: f
+	}, a() && window.speechSynthesis.addEventListener("voiceschanged", p), window.addEventListener("sorion:byeolha-ready", () => {
+		f(), p();
+	}), window.addEventListener("sorion:byeolha-progress", (e) => l(String(e.detail))), window.addEventListener("pagehide", f), p();
 }
 // src/modules/viewport-fit.ts
 function c() {

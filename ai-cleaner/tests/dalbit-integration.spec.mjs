@@ -143,3 +143,54 @@ test('태블릿·PC 상단 메뉴도 내부 왕복 경로를 제공한다',async
     expect(page.url()).toContain('/ai-cleaner/');
   }
 });
+
+
+test('새 상단 메뉴는 주요 화면 너비에서 읽히고 가로로 넘치지 않는다',async({page})=>{
+  for(const width of [320,360,375,390,412,430,768,1024,1280]){
+    await page.setViewportSize({width,height:844});
+    await page.goto(playground);
+    const bounds=await page.evaluate(()=>({
+      viewport:innerWidth,
+      width:document.documentElement.scrollWidth,
+      cards:[...document.querySelectorAll('.workspaceNav .studioCard')].map(el=>({right:el.getBoundingClientRect().right,visible:el.getBoundingClientRect().width>0}))
+    }));
+    expect(bounds.width,`${width}px document overflow`).toBeLessThanOrEqual(bounds.viewport);
+    expect(bounds.cards.every(card=>card.visible&&card.right<=bounds.viewport+1),`${width}px menu clipping`).toBe(true);
+    await expect(page.locator('.brandName')).toContainText('AI 놀이터');
+  }
+});
+
+test('별하 브리지는 긴 결과를 나눠 읽고 다른 화면은 열지 않는다',async({page})=>{
+  await page.route('**/AI-/bridge/byeolha.html',route=>route.fulfill({contentType:'text/html',body:`<!doctype html><script>
+    const channel='dalbit-byeolha';
+    function wav(){const samples=800,view=new DataView(new ArrayBuffer(44+samples*2));
+      function text(at,value){for(let i=0;i<value.length;i++)view.setUint8(at+i,value.charCodeAt(i))}
+      text(0,'RIFF');view.setUint32(4,36+samples*2,true);text(8,'WAVE');text(12,'fmt ');
+      view.setUint32(16,16,true);view.setUint16(20,1,true);view.setUint16(22,1,true);
+      view.setUint32(24,8000,true);view.setUint32(28,16000,true);view.setUint16(32,2,true);
+      view.setUint16(34,16,true);text(36,'data');view.setUint32(40,samples*2,true);
+      return new Blob([view.buffer],{type:'audio/wav'})}
+    addEventListener('message',event=>{if(event.origin!==location.origin||event.data?.channel!==channel)return;
+      if(event.data.type==='speak'){
+        parent.postMessage({channel,type:'progress',id:event.data.id,message:'chunk:'+event.data.text.length},location.origin);
+        parent.postMessage({channel,type:'audio',id:event.data.id,blob:wav()},location.origin);
+      }
+    });
+    parent.postMessage({channel,type:'ready'},location.origin);
+  </script>`}));
+  await page.goto(new URL('../AIPlayground/DalbitUnse/dist/',playground).href);
+  await page.locator('#voiceToggle').click();
+  await expect(page.locator('iframe[title="별하 음성 연결"]')).toHaveCount(1);
+  const chunks=await page.evaluate(async()=>{
+    const lengths=[];
+    const onProgress=event=>{const match=String(event.detail).match(/^chunk:(\d+)$/);if(match)lengths.push(Number(match[1]))};
+    window.addEventListener('sorion:byeolha-progress',onProgress);
+    try{await window.SoriOn.voices.byeolha.speak({text:'가나다라마바사. '.repeat(190),voice:'byeolha',style:'mystical-gentle'});}
+    finally{window.removeEventListener('sorion:byeolha-progress',onProgress)}
+    return lengths;
+  });
+  expect(chunks.length).toBeGreaterThanOrEqual(3);
+  expect(Math.max(...chunks)).toBeLessThanOrEqual(500);
+  expect(chunks.reduce((sum,length)=>sum+length,0)).toBeGreaterThan(1000);
+  expect(page.url()).toContain('/AIPlayground/DalbitUnse/dist/');
+});

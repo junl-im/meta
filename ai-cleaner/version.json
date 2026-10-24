@@ -1,7 +1,7 @@
 {
-  "version": "1.21.0",
-  "assetVersion": "1210",
+  "version": "1.22.0",
+  "assetVersion": "1220",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Added Dalbit Unse as an internal playground service with isolated PWA scope."
+  "notes": "Refined playground navigation and Dalbit disclosures; added optional SoriON Byeolha narration bridge."
 }

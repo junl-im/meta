@@ -59,3 +59,21 @@
 #couple .couple-result{border-radius:24px!important}
 #couple .couple-meter{padding:9px 12px;border-top:1px solid #d6bc8255;border-bottom:1px solid #d6bc8255}
 @media(max-width:850px){#newyear[data-mobile-stage='result'] .newyear-result-head{padding-bottom:7px}#couple[data-mobile-stage='result'] .couple-meter{padding:6px 10px}}
+
+/* 달빛운세 상세 읽기: 월광 봉인처럼 눌러 열되 텍스트는 늘 선명하게. */
+@media(max-width:850px){
+  .mobile-reading-detail{position:relative;isolation:isolate;margin:10px 0;border:1px solid #d8ba825f;border-radius:15px;background:linear-gradient(110deg,#49365d,#2c2545 64%,#2a243e);box-shadow:inset 0 1px #fff2,0 6px 18px #110d2833;overflow:hidden}
+  .mobile-reading-detail>summary{position:relative;min-height:45px;padding:10px 44px 10px 14px;justify-content:flex-start;color:#ffe4b3;font-size:12px;line-height:1.35;letter-spacing:-.015em}
+  .mobile-reading-detail>summary::before{content:'✦';color:#e8c585;font-size:13px;margin-right:9px;flex:none;text-shadow:0 0 12px #ebd09c66}
+  .mobile-reading-detail>summary::after{content:'+';position:absolute;right:11px;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:25px;height:25px;border:1px solid #d7bb8977;border-radius:50%;background:#201a34;color:#f6dda9;font:600 18px/1 var(--sans);transition:transform .2s,background .2s}
+  .mobile-reading-detail[open]>summary::after{content:'−';transform:translateY(-50%);background:#674a72}
+  .mobile-reading-detail>summary:hover{background:#b8965a1c}
+  .mobile-reading-detail>summary:focus-visible{outline:2px solid #ffe3ab;outline-offset:-3px;border-radius:14px}
+  .mobile-reading-detail[open]{background:linear-gradient(160deg,#40314f,#231d3a)}
+  .mobile-reading-detail[open]>summary{border-bottom:1px solid #d8ba8252}
+}
+@media(prefers-reduced-motion:reduce){.mobile-reading-detail>summary::after{transition:none}}
+
+/* 별하의 첫 모델 준비 상태를 결과와 메뉴를 가리지 않는 작은 안내로 표시. */
+.voice-loading-note{position:fixed;z-index:120;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);width:max-content;max-width:min(90vw,370px);padding:10px 15px;border:1px solid #d6bc859c;border-radius:16px;background:#231d39f2;color:#ffe9bb;box-shadow:0 9px 26px #0d0a1caa;font:600 12px/1.45 var(--sans);text-align:center;pointer-events:none}
+@media(max-width:850px){.voice-loading-note{bottom:calc(76px + env(safe-area-inset-bottom))}}

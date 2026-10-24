@@ -94,7 +94,7 @@ async function main() {
   const pkg=JSON.parse(await fs.readFile(path.join(ROOT,'package.json'),'utf8'));
   if(pkg.name!=='ai-cleaner-browser-checks'||!inside(ROOT,OUT)||path.basename(OUT)!=='.pages-site')throw new Error('Run the Pages builder from the meta repository root.');
   await ensureFile(path.join(APP,'version.json'));
-  for (const relative of ['index.html', 'app.js', 'experience.js', 'style.css', 'art.css', 'integration.css', 'sw.js', 'manifest.webmanifest', 'data/tarot-artwork.json', 'data/saju-knowledge.json']) await ensureFile(path.join(DALBIT, relative));
+  for (const relative of ['index.html', 'app.js', 'experience.js', 'style.css', 'art.css', 'integration.css', 'byeolha-connector.js', 'sw.js', 'manifest.webmanifest', 'data/tarot-artwork.json', 'data/saju-knowledge.json']) await ensureFile(path.join(DALBIT, relative));
   await fs.rm(OUT, { recursive: true, force: true });
   const appOut = path.join(OUT, 'ai-cleaner');
   const osOut = path.join(appOut, 'ai-writing-os');
