@@ -15,10 +15,14 @@ const domains = ['work', 'love', 'money', 'wellbeing'];
 for (const [key, item] of Object.entries(db.dayMasters)) {
   for (const field of ['name', 'image', 'core', 'strength', 'shadow', ...domains])
     assert.ok(typeof item[field] === 'string' && item[field].trim().length >= 2, `${key} ${field}`);
+  assert.match(item.core, /결$/, `${key} core: 사주 안내문 연결을 위한 명사형 마무리 필요`);
+  for (const field of ['core', 'strength', 'shadow'])
+    assert.doesNotMatch(item[field], /[.!?]\s*$/, `${key} ${field}: 완성 문장과 조각 문장의 혼용 방지`);
 }
 for (const [key, item] of Object.entries(db.tenGods)) {
   for (const field of ['theme', 'core', ...domains])
     assert.ok(typeof item[field] === 'string' && item[field].trim().length >= 3, `${key} ${field}`);
+  assert.match(item.core, /흐름$/, `${key} core: 연운·기간별 해석과 자연스럽게 연결되어야 함`);
 }
 const allMessages = Object.values(db.dayMasters).flatMap(item=>domains.map(field=>item[field]));
 assert.equal(new Set(allMessages).size, allMessages.length, '일간 40개 분야별 문구의 중복 제거');

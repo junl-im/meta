@@ -222,7 +222,7 @@
     if(newyearHint)newyearHint.textContent='나의 사주 정보가 연결되었어요. 신년운세에서 세운 해석도 함께 볼 수 있어요.';
     const master=sajuKnowledge?.dayMasters?.[dayStem];
     $('#sajuReading').innerHTML=master
-      ? `<div class="reading-prologue"><span>나의 일간 · ${escapeHtml(master.name)} ${escapeHtml(dayStem)}</span><h4>${escapeHtml(master.image)}</h4><p>${paragraph(master.core)}. 그리고 ${paragraph(master.strength)}. 이런 면은 오래 키워갈 만한 힘이에요.</p><p>가끔은 ${paragraph(master.shadow)}도 돌아보면 좋아요. 한 사람의 모든 모습은 사주만으로 단정할 수 없으니까요.</p></div><div class="reading-prologue"><span>오행의 균형 · ${escapeHtml(elementNames[dominant])}</span><p>${paragraph(elementMessage[dominant])}</p></div>${unknown?'<p class="saju-note">태어난 시간을 알면 네 번째 기둥까지 포함해 다시 살펴볼 수 있어요.</p>':''}`
+      ? `<div class="reading-prologue"><span>나의 일간 · ${escapeHtml(master.name)} ${escapeHtml(dayStem)}</span><h4>${escapeHtml(master.image)}</h4><p>${paragraph(`전통 명리에서는 ${master.core}을 이 일간의 이미지로 읽어요.`)} ${paragraph(`특히 ${master.strength}도 오래 키워 갈 수 있는 강점이에요.`)}</p><p>${paragraph(`한편 ${master.shadow}도 함께 살펴볼 만해요.`)} 한 사람의 모든 모습은 사주만으로 단정할 수 없으니까요.</p></div><div class="reading-prologue"><span>오행의 균형 · ${escapeHtml(elementNames[dominant])}</span><p>${paragraph(elementMessage[dominant])}</p></div>${unknown?'<p class="saju-note">태어난 시간을 알면 네 번째 기둥까지 포함해 다시 살펴볼 수 있어요.</p>':''}`
       : `<b>✧ 일간 ${escapeHtml(dayStem)}의 이야기</b><br>${escapeHtml(dayStemMessage[dayStem]||'나만의 중심을 가꾸는 상징으로 읽을 수 있어요.')}<br><br><b>✧ 두드러지는 오행 — ${elementNames[dominant]}</b><br>${escapeHtml(elementMessage[dominant])}`;
     const relations=[
       {label:'년간 · 뿌리',value:eight.getYearShiShenGan()},
@@ -264,14 +264,15 @@
     const yearStories=[thisYear,thisYear+1].map(year=>{
       const y8=Solar.fromYmdHms(year,7,1,12,0,0).getLunar().getEightChar();
       const link=koreanTenGod((typeof LunarUtil!=='undefined'&&LunarUtil.SHI_SHEN)?LunarUtil.SHI_SHEN[dayStem+y8.getYearGan()]:null);
-      const advice=sajuKnowledge?.tenGods?.[link]?.core||tenGodMessage[link]||'지금의 나에게 필요한 균형과 선택을 살펴보세요.';
+      const yearCore=sajuKnowledge?.tenGods?.[link]?.core;
+      const advice=yearCore?`${yearCore}이라는 전통적 상징을 돌아보세요.`:tenGodMessage[link]||'지금의 나에게 필요한 균형과 선택을 살펴보세요.';
       return `<article class="saju-year"><b>${year}년 · ${escapeHtml(y8.getYear())}</b><span>일간과의 관계 · ${escapeHtml(link)}</span><p>${escapeHtml(advice)}</p></article>`;
     }).join('');
     const privateAnalysis=master?`<section class="saju-depth personal-reading"><p class="kicker">YOUR PERSONAL STAR MAP</p><h4>나에게 찾아오는 시간의 결</h4><p class="saju-note">띠만으로 고른 문구가 아니에요. 나의 일간과 실제 날짜의 간지 관계를 계산해, 일·관계·금전·돌봄의 네 갈래를 살펴봅니다.</p><div class="personal-periods" role="group" aria-label="개인별 운세 기간"><button type="button" class="selected" data-personal-period="daily">오늘</button><button type="button" data-personal-period="weekly">이번 주</button><button type="button" data-personal-period="monthly">이번 달</button><button type="button" data-personal-period="yearly">올해</button><button type="button" data-personal-period="date">날짜 선택</button></div><div class="personal-date-control" hidden><label for="personalFortuneDate">운세를 볼 날짜</label><input id="personalFortuneDate" type="date" value="${kstNow()}" min="1900-01-01" max="2099-12-31"></div><div id="personalFlowResult" class="personal-flow-result" aria-live="polite"></div></section>`:'';
     $('#sajuAdvanced').innerHTML=`${privateAnalysis}${seasonalMarkup}<section class="saju-depth"><p class="kicker">YOUR INNER PATTERN</p><h4>내 사주를 더 깊게 읽는 관계</h4><div class="saju-clues">${relationMarkup}</div><p class="saju-note">십성은 태어난 날의 천간을 기준으로 다른 천간의 관계를 읽는 전통 분류예요. 우열이나 성격을 확정하지 않아요.</p></section><section class="saju-depth"><p class="kicker">TEN-YEAR RHYTHM</p><h4>10년의 흐름 · 대운</h4>${cyclesMarkup}</section><section class="saju-depth"><p class="kicker">THE NEXT TWO YEARS</p><h4>올해와 내년의 기운 · 세운</h4><div class="saju-years">${yearStories}</div></section>`;
     if(master)initPersonalPeriods(dayStem,master);
     $('#sajuPlaceholder').hidden=true;$('#sajuResult').hidden=false;$('#sajuDialog').close();$('#sajuResult').scrollIntoView({behavior:'smooth',block:'center'});
-    window.DalbitByeolha?.read(master?`${master.core}. ${master.strength}. 이런 강점을 기억해 주세요. ${master.work} ${elementMessage[dominant]} ${sajuKnowledge?.tenGods?.[strongest.name]?.core||tenGodMessage[strongest.name]||''} ${cycleVoice}`:`${dayStemMessage[dayStem]} ${elementMessage[dominant]} ${cycleVoice}`);
+    window.DalbitByeolha?.read(master?`전통 명리에서는 ${master.core}을 이 일간의 이미지로 읽어요. ${master.strength}도 소중한 강점이에요. ${master.work} ${elementMessage[dominant]} ${strongest?.name?`${strongest.name}의 의미도 함께 살펴보세요.`:''} ${cycleVoice}`:`${dayStemMessage[dayStem]} ${elementMessage[dominant]} ${cycleVoice}`);
   }
 
   /** 날짜의 실제 간지와 일간의 십성을 분리 계산하며 결과 문장은 버전 관리된 지식 DB에서 고릅니다. */
@@ -291,7 +292,7 @@
     const labels={daily:'오늘',weekly:'이번 주',monthly:'이번 달',yearly:`${by}년`,date:'선택한 날'};
     const domain=[['일·공부','work'],['관계·사랑','love'],['금전·생활','money'],['마음 돌봄','wellbeing']];
     const entries=domain.map(([title,key])=>({title,message:`${master[key].replace('이번 주',labels[period])} ${knowledge[key]}`}));
-    return {period:labels[period],source:`나의 일간 ${master.name}(${dayStem}) × ${pair} · ${relation}`,theme:knowledge.theme,hint,lead:`${hint} 흐름과 ${knowledge.theme}의 상징이 만나요. ${knowledge.core}.`,entries};
+    return {period:labels[period],source:`나의 일간 ${master.name}(${dayStem}) × ${pair} · ${relation}`,theme:knowledge.theme,hint,lead:`${hint} 흐름과 ${knowledge.theme}의 상징이 만나요. ${knowledge.core}이라는 전통적 의미를 함께 돌아볼 수 있어요.`,entries};
   }
   function initPersonalPeriods(dayStem,master){
     const holder=$('#sajuAdvanced'),output=holder.querySelector('#personalFlowResult'),picker=holder.querySelector('#personalFortuneDate'),control=holder.querySelector('.personal-date-control');

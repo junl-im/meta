@@ -1,5 +1,5 @@
 /* 달빛운세 오프라인 지원. 범위는 설치된 달빛운세 경로로 제한됩니다. */
-const CACHE_NAME='dalbit-ritual-v4.7.0';
+const CACHE_NAME='dalbit-ritual-v4.8.0';
 const CORE_FILES=[
   './','./index.html','./style.css','./art.css','./app.js','./experience.js',
   './manifest.webmanifest','./data/tarot-artwork.json','./data/tarot-minor-readings.json','./data/couple-copy.json',
