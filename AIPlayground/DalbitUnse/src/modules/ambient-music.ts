@@ -7,16 +7,26 @@ const BEAT = 60 / 74;
 export function mountAmbientMusic(button: HTMLButtonElement): void {
   let context: AudioContext | null = null;
   let master: GainNode | null = null;
-  let enabled = false;
+  // 첫 방문은 켜짐이 기본입니다. 브라우저가 자동재생을 막을 때는 첫 터치를 기다립니다.
+  let enabled = true;
+  try { enabled = localStorage.getItem(KEY) !== 'off'; } catch { /* 저장 불가 환경에서도 기본 켬 */ }
+  let playing = false;
+  let starting = false;
   let interval: number | undefined;
   let beatIndex = 0;
   let nextBeat = 0;
+  let narrationActive = false;
+  const musicLevel = (): number => narrationActive ? 0.065 : 0.32;
 
   const status = (): void => {
     button.setAttribute('aria-pressed', String(enabled));
-    button.setAttribute('aria-label', enabled ? '신비로운 배경음 끄기' : '신비로운 배경음 켜기');
-    button.title = enabled ? '배경음 끄기' : '배경음 켜기';
+    const waiting = enabled && !playing;
+    button.setAttribute('aria-label', !enabled ? '배경음 꺼짐, 켜기' : waiting ? '배경음 켜짐, 첫 화면 터치 후 재생됩니다. 끄기' : '배경음 켜짐, 끄기');
+    button.title = !enabled ? '배경음 꺼짐 · 눌러서 켜기' : waiting ? '배경음 켜짐 · 화면을 터치하면 재생돼요' : '배경음 재생 중 · 눌러서 끄기';
     button.classList.toggle('enabled', enabled);
+    button.classList.toggle('waiting', waiting);
+    button.classList.toggle('playing', enabled && playing);
+    button.dataset.sound = enabled ? 'on' : 'off';
     const label = button.querySelector<HTMLElement>('.sound-state');
     if (label) label.textContent = enabled ? 'ON' : 'OFF';
   };
@@ -40,7 +50,7 @@ export function mountAmbientMusic(button: HTMLButtonElement): void {
   }
 
   function schedule(): void {
-    if (!context || !enabled) return;
+    if (!context || !enabled || !playing) return;
     while (nextBeat < context.currentTime + 1.8) {
       const step = beatIndex % MELODY.length;
       const note = MELODY[step];
@@ -58,29 +68,36 @@ export function mountAmbientMusic(button: HTMLButtonElement): void {
   }
 
   async function start(): Promise<void> {
+    if (!enabled || playing || starting) return;
+    starting = true;
     try {
       if (!context) {
         context = new AudioContext();
         master = context.createGain();
-        master.gain.value = 0.32;
+        master.gain.value = musicLevel();
         master.connect(context.destination);
       }
       await context.resume();
-      enabled = true;
+      if (!enabled) { await context.suspend(); return; }
+      playing = context.state === 'running';
+      if (!playing) return;
+      if (master) master.gain.setValueAtTime(musicLevel(), context.currentTime);
       nextBeat = context.currentTime + 0.07;
       beatIndex = 0;
       schedule();
+      if (interval !== undefined) window.clearInterval(interval);
       interval = window.setInterval(schedule, 750);
-      try { localStorage.setItem(KEY, 'on'); } catch { /* 방문자 설정 비활성 브라우저 */ }
     } catch {
-      enabled = false;
-      button.title = '이 브라우저에서는 배경음을 재생할 수 없어요';
+      playing = false;
+    } finally {
+      starting = false;
+      status();
     }
-    status();
   }
 
   function stop(): void {
     enabled = false;
+    playing = false;
     if (interval !== undefined) window.clearInterval(interval);
     interval = undefined;
     if (master && context) master.gain.setTargetAtTime(0.0001, context.currentTime, 0.16);
@@ -92,17 +109,35 @@ export function mountAmbientMusic(button: HTMLButtonElement): void {
     status();
   }
 
-  button.addEventListener('click', () => {
+  button.addEventListener('click', (event) => {
+    event.stopPropagation();
     if (enabled) { stop(); return; }
-    if (master && context) master.gain.setValueAtTime(0.32, context.currentTime);
+    enabled = true;
+    try { localStorage.setItem(KEY, 'on'); } catch { /* 저장 불가 환경 */ }
+    status();
     void start();
   });
+  // 소리가 '기본 켜짐'이어도 사용자의 실제 제스처 없이 재생을 강제할 수 없습니다.
+  // 첫 탭·클릭·키 입력에서 대기 중이던 음악을 자연스럽게 시작합니다.
+  const unlock = (event: Event): void => {
+    if (event.target instanceof Element && event.target.closest('#musicToggle')) return;
+    if (enabled && !playing) void start();
+  };
+  document.addEventListener('pointerdown', unlock, { passive: true });
+  document.addEventListener('keydown', unlock);
+  // 낭독이 시작되면 배경음을 자동으로 낮추고 종료 후 원래 수준으로 복원.
+  const updateNarrationMix = (isNarrating: boolean): void => {
+    narrationActive = isNarrating;
+    if (master && context && context.state === 'running') master.gain.setTargetAtTime(musicLevel(), context.currentTime, 0.14);
+  };
+  window.addEventListener('dalbit:voice-start', () => updateNarrationMix(true));
+  window.addEventListener('dalbit:voice-end', () => updateNarrationMix(false));
   document.addEventListener('visibilitychange', () => {
     if (!context || !enabled) return;
-    if (document.hidden) void context.suspend();
-    else void context.resume().then(() => { nextBeat = context!.currentTime + 0.05; schedule(); });
+    if (document.hidden) { playing = false; void context.suspend(); status(); }
+    else { void context.resume().then(() => { if (!enabled || !context || context.state !== 'running') return; playing = true; nextBeat = context.currentTime + 0.05; schedule(); status(); }).catch(() => { playing = false; status(); }); }
   });
-  window.addEventListener('pagehide', () => { if (enabled) stop(); });
-  // 자동 재생은 브라우저 정책과 접근성을 위해 시도하지 않습니다.
+  window.addEventListener('pagehide', () => { if (interval !== undefined) window.clearInterval(interval); interval = undefined; if (context) void context.suspend(); playing = false; });
+  // AudioContext.resume()을 제스처 전에 요청하면 일부 모바일에서 보류 상태로 남습니다.
   status();
 }

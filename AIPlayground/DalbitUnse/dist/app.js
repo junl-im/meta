@@ -68,14 +68,62 @@
     '庚':'단단한 쇠처럼 결단과 변화의 힘을 상징해요.', '辛':'세공한 보석처럼 섬세한 감각과 기준을 상징해요.',
     '壬':'넓은 바다처럼 크고 유연한 생각을 상징해요.', '癸':'잔잔한 비처럼 차분한 통찰을 상징해요.'
   };
+  const tenGodKorean={'比肩':'비견','劫财':'겁재','劫財':'겁재','食神':'식신','伤官':'상관','傷官':'상관','偏财':'편재','偏財':'편재','正财':'정재','正財':'정재','七杀':'편관','七殺':'편관','偏官':'편관','正官':'정관','偏印':'편인','正印':'정인','日主':'일간'};
+  const tenGodMessage={
+    '비견':'주관과 독립심을 살리는 힘이에요. 함께 걷는 사람의 관점도 놓치지 않으면 더 든든해져요.',
+    '겁재':'경쟁과 협력 사이에서 에너지가 자랄 수 있어요. 비교보다 내 몫의 성장을 먼저 챙겨보세요.',
+    '식신':'꾸준히 쌓은 실력과 표현이 힘을 얻는 상징이에요. 작은 결과를 만들어보는 일이 잘 어울려요.',
+    '상관':'익숙한 틀 밖에서 새로운 길을 찾는 기운이에요. 날카로운 아이디어를 다정한 말로 건네보세요.',
+    '편재':'새로운 기회를 발견하고 여러 가능성을 살피는 기운이에요. 결정 전에는 자원과 한계를 함께 점검해 보세요.',
+    '정재':'쌓아 올린 것을 보살피고 안정적으로 관리하는 기운이에요. 매일의 작은 기록이 힘이 될 수 있어요.',
+    '편관':'책임과 도전 앞에서 단단해지는 상징이에요. 스스로에게 지나친 압박을 주지 않는 균형이 필요해요.',
+    '정관':'원칙과 신뢰, 약속을 지키는 힘이 돋보여요. 나만의 기준에 여유를 더해 보세요.',
+    '편인':'남다른 관찰력과 통찰을 기르는 기운이에요. 생각을 현실의 실천으로 이어보면 좋아요.',
+    '정인':'배움과 돌봄, 차분한 성장을 상징해요. 받아 온 도움을 나누는 마음이 관계를 따뜻하게 만들어요.',
+    '일간':'사주의 중심인 나 자신을 가리켜요.'
+  };
+  const koreanTenGod=raw=>tenGodKorean[String(raw)]||String(raw||'관계 미상');
+  let sajuKnowledge=null; // 창작된 분야별 해석 DB. 계산식과 분리하여 교정·확장합니다.
+  let recentSaju=null; // 기기 메모리에서만 메뉴 간 연동. 서버/저장소에 남기지 않습니다.
   const kstParts = new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'});
   const kstNow = () => { const p = Object.fromEntries(kstParts.formatToParts(new Date()).filter(x=>x.type!=='literal').map(x=>[x.type,x.value])); return `${p.year}-${p.month}-${p.day}`; };
-  const safeDate = (iso) => /^\d{4}-\d{2}-\d{2}$/.test(iso) && !Number.isNaN(Date.parse(`${iso}T12:00:00Z`));
+  const safeDate = (iso,calendar='solar') => {
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(iso))return false;
+    const [y,m,d]=iso.split('-').map(Number);
+    if(y<1900||y>2099||m<1||m>12)return false;
+    if(calendar==='lunar')return d>=1&&d<=30;
+    return d>=1&&d<=new Date(Date.UTC(y,m,0)).getUTCDate();
+  };
+  /** 출생일에는 월력을 수십 번 넘길 필요가 없는 3칸형 달력 선택기를 사용합니다. */
+  function initMoonDateInputs(){
+    $$('.moon-date-parts').forEach(group=>{
+      const target=$('#'+group.dataset.dateTarget),year=group.querySelector('.moon-year'),month=group.querySelector('.moon-month'),day=group.querySelector('.moon-day');
+      for(let m=1;m<=12;m++)month.add(new Option(`${m}월`,String(m)));
+      const calendar=()=>{
+        if(target.id==='sajuBirth')return $('#sajuCalendarType button.selected')?.dataset.cal||'solar';
+        return $('#coupleCalendar'+target.id.slice(-1)).value;
+      };
+      const sync=()=>{
+        const y=Number(year.value),m=Number(month.value),previous=day.value;
+        const max=calendar()==='lunar'?30:(Number.isInteger(y)&&y>=1900&&y<=2099&&m>=1&&m<=12?new Date(Date.UTC(y,m,0)).getUTCDate():31);
+        day.replaceChildren(new Option('일',''));
+        for(let d=1;d<=max;d++)day.add(new Option(`${d}일`,String(d)));
+        if(previous&&Number(previous)<=max)day.value=previous;
+        target.value=Number.isInteger(y)&&y>=1900&&y<=2099&&m>=1&&m<=12&&day.value?`${y}-${String(m).padStart(2,'0')}-${String(day.value).padStart(2,'0')}`:'';
+        group.classList.toggle('complete',Boolean(target.value));
+      };
+      year.addEventListener('input',sync);month.addEventListener('change',sync);day.addEventListener('change',sync);
+      if(target.id==='sajuBirth')$$('#sajuCalendarType button').forEach(btn=>btn.addEventListener('click',()=>queueMicrotask(sync)));
+      else $('#coupleCalendar'+target.id.slice(-1)).addEventListener('change',sync);
+      sync();
+    });
+  }
   const isoOf = (date) => date.toISOString().slice(0,10);
   const hash = (value) => {let h=2166136261;for(const ch of String(value)){h ^= ch.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;};
   const mix = (key,n) => hash(`${key}|${n}|달빛운세`);
   const choose = (arr,key,n) => arr[mix(key,n)%arr.length];
   const escapeHtml = (s) => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const paragraph = s => escapeHtml(s).replace(/(?<=[.!?])\s+(?=[가-힣“])/gu,'\n');
   const toast = (message) => {const el=$('#toast');el.textContent=message;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),2600);};
   async function copyText(text) {try {await navigator.clipboard.writeText(text);toast('결과를 복사했어요 ✧');}catch{toast('복사가 지원되지 않는 환경이에요.');}}
 
@@ -95,7 +143,13 @@
   function drawZodiacGrid(){
     $('#zodiacCounter').textContent=`${String(selectedZodiac+1).padStart(2,'0')} / 12`;
     $('#zodiacGrid').innerHTML=animals.map((a,i)=>`<button type="button" class="animal-button ${i===selectedZodiac?'selected':''}" aria-pressed="${i===selectedZodiac}" data-animal="${i}"><span class="animal-portrait" aria-hidden="true" style="background-position:${(i%4)*100/3}% ${Math.floor(i/4)*50}%"></span><span>${a.name}띠</span></button>`).join('');
-    $$('.animal-button').forEach(b=>b.addEventListener('click',()=>{selectedZodiac=Number(b.dataset.animal);try{localStorage.setItem('moonlit-zodiac',String(selectedZodiac));}catch{}drawZodiacGrid();updateFortune();}));
+    $$('.animal-button').forEach(b=>b.addEventListener('click',()=>{
+      selectedZodiac=Number(b.dataset.animal);
+      try{localStorage.setItem('moonlit-zodiac',String(selectedZodiac));}catch{}
+      drawZodiacGrid();updateFortune();
+      $('#zodiac').dataset.mobileStage='result';
+      $('#zodiac').scrollTop=0;
+    }));
   }
   function fortuneFor(zodiac,period,seed){
     const key=`${zodiac}/${period}/${seed}`;
@@ -126,7 +180,8 @@
       updateFortune();
     }));
     $('#showDateFortune').addEventListener('click',()=>{const v=$('#fortuneInputDate').value;if(!safeDate(v)){toast('날짜를 선택해 주세요.');return;}selectedDate=v;updateFortune();});
-    $('#findZodiac').addEventListener('click',()=>{const y=Number($('#birthYear').value);if(!Number.isInteger(y)||y<1900||y>2100){toast('1900~2100 사이 출생 연도를 입력해 주세요.');return;}selectedZodiac=zodiacFromYear(y);drawZodiacGrid();updateFortune();$('#zodiacDialog').close();toast('연도 기준으로 찾았어요. 1~2월생은 음력 설을 확인해 주세요.');});
+    $('#findZodiac').addEventListener('click',()=>{const y=Number($('#birthYear').value);if(!Number.isInteger(y)||y<1900||y>2100){toast('1900~2100 사이 출생 연도를 입력해 주세요.');return;}selectedZodiac=zodiacFromYear(y);drawZodiacGrid();updateFortune();$('#zodiacDialog').close();$('#zodiac').dataset.mobileStage='result';$('#zodiac').scrollTop=0;toast('연도 기준으로 찾았어요. 1~2월생은 음력 설을 확인해 주세요.');});
+    $('#zodiacBack').addEventListener('click',()=>{$('#zodiac').dataset.mobileStage='choose';$('#zodiac').scrollTop=0;});
     $('#copyFortune').addEventListener('click',()=>{const a=animals[selectedZodiac],f=fortuneFor(selectedZodiac,selectedPeriod,periodSeed());copyText(`달빛운세 ${a.label} ${periodLabels[selectedPeriod]} 운세\n${f.headline}\n${f.description}\n행운의 색: ${f.color} · 숫자: ${f.number} · 방향: ${f.direction}\n※ 재미로 보는 달빛운세`);});
   }
 
@@ -136,7 +191,7 @@
     calButtons.forEach(btn=>btn.addEventListener('click',()=>{calendar=btn.dataset.cal;calButtons.forEach(x=>{x.classList.toggle('selected',x===btn);x.setAttribute('aria-checked',String(x===btn));});$('#leapLine').hidden=calendar!=='lunar';}));
     $('#sajuForm').addEventListener('submit',e=>{
       e.preventDefault(); const input=$('#sajuBirth').value,time=$('#sajuTime').value,unknown=time==='unknown';
-      if(!safeDate(input)){toast('올바른 생년월일을 입력해 주세요.');return;}
+      if(!safeDate(input,calendar)){toast('출생 연도·월·일을 정확히 입력해 주세요.');return;}
       if(typeof Solar==='undefined'||typeof Lunar==='undefined'){toast('사주 계산 자료를 불러오지 못했어요. 다시 접속해 주세요.');return;}
       const [year,month,day]=input.split('-').map(Number);
       if(year<1900||year>2099){toast('1900~2099 사이 생년월일을 입력해 주세요.');return;}
@@ -162,9 +217,97 @@
     $('#pillarGrid').innerHTML=pairs.map((p,i)=>`<div class="pillar"><span class="pillar-label">${labels[i]}</span><span class="pillar-gan">${p?p[0]:'—'}</span><span class="pillar-ji">${p?p[1]:'—'}</span><small>${p?'천간 · 지지':'시간 미상'}</small></div>`).join('');
     $('#elementsChart').innerHTML=`<h4>오행의 분포 <small style="font:400 10px var(--sans);color:#a69bb9">(천간·지지의 대표 오행)</small></h4>`+counts.map((v,i)=>`<div class="element-line"><span>${elementNames[i]}</span><div class="element-track"><i style="width:${total?(v/total)*100:0}%;background:${elementColors[i]}"></i></div><b>${v}</b></div>`).join('');
     const dayStem=pairs[2]?.[0]||'甲';
-    $('#sajuReading').innerHTML=`<b>✧ 일간 ${escapeHtml(dayStem)}의 이야기</b><br>${escapeHtml(dayStemMessage[dayStem]||'나만의 중심을 가꾸는 상징으로 읽을 수 있어요.')}<br><br><b>✧ 두드러지는 오행 — ${elementNames[dominant]}</b><br>${escapeHtml(elementMessage[dominant])}<br><br>어떤 기운이 강하게 보이더라도 그것이 당신의 가능성을 한정하는 건 아니에요. 지금까지 잘 걸어온 나에게 따뜻한 한마디를 건네주세요.${unknown?'<br><br>태어난 시간을 알면 시주까지 포함해 다시 확인할 수 있어요.':''}`;
-    window.DalbitByeolha?.read(`${name||'당신'}님의 사주 이야기예요. ${dayStemMessage[dayStem]} ${elementMessage[dominant]}`);
+    recentSaju={dayStem,name,solarDate:solar.toYmd()};
+    const newyearHint=$('#newyearPersonalHint');
+    if(newyearHint)newyearHint.textContent='나의 사주 정보가 연결되었어요. 신년운세에서 세운 해석도 함께 볼 수 있어요.';
+    const master=sajuKnowledge?.dayMasters?.[dayStem];
+    $('#sajuReading').innerHTML=master
+      ? `<div class="reading-prologue"><span>나의 일간 · ${escapeHtml(master.name)} ${escapeHtml(dayStem)}</span><h4>${escapeHtml(master.image)}</h4><p>${paragraph(master.core)}. 그리고 ${paragraph(master.strength)}. 이런 면은 오래 키워갈 만한 힘이에요.</p><p>가끔은 ${paragraph(master.shadow)}도 돌아보면 좋아요. 한 사람의 모든 모습은 사주만으로 단정할 수 없으니까요.</p></div><div class="reading-prologue"><span>오행의 균형 · ${escapeHtml(elementNames[dominant])}</span><p>${paragraph(elementMessage[dominant])}</p></div>${unknown?'<p class="saju-note">태어난 시간을 알면 네 번째 기둥까지 포함해 다시 살펴볼 수 있어요.</p>':''}`
+      : `<b>✧ 일간 ${escapeHtml(dayStem)}의 이야기</b><br>${escapeHtml(dayStemMessage[dayStem]||'나만의 중심을 가꾸는 상징으로 읽을 수 있어요.')}<br><br><b>✧ 두드러지는 오행 — ${elementNames[dominant]}</b><br>${escapeHtml(elementMessage[dominant])}`;
+    const relations=[
+      {label:'년간 · 뿌리',value:eight.getYearShiShenGan()},
+      {label:'월간 · 사회',value:eight.getMonthShiShenGan()},
+      ...(!unknown?[{label:'시간 · 표현',value:eight.getTimeShiShenGan()}]:[])
+    ].map(x=>({...x,name:koreanTenGod(x.value)}));
+    const strongest=relations.find(x=>tenGodMessage[x.name])||relations[0];
+    const relationMarkup=relations.map(x=>`<article class="saju-clue"><span>${escapeHtml(x.label)}</span><b>${escapeHtml(x.name)}</b><p>${paragraph(sajuKnowledge?.tenGods?.[x.name]?.core||tenGodMessage[x.name]||'삶의 여러 관계를 되돌아보는 상징으로 살펴보세요.')}</p></article>`).join('');
+    // 태어난 절기 월지의 대표 오행과 일간, 지지의 합·충 관계를 계산 근거와 함께 설명합니다.
+    const seasonElement=branchElements[eight.getMonthZhi()],selfElement=stemElements[dayStem];
+    const elementRelation=seasonElement===selfElement
+      ? '태어난 달과 나의 일간이 같은 오행으로 읽혀요. 익숙한 리듬을 든든한 바탕으로 삼을 수 있겠어요.'
+      : (seasonElement+1)%5===selfElement
+        ? '태어난 달의 대표 오행이 나의 일간을 생하는 관계로 읽혀요. 도움받아 성장하는 경험을 돌아보면 좋겠어요.'
+        : (selfElement+1)%5===seasonElement
+          ? '나의 일간이 태어난 달의 대표 오행을 생하는 관계로 읽혀요. 주변을 위해 에너지를 쓰는 만큼 회복도 살펴보세요.'
+          : (seasonElement+2)%5===selfElement
+            ? '태어난 달의 대표 오행이 나의 일간을 극하는 관계로 읽혀요. 부담을 조절하는 방식에 관심을 두면 좋겠어요.'
+            : '나의 일간이 태어난 달의 대표 오행을 극하는 관계로 읽혀요. 주도성과 유연함 사이의 균형을 생각해 보세요.';
+    const branchPairs=pairs.map((pair,i)=>pair?{label:labels[i],branch:pair[1]}:null).filter(Boolean);
+    const interactions=[];
+    for(let i=0;i<branchPairs.length;i++)for(let j=i+1;j<branchPairs.length;j++){
+      const x=branchPairs[i],y=branchPairs[j],rules=sajuKnowledge?.branchRelations;
+      for(const [type,patterns,title] of [['harmony',rules?.harmony,'조화'],['clash',rules?.clash,'변화']]){
+        if(x.branch!==y.branch&&patterns?.some(pair=>pair.includes(x.branch)&&pair.includes(y.branch)))interactions.push({title,between:`${x.label} ${x.branch} · ${y.label} ${y.branch}`,message:rules?.[`${type}Message`]});
+      }
+    }
+    const seasonalMarkup=sajuKnowledge?`<section class="saju-depth seasonal-reading"><p class="kicker">SEASON & RELATION</p><h4>태어난 달과 네 기둥의 연결</h4><p class="saju-note">절기를 반영한 월지 ${escapeHtml(eight.getMonthZhi())}(${elementNames[seasonElement]})와 나의 일간 ${escapeHtml(dayStem)}(${elementNames[selfElement]})를 비교했어요.</p><p class="seasonal-note">${escapeHtml(elementRelation)}</p><div class="branch-interactions">${interactions.length?interactions.slice(0,4).map(x=>`<article><span>${escapeHtml(x.title)}의 관계 · ${escapeHtml(x.between)}</span><p>${paragraph(x.message)}</p></article>`).join(''):'<p class="saju-note">네 기둥에서 대표적인 육합·육충 관계가 따로 잡히지 않았어요. 이것이 관계의 좋고 나쁨을 뜻하지는 않아요.</p>'}</div><details class="personal-calculation"><summary>계산의 범위</summary><p>월지의 대표 오행과 일간의 생극, 네 지지 사이의 육합·육충만 살펴본 기본 분석이에요. 지장간, 격국, 용신 전체를 종합 판정한 결과는 아니며 출생 지역과 자시 보정은 별도 검증이 필요해요.</p></details></section>`:'';
+    const gender=$('#sajuGender').value;
+    let cyclesMarkup='<p class="saju-note">전통 대운의 순행·역행은 선택한 기준에 따라 계산해요. 남성 또는 여성을 선택하면 10년 흐름을 살펴볼 수 있어요.</p>';
+    let cycleVoice='';
+    if(gender!=='unknown'){
+      const yun=eight.getYun(gender==='male'?1:0,2),cycles=yun.getDaYun(9).slice(1),currentYear=Number(kstNow().slice(0,4));
+      const active=cycles.find(d=>d.getStartYear()<=currentYear&&currentYear<=d.getEndYear());
+      cyclesMarkup=`<p class="saju-note">${escapeHtml(yun.isForward()?'순행':'역행')}으로 계산한 전통 대운표예요. 나이는 전통식 기준이며 계산법에 따라 시작 시점이 달라질 수 있어요.</p><div class="saju-cycles">${cycles.map(d=>`<div class="saju-cycle ${active===d?'current':''}"><b>${escapeHtml(d.getGanZhi())}</b><span>${d.getStartYear()}~${d.getEndYear()}년</span><small>${d.getStartAge()}~${d.getEndAge()}세</small></div>`).join('')}</div>`;
+      cycleVoice=active?`지금은 전통 대운표상 ${active.getGanZhi()} 흐름에 해당합니다. 한 시기의 이름보다 지금 쌓고 있는 경험과 선택이 더 중요해요.`:'대운표를 통해 지나온 과정과 앞으로의 변화를 함께 돌아보세요.';
+    }
+    const thisYear=Number(kstNow().slice(0,4));
+    const yearStories=[thisYear,thisYear+1].map(year=>{
+      const y8=Solar.fromYmdHms(year,7,1,12,0,0).getLunar().getEightChar();
+      const link=koreanTenGod((typeof LunarUtil!=='undefined'&&LunarUtil.SHI_SHEN)?LunarUtil.SHI_SHEN[dayStem+y8.getYearGan()]:null);
+      const advice=sajuKnowledge?.tenGods?.[link]?.core||tenGodMessage[link]||'지금의 나에게 필요한 균형과 선택을 살펴보세요.';
+      return `<article class="saju-year"><b>${year}년 · ${escapeHtml(y8.getYear())}</b><span>일간과의 관계 · ${escapeHtml(link)}</span><p>${escapeHtml(advice)}</p></article>`;
+    }).join('');
+    const privateAnalysis=master?`<section class="saju-depth personal-reading"><p class="kicker">YOUR PERSONAL STAR MAP</p><h4>나에게 찾아오는 시간의 결</h4><p class="saju-note">띠만으로 고른 문구가 아니에요. 나의 일간과 실제 날짜의 간지 관계를 계산해, 일·관계·금전·돌봄의 네 갈래를 살펴봅니다.</p><div class="personal-periods" role="group" aria-label="개인별 운세 기간"><button type="button" class="selected" data-personal-period="daily">오늘</button><button type="button" data-personal-period="weekly">이번 주</button><button type="button" data-personal-period="monthly">이번 달</button><button type="button" data-personal-period="yearly">올해</button><button type="button" data-personal-period="date">날짜 선택</button></div><div class="personal-date-control" hidden><label for="personalFortuneDate">운세를 볼 날짜</label><input id="personalFortuneDate" type="date" value="${kstNow()}" min="1900-01-01" max="2099-12-31"></div><div id="personalFlowResult" class="personal-flow-result" aria-live="polite"></div></section>`:'';
+    $('#sajuAdvanced').innerHTML=`${privateAnalysis}${seasonalMarkup}<section class="saju-depth"><p class="kicker">YOUR INNER PATTERN</p><h4>내 사주를 더 깊게 읽는 관계</h4><div class="saju-clues">${relationMarkup}</div><p class="saju-note">십성은 태어난 날의 천간을 기준으로 다른 천간의 관계를 읽는 전통 분류예요. 우열이나 성격을 확정하지 않아요.</p></section><section class="saju-depth"><p class="kicker">TEN-YEAR RHYTHM</p><h4>10년의 흐름 · 대운</h4>${cyclesMarkup}</section><section class="saju-depth"><p class="kicker">THE NEXT TWO YEARS</p><h4>올해와 내년의 기운 · 세운</h4><div class="saju-years">${yearStories}</div></section>`;
+    if(master)initPersonalPeriods(dayStem,master);
     $('#sajuPlaceholder').hidden=true;$('#sajuResult').hidden=false;$('#sajuDialog').close();$('#sajuResult').scrollIntoView({behavior:'smooth',block:'center'});
+    window.DalbitByeolha?.read(master?`${master.core}. ${master.strength}. 이런 강점을 기억해 주세요. ${master.work} ${elementMessage[dominant]} ${sajuKnowledge?.tenGods?.[strongest.name]?.core||tenGodMessage[strongest.name]||''} ${cycleVoice}`:`${dayStemMessage[dayStem]} ${elementMessage[dominant]} ${cycleVoice}`);
+  }
+
+  /** 날짜의 실제 간지와 일간의 십성을 분리 계산하며 결과 문장은 버전 관리된 지식 DB에서 고릅니다. */
+  function personalFlow(dayStem,master,period,dateString){
+    const current=safeDate(dateString)?dateString:kstNow();
+    const [y,m,d]=current.split('-').map(Number);
+    const basis=new Date(Date.UTC(y,m-1,d,12));
+    if(period==='weekly')basis.setUTCDate(basis.getUTCDate()-(basis.getUTCDay()+6)%7);
+    if(period==='yearly')basis.setUTCMonth(6,1); // 입춘 경계 영향을 피한 해당 년도 세운 대표 간지
+    const by=basis.getUTCFullYear(),bm=basis.getUTCMonth()+1,bd=basis.getUTCDate();
+    const e=Solar.fromYmdHms(by,bm,bd,12,0,0).getLunar().getEightChar();
+    const pair=period==='yearly'?e.getYear():period==='monthly'?e.getMonth():e.getDay();
+    const relation=koreanTenGod(LunarUtil.SHI_SHEN?.[dayStem+pair[0]]);
+    const knowledge=sajuKnowledge?.tenGods?.[relation];
+    if(!knowledge)throw Error('해석 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
+    const hint=sajuKnowledge?.branchHints?.[pair[1]]||'현재를 돌아보는';
+    const labels={daily:'오늘',weekly:'이번 주',monthly:'이번 달',yearly:`${by}년`,date:'선택한 날'};
+    const domain=[['일·공부','work'],['관계·사랑','love'],['금전·생활','money'],['마음 돌봄','wellbeing']];
+    const entries=domain.map(([title,key])=>({title,message:`${master[key].replace('이번 주',labels[period])} ${knowledge[key]}`}));
+    return {period:labels[period],source:`나의 일간 ${master.name}(${dayStem}) × ${pair} · ${relation}`,theme:knowledge.theme,hint,lead:`${hint} 흐름과 ${knowledge.theme}의 상징이 만나요. ${knowledge.core}.`,entries};
+  }
+  function initPersonalPeriods(dayStem,master){
+    const holder=$('#sajuAdvanced'),output=holder.querySelector('#personalFlowResult'),picker=holder.querySelector('#personalFortuneDate'),control=holder.querySelector('.personal-date-control');
+    const render=(period,announce=false)=>{
+      try{
+        const story=personalFlow(dayStem,master,period,period==='date'?picker.value:kstNow());
+        output.innerHTML=`<div class="personal-flow-head"><small>${escapeHtml(story.period)}의 흐름 · ${escapeHtml(story.theme)}</small><p>${paragraph(story.lead)}</p></div><div class="personal-domain-grid">${story.entries.map(({title,message})=>`<article class="personal-domain"><span>${escapeHtml(title)}</span><p>${paragraph(message)}</p></article>`).join('')}</div><details class="personal-calculation"><summary>어떤 기준으로 풀었나요?</summary><p>${escapeHtml(story.source)}</p><p>24절기 기준으로 계산된 날짜 간지와 나의 일간 사이의 전통 십성 관계를 사용했어요. 미래 사건이나 성공 가능성을 수치로 예측하는 기능은 아니에요.</p></details>`;
+        if(announce)window.DalbitByeolha?.read(`${story.period}의 이야기입니다. ${story.lead} ${story.entries.map(x=>`${x.title}. ${x.message}`).join(' ')}`);
+      }catch(e){output.textContent=e.message||'날짜를 확인해 주세요.';}
+    };
+    holder.querySelectorAll('[data-personal-period]').forEach(button=>button.addEventListener('click',()=>{
+      holder.querySelectorAll('[data-personal-period]').forEach(x=>{x.classList.toggle('selected',x===button);x.setAttribute('aria-pressed',String(x===button));});
+      const period=button.dataset.personalPeriod;control.hidden=period!=='date';render(period,true);
+    }));
+    picker.addEventListener('change',()=>render('date',true));
+    render('daily');
   }
 
   // 각 대아르카나 22장 + 소아르카나 56장 = 78장. 카드와 해석은 창작된 한국어 콘텐츠입니다.
@@ -206,6 +349,22 @@
   const minorArt=(si,ri)=>`./assets/tarot-${['wands','cups','swords','pentacles'][si]}-${ri<8?'a':'b'}-${String(ri<8?ri:ri-8).padStart(2,'0')}.webp`;
   const makeTarotDeck=()=>[...major.map((r,i)=>({id:i,kr:r[0],en:r[1],symbol:r[2],theme:r[3],up:r[4],down:r[5],art:majorArt(i),major:true})),...suits.flatMap((s,si)=>ranks.map((r,ri)=>({id:22+si*14+ri,kr:`${s.kr} ${r[0]}`,en:`${r[1]} of ${s.en}`,symbol:s.symbol,theme:`${s.essence} · ${r[2]}`,up:`${r[2]}의 상징이 ${s.essence}의 영역과 만나요. ${s.up}`,down:`${r[2]}의 의미가 잠시 막혀 있을 수 있어요. ${s.down}`,art:minorArt(si,ri),suitArt:suitArt[si],rank:ri+1,major:false})))];
   const tarotDeck=makeTarotDeck();
+  // 마이너 카드 해석은 카드마다 고유한 장면과 의미를 가진 독립 JSON이 기준입니다.
+  // 네트워크가 끊기면 내장 문구로 안전하게 돌아가되, 카드를 뽑기 전에 로딩을 기다립니다.
+  let tarotReadingsReady=Promise.resolve();
+  async function loadTarotReadings(){
+    try{
+      const response=await fetch('./data/tarot-minor-readings.json',{cache:'default'});
+      if(!response.ok)throw Error('readings unavailable');
+      const data=await response.json();
+      const validCard=row=>Array.isArray(row)&&row.length===3&&row.every((value,index)=>typeof value==='string'&&value.trim().length>=(index===0?4:35)&&value.length<360);
+      if(data.schemaVersion!==1||!Array.isArray(data.cards)||data.cards.length!==4||!data.cards.every(suit=>Array.isArray(suit)&&suit.length===14&&suit.every(validCard)))throw Error('invalid readings');
+      data.cards.forEach((suit,si)=>suit.forEach(([theme,up,down],ri)=>{
+        const card=tarotDeck[22+si*14+ri];
+        card.theme=theme;card.up=up;card.down=down;
+      }));
+    }catch{ /* 오프라인에서는 내장된 기본 풀이로 안전하게 대체합니다. */ }
+  }
   // AI 놀이터 이식 시 자산 변경은 버전 관리된 JSON 데이터만 교체하면 됩니다.
   // 네트워크/JSON 오류에서는 위 기본 경로를 유지하므로 리딩 자체가 중단되지 않습니다.
   async function loadTarotArtworkManifest(){
@@ -234,7 +393,12 @@
   let tarotCategory='general',tarotCount=1,tarotPool=[],drawn=[],tarotPrompt='';
   let ritualEpoch=0,ritualTimers=[],ritualPriorOverflow='';
   const tarotPositions=(count)=>count===1?['오늘의 메시지']:['현재의 상황','도움이 되는 조언','앞으로의 가능성'];
-  function setTarotStep(step){$('#tarotSettings').hidden=step!=='settings';$('#tarotDraw').hidden=step!=='draw';$('#tarotResults').hidden=step!=='results';}
+  function setTarotStep(step){
+    $('#tarotSettings').hidden=step!=='settings';
+    $('#tarotDraw').hidden=step!=='draw';
+    $('#tarotResults').hidden=step!=='results';
+    $('#tarot').dataset.stage=step;
+  }
   function cancelSingleReveal(){
     ritualEpoch++;
     ritualTimers.forEach(clearTimeout);ritualTimers=[];
@@ -245,7 +409,7 @@
     if($('#singleReveal').hidden)return;
     cancelSingleReveal();
     renderTarotResults(true);setTarotStep('results');
-    $('#tarotResults').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});
+    $('#tarotResults').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
     $('#againTarot').focus({preventScroll:true});
   }
   function showSingleReveal(c){
@@ -286,7 +450,7 @@
     drawn.push({...card,reversed:secureRand(100)<35});
     if(drawn.length>=tarotCount){
       if(tarotCount===1)showSingleReveal(drawn[0]);
-      else{renderTarotResults();setTarotStep('results');$('#tarotResults').scrollIntoView({behavior:'smooth',block:'center'});}
+      else{renderTarotResults();setTarotStep('results');$('#tarotResults').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});}
     }
     else renderFan();
   }
@@ -294,23 +458,30 @@
     $('#tarotResultQuestion').textContent=tarotPrompt?`당신의 질문 · “${tarotPrompt}”`:'지금 이 순간, 마음에 닿는 이야기를 만나보세요.';
     const positions=tarotPositions(tarotCount);
     $('#drawnCards').classList.toggle('one-card',tarotCount===1);
-    $('#drawnCards').innerHTML=drawn.map((c,i)=>`<article class="drawn-card"><div class="drawn-label">✧ ${positions[i]}</div><div class="reading-card ${alreadyRevealed?'flipped':''}" role="img" aria-label="${escapeHtml(c.kr)}, ${c.reversed?'역방향':'정방향'}"><div class="reading-card-inner"><div class="reading-back"><div class="tarot-back-art"><span class="back-orbit"></span><span class="back-sun">✺</span></div></div><div class="reading-front ${c.reversed?'reversed':''}"><div class="tarot-face-art"><span class="face-arch"></span>${renderTarotArtwork(c)}<span class="face-caption">${escapeHtml(c.en)}</span></div></div></div></div><h4>${escapeHtml(c.kr)}</h4><div class="orientation">${c.reversed?'↻ 역방향':'↑ 정방향'} · ${escapeHtml(c.theme)}</div><p class="card-reading">${escapeHtml(c.reversed?c.down:c.up)}</p></article>`).join('');
+    const readingParagraph=text=>String(text).split(/(?<=[.!?])\s+(?=[가-힣“])/u).map(sentence=>`<span class="reading-sentence">${escapeHtml(sentence)}</span>`).join('');
+    $('#drawnCards').innerHTML=drawn.map((c,i)=>`<article class="drawn-card"><div class="drawn-label">✧ ${positions[i]}</div><div class="reading-card ${alreadyRevealed?'flipped':''}" role="img" aria-label="${escapeHtml(c.kr)} 타로카드"><div class="reading-card-inner"><div class="reading-back"><div class="tarot-back-art"><span class="back-orbit"></span><span class="back-sun">✺</span></div></div><div class="reading-front"><div class="tarot-face-art"><span class="face-arch"></span>${renderTarotArtwork(c)}<span class="face-caption">${escapeHtml(c.en)}</span></div></div></div></div><h4>${escapeHtml(c.kr)}</h4><div class="orientation">✧ ${escapeHtml(c.theme)}</div><p class="card-reading">${readingParagraph(c.reversed?c.down:c.up)}</p></article>`).join('');
     const categoryLabel={general:'지금 나에게 필요한',love:'관계의 마음을 살펴볼',work:'일과 배움의 방향을 되짚을',money:'현실적인 균형을 생각해 볼'}[tarotCategory];
     $('#tarotSummary').textContent=`✧ ${categoryLabel} 작은 힌트가 도착했어요. 혹시 마음이 무거웠다면 이 순간만큼은 조금 내려놓아도 괜찮아요. 카드는 정답을 강요하지 않아요. 당신에게 위로가 되는 한 문장만 조용히 간직해 보세요.`;
-    window.DalbitByeolha?.read(drawn.map(c=>`${c.kr} 카드입니다. ${c.reversed?c.down:c.up}`).join(' '));
+    window.DalbitByeolha?.read(drawn.map(c=>`${c.kr}. ${c.reversed?c.down:c.up}`).join(' '));
     if(!alreadyRevealed)requestAnimationFrame(()=>setTimeout(()=>$$('.reading-card').forEach((el,i)=>setTimeout(()=>el.classList.add('flipped'),i*260)),90));
   }
   function initTarot(){
     void loadTarotArtworkManifest();
+    tarotReadingsReady=loadTarotReadings();
     $('#ritualParticles').innerHTML=Array.from({length:24},(_,i)=>`<i style="--angle:${i*15}deg;--travel:${145+(i%5)*20}px;--delay:${i%4*70}ms">${i%3===0?'✦':'✧'}</i>`).join('');
     $('#ritualSkip').addEventListener('click',finishSingleReveal);
     document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#singleReveal').hidden){e.preventDefault();finishSingleReveal();}});
     $$('#tarotCategories button').forEach(b=>b.addEventListener('click',()=>{tarotCategory=b.dataset.category;$$('#tarotCategories button').forEach(x=>x.classList.toggle('selected',x===b));}));
     $$('#tarotCount button').forEach(b=>b.addEventListener('click',()=>{tarotCount=Number(b.dataset.count);$$('#tarotCount button').forEach(x=>x.classList.toggle('selected',x===b));}));
-    $('#startTarot').addEventListener('click',()=>{cancelSingleReveal();tarotPrompt=$('#tarotQuestion').value.trim().slice(0,90);tarotPool=shuffled(tarotDeck);drawn=[];setTarotStep('draw');renderFan();});
+    $('#startTarot').addEventListener('click',async()=>{await tarotReadingsReady;cancelSingleReveal();tarotPrompt=$('#tarotQuestion').value.trim().slice(0,90);tarotPool=shuffled(tarotDeck);drawn=[];setTarotStep('draw');renderFan();});
     $('#resetTarotDraw').addEventListener('click',()=>{cancelSingleReveal();setTarotStep('settings');});
-    $('#againTarot').addEventListener('click',()=>{cancelSingleReveal();tarotPool=shuffled(tarotDeck);drawn=[];setTarotStep('draw');renderFan();});
-    $('#copyTarot').addEventListener('click',()=>copyText(`달빛운세 타로\n${tarotPrompt?`질문: ${tarotPrompt}\n`:''}${drawn.map((c,i)=>`${tarotPositions(tarotCount)[i]}: ${c.kr} (${c.reversed?'역방향':'정방향'})\n${c.reversed?c.down:c.up}`).join('\n\n')}\n※ 자기성찰을 위한 타로 리딩`));
+    $('#againTarot').addEventListener('click',()=>{
+      cancelSingleReveal();tarotPool=shuffled(tarotDeck);drawn=[];setTarotStep('draw');renderFan();
+      $('#tarotDraw').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+      $('#tarotDrawTitle').setAttribute('tabindex','-1');
+      $('#tarotDrawTitle').focus({preventScroll:true});
+    });
+    $('#copyTarot').addEventListener('click',()=>copyText(`달빛운세 타로\n${tarotPrompt?`질문: ${tarotPrompt}\n`:''}${drawn.map((c,i)=>`${tarotPositions(tarotCount)[i]}: ${c.kr}\n${c.reversed?c.down:c.up}`).join('\n\n')}\n※ 자기성찰을 위한 타로 리딩`));
   }
 
   const seasons=[['봄','새싹의 계절','시작하고 싶은 일을 가볍게 시도해 보세요.'],['여름','활력의 계절','주변 사람들과 에너지를 나누되 무리하지 마세요.'],['가을','결실의 계절','차곡차곡 쌓인 경험을 돌아보고 정리해 보세요.'],['겨울','충전의 계절','한 해를 돌아보며 다음 걸음을 준비해 보세요.']];
@@ -325,11 +496,17 @@
     $('#showNewyear').addEventListener('click',()=>{
       const year=Number($('#newyearYear').value),z=Number($('#newyearZodiac').value),key=`annual/${year}/${z}`,a=animals[z];
       $('#newyearResultTitle').textContent=`${year}년 ${a.label}, 새로운 장의 시작`;
-      $('#newyearResultText').textContent=`${choose(annualStarts,key,1)} ${choose(annualEnds,key,2)}`;
+      let personal='';
+      if(recentSaju){
+        const year8=Solar.fromYmdHms(year,7,1,12,0,0).getLunar().getEightChar(),relation=koreanTenGod(LunarUtil.SHI_SHEN[recentSaju.dayStem+year8.getYearGan()]);
+        const master=sajuKnowledge?.dayMasters?.[recentSaju.dayStem],god=sajuKnowledge?.tenGods?.[relation];
+        personal=`당신의 일간 ${recentSaju.dayStem}${master?`(${master.name})`:''}과 ${year}년의 간지 ${year8.getYear()}를 함께 보면, ${relation}의 상징을 만나요. ${god?`${god.core}. 관계에서는 ${god.love} 생활에서는 ${god.money}`:tenGodMessage[relation]||'변화 속에서 나의 중심을 살펴보세요.'} `;
+      }
+      $('#newyearResultText').textContent=`${personal}${choose(annualStarts,key,1)} ${choose(annualEnds,key,2)}`;
       $('#seasonGrid').innerHTML=seasons.map((s,i)=>`<article class="season-card"><span>✦ ${s[0]}</span><h4>${s[1]}</h4><p>${choose([s[2],opening[(mix(key,i)+i)%opening.length],closings[(mix(key,i+8)+i)%closings.length]],key,i+20)}</p></article>`).join('');
       $('#newyearAdvice').textContent=`올해의 작은 제안 · ${choose(closings,key,12)}`;
-      window.DalbitByeolha?.read(`${year}년 ${a.label} 신년운세입니다. ${$('#newyearResultText').textContent} ${$('#newyearAdvice').textContent}`);
       $('#newyearResult').hidden=false;$('#newyearResult').scrollIntoView({behavior:'smooth',block:'center'});
+      window.DalbitByeolha?.read(`${$('#newyearResultText').textContent} ${$('#newyearAdvice').textContent}`);
     });
   }
 
@@ -342,20 +519,34 @@
   }
   function initCouple(){
     void loadCoupleCopy();
+    ['A','B'].forEach(suffix=>{
+      const select=$('#coupleCalendar'+suffix),leap=$('#coupleLeapLine'+suffix);
+      const update=()=>{leap.hidden=select.value!=='lunar';if(leap.hidden)$('#coupleLeap'+suffix).checked=false;};
+      select.addEventListener('change',update);update();
+    });
     const readPerson=suffix=>{
       const date=$('#coupleBirth'+suffix).value;
-      if(!safeDate(date))throw Error('두 사람의 생년월일을 모두 확인해 주세요.');
+      const cal=$('#coupleCalendar'+suffix).value;
+      if(!safeDate(date,cal))throw Error('두 사람의 출생 연도·월·일을 모두 확인해 주세요.');
       const [year,month,day]=date.split('-').map(Number);
       if(year<1900||year>2099)throw Error('1900~2099년 생년월일을 입력해 주세요.');
       const time=$('#coupleTime'+suffix).value, hour=time==='unknown'?12:Number(time);
-      const cal=$('#coupleCalendar'+suffix).value;
       let solar,lunar;
-      if(cal==='lunar'){lunar=Lunar.fromYmdHms(year,month,day,hour,0,0);solar=lunar.getSolar();
-        if(lunar.getYear()!==year||lunar.getMonth()!==month||lunar.getDay()!==day)throw Error('음력 생일을 확인해 주세요.');}
+      if(cal==='lunar'){
+        const calendarMonth=$('#coupleLeap'+suffix).checked?-month:month;
+        lunar=Lunar.fromYmdHms(year,calendarMonth,day,hour,0,0);solar=lunar.getSolar();
+        if(lunar.getYear()!==year||lunar.getMonth()!==calendarMonth||lunar.getDay()!==day)throw Error('음력 생일이나 윤달 여부를 확인해 주세요.');}
       else{solar=Solar.fromYmdHms(year,month,day,hour,0,0);lunar=solar.getLunar();
         if(solar.getYear()!==year||solar.getMonth()!==month||solar.getDay()!==day)throw Error('양력 생일을 확인해 주세요.');}
-      const stem=lunar.getEightChar().getDay()?.[0]||'甲';
-      return {name:$('#coupleName'+suffix).value.trim().slice(0,20)||'소중한 사람',stem,element:stemElements[stem]??0,solarDate:solar.toYmd(),unknown:time==='unknown'};
+      const eight=lunar.getEightChar(),stem=eight.getDay()?.[0]||'甲',gender=$('#coupleGender'+suffix).value;
+      const name=$('#coupleName'+suffix).value.trim().slice(0,20)||'소중한 사람';
+      let phase='';
+      if(gender!=='unknown'){
+        const todayYear=Number(kstNow().slice(0,4));
+        const current=eight.getYun(gender==='male'?1:0,2).getDaYun(12).slice(1).find(d=>d.getStartYear()<=todayYear&&todayYear<=d.getEndYear());
+        if(current)phase=`${name}님의 전통 대운은 ${current.getGanZhi()} 흐름에 해당해요.`;
+      }
+      return {name,stem,dayBranch:eight.getDay()?.[1],element:stemElements[stem]??0,solarDate:solar.toYmd(),unknown:time==='unknown',phase};
     };
     $('#coupleForm').addEventListener('submit',event=>{
       event.preventDefault();
@@ -365,19 +556,25 @@
       const key=[a.solarDate,b.solarDate].sort().join('|');
       const supporting=(a.element+1)%5===b.element||(b.element+1)%5===a.element;
       const difference=(a.element+2)%5===b.element||(b.element+2)%5===a.element;
-      const symbolic= Math.min(94,Math.max(61,70+(mix(key,8)%15)+(supporting?8:0)-(difference?5:0)));
+      const relation=supporting?'함께 자라는 결':difference?'다름의 조율':'나란한 균형';
+      const relationMessage=supporting?'서로의 강점을 북돋는 관계로 읽을 수 있어요. 받기만 하거나 주기만 하지 않도록 살펴보세요.':difference?'서로 다른 방식이 부딪칠 수 있지만, 그 차이를 이해하면 관계의 새로운 힘이 될 수 있어요.':'닮은 부분과 다른 부분을 조율하면서 함께 균형을 만들어갈 수 있어요.';
+      const rules=sajuKnowledge?.branchRelations;
+      const harmony=a.dayBranch!==b.dayBranch&&rules?.harmony?.some(pair=>pair.includes(a.dayBranch)&&pair.includes(b.dayBranch));
+      const clash=a.dayBranch!==b.dayBranch&&rules?.clash?.some(pair=>pair.includes(a.dayBranch)&&pair.includes(b.dayBranch));
+      const branchMessage=harmony?`두 사람의 일지 ${a.dayBranch}와 ${b.dayBranch}에는 전통적으로 연결을 상징하는 육합 관계가 있어요. ${rules.harmonyMessage}`:clash?`두 사람의 일지 ${a.dayBranch}와 ${b.dayBranch}에는 변화의 상징인 육충 관계가 있어요. ${rules.clashMessage}`:'두 사람의 일지는 대표적인 육합·육충 조합에 속하지 않아요. 그것만으로 관계의 깊이를 판단하지는 않아요.';
       const msg=coupleCopy.length?coupleCopy[mix(key,9)%coupleCopy.length]:{
         headline:'서로의 다름을 이해하는 시간이 소중해요',
         description:'어떤 날에는 닮은 점이, 어떤 날에는 다른 점이 두 사람에게 새로운 이야기를 건네기도 해요.',
         advice:'서로의 오늘을 한 번 더 다정하게 물어봐 주세요.'
       };
       $('#coupleHeadline').textContent=`${a.name}님과 ${b.name}님, ${msg.headline}`;
-      $('#coupleScore').textContent=`${symbolic}점`;
-      $('#coupleDescription').textContent=msg.description;
-      $('#coupleAdvice').textContent=`달빛의 작은 제안 · ${msg.advice}`;
+      $('#coupleScore').textContent=relation;
+      $('#coupleDescription').textContent=`${a.name}님의 일간 ${a.stem}(${elementNames[a.element]})과 ${b.name}님의 일간 ${b.stem}(${elementNames[b.element]})을 오행으로 살펴보면, ${relationMessage}\n\n${branchMessage}\n\n${msg.description}`;
+      const phaseMessage=[a.phase,b.phase].filter(Boolean).join(' ');
+      $('#coupleAdvice').textContent=`달빛의 작은 제안 · ${msg.advice}${phaseMessage?`\n\n각자의 10년 흐름도 함께 살펴봤어요. ${phaseMessage}`:''}`;
       $('#coupleResult').hidden=false;$('#coupleDialog').close();
       $('#coupleResult').scrollIntoView({behavior:'smooth',block:'center'});
-      window.DalbitByeolha?.read(`${a.name}님과 ${b.name}님의 궁합 이야기예요. ${msg.headline}. ${msg.description} ${msg.advice}`);
+      window.DalbitByeolha?.read(`${msg.headline} ${$('#coupleDescription').textContent} ${$('#coupleAdvice').textContent}`);
     });
   }
 
@@ -387,7 +584,9 @@
     $$('#mobileNav a').forEach(a=>a.addEventListener('click',()=>{nav.hidden=true;toggle.setAttribute('aria-expanded','false');}));
     const names=['home','zodiac','saju','tarot','couple','newyear'];
     const show=(name,updateHistory=false)=>{
+      window.DalbitByeolha?.silence();
       const id=names.includes(name)?name:'home';
+      if(id==='zodiac'&&document.body.dataset.view!=='zodiac')$('#zodiac').dataset.mobileStage='choose';
       $$('.view-screen').forEach(view=>{const isActive=view.id===id;view.hidden=!isActive;view.classList.toggle('is-active',isActive);if(isActive)view.scrollTop=0;});
       document.body.dataset.view=id;
       $$('.nav-link,.mobile-dock a,#mobileNav a').forEach(a=>{const active=a.getAttribute('href')===`#${id}`;a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
@@ -414,7 +613,15 @@
   async function loadCopyManifests(){
     const useArray=(target,incoming,expected)=>{if(Array.isArray(incoming)&&incoming.length===expected&&incoming.every(x=>typeof x==='string'))target.splice(0,target.length,...incoming);};
     const load=async(path)=>{const response=await fetch(path,{cache:'default'});if(!response.ok)throw Error('data unavailable');const data=await response.json();if(data.schemaVersion!==1)throw Error('unknown data schema');return data;};
-    const outcomes=await Promise.allSettled([load('./data/fortune-copy.json'),load('./data/tarot-meanings.json'),load('./data/newyear-copy.json')]);
+    const loadSaju=async()=>{
+      const response=await fetch('./data/saju-knowledge.json',{cache:'default'});
+      if(!response.ok)throw Error('saju DB unavailable');
+      const data=await response.json();
+      const masters='甲乙丙丁戊己庚辛壬癸',gods=['비견','겁재','식신','상관','편재','정재','편관','정관','편인','정인'];
+      if(data.schemaVersion!==2||!masters.split('').every(k=>data.dayMasters?.[k]&&['name','image','core','strength','shadow','work','love','money','wellbeing'].every(field=>typeof data.dayMasters[k][field]==='string'&&data.dayMasters[k][field].trim().length>0))||!gods.every(k=>data.tenGods?.[k]&&['core','theme','work','love','money','wellbeing'].every(field=>typeof data.tenGods[k][field]==='string'&&data.tenGods[k][field].trim().length>0)))throw Error('invalid saju DB schema');
+      return data;
+    };
+    const outcomes=await Promise.allSettled([load('./data/fortune-copy.json'),load('./data/tarot-meanings.json'),load('./data/newyear-copy.json'),loadSaju()]);
     if(outcomes[0].status==='fulfilled'){
       const d=outcomes[0].value;
       useArray(headlines,d.headlines,10);useArray(opening,d.opening,8);useArray(closings,d.closings,8);useArray(reassurance,d.reassurance,6);
@@ -433,11 +640,13 @@
       if(Array.isArray(d.seasons)&&d.seasons.length===4)seasons.splice(0,seasons.length,...d.seasons);
       useArray(annualStarts,d.annualStarts,5);useArray(annualEnds,d.annualEnds,4);
     }
+    if(outcomes[3].status==='fulfilled')sajuKnowledge=outcomes[3].value;
+    else console.warn('사주 해석 DB를 불러오지 못해 기존 계산형 해석으로 표시합니다.');
   }
   async function start(){
     await loadCopyManifests();
     if($('#currentYear'))$('#currentYear').textContent=kstNow().slice(0,4);
-    initNavigation();initFortune();initTarot();initSaju();initNewyear();initCouple();
+    initNavigation();initFortune();initTarot();initMoonDateInputs();initSaju();initNewyear();initCouple();
     if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
       const registerOffline=()=>navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'}).catch(()=>{});
       if(document.readyState==='complete')registerOffline();

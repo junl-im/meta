@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "assetVersion": "4.1.0",
+  "assetVersion": "4.4.0",
   "theme": "moonlit-gold-fantasy",
   "illustrationFormat": "image/webp",
   "originalAtlases": ["./assets/tarot-majors-a.png", "./assets/tarot-majors-b.png", "./assets/tarot-majors-c.png", "./assets/tarot-majors-d.png", "./assets/tarot-minors-e.png"],

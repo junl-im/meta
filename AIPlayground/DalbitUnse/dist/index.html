@@ -27,10 +27,9 @@
         <a class="nav-link active" href="#home">홈</a><a class="nav-link" href="#zodiac">띠별운세</a><a class="nav-link" href="#saju">사주풀이</a><a class="nav-link" href="#tarot">타로카드</a><a class="nav-link" href="#couple">궁합</a><a class="nav-link" href="#newyear">신년운세</a>
       </nav>
       <div class="sound-controls" aria-label="오디오 기능">
-        <button class="sound-toggle" id="musicToggle" type="button" aria-pressed="false" aria-label="신비로운 배경음 켜기"><span class="sound-glyph" aria-hidden="true">♫</span><span class="sound-title">배경음</span><span class="sound-state">OFF</span></button>
-        <button class="sound-toggle pending" id="voiceToggle" type="button" aria-pressed="false" aria-label="별하 성우 연결 준비 중"><span class="sound-glyph" aria-hidden="true">✧</span><span class="sound-title">별하</span><span class="sound-state">준비 중</span></button>
+        <button class="sound-toggle enabled waiting" id="musicToggle" type="button" aria-pressed="true" aria-label="배경음 켜짐, 첫 화면 터치 후 재생됩니다. 끄기" data-sound="on"><span class="sound-glyph" aria-hidden="true"></span><span class="sound-title">배경음</span><span class="sound-state">ON</span></button>
+        <button class="sound-toggle" id="voiceToggle" type="button" aria-pressed="false" aria-label="임시 한국어 음성 결과 낭독 꺼짐, 켜기" data-voice="off"><span class="sound-glyph" aria-hidden="true"></span><span class="sound-title">음성 낭독</span><span class="sound-state">OFF</span></button>
       </div>
-      <a class="nav-cta" href="#tarot"><span>✧</span> 타로 열기 <span aria-hidden="true">↗</span></a>
       <button class="menu-toggle" id="menuToggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav"><span></span><span></span><span></span></button>
     </div>
     <nav id="mobileNav" class="mobile-nav" aria-label="모바일 메뉴" hidden><a href="#home">홈</a><a href="#zodiac">띠별운세</a><a href="#saju">사주풀이</a><a href="#tarot">타로카드</a><a href="#couple">궁합</a><a href="#newyear">신년운세</a></nav>
@@ -46,22 +45,10 @@
         </div>
         <p class="home-free-pill">✦ 가입 없이 무료 ✦</p>
         <p class="hero-overline"><span class="spark">✦</span> 오늘 마음에 찾아온 작은 위로</p>
-        <p class="hero-sub">혹시 오늘도 수고가 많았나요?<br>달빛 아래 잠시 쉬어가며, 당신을 위한 이야기를 들어보세요.</p>
-        <div class="home-shortcuts" aria-label="운세 메뉴 바로가기">
-          <a href="#zodiac"><span>🐲</span><b>띠별 운세</b></a>
-          <a href="#saju"><span>命</span><b>나의 사주</b></a>
-          <a href="#tarot"><span>✧</span><b>타로 카드</b></a>
-          <a href="#couple"><span>♡</span><b>커플 궁합</b></a>
-          <a href="#newyear"><span>☀</span><b>신년 운세</b></a>
-        </div>
+        <p class="hero-sub">오늘 하루도 행복한 하루가 되었나요?<br>어떤 하루였든 괜찮아요. 달빛 아래 잠시 마음을 쉬어가세요.</p>
+        <p class="home-poetry" aria-hidden="true">✦ &nbsp; MOONLIT STORIES &nbsp; ✦</p>
       </div>
-      <div class="hero-art" aria-hidden="true">
-        <div class="orbit orbit-outer"></div><div class="orbit orbit-mid"></div><div class="orbit orbit-inner"></div><span class="hero-spark s1">✦</span><span class="hero-spark s2">✧</span><span class="hero-spark s3">✶</span>
-        <div class="hero-card hero-card-left"><div class="hero-card-illustration moon-art"><span>☽</span><i></i><b>☾</b></div><div class="hero-card-title">THE MOON</div></div>
-        <div class="hero-card hero-card-center"><div class="hero-card-illustration star-art"><span>✦</span><i>✧</i><b>♒</b></div><div class="hero-card-title">THE STAR</div></div>
-        <div class="hero-card hero-card-right"><div class="hero-card-illustration sun-art"><span>☼</span><i>✺</i></div><div class="hero-card-title">THE SUN</div></div>
-        <div class="hero-moon">☾</div><div class="hero-caption">✧  TRUST THE STARS  ✧</div>
-      </div>
+      <div class="hero-art" aria-hidden="true"></div>
     </section>
 
     <div class="ornate-divider section-shell"><span></span><b>✧</b><span></span></div>
@@ -76,11 +63,11 @@
       </div>
     </section>
 
-    <section id="zodiac" class="feature-section zodiac-section view-screen" hidden><div class="section-shell">
+    <section id="zodiac" class="feature-section zodiac-section view-screen" data-mobile-stage="choose" hidden><div class="section-shell">
       <div class="section-heading"><p class="kicker">DAILY HOROSCOPE <span>✧</span></p><h2>열두 동물의 <em>오늘</em></h2><p>나의 띠를 선택하고, 궁금한 기간의 운세를 읽어보세요.</p></div>
       <div class="zodiac-layout">
         <div class="zodiac-pick"><div class="panel-overline">SELECT YOUR ZODIAC <span id="zodiacCounter">05 / 12</span></div><div class="zodiac-grid" id="zodiacGrid"></div><div class="zodiac-help"><button class="text-button" type="button" id="openZodiacDialog">✧ 내 띠가 궁금하다면 생년 정보 입력 →</button></div></div>
-        <div class="fortune-panel" id="fortunePanel"><div class="fortune-top"><div><div class="panel-overline">YOUR FORTUNE · <span id="fortuneDate"></span></div><h3><span id="chosenAnimal">🐉</span> <span id="chosenZodiacName">용띠</span> 운세</h3></div><div class="fortune-moon">☯</div></div>
+        <div class="fortune-panel" id="fortunePanel"><button class="zodiac-return" id="zodiacBack" type="button">← 다른 띠 선택하기</button><div class="fortune-top"><div><div class="panel-overline">YOUR FORTUNE · <span id="fortuneDate"></span></div><h3><span id="chosenAnimal">🐉</span> <span id="chosenZodiacName">용띠</span> 운세</h3></div><div class="fortune-moon">☯</div></div>
           <div class="period-tabs" role="tablist" aria-label="운세 기간"><button type="button" class="period-tab active" data-period="daily" role="tab" aria-selected="true">오늘</button><button type="button" class="period-tab" data-period="weekly" role="tab" aria-selected="false">이번 주</button><button type="button" class="period-tab" data-period="monthly" role="tab" aria-selected="false">이번 달</button><button type="button" class="period-tab" data-period="yearly" role="tab" aria-selected="false">올해</button><button type="button" class="period-tab" data-period="date" role="tab" aria-selected="false">날짜 선택</button></div>
           <div class="date-choice" id="dateChoice" hidden><label for="fortuneInputDate">운세를 볼 날짜</label><input id="fortuneInputDate" type="date"><button class="small-button" id="showDateFortune">확인</button></div>
           <div class="fortune-content" aria-live="polite"><div class="fortune-rating"><span id="fortuneStars" aria-label="오늘의 별점">★★★★☆</span><span id="fortuneScoreText">좋은 흐름이 찾아오는 날</span></div><h4 id="fortuneHeadline">당신의 하루에 따뜻한 기운이 스며들어요.</h4><p id="fortuneDescription"></p><div class="fortune-stats" id="fortuneStats"></div><div class="lucky-row"><span>행운의 색 <b id="luckyColor"></b></span><span>행운의 숫자 <b id="luckyNumber"></b></span><span>행운의 방향 <b id="luckyDirection"></b></span></div></div>
@@ -109,21 +96,22 @@
             <div class="ritual-heartbeats" aria-hidden="true"><span>♡</span><span>♡</span><span>♡</span></div>
           </div>
         </div>
-        <div class="tarot-results" id="tarotResults" hidden><div class="tarot-step-label">✦ STEP 03 · 당신에게 도착한 카드</div><h3>별들이 건네는 오늘의 메시지</h3><p id="tarotResultQuestion" class="tarot-result-question"></p><div class="drawn-cards" id="drawnCards"></div><div class="tarot-summary" id="tarotSummary"></div><div class="tarot-result-actions"><button type="button" class="button button-gold" id="againTarot">다시 카드 뽑기 ↗</button><button type="button" class="button button-glass" id="copyTarot">결과 복사</button></div></div>
-        <p class="tarot-fineprint">✧ 78장 클래식 타로 · 정방향·역방향 리딩</p>
+        <div class="tarot-results" id="tarotResults" hidden><div class="tarot-step-label">✦ STEP 03 · 당신에게 도착한 카드</div><h3>별들이 건네는 오늘의 메시지</h3><p id="tarotResultQuestion" class="tarot-result-question"></p><div class="drawn-cards" id="drawnCards"></div><div class="tarot-summary" id="tarotSummary"></div><div class="tarot-result-actions" role="group" aria-label="타로 결과 동작"><button type="button" class="button button-gold" id="againTarot">다시 카드 뽑기 ↗</button><button type="button" class="button button-glass" id="copyTarot">결과 복사</button></div></div>
+        <p class="tarot-fineprint">✧ 78장의 카드가 건네는 당신만의 이야기</p>
       </div>
     </div></section>
 
-    <section id="saju" class="saju-section feature-section view-screen" hidden><div class="section-shell"><div class="section-heading"><p class="kicker">THE FOUR PILLARS OF DESTINY</p><h2>태어난 순간에 담긴 <em>네 개의 기둥</em></h2><p>나의 생년월일시를 입력하고, 나에게 담긴 전통의 상징을 천천히 만나보세요.</p><button type="button" class="button button-gold view-primary" id="openSajuDialog">내 사주 정보 입력하기 ✧</button></div>
+    <section id="saju" class="saju-section feature-section view-screen" hidden><div class="section-shell"><div class="section-heading"><p class="kicker">THE FOUR PILLARS OF DESTINY</p><h2>태어난 순간에 담긴 <em>네 개의 기둥</em></h2><p>출생 시간과 절기, 십성과 대운, 일·주·월·년의 흐름까지 나의 이야기를 깊게 살펴보세요.</p><button type="button" class="button button-gold view-primary" id="openSajuDialog">내 사주 정보 입력하기 ✧</button></div>
       <div class="saju-layout"><dialog class="moonlit-dialog" id="sajuDialog" aria-label="나의 사주 정보 입력"><button class="modal-close" type="button" data-close-dialog aria-label="닫기">×</button><form id="sajuForm" class="saju-form"><div class="form-topline"><span>✧ 나의 사주 알아보기</span><span>음력·양력 선택</span></div>
           <div class="field"><label for="sajuName">이름 <small>선택 사항</small></label><input id="sajuName" type="text" maxlength="20" placeholder="어떻게 불러드릴까요?"></div>
-          <div class="field"><label for="sajuBirth">태어난 날짜</label><input id="sajuBirth" type="date" min="1900-01-01" max="2099-12-31" required></div>
+          <div class="field"><span class="field-label" id="sajuBirthLabel">태어난 날짜</span><div class="moon-date-parts" data-date-target="sajuBirth" role="group" aria-labelledby="sajuBirthLabel"><input type="number" class="moon-year" inputmode="numeric" min="1900" max="2099" placeholder="연도" aria-label="태어난 연도"><select class="moon-month" aria-label="태어난 월"><option value="">월</option></select><select class="moon-day" aria-label="태어난 일"><option value="">일</option></select></div><input id="sajuBirth" type="hidden"></div>
           <div class="field"><span class="field-label">날짜 기준</span><div class="segmented full" id="sajuCalendarType" role="radiogroup" aria-label="날짜 기준"><button type="button" class="selected" role="radio" aria-checked="true" data-cal="solar">양력</button><button type="button" role="radio" aria-checked="false" data-cal="lunar">음력</button></div><label class="checkline" id="leapLine" hidden><input type="checkbox" id="sajuLeap"> 음력 윤달로 태어났어요</label></div>
           <div class="field"><label for="sajuTime">태어난 시간</label><select id="sajuTime"><option value="unknown">잘 모르겠어요 (시간주 제외)</option><option value="0">자시 · 23:00~00:59</option><option value="2">축시 · 01:00~02:59</option><option value="4">인시 · 03:00~04:59</option><option value="6">묘시 · 05:00~06:59</option><option value="8">진시 · 07:00~08:59</option><option value="10">사시 · 09:00~10:59</option><option value="12">오시 · 11:00~12:59</option><option value="14">미시 · 13:00~14:59</option><option value="16">신시 · 15:00~16:59</option><option value="18">유시 · 17:00~18:59</option><option value="20">술시 · 19:00~20:59</option><option value="22">해시 · 21:00~22:59</option></select></div>
+          <div class="field"><label for="sajuGender">대운 계산 기준</label><select id="sajuGender"><option value="unknown">선택하지 않음</option><option value="female">여성</option><option value="male">남성</option></select></div>
           <button type="submit" class="button button-gold full-button">나의 사주 풀어보기 <span>↗</span></button><p class="privacy-note">🔒 입력 정보는 기기에서만 계산하며 서버에 저장하지 않아요.</p>
         </form></dialog>
         <div class="saju-placeholder" id="sajuPlaceholder"><div class="saju-circle"><span class="ring ring-a"></span><span class="ring ring-b"></span><div class="saju-yin-yang">☯</div><i class="saju-sigil a">木</i><i class="saju-sigil b">火</i><i class="saju-sigil c">土</i><i class="saju-sigil d">金</i><i class="saju-sigil e">水</i></div><p>하늘의 시간과 땅의 기운이 만나<br>당신만의 이야기가 시작됩니다.</p><span>生 · 年 · 月 · 日 · 時</span></div>
-        <div class="saju-result" id="sajuResult" hidden aria-live="polite"><p class="kicker">YOUR SAJU CHART</p><h3 id="sajuResultTitle">당신의 사주팔자</h3><p id="sajuDateInfo" class="result-muted"></p><div class="pillar-grid" id="pillarGrid"></div><div class="elements-chart" id="elementsChart"></div><div class="saju-reading" id="sajuReading"></div><div class="calculation-note">※ 전통 명리학의 간지·오행을 이용한 간단 풀이입니다. 절입 시각, 지역 태양시, 자시의 날짜 경계에 따라 만세력마다 결과가 달라질 수 있어요. 정밀 감정이나 미래 예측을 보장하지 않습니다.</div></div>
+        <div class="saju-result" id="sajuResult" hidden aria-live="polite"><p class="kicker">YOUR SAJU CHART</p><h3 id="sajuResultTitle">당신의 사주팔자</h3><p id="sajuDateInfo" class="result-muted"></p><div class="pillar-grid" id="pillarGrid"></div><div class="elements-chart" id="elementsChart"></div><div class="saju-reading" id="sajuReading"></div><div class="saju-advanced" id="sajuAdvanced"></div><div class="calculation-note">※ 절기를 반영한 간지·오행·십성·대운의 전통 계산입니다. 출생 지역에 따른 태양시 보정과 자시 경계 선택은 아직 지원하지 않아 일부 만세력과 차이가 날 수 있어요. 해석은 자기 이해를 위한 참고이며 실제 미래를 확정하지 않습니다.</div></div>
       </div></div></section>
 
     <section id="couple" class="couple-section feature-section view-screen" hidden><div class="section-shell">
@@ -139,24 +127,24 @@
           <p class="kicker">✧ 우리의 별자리 이야기</p><h3>2명의 정보를 알려주세요</h3>
           <div class="couple-form-grid">
             <fieldset><legend>첫 번째 사람</legend><label for="coupleNameA">이름 또는 애칭</label><input id="coupleNameA" maxlength="20" placeholder="예: 나" required>
-              <label for="coupleBirthA">생년월일</label><input type="date" id="coupleBirthA" min="1900-01-01" max="2099-12-31" required>
-              <label for="coupleCalendarA">날짜 기준</label><select id="coupleCalendarA"><option value="solar">양력</option><option value="lunar">음력</option></select>
-              <label for="coupleTimeA">출생 시간</label><select id="coupleTimeA"><option value="unknown">잘 모르겠어요</option><option value="0">자시 23:00~00:59</option><option value="2">축시 01:00~02:59</option><option value="4">인시 03:00~04:59</option><option value="6">묘시 05:00~06:59</option><option value="8">진시 07:00~08:59</option><option value="10">사시 09:00~10:59</option><option value="12">오시 11:00~12:59</option><option value="14">미시 13:00~14:59</option><option value="16">신시 15:00~16:59</option><option value="18">유시 17:00~18:59</option><option value="20">술시 19:00~20:59</option><option value="22">해시 21:00~22:59</option></select></fieldset>
+              <label id="coupleBirthLabelA">생년월일</label><div class="moon-date-parts" data-date-target="coupleBirthA" role="group" aria-labelledby="coupleBirthLabelA"><input type="number" class="moon-year" inputmode="numeric" min="1900" max="2099" placeholder="연도" aria-label="첫 번째 사람 출생 연도"><select class="moon-month" aria-label="첫 번째 사람 출생 월"><option value="">월</option></select><select class="moon-day" aria-label="첫 번째 사람 출생 일"><option value="">일</option></select></div><input id="coupleBirthA" type="hidden">
+              <label for="coupleCalendarA">날짜 기준</label><select id="coupleCalendarA"><option value="solar">양력</option><option value="lunar">음력</option></select><label class="couple-leap-check checkline" id="coupleLeapLineA" hidden><input id="coupleLeapA" type="checkbox"> 윤달</label>
+              <label for="coupleTimeA">출생 시간</label><select id="coupleTimeA"><option value="unknown">잘 모르겠어요</option><option value="0">자시 23:00~00:59</option><option value="2">축시 01:00~02:59</option><option value="4">인시 03:00~04:59</option><option value="6">묘시 05:00~06:59</option><option value="8">진시 07:00~08:59</option><option value="10">사시 09:00~10:59</option><option value="12">오시 11:00~12:59</option><option value="14">미시 13:00~14:59</option><option value="16">신시 15:00~16:59</option><option value="18">유시 17:00~18:59</option><option value="20">술시 19:00~20:59</option><option value="22">해시 21:00~22:59</option></select><label for="coupleGenderA">대운 기준</label><select id="coupleGenderA"><option value="unknown">선택하지 않음</option><option value="female">여성</option><option value="male">남성</option></select></fieldset>
             <fieldset><legend>두 번째 사람</legend><label for="coupleNameB">이름 또는 애칭</label><input id="coupleNameB" maxlength="20" placeholder="예: 소중한 사람" required>
-              <label for="coupleBirthB">생년월일</label><input type="date" id="coupleBirthB" min="1900-01-01" max="2099-12-31" required>
-              <label for="coupleCalendarB">날짜 기준</label><select id="coupleCalendarB"><option value="solar">양력</option><option value="lunar">음력</option></select>
-              <label for="coupleTimeB">출생 시간</label><select id="coupleTimeB"><option value="unknown">잘 모르겠어요</option><option value="0">자시 23:00~00:59</option><option value="2">축시 01:00~02:59</option><option value="4">인시 03:00~04:59</option><option value="6">묘시 05:00~06:59</option><option value="8">진시 07:00~08:59</option><option value="10">사시 09:00~10:59</option><option value="12">오시 11:00~12:59</option><option value="14">미시 13:00~14:59</option><option value="16">신시 15:00~16:59</option><option value="18">유시 17:00~18:59</option><option value="20">술시 19:00~20:59</option><option value="22">해시 21:00~22:59</option></select></fieldset>
+              <label id="coupleBirthLabelB">생년월일</label><div class="moon-date-parts" data-date-target="coupleBirthB" role="group" aria-labelledby="coupleBirthLabelB"><input type="number" class="moon-year" inputmode="numeric" min="1900" max="2099" placeholder="연도" aria-label="두 번째 사람 출생 연도"><select class="moon-month" aria-label="두 번째 사람 출생 월"><option value="">월</option></select><select class="moon-day" aria-label="두 번째 사람 출생 일"><option value="">일</option></select></div><input id="coupleBirthB" type="hidden">
+              <label for="coupleCalendarB">날짜 기준</label><select id="coupleCalendarB"><option value="solar">양력</option><option value="lunar">음력</option></select><label class="couple-leap-check checkline" id="coupleLeapLineB" hidden><input id="coupleLeapB" type="checkbox"> 윤달</label>
+              <label for="coupleTimeB">출생 시간</label><select id="coupleTimeB"><option value="unknown">잘 모르겠어요</option><option value="0">자시 23:00~00:59</option><option value="2">축시 01:00~02:59</option><option value="4">인시 03:00~04:59</option><option value="6">묘시 05:00~06:59</option><option value="8">진시 07:00~08:59</option><option value="10">사시 09:00~10:59</option><option value="12">오시 11:00~12:59</option><option value="14">미시 13:00~14:59</option><option value="16">신시 15:00~16:59</option><option value="18">유시 17:00~18:59</option><option value="20">술시 19:00~20:59</option><option value="22">해시 21:00~22:59</option></select><label for="coupleGenderB">대운 기준</label><select id="coupleGenderB"><option value="unknown">선택하지 않음</option><option value="female">여성</option><option value="male">남성</option></select></fieldset>
           </div>
           <button type="submit" class="button button-gold full-button">우리의 궁합 이야기 보기 ♡</button><p class="privacy-note">🔒 이 정보는 전송하거나 저장하지 않고 기기 안에서만 계산합니다.</p>
         </form>
       </dialog>
     </div></section>
 
-    <section id="newyear" class="newyear-section feature-section view-screen" hidden><div class="section-shell"><div class="newyear-shell"><div class="newyear-heading"><p class="kicker">A NEW CHAPTER BEGINS</p><h2><span id="newyearTitle">2027</span>년,<br><em>새로운 별빛을 맞이하세요</em></h2><p>새해의 큰 흐름부터 계절별 기운까지,<br>조금 더 다정하게 내일을 준비하는 시간.</p><div class="newyear-selects"><label for="newyearYear">보고 싶은 해</label><select id="newyearYear"></select><label for="newyearZodiac">나의 띠</label><select id="newyearZodiac"></select></div><button type="button" class="button button-gold" id="showNewyear">신년운세 확인하기 ↗</button></div><div class="newyear-visual" aria-hidden="true"><div class="newyear-halo"></div><span class="big-year" id="bigYear">2027</span><div class="big-glyph">✶</div><div class="newyear-visual-bottom">A NEW BEGINNING · A BRIGHTER YOU</div></div></div>
+    <section id="newyear" class="newyear-section feature-section view-screen" hidden><div class="section-shell"><div class="newyear-shell"><div class="newyear-heading"><p class="kicker">A NEW CHAPTER BEGINS</p><h2><span id="newyearTitle">2027</span>년,<br><em>새로운 별빛을 맞이하세요</em></h2><p>새해의 큰 흐름부터 계절별 기운까지,<br>조금 더 다정하게 내일을 준비하는 시간.</p><div class="newyear-selects"><label for="newyearYear">보고 싶은 해</label><select id="newyearYear"></select><label for="newyearZodiac">나의 띠</label><select id="newyearZodiac"></select></div><button type="button" class="button button-gold" id="showNewyear">신년운세 확인하기 ↗</button><p class="newyear-personal-hint" id="newyearPersonalHint">출생정보로 더 깊이 읽고 싶다면 <a href="#saju">사주풀이에서 먼저 살펴보세요 ↗</a></p></div><div class="newyear-visual" aria-hidden="true"><div class="newyear-halo"></div><span class="big-year" id="bigYear">2027</span><div class="big-glyph">✶</div><div class="newyear-visual-bottom">A NEW BEGINNING · A BRIGHTER YOU</div></div></div>
         <div class="newyear-result" id="newyearResult" hidden><div class="newyear-result-head"><span>✧ NEW YEAR READING</span><h3 id="newyearResultTitle"></h3><p id="newyearResultText"></p></div><div class="season-grid" id="seasonGrid"></div><div class="newyear-advice" id="newyearAdvice"></div></div>
       </div></section>
 
-    <section class="trust-section section-shell"><div class="trust-symbol">✦</div><div><p class="kicker">FREE TO EXPLORE, ALWAYS</p><h2>좋은 하루의 시작은, <em>작은 기대</em>만으로도 충분하니까.</h2><p>운세는 미래를 확정하는 답이 아니라 오늘을 돌아보는 이야기예요.<br>마음에 닿는 문장은 간직하고, 중요한 결정은 스스로의 판단을 믿어주세요.</p></div><a href="#home" class="button button-glass">처음으로 ↑</a></section>
+    <section class="trust-section section-shell"><div class="trust-symbol">✦</div><div><p class="kicker">A QUIET MOMENT UNDER THE MOON</p><h2>좋은 하루의 시작은, <em>작은 기대</em>만으로도 충분하니까.</h2><p>운세는 미래를 확정하는 답이 아니라 오늘을 돌아보는 이야기예요.<br>마음에 닿는 문장은 간직하고, 중요한 결정은 스스로의 판단을 믿어주세요.</p></div><a href="#home" class="button button-glass">처음으로 ↑</a></section>
   </main>
 
   <nav class="mobile-dock" aria-label="모바일 빠른 메뉴">
@@ -168,7 +156,7 @@
     <a href="#newyear"><span class="dock-icon dock-year" aria-hidden="true"></span><span>신년</span></a>
   </nav>
 
-  <div class="version-chip" aria-label="버전 정보">v4.1</div>
+  <div class="version-chip" aria-label="버전 정보">v4.7</div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="./assets/lunar.js"></script>
   <script src="./app.js" defer></script>
