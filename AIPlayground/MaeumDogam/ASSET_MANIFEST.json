@@ -1,8 +1,8 @@
 {
   "project": "곰같은여우의 마음도감",
   "projectId": "maeumdogam",
-  "version": "0.3.0",
-  "updatedAt": "2026-10-24",
+  "version": "0.4.0",
+  "updatedAt": "2026-10-25",
   "repository": "junl-im/meta",
   "projectRoot": "AIPlayground/MaeumDogam",
   "notionMaster": "https://app.notion.com/p/403fff243ec98170ac40ea10ec641872",
@@ -673,6 +673,20 @@
       "approved": false,
       "originalDriveFileId": null,
       "sha256": null
+    }
+  ],
+  "reviewDrafts": [
+    {
+      "id": "CHAR-ISFJ",
+      "category": "character",
+      "name": "ISFJ 마음의 정원사 신규 원화 시안",
+      "path": "assets/characters/mbti/isfj-gardener-draft-v01.png",
+      "status": "generated",
+      "approved": false,
+      "driveBackedUp": false,
+      "sha256": null,
+      "githubBlobSha": "a966eedd55077288d19939cf7dc5e20f3b903af0",
+      "notes": "1차 시안. PNG 투명도·가장자리·ISTJ 및 마스코트와 일관성 미검증. 최종 캐릭터 본 자산으로 승격 금지."
     }
   ]
 }
