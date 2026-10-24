@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "assetVersion": "2.1.0",
+  "assetVersion": "4.1.0",
   "theme": "moonlit-gold-fantasy",
   "illustrationFormat": "image/webp",
   "originalAtlases": ["./assets/tarot-majors-a.png", "./assets/tarot-majors-b.png", "./assets/tarot-majors-c.png", "./assets/tarot-majors-d.png", "./assets/tarot-minors-e.png"],
@@ -12,9 +12,15 @@
   ],
   "suitArtwork": ["./assets/tarot-major-d-4.webp", "./assets/tarot-major-d-5.webp", "./assets/tarot-minor-e-0.webp", "./assets/tarot-minor-e-1.webp"],
   "courtArtwork": ["./assets/tarot-minor-e-2.webp", "./assets/tarot-minor-e-3.webp", "./assets/tarot-minor-e-4.webp", "./assets/tarot-minor-e-5.webp"],
+  "minorArtwork": [
+    ["./assets/tarot-wands-a-00.webp", "./assets/tarot-wands-a-01.webp", "./assets/tarot-wands-a-02.webp", "./assets/tarot-wands-a-03.webp", "./assets/tarot-wands-a-04.webp", "./assets/tarot-wands-a-05.webp", "./assets/tarot-wands-a-06.webp", "./assets/tarot-wands-a-07.webp", "./assets/tarot-wands-b-00.webp", "./assets/tarot-wands-b-01.webp", "./assets/tarot-wands-b-02.webp", "./assets/tarot-wands-b-03.webp", "./assets/tarot-wands-b-04.webp", "./assets/tarot-wands-b-05.webp"],
+    ["./assets/tarot-cups-a-00.webp", "./assets/tarot-cups-a-01.webp", "./assets/tarot-cups-a-02.webp", "./assets/tarot-cups-a-03.webp", "./assets/tarot-cups-a-04.webp", "./assets/tarot-cups-a-05.webp", "./assets/tarot-cups-a-06.webp", "./assets/tarot-cups-a-07.webp", "./assets/tarot-cups-b-00.webp", "./assets/tarot-cups-b-01.webp", "./assets/tarot-cups-b-02.webp", "./assets/tarot-cups-b-03.webp", "./assets/tarot-cups-b-04.webp", "./assets/tarot-cups-b-05.webp"],
+    ["./assets/tarot-swords-a-00.webp", "./assets/tarot-swords-a-01.webp", "./assets/tarot-swords-a-02.webp", "./assets/tarot-swords-a-03.webp", "./assets/tarot-swords-a-04.webp", "./assets/tarot-swords-a-05.webp", "./assets/tarot-swords-a-06.webp", "./assets/tarot-swords-a-07.webp", "./assets/tarot-swords-b-00.webp", "./assets/tarot-swords-b-01.webp", "./assets/tarot-swords-b-02.webp", "./assets/tarot-swords-b-03.webp", "./assets/tarot-swords-b-04.webp", "./assets/tarot-swords-b-05.webp"],
+    ["./assets/tarot-pentacles-a-00.webp", "./assets/tarot-pentacles-a-01.webp", "./assets/tarot-pentacles-a-02.webp", "./assets/tarot-pentacles-a-03.webp", "./assets/tarot-pentacles-a-04.webp", "./assets/tarot-pentacles-a-05.webp", "./assets/tarot-pentacles-a-06.webp", "./assets/tarot-pentacles-a-07.webp", "./assets/tarot-pentacles-b-00.webp", "./assets/tarot-pentacles-b-01.webp", "./assets/tarot-pentacles-b-02.webp", "./assets/tarot-pentacles-b-03.webp", "./assets/tarot-pentacles-b-04.webp", "./assets/tarot-pentacles-b-05.webp"]
+  ],
   "notes": {
     "major": "22개의 메이저 아르카나는 카드마다 독립적인 원화입니다.",
-    "minor": "56개의 마이너 아르카나는 4개 슈트·4개 궁정인물 원화와 랭크 표식을 조합합니다.",
-    "source": "신규 생성한 PNG 원본 5종을 개별 WebP로 최적화했습니다. SVG는 사용하지 않습니다."
+    "minor": "56개의 마이너 아르카나도 카드마다 독립적으로 만든 원화입니다.",
+    "source": "78장 원화는 개별 최적화 WebP로 분리합니다. PNG 원본 아틀라스는 별도 백업합니다. SVG는 사용하지 않습니다."
   }
 }
