@@ -484,6 +484,8 @@ test('foundation flow keeps state, layout and rewrite tools coherent', async ({ 
   await expect(page.locator('[data-resulttab="xray"]')).toHaveCount(0);
 
   await input.fill('');
+  await expect(input).toHaveValue('');
+  await analyzeNow(page,{silent:true});
   await expect(output).toHaveValue('');
   await expect(page.locator('#issuesWidget')).toBeHidden();
   await expect(page.locator('#detailSummary')).toHaveText('분석 전');
@@ -808,6 +810,7 @@ test('Blog Factory copy-first flow stays simple on mobile', async ({ page }) => 
 
 test('Blog Factory switches pipeline semantics across topic and production modes', async ({ page }) => {
   await gotoReady(page);await page.locator('[data-tool="writing"]').click();
+  await expect(page.locator('#osStatus')).toContainText('프롬프트 빌더 준비 완료');
   await expect(page.locator('#osFactoryPipeline')).toContainText('TOP 3');
   await expect(page.locator('#osImageCount')).toBeDisabled();
   await page.locator('#osFactoryPresets [data-factory-mode="idea_bank"]').click();
