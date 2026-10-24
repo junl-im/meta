@@ -484,6 +484,8 @@ test('foundation flow keeps state, layout and rewrite tools coherent', async ({ 
   await expect(page.locator('[data-resulttab="xray"]')).toHaveCount(0);
 
   await input.fill('');
+  await expect(input).toHaveValue('');
+  await analyzeNow(page,{silent:true});
   await expect(output).toHaveValue('');
   await expect(page.locator('#issuesWidget')).toBeHidden();
   await expect(page.locator('#detailSummary')).toHaveText('분석 전');
