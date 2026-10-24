@@ -9,6 +9,9 @@
   <meta property="og:description" content="오늘, 당신의 별빛을 발견하세요. 무료 사주·타로·띠별 운세·신년운세.">
   <title>달빛운세 — 당신의 하루에 작은 별빛</title>
   <link rel="icon" type="image/png" href="./assets/favicon.png">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -79,6 +82,22 @@
       <div class="tarot-experience" id="tarotExperience">
         <div class="tarot-settings" id="tarotSettings"><div class="tarot-step-label">✦ STEP 01 · 질문을 마음에 담아요</div><div class="tarot-question-wrap"><label for="tarotQuestion">어떤 이야기가 궁금하세요?</label><input id="tarotQuestion" type="text" maxlength="90" placeholder="예: 요즘 마음에 걸리는 일이 잘 풀릴까요? (선택)"></div><div class="tarot-choices"><div><p class="choice-label">관심 주제</p><div class="segmented" id="tarotCategories" role="group" aria-label="타로 주제"><button class="selected" type="button" data-category="general">전체</button><button type="button" data-category="love">사랑</button><button type="button" data-category="work">일·학업</button><button type="button" data-category="money">금전</button></div></div><div><p class="choice-label">카드 펼침</p><div class="segmented" id="tarotCount" role="group" aria-label="카드 장수"><button class="selected" type="button" data-count="1">1장 메시지</button><button type="button" data-count="3">3장 리딩</button></div></div></div><button type="button" class="button button-gold tarot-start" id="startTarot">카드 섞고 펼치기 <span>✧</span></button></div>
         <div class="tarot-draw" id="tarotDraw" hidden><div class="tarot-step-label">✦ STEP 02 · 마음이 끌리는 카드를 선택하세요</div><h3 id="tarotDrawTitle">1장의 카드를 골라주세요</h3><p id="tarotDrawSub">모든 카드는 동일한 확률로 섞여 있어요.</p><div class="tarot-fan" id="tarotFan"></div><div class="selection-dots" id="selectionDots"></div><button type="button" class="subtle-button tarot-back" id="resetTarotDraw">← 처음으로</button></div>
+        <div class="single-reveal" id="singleReveal" role="dialog" aria-modal="true" aria-label="선택한 타로 카드의 신비로운 공개" hidden>
+          <div class="ritual-sky" aria-hidden="true"></div>
+          <button type="button" class="ritual-skip" id="ritualSkip">결과 바로 보기 <span aria-hidden="true">↗</span></button>
+          <div class="ritual-content">
+            <p class="ritual-overline">✦ THE MOONLIT REVEAL ✦</p>
+            <h3 class="ritual-heading">당신의 카드가 깨어납니다</h3>
+            <p class="ritual-subtitle">잠시 숨을 고르고, 달빛이 전하는 이야기를 기다려주세요.</p>
+            <div class="ritual-stage" aria-hidden="true">
+              <div class="ritual-outer-ring"></div><div class="ritual-inner-ring"></div>
+              <div class="ritual-burst"></div><div class="ritual-particles" id="ritualParticles"></div>
+              <div class="ritual-card" id="ritualCard"><div class="ritual-card-inner"><div class="ritual-card-back"><div class="tarot-back-art"></div></div><div class="ritual-card-front"><div class="tarot-face-art" id="ritualCardArt"></div></div></div></div>
+            </div>
+            <div class="ritual-status" id="ritualStatus" role="status" aria-live="polite">달빛이 카드 위에 내려앉고 있어요</div>
+            <div class="ritual-heartbeats" aria-hidden="true"><span>♡</span><span>♡</span><span>♡</span></div>
+          </div>
+        </div>
         <div class="tarot-results" id="tarotResults" hidden><div class="tarot-step-label">✦ STEP 03 · 당신에게 도착한 카드</div><h3>별들이 건네는 오늘의 메시지</h3><p id="tarotResultQuestion" class="tarot-result-question"></p><div class="drawn-cards" id="drawnCards"></div><div class="tarot-summary" id="tarotSummary"></div><div class="tarot-result-actions"><button type="button" class="button button-gold" id="againTarot">다시 카드 뽑기 ↗</button><button type="button" class="button button-glass" id="copyTarot">결과 복사</button></div></div>
         <p class="tarot-fineprint">✧ 78장 클래식 타로 · 정방향·역방향 · 무료 리딩</p>
       </div>

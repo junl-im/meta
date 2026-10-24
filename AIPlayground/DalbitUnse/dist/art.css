@@ -28,6 +28,17 @@
 .tarot-face-art .face-symbol{font-size:62px;color:#fff4ca;text-shadow:0 0 7px #161328,0 0 17px #090b1c,0 0 31px #fbe5b8;filter:drop-shadow(0 2px 4px #11142b);margin-top:10px}
 .tarot-face-art .face-stars{color:#f5dcac;text-shadow:0 0 11px #081129;font-size:13px}
 .tarot-face-art .face-caption{background:#11162dcb;border:1px solid #e0c18780;border-radius:4px;padding:4px 0;bottom:8px;left:8px;right:8px;font-size:8px;letter-spacing:.6px}
+.tarot-face-art{isolation:isolate}
+.arcana-illustration{position:absolute;z-index:1;left:5%;top:9%;width:90%;height:73%;object-fit:contain;object-position:center;filter:drop-shadow(0 4px 9px #070b26b0);-webkit-mask-image:radial-gradient(ellipse 78% 69% at 50% 50%,#000 55%,#000c 76%,transparent 100%);mask-image:radial-gradient(ellipse 78% 69% at 50% 50%,#000 55%,#000c 76%,transparent 100%);pointer-events:none}
+.arcana-illustration.arcana-minor{top:11%;height:69%;width:83%;left:8.5%}
+.arcana-rank{position:absolute;z-index:3;top:11px;left:12px;font:700 10px var(--latin);letter-spacing:1px;color:#f4dfb3;text-shadow:0 1px 7px #080919;padding:3px 6px;background:#151735b3;border:1px solid #ead2a770;border-radius:4px}
+.arcana-suit-mark{position:absolute;z-index:3;top:9px;right:11px;width:26px;height:26px;object-fit:contain;background:#141735bd;border:1px solid #ddc18b88;border-radius:50%;padding:2px;filter:drop-shadow(0 0 5px #f3dc924d)}
+.tarot-face-art .face-caption{z-index:4;box-shadow:0 0 11px #131020ac}
+.reading-card.flipped .arcana-illustration{animation:arcana-reveal 900ms cubic-bezier(.2,.75,.3,1) both}
+.reading-card.flipped .tarot-face-art::after{content:'';position:absolute;z-index:2;inset:3px;border-radius:9px;pointer-events:none;background:linear-gradient(117deg,transparent 22%,#ffe8ab38 47%,transparent 66%);background-size:250% 100%;animation:arcana-sheen 1.65s ease-out 500ms both}
+@keyframes arcana-reveal{0%{opacity:.2;transform:translateY(8px) scale(.93);filter:blur(7px) drop-shadow(0 2px 8px #070b26)}55%{opacity:1;filter:blur(0) drop-shadow(0 0 13px #fff0be80)}100%{opacity:1;transform:translateY(0) scale(1);filter:drop-shadow(0 4px 9px #070b26b0)}}
+@keyframes arcana-sheen{0%{background-position:180% center;opacity:0}25%{opacity:1}100%{background-position:-85% center;opacity:0}}
+@media(prefers-reduced-motion:reduce){.reading-card.flipped .arcana-illustration,.reading-card.flipped .tarot-face-art::after{animation:none}}
 .saju-placeholder{background-image:linear-gradient(0deg,#17142f 0,transparent 45%),url('./assets/saju-celestial.webp');background-size:cover;background-position:center;justify-content:end;padding:20px;min-height:470px;position:relative;overflow:hidden}
 .saju-placeholder .saju-circle{visibility:hidden;flex:1}
 .saju-placeholder p{font-size:14px;color:#fff6df;text-shadow:0 0 16px #0c0b20,0 2px 6px #0c0b20;font-weight:700}
@@ -85,3 +96,55 @@
   .dock-year{background-image:url('./assets/newyear-gate.webp')}
   .site-footer{padding-bottom:26px}
 }
+
+/* Single-card ritual: summons, three heartbeats, a slow opening, and a golden finale. */
+.single-reveal{position:fixed;inset:0;z-index:160;display:grid;place-items:center;min-height:100svh;padding:55px 20px 35px;overflow-y:auto;overflow-x:hidden;background:radial-gradient(ellipse at 50% 43%,#302357,#0c0b22 72%);text-align:center;isolation:isolate;overscroll-behavior:contain}
+.single-reveal[hidden]{display:none!important}
+.ritual-sky{position:absolute;z-index:-2;inset:0;background:linear-gradient(180deg,#0a0a1ddc 0%,#1a1035bb 47%,#08091fd9 100%),url('./assets/hero-mobile.webp') center 52%/cover no-repeat;filter:saturate(.94)}
+.single-reveal::before{content:'';position:absolute;z-index:-1;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 49%,#e5cc9430,transparent 35%),repeating-radial-gradient(circle at 50% 49%,transparent 0 60px,#e3cb9b0a 61px,#e3cb9b0a 62px,transparent 64px 110px)}
+.ritual-content{width:min(100%,620px);position:relative;padding:0 0 15px}
+.ritual-skip{position:fixed;top:calc(21px + env(safe-area-inset-top,0px));right:calc(20px + env(safe-area-inset-right,0px));z-index:5;min-height:46px;padding:10px 16px;border-radius:24px;border:1px solid #f4d9a774;background:#1a1739c9;color:#f6e5c1;font-size:12px;font-weight:700;backdrop-filter:blur(14px)}
+.ritual-skip:hover,.ritual-skip:focus-visible{background:#ead5a8;color:#21172e;outline:2px solid #fff2d9;outline-offset:3px}
+.ritual-overline{font:700 10px var(--latin);letter-spacing:3px;color:#ebd29c;animation:ritual-appear .55s both}
+.ritual-heading{font:700 clamp(27px,3.3vw,37px) var(--serif);color:#fff1d1;letter-spacing:-.05em;text-shadow:0 3px 27px #edcc967d;margin:11px 0 8px}
+.ritual-subtitle{font-size:12px;line-height:1.8;color:#e1d8ee;margin:0 auto}
+.ritual-stage{height:425px;max-width:500px;margin:12px auto 0;position:relative;display:grid;place-items:center;perspective:1500px;transform:translateZ(0)}
+.ritual-outer-ring,.ritual-inner-ring{position:absolute;left:50%;top:50%;border:1px solid #f6da9947;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none}
+.ritual-outer-ring{width:385px;height:385px;box-shadow:0 0 0 25px #edd08a09,0 0 80px #c9a7f226,inset 0 0 60px #d3c3f716}
+.ritual-inner-ring{width:295px;height:295px;border-style:dashed;animation:ritual-ring-spin 24s linear infinite}
+.ritual-card{width:212px;height:348px;position:relative;z-index:3;opacity:0;transform:translateY(95px) scale(.61);filter:drop-shadow(0 15px 18px #09051f)}
+.ritual-card-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform 1450ms cubic-bezier(.19,.75,.29,1)}
+.ritual-card-back,.ritual-card-front{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:12px;overflow:hidden}
+.ritual-card-back{background:#161631}
+.ritual-card-front{transform:rotateY(180deg)}
+.ritual-card-back .tarot-back-art{position:absolute;inset:0;border-radius:12px}
+.ritual-card-front .tarot-face-art{width:100%;height:100%;border-radius:12px}
+.ritual-card-front.reversed .tarot-face-art{transform:rotate(180deg)}
+.ritual-card-front .arcana-illustration{height:72%;top:10%}
+.ritual-card-front .arcana-rank{font-size:11px}
+.ritual-card-front .face-caption{font-size:11px;bottom:12px;left:11px;right:11px}
+.ritual-burst{position:absolute;width:510px;height:510px;left:50%;top:50%;transform:translate(-50%,-50%) scale(.35);border-radius:50%;opacity:0;pointer-events:none;background:repeating-conic-gradient(from 6deg,#ffe8a680 0deg,#ffe8a600 9deg,#e6bef400 15deg);-webkit-mask-image:radial-gradient(circle,transparent 0 22%,#000 32%,transparent 67%);mask-image:radial-gradient(circle,transparent 0 22%,#000 32%,transparent 67%)}
+.ritual-particles{position:absolute;inset:0;pointer-events:none;overflow:visible}
+.ritual-particles i{position:absolute;left:50%;top:50%;font:24px Georgia;color:#fce6ad;text-shadow:0 0 16px #fff5cd;opacity:0;font-style:normal;transform:translate(-50%,-50%)}
+.ritual-status{font:700 16px var(--serif);color:#ffe4b0;min-height:25px;text-shadow:0 0 21px #d6bcf480;letter-spacing:.03em}
+.ritual-heartbeats{margin:13px auto 0;display:flex;justify-content:center;gap:10px;color:#9f88b9;font-size:18px}
+.ritual-heartbeats span{transition:color .18s,transform .18s,text-shadow .18s}
+.ritual-heartbeats[data-beat='1'] span:nth-child(1),.ritual-heartbeats[data-beat='2'] span:nth-child(-n+2),.ritual-heartbeats[data-beat='3'] span{color:#f6d68c;transform:scale(1.24);text-shadow:0 0 13px #f9dfa5}
+.single-reveal[data-phase='summon'] .ritual-card{animation:ritual-summon 600ms cubic-bezier(.2,.8,.3,1) both}
+.single-reveal[data-phase='heartbeat'] .ritual-card{opacity:1;transform:scale(1);animation:ritual-heart 1830ms ease-in-out both}
+.single-reveal[data-phase='heartbeat'] .ritual-outer-ring{animation:ritual-ring-heart 1830ms ease-in-out both}
+.single-reveal[data-phase='reveal'] .ritual-card,.single-reveal[data-phase='finale'] .ritual-card{opacity:1;transform:scale(1.055);filter:drop-shadow(0 0 35px #f8d69b8f)}
+.single-reveal[data-phase='reveal'] .ritual-card-inner,.single-reveal[data-phase='finale'] .ritual-card-inner{transform:rotateY(180deg)}
+.single-reveal[data-phase='reveal'] .ritual-burst,.single-reveal[data-phase='finale'] .ritual-burst{animation:ritual-flare 1600ms ease-out both}
+.single-reveal[data-phase='reveal'] .ritual-particles i,.single-reveal[data-phase='finale'] .ritual-particles i{animation:ritual-spark 1550ms ease-out var(--delay) both}
+.single-reveal[data-phase='finale'] .ritual-heading{color:#fff8e9;text-shadow:0 0 33px #ffe5a7}
+@keyframes ritual-appear{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ritual-summon{from{opacity:0;transform:translateY(95px) scale(.61) rotate(-7deg);filter:blur(7px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0) drop-shadow(0 15px 24px #060313)}}
+@keyframes ritual-heart{0%,26%,54%,82%,100%{transform:scale(1)}13%,40%,68%{transform:scale(1.17)}26%,54%,82%{filter:drop-shadow(0 14px 18px #09051f)}13%,40%,68%{filter:drop-shadow(0 0 31px #ebd0a6)}}
+@keyframes ritual-ring-heart{0%,26%,54%,82%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)}13%,40%,68%{opacity:1;transform:translate(-50%,-50%) scale(1.13);box-shadow:0 0 50px #e7d9b95c}}
+@keyframes ritual-ring-spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes ritual-flare{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}35%{opacity:.88}100%{opacity:0;transform:translate(-50%,-50%) scale(1.32)}}
+@keyframes ritual-spark{0%{opacity:0;transform:translate(-50%,-50%) rotate(var(--angle)) translateY(0) scale(.2)}33%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--angle)) translateY(calc(-1*var(--travel))) scale(.85)}}
+@media(max-width:520px){.single-reveal{padding:74px 12px 34px}.ritual-overline{font-size:9px;letter-spacing:2px}.ritual-heading{font-size:27px}.ritual-subtitle{font-size:11px;padding:0 10px}.ritual-stage{height:min(53svh,385px);min-height:305px;width:100%}.ritual-card{width:min(51vw,190px);height:min(82vw,313px)}.ritual-outer-ring{width:min(90vw,355px);height:min(90vw,355px)}.ritual-inner-ring{width:min(73vw,270px);height:min(73vw,270px)}.ritual-burst{width:99vw;height:99vw}.ritual-status{font-size:13px}.ritual-skip{top:calc(12px + env(safe-area-inset-top,0px));right:12px;font-size:11px}}
+@media(max-height:640px){.single-reveal{padding-top:58px;padding-bottom:20px}.ritual-stage{height:290px;min-height:260px}.ritual-card{height:260px;width:159px}.ritual-outer-ring{width:290px;height:290px}.ritual-inner-ring{width:225px;height:225px}.ritual-heading{font-size:24px}.ritual-status{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.ritual-inner-ring,.ritual-particles i,.ritual-burst,.ritual-card,.ritual-outer-ring{animation:none!important}.ritual-card-inner{transition:none!important}}

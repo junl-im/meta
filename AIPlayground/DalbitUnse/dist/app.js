@@ -189,12 +189,76 @@
     {kr:'펜타클',en:'Pentacles',symbol:'✥',essence:'현실과 안정',up:'현실적인 계획과 꾸준한 실천이 도움이 돼요.',down:'당장의 결과만 보지 말고 기반을 돌아보세요.'}
   ];
   const ranks=[['에이스','Ace','새로운 씨앗'],['2','Two','선택과 조화'],['3','Three','협력과 확장'],['4','Four','안정과 정리'],['5','Five','변화와 도전'],['6','Six','나눔과 회복'],['7','Seven','점검과 용기'],['8','Eight','전진과 집중'],['9','Nine','성찰과 성취'],['10','Ten','완성과 무게'],['시종','Page','배움과 소식'],['기사','Knight','움직임과 탐색'],['여왕','Queen','돌봄과 성숙'],['왕','King','책임과 통솔']];
-  const tarotDeck=[...major.map((r,i)=>({id:i,kr:r[0],en:r[1],symbol:r[2],theme:r[3],up:r[4],down:r[5]})),...suits.flatMap((s,si)=>ranks.map((r,ri)=>({id:22+si*14+ri,kr:`${s.kr} ${r[0]}`,en:`${r[1]} of ${s.en}`,symbol:s.symbol,theme:`${s.essence} · ${r[2]}`,up:`${r[2]}의 상징이 ${s.essence}의 영역과 만나요. ${s.up}`,down:`${r[2]}의 의미가 잠시 막혀 있을 수 있어요. ${s.down}`})))];
+  // 원화 스프라이트는 3×2 독립 그림으로 생성해 개별 WebP로 분리했습니다.
+  // 메이저 22종 고유 장면, 마이너 4개 슈트와 4개 인물 등 총 30개 원화.
+  const majorArt=(i)=>`./assets/tarot-major-${'abcd'[Math.floor(i/6)]}-${i%6}.webp`;
+  const suitArt=['./assets/tarot-major-d-4.webp','./assets/tarot-major-d-5.webp','./assets/tarot-minor-e-0.webp','./assets/tarot-minor-e-1.webp'];
+  const courtArt=['./assets/tarot-minor-e-2.webp','./assets/tarot-minor-e-3.webp','./assets/tarot-minor-e-4.webp','./assets/tarot-minor-e-5.webp'];
+  const tarotDeck=[...major.map((r,i)=>({id:i,kr:r[0],en:r[1],symbol:r[2],theme:r[3],up:r[4],down:r[5],art:majorArt(i),major:true})),...suits.flatMap((s,si)=>ranks.map((r,ri)=>({id:22+si*14+ri,kr:`${s.kr} ${r[0]}`,en:`${r[1]} of ${s.en}`,symbol:s.symbol,theme:`${s.essence} · ${r[2]}`,up:`${r[2]}의 상징이 ${s.essence}의 영역과 만나요. ${s.up}`,down:`${r[2]}의 의미가 잠시 막혀 있을 수 있어요. ${s.down}`,art:ri>=10?courtArt[ri-10]:suitArt[si],suitArt:suitArt[si],rank:ri+1,major:false})))];
+  // AI 놀이터 이식 시 자산 변경은 버전 관리된 JSON 데이터만 교체하면 됩니다.
+  // 네트워크/JSON 오류에서는 위 기본 경로를 유지하므로 리딩 자체가 중단되지 않습니다.
+  async function loadTarotArtworkManifest(){
+    try{
+      const response=await fetch('./data/tarot-artwork.json',{cache:'default'});
+      if(!response.ok)throw Error('manifest unavailable');
+      const data=await response.json();
+      const validPath=path=>typeof path==='string'&&/^\.\/assets\/[a-z0-9-]+\.webp$/.test(path);
+      const validList=(list,count)=>Array.isArray(list)&&list.length===count&&list.every(validPath);
+      if(data.schemaVersion!==1||!validList(data.majorArtwork,22)||!validList(data.suitArtwork,4)||!validList(data.courtArtwork,4))throw Error('invalid manifest');
+      tarotDeck.forEach(card=>{
+        if(card.major){card.art=data.majorArtwork[card.id];return;}
+        const suitIndex=Math.floor((card.id-22)/14),rankIndex=(card.id-22)%14;
+        card.suitArt=data.suitArtwork[suitIndex];
+        card.art=rankIndex>=10?data.courtArtwork[rankIndex-10]:card.suitArt;
+      });
+    }catch{ /* 정적 내장 목록이 안전한 폴백입니다. */ }
+  }
+  function renderTarotArtwork(c){
+    const rank=c.major?'':`<span class="arcana-rank" aria-hidden="true">${c.rank<=10?String(c.rank).padStart(2,'0'):['PAGE','KNIGHT','QUEEN','KING'][c.rank-11]}</span>`;
+    const suit=c.major||c.rank<=10?'':`<img class="arcana-suit-mark" src="${c.suitArt}" alt="" loading="lazy" decoding="async">`;
+    return `<img class="arcana-illustration ${c.major?'arcana-major':'arcana-minor'}" src="${c.art}" alt="" loading="eager" decoding="async">${rank}${suit}`;
+  }
   const secureRand=(n)=>{if(globalThis.crypto?.getRandomValues){const v=new Uint32Array(1);crypto.getRandomValues(v);return v[0]%n;}return Math.floor(Math.random()*n);};
   function shuffled(arr){const list=[...arr];for(let i=list.length-1;i>0;i--){const j=secureRand(i+1);[list[i],list[j]]=[list[j],list[i]];}return list;}
   let tarotCategory='general',tarotCount=1,tarotPool=[],drawn=[],tarotPrompt='';
+  let ritualEpoch=0,ritualTimers=[],ritualPriorOverflow='';
   const tarotPositions=(count)=>count===1?['오늘의 메시지']:['현재의 상황','도움이 되는 조언','앞으로의 가능성'];
   function setTarotStep(step){$('#tarotSettings').hidden=step!=='settings';$('#tarotDraw').hidden=step!=='draw';$('#tarotResults').hidden=step!=='results';}
+  function cancelSingleReveal(){
+    ritualEpoch++;
+    ritualTimers.forEach(clearTimeout);ritualTimers=[];
+    $('#singleReveal').hidden=true;$('#singleReveal').removeAttribute('data-phase');
+    document.body.style.overflow=ritualPriorOverflow;
+  }
+  function finishSingleReveal(){
+    if($('#singleReveal').hidden)return;
+    cancelSingleReveal();
+    renderTarotResults(true);setTarotStep('results');
+    $('#tarotResults').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});
+    $('#againTarot').focus({preventScroll:true});
+  }
+  function showSingleReveal(c){
+    cancelSingleReveal();setTarotStep('ceremony');
+    const scene=$('#singleReveal'),status=$('#ritualStatus');
+    $('#ritualCardArt').innerHTML=`${renderTarotArtwork(c)}<span class="face-caption">${escapeHtml(c.en)}</span>`;
+    scene.querySelector('.ritual-card-front').classList.toggle('reversed',c.reversed);
+    scene.querySelector('.ritual-heartbeats').removeAttribute('data-beat');
+    status.textContent='달빛이 카드 위에 내려앉고 있어요';
+    scene.hidden=false;scene.dataset.phase='enter';
+    ritualPriorOverflow=document.body.style.overflow;document.body.style.overflow='hidden';
+    $('#ritualSkip').focus({preventScroll:true});
+    const epoch=ritualEpoch;
+    const at=(delay,fn)=>ritualTimers.push(setTimeout(()=>{if(ritualEpoch===epoch&&!scene.hidden)fn();},delay));
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){finishSingleReveal();return;}
+    at(90,()=>scene.dataset.phase='summon');
+    at(630,()=>{scene.dataset.phase='heartbeat';status.textContent='두근… 당신의 선택에 별들이 응답해요';});
+    at(1050,()=>{scene.querySelector('.ritual-heartbeats').dataset.beat='1';status.textContent='두근…';});
+    at(1500,()=>{scene.querySelector('.ritual-heartbeats').dataset.beat='2';status.textContent='두근… 두근…';});
+    at(1950,()=>{scene.querySelector('.ritual-heartbeats').dataset.beat='3';status.textContent='두근… 두근… 두근…';});
+    at(2500,()=>{scene.dataset.phase='reveal';status.textContent='스르륵… 신비로운 문이 열려요';});
+    at(3970,()=>{scene.dataset.phase='finale';status.textContent=`짠! ${c.kr} 카드가 당신에게 찾아왔어요 ✦`;});
+    at(4780,finishSingleReveal);
+  }
   function renderFan(){
     const visible=tarotPool.slice(0,9),count=visible.length,spread=window.innerWidth<520?235:620;
     $('#tarotFan').innerHTML=visible.map((card,i)=>{
@@ -209,24 +273,31 @@
     if(drawn.length>=tarotCount)return;
     const card=tarotPool.splice(index,1)[0];if(!card)return;
     drawn.push({...card,reversed:secureRand(100)<35});
-    if(drawn.length>=tarotCount){renderTarotResults();setTarotStep('results');$('#tarotResults').scrollIntoView({behavior:'smooth',block:'center'});}
+    if(drawn.length>=tarotCount){
+      if(tarotCount===1)showSingleReveal(drawn[0]);
+      else{renderTarotResults();setTarotStep('results');$('#tarotResults').scrollIntoView({behavior:'smooth',block:'center'});}
+    }
     else renderFan();
   }
-  function renderTarotResults(){
+  function renderTarotResults(alreadyRevealed=false){
     $('#tarotResultQuestion').textContent=tarotPrompt?`당신의 질문 · “${tarotPrompt}”`:'지금 이 순간, 마음에 닿는 이야기를 만나보세요.';
     const positions=tarotPositions(tarotCount);
     $('#drawnCards').classList.toggle('one-card',tarotCount===1);
-    $('#drawnCards').innerHTML=drawn.map((c,i)=>`<article class="drawn-card"><div class="drawn-label">✧ ${positions[i]}</div><div class="reading-card" role="img" aria-label="${escapeHtml(c.kr)}, ${c.reversed?'역방향':'정방향'}"><div class="reading-card-inner"><div class="reading-back"><div class="tarot-back-art"><span class="back-orbit"></span><span class="back-sun">✺</span></div></div><div class="reading-front ${c.reversed?'reversed':''}"><div class="tarot-face-art"><span class="face-arch"></span><span class="face-stars">✧ ✦</span><span class="face-symbol">${c.symbol}</span><span class="face-caption">${escapeHtml(c.en)}</span></div></div></div></div><h4>${escapeHtml(c.kr)}</h4><div class="orientation">${c.reversed?'↻ 역방향':'↑ 정방향'} · ${escapeHtml(c.theme)}</div><p class="card-reading">${escapeHtml(c.reversed?c.down:c.up)}</p></article>`).join('');
+    $('#drawnCards').innerHTML=drawn.map((c,i)=>`<article class="drawn-card"><div class="drawn-label">✧ ${positions[i]}</div><div class="reading-card ${alreadyRevealed?'flipped':''}" role="img" aria-label="${escapeHtml(c.kr)}, ${c.reversed?'역방향':'정방향'}"><div class="reading-card-inner"><div class="reading-back"><div class="tarot-back-art"><span class="back-orbit"></span><span class="back-sun">✺</span></div></div><div class="reading-front ${c.reversed?'reversed':''}"><div class="tarot-face-art"><span class="face-arch"></span>${renderTarotArtwork(c)}<span class="face-caption">${escapeHtml(c.en)}</span></div></div></div></div><h4>${escapeHtml(c.kr)}</h4><div class="orientation">${c.reversed?'↻ 역방향':'↑ 정방향'} · ${escapeHtml(c.theme)}</div><p class="card-reading">${escapeHtml(c.reversed?c.down:c.up)}</p></article>`).join('');
     const categoryLabel={general:'지금 나에게 필요한',love:'관계의 마음을 살펴볼',work:'일과 배움의 방향을 되짚을',money:'현실적인 균형을 생각해 볼'}[tarotCategory];
     $('#tarotSummary').textContent=`✧ ${categoryLabel} 작은 힌트가 도착했어요. 카드가 보여주는 상징을 정답으로 여기기보다, 지금 내 마음에서 가장 크게 울리는 한 문장을 골라보세요.`;
-    requestAnimationFrame(()=>setTimeout(()=>$$('.reading-card').forEach((el,i)=>setTimeout(()=>el.classList.add('flipped'),i*260)),90));
+    if(!alreadyRevealed)requestAnimationFrame(()=>setTimeout(()=>$$('.reading-card').forEach((el,i)=>setTimeout(()=>el.classList.add('flipped'),i*260)),90));
   }
   function initTarot(){
+    void loadTarotArtworkManifest();
+    $('#ritualParticles').innerHTML=Array.from({length:24},(_,i)=>`<i style="--angle:${i*15}deg;--travel:${145+(i%5)*20}px;--delay:${i%4*70}ms">${i%3===0?'✦':'✧'}</i>`).join('');
+    $('#ritualSkip').addEventListener('click',finishSingleReveal);
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#singleReveal').hidden){e.preventDefault();finishSingleReveal();}});
     $$('#tarotCategories button').forEach(b=>b.addEventListener('click',()=>{tarotCategory=b.dataset.category;$$('#tarotCategories button').forEach(x=>x.classList.toggle('selected',x===b));}));
     $$('#tarotCount button').forEach(b=>b.addEventListener('click',()=>{tarotCount=Number(b.dataset.count);$$('#tarotCount button').forEach(x=>x.classList.toggle('selected',x===b));}));
-    $('#startTarot').addEventListener('click',()=>{tarotPrompt=$('#tarotQuestion').value.trim().slice(0,90);tarotPool=shuffled(tarotDeck);drawn=[];setTarotStep('draw');renderFan();});
-    $('#resetTarotDraw').addEventListener('click',()=>setTarotStep('settings'));
-    $('#againTarot').addEventListener('click',()=>{tarotPool=shuffled(tarotDeck);drawn=[];setTarotStep('draw');renderFan();});
+    $('#startTarot').addEventListener('click',()=>{cancelSingleReveal();tarotPrompt=$('#tarotQuestion').value.trim().slice(0,90);tarotPool=shuffled(tarotDeck);drawn=[];setTarotStep('draw');renderFan();});
+    $('#resetTarotDraw').addEventListener('click',()=>{cancelSingleReveal();setTarotStep('settings');});
+    $('#againTarot').addEventListener('click',()=>{cancelSingleReveal();tarotPool=shuffled(tarotDeck);drawn=[];setTarotStep('draw');renderFan();});
     $('#copyTarot').addEventListener('click',()=>copyText(`달빛운세 무료 타로\n${tarotPrompt?`질문: ${tarotPrompt}\n`:''}${drawn.map((c,i)=>`${tarotPositions(tarotCount)[i]}: ${c.kr} (${c.reversed?'역방향':'정방향'})\n${c.reversed?c.down:c.up}`).join('\n\n')}\n※ 자기성찰을 위한 타로 리딩`));
   }
 
@@ -260,6 +331,11 @@
   function start(){
     $('#currentYear').textContent=kstNow().slice(0,4);
     initNavigation();initFortune();initTarot();initSaju();initNewyear();
+    if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
+      const registerOffline=()=>navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'}).catch(()=>{});
+      if(document.readyState==='complete')registerOffline();
+      else window.addEventListener('load',registerOffline,{once:true});
+    }
     console.info('달빛운세: 78장 타로, 12띠 운세 및 사주 간지 계산 준비 완료.');
   }
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',start):start();

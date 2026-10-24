@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "assetVersion": "2.1.0",
+  "theme": "moonlit-gold-fantasy",
+  "illustrationFormat": "image/webp",
+  "originalAtlases": ["./assets/tarot-majors-a.png", "./assets/tarot-majors-b.png", "./assets/tarot-majors-c.png", "./assets/tarot-majors-d.png", "./assets/tarot-minors-e.png"],
+  "majorArtwork": [
+    "./assets/tarot-major-a-0.webp", "./assets/tarot-major-a-1.webp", "./assets/tarot-major-a-2.webp", "./assets/tarot-major-a-3.webp", "./assets/tarot-major-a-4.webp", "./assets/tarot-major-a-5.webp",
+    "./assets/tarot-major-b-0.webp", "./assets/tarot-major-b-1.webp", "./assets/tarot-major-b-2.webp", "./assets/tarot-major-b-3.webp", "./assets/tarot-major-b-4.webp", "./assets/tarot-major-b-5.webp",
+    "./assets/tarot-major-c-0.webp", "./assets/tarot-major-c-1.webp", "./assets/tarot-major-c-2.webp", "./assets/tarot-major-c-3.webp", "./assets/tarot-major-c-4.webp", "./assets/tarot-major-c-5.webp",
+    "./assets/tarot-major-d-0.webp", "./assets/tarot-major-d-1.webp", "./assets/tarot-major-d-2.webp", "./assets/tarot-major-d-3.webp"
+  ],
+  "suitArtwork": ["./assets/tarot-major-d-4.webp", "./assets/tarot-major-d-5.webp", "./assets/tarot-minor-e-0.webp", "./assets/tarot-minor-e-1.webp"],
+  "courtArtwork": ["./assets/tarot-minor-e-2.webp", "./assets/tarot-minor-e-3.webp", "./assets/tarot-minor-e-4.webp", "./assets/tarot-minor-e-5.webp"],
+  "notes": {
+    "major": "22개의 메이저 아르카나는 카드마다 독립적인 원화입니다.",
+    "minor": "56개의 마이너 아르카나는 4개 슈트·4개 궁정인물 원화와 랭크 표식을 조합합니다.",
+    "source": "신규 생성한 PNG 원본 5종을 개별 WebP로 최적화했습니다. SVG는 사용하지 않습니다."
+  }
+}
