@@ -5,6 +5,7 @@ const ROOT = process.cwd();
 const OUT = path.join(ROOT, '.pages-site');
 const APP = path.join(ROOT, 'ai-cleaner');
 const OS = path.join(APP, 'ai-writing-os');
+const DALBIT = path.join(ROOT, 'AIPlayground', 'DalbitUnse', 'dist');
 
 const rootFiles = ['index.html'];
 const optionalSharedPublicFiles = ['OPTION/SS_OPTION.txt'];
@@ -93,6 +94,7 @@ async function main() {
   const pkg=JSON.parse(await fs.readFile(path.join(ROOT,'package.json'),'utf8'));
   if(pkg.name!=='ai-cleaner-browser-checks'||!inside(ROOT,OUT)||path.basename(OUT)!=='.pages-site')throw new Error('Run the Pages builder from the meta repository root.');
   await ensureFile(path.join(APP,'version.json'));
+  for (const relative of ['index.html', 'app.js', 'experience.js', 'style.css', 'art.css', 'integration.css', 'sw.js', 'manifest.webmanifest', 'data/tarot-artwork.json', 'data/saju-knowledge.json']) await ensureFile(path.join(DALBIT, relative));
   await fs.rm(OUT, { recursive: true, force: true });
   const appOut = path.join(OUT, 'ai-cleaner');
   const osOut = path.join(appOut, 'ai-writing-os');
@@ -103,6 +105,8 @@ async function main() {
   for (const file of optionalSharedPublicFiles) await copyOptionalFileRelative(ROOT, file, OUT);
   for (const file of appFiles) await copyFileRelative(APP, file, appOut);
   for (const dir of appDirs) await copyDirRelative(APP, dir, appOut);
+  // Publish the existing fortune app at its own path. Its relative assets and SW remain scoped there.
+  await copyDirRelative(ROOT, 'AIPlayground/DalbitUnse/dist', OUT);
   // Publish configuration booleans only; credentials never enter the public artifact.
   if (['true','false'].includes(process.env.DAILY_HAS_KEY) && ['true','false'].includes(process.env.DAILY_HAS_SEED)) {
     const configured=process.env.DAILY_HAS_KEY==='true'&&process.env.DAILY_HAS_SEED==='true';

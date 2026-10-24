@@ -1041,3 +1041,13 @@ body{background:linear-gradient(180deg,#f9f4ed 0,#fcfaf6 280px,#f9f8f5 100%)}
   .workspaceNav .toolnav .studioCard b{font-size:9.5px}
   .studioExternalRow .studioCard b{font-size:10px}
 }
+
+/* 달빛운세는 별도 내부 경로에서 실행해 도구별 CSS와 상태를 격리합니다. */
+.moonStudioGroup .studioCard{border-color:#aaa0bd;background:linear-gradient(125deg,#241c3e,#35284d);color:#f4dbaf}
+.moonStudioGroup .studioCard b{color:inherit}
+.moonStudioGroup .studioCard:hover{background:linear-gradient(125deg,#32234d,#45315f);border-color:#e5c789;box-shadow:0 3px 12px #281b4244}
+@media(max-width:600px){
+  .workspaceNav .studioExternalRow{grid-template-columns:minmax(0,2fr) repeat(2,minmax(0,1fr));gap:6px}.workspaceNav .studioExternalRow .moonStudioGroup{display:grid;gap:4px;min-width:0}
+  .moonStudioGroup .audioStudios{display:block;width:100%!important}
+  .moonStudioGroup .studioCard{min-height:34px;padding:4px 2px;font-size:10px}.moonStudioGroup .studioCard b{font-size:10px}
+}

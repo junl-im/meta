@@ -17,6 +17,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="./art.css">
+  <link rel="stylesheet" href="./integration.css">
 </head>
 <body>
   <div class="sky" aria-hidden="true"><div class="stars stars-a"></div><div class="stars stars-b"></div><div class="sky-glow"></div></div>
@@ -24,7 +25,7 @@
     <div class="nav-inner">
       <a class="brand moonlit-brand" href="#home" aria-label="곰같은여우의 달빛운세 홈"><span class="brand-mark">☾</span><span class="brand-copy"><small class="brand-owner">곰같은여우의</small><span class="brand-name">달빛<span class="brand-accent">운세</span></span></span></a>
       <nav class="desktop-nav" aria-label="주요 메뉴">
-        <a class="nav-link active" href="#home">홈</a><a class="nav-link" href="#zodiac">띠별운세</a><a class="nav-link" href="#saju">사주풀이</a><a class="nav-link" href="#tarot">타로카드</a><a class="nav-link" href="#couple">궁합</a><a class="nav-link" href="#newyear">신년운세</a>
+        <a class="nav-link active" href="#home">홈</a><a class="nav-link" href="#zodiac">띠별운세</a><a class="nav-link" href="#saju">사주풀이</a><a class="nav-link" href="#tarot">타로카드</a><a class="nav-link" href="#couple">궁합</a><a class="nav-link" href="#newyear">신년운세</a><a class="nav-link" href="../../../ai-cleaner/">AI 놀이터 ↗</a>
       </nav>
       <div class="sound-controls" aria-label="오디오 기능">
         <button class="sound-toggle enabled waiting" id="musicToggle" type="button" aria-pressed="true" aria-label="배경음 켜짐, 첫 화면 터치 후 재생됩니다. 끄기" data-sound="on"><span class="sound-glyph" aria-hidden="true"></span><span class="sound-title">배경음</span><span class="sound-state">ON</span></button>
@@ -111,7 +112,7 @@
           <button type="submit" class="button button-gold full-button">나의 사주 풀어보기 <span>↗</span></button><p class="privacy-note">🔒 입력 정보는 기기에서만 계산하며 서버에 저장하지 않아요.</p>
         </form></dialog>
         <div class="saju-placeholder" id="sajuPlaceholder"><div class="saju-circle"><span class="ring ring-a"></span><span class="ring ring-b"></span><div class="saju-yin-yang">☯</div><i class="saju-sigil a">木</i><i class="saju-sigil b">火</i><i class="saju-sigil c">土</i><i class="saju-sigil d">金</i><i class="saju-sigil e">水</i></div><p>하늘의 시간과 땅의 기운이 만나<br>당신만의 이야기가 시작됩니다.</p><span>生 · 年 · 月 · 日 · 時</span></div>
-        <div class="saju-result" id="sajuResult" hidden aria-live="polite"><p class="kicker">YOUR SAJU CHART</p><h3 id="sajuResultTitle">당신의 사주팔자</h3><p id="sajuDateInfo" class="result-muted"></p><div class="pillar-grid" id="pillarGrid"></div><div class="elements-chart" id="elementsChart"></div><div class="saju-reading" id="sajuReading"></div><div class="saju-advanced" id="sajuAdvanced"></div><div class="calculation-note">※ 한국 시간대 이력과 절기를 고려한 전통 명리 계산입니다. 이른 자시와 늦은 자시는 구분하지만, 출생 지역의 진태양시 보정이나 유파별 23시 일주 변경 방식은 적용하지 않아요. 시간이 불확실하거나 절기 교차일에 태어났다면 결과가 다른 만세력과 다를 수 있어요. 해석은 자기 이해를 위한 참고이며 미래를 확정하지 않습니다.</div></div>
+        <div class="saju-result" id="sajuResult" hidden aria-live="polite"><p class="kicker">YOUR SAJU CHART</p><h3 id="sajuResultTitle">당신의 사주팔자</h3><p id="sajuDateInfo" class="result-muted"></p><div class="pillar-grid" id="pillarGrid"></div><div class="saju-element-summary" id="sajuElementSummary" aria-label="오행 간단 분포"></div><div class="elements-chart" id="elementsChart"></div><div class="saju-reading" id="sajuReading"></div><div class="saju-advanced" id="sajuAdvanced"></div><div class="calculation-note">※ 한국 시간대 이력과 절기를 고려한 전통 명리 계산입니다. 이른 자시와 늦은 자시는 구분하지만, 출생 지역의 진태양시 보정이나 유파별 23시 일주 변경 방식은 적용하지 않아요. 시간이 불확실하거나 절기 교차일에 태어났다면 결과가 다른 만세력과 다를 수 있어요. 해석은 자기 이해를 위한 참고이며 미래를 확정하지 않습니다.</div></div>
       </div></div></section>
 
     <section id="couple" class="couple-section feature-section view-screen" hidden><div class="section-shell">
@@ -154,6 +155,7 @@
     <a href="#tarot"><span class="dock-icon dock-tarot" aria-hidden="true"></span><span>타로</span></a>
     <a href="#couple"><span class="dock-icon dock-couple" aria-hidden="true">♡</span><span>궁합</span></a>
     <a href="#newyear"><span class="dock-icon dock-year" aria-hidden="true"></span><span>신년</span></a>
+    <a class="playground-dock" href="../../../ai-cleaner/"><span class="dock-icon" aria-hidden="true">✦</span><span>놀이터</span></a>
   </nav>
 
   <div class="version-chip" aria-label="버전 정보">v4.10</div>

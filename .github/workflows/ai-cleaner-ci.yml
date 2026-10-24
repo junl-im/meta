@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'ai-cleaner/**'
+      - 'AIPlayground/DalbitUnse/**'
       - 'index.html'
       - 'package.json'
       - 'package-lock.json'
@@ -15,6 +16,7 @@ on:
       - 'agent/ai-cleaner-migration'
     paths:
       - 'ai-cleaner/**'
+      - 'AIPlayground/DalbitUnse/**'
       - 'index.html'
       - 'OPTION/SS_OPTION.txt'
       - 'package.json'
@@ -73,6 +75,11 @@ jobs:
           node --check .github/scripts/build-pages-artifact.mjs
           node --check .github/scripts/build-runtime-vendor.mjs
           node --check ai-cleaner/sw.js
+      - name: Check and build Dalbit Unse
+        run: |
+          npm ci --prefix AIPlayground/DalbitUnse --no-audit --no-fund
+          npm run check --prefix AIPlayground/DalbitUnse
+          npm run build --prefix AIPlayground/DalbitUnse
       - name: Modular core unit checks
         run: node ai-cleaner/tests/module-check.mjs
       - name: Static checks
@@ -100,6 +107,8 @@ jobs:
           fi
       - name: Build local runtime vendor
         run: npm run build:vendor
+      - name: Verify Pages artifact contents
+        run: node .github/scripts/build-pages-artifact.mjs
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Start static preview
