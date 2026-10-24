@@ -59,7 +59,6 @@
     await domReady;
     const version=String(config.version||'').trim();
     const badge=document.getElementById('versionBadge'); if(badge)badge.textContent=version?'v'+version:'version';
-    const footer=document.getElementById('footerVersion'); if(footer)footer.textContent=version?'v'+version:'';
     if(version)document.title='AI 글 다듬기 | '+APP_NAME+' v'+version;
     if(document.body){document.body.inert=true;document.body.setAttribute('aria-busy','true');}
     document.documentElement.classList.add('boot-ready');

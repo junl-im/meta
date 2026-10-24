@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://r.jina.ai; worker-src 'self' blob:; font-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1220">
+<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1230">
 <style id="bootCritical">html:not(.boot-ready) body{visibility:hidden}html{background:#fff8f0}html.app-booting{overflow-anchor:none}html.app-booting body{cursor:progress}html.app-booting body *{cursor:progress!important}</style>
 <script src="js/boot.js" defer></script>
 </head>
@@ -100,7 +100,7 @@
       </div>
     </section>
 
-    <div class="bridgeAction" aria-label="원본 전체를 결과에 한 글자씩 처음부터 새로 입력"><button class="bridgeBtn previewBridge" id="typingPreviewButton" type="button" aria-controls="typingPreviewPanel" aria-expanded="false" title="원본을 처음부터 새로 쓰며, 기본 설정에서는 **만 결과에서 제거합니다."><span>▶</span><b>원본을 자동으로 완전새로쓰기</b><small id="typingBridgeStatus" aria-live="polite">원본 입력 후 사용</small></button></div>
+    <div class="bridgeAction" aria-label="원본 전체를 결과에 한 글자씩 처음부터 새로 입력"><button class="bridgeBtn previewBridge" id="typingPreviewButton" type="button" aria-controls="typingPreviewPanel" aria-expanded="false" title="원본을 처음부터 새로 쓰며, 기본 설정에서는 **만 결과에서 제거합니다."><span class="typingActionArt" aria-hidden="true"><img src="assets/typewriter-action.webp" alt="" width="56" height="56" decoding="async"></span><span class="typingActionCopy"><span class="typingActionEyebrow">한 글자씩 결과 작성</span><b>원본을 자동으로 완전새로쓰기</b><small id="typingBridgeStatus" aria-live="polite">원본 입력 후 사용</small></span><span class="typingActionArrow" aria-hidden="true">→</span></button></div>
 
     <section class="card resultCard" id="resultCard" aria-label="다듬어진 결과">
       <div class="head resultHead">
@@ -466,7 +466,7 @@
 
   <p class="sub reachFootnote">자동 웹검색 결과 자체를 긁어오는 기능은 검색 서비스 정책·API 제한에 따라 달라집니다. Reach는 키 없이 검색 계획과 다중 출처 수집·교차검증을 수행하며, 공개 URL 본문 수집에는 Reader를 사용합니다.</p>
 </main>
-<div class="footer">곰같은여우의 AI 놀이터 <span id="footerVersion"></span> · 브라우저 로컬 처리</div>
+<div class="footer">브라우저 로컬 처리</div>
 </div>
 
 <div class="floatingDock" id="floatingDock" aria-label="분석 도우미">

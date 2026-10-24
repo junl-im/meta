@@ -171,9 +171,8 @@ function syncDocumentTitle(tool='text'){
   document.title=`${label} | ${APP_NAME}${APP_VERSION==='local'?'':` v${APP_VERSION}`}`;
 }
 function applyVersionUi(){
-  const badge=$('#versionBadge'),footer=$('#footerVersion');
+  const badge=$('#versionBadge');
   if(badge)badge.textContent=APP_VERSION==='local'?'local':'v'+APP_VERSION;
-  if(footer)footer.textContent=APP_VERSION==='local'?'local':'v'+APP_VERSION;
   syncDocumentTitle(document.querySelector('[data-tool].active')?.dataset.tool||'text');
 }
 
