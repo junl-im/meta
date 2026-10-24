@@ -692,3 +692,11 @@ main{height:max(150px,calc(var(--live-vh,100dvh) - var(--header-h,70px) - var(--
   #tarot.is-active[data-stage='results'] .drawn-card{grid-template-columns:78px minmax(0,1fr);gap:3px 8px}
   #tarot.is-active[data-stage='results'] .tarot-result-actions button{font-size:10px;padding:8px 5px}
 }
+
+/* v4.9 · 분 단위 출생 시각은 필요한 경우에만 열립니다. */
+.moonlit-dialog .precise-birth-time{max-width:100%;margin:6px 0 2px;color:#d9cae3;font-size:11px}
+.moonlit-dialog .precise-birth-time summary{width:max-content;max-width:100%;padding:4px 0;color:#f0d5a4;cursor:pointer;line-height:1.6}
+.moonlit-dialog .precise-time-row{display:flex;flex-wrap:wrap;align-items:center;gap:5px 10px;padding:7px 0 4px}
+.moonlit-dialog .precise-time-row label{flex:none;font-size:11px;margin:0}
+.moonlit-dialog .precise-time-row input[type='time']{width:132px;min-width:0;max-width:132px;min-height:38px;margin:0;padding:6px 9px;color-scheme:dark;font-variant-numeric:tabular-nums}
+.moonlit-dialog .precise-time-row small{flex-basis:100%;font-size:10px;color:#afa2c6;line-height:1.55}

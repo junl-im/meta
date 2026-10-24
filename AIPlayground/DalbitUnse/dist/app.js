@@ -83,6 +83,55 @@
     '일간':'사주의 중심인 나 자신을 가리켜요.'
   };
   const koreanTenGod=raw=>tenGodKorean[String(raw)]||String(raw||'관계 미상');
+  // lunar-javascript의 절기 시각은 UTC+8 현지 시각을 사용합니다.
+  // 연·월주는 한국 출생 시각을 해당 기준으로 변환하되, 일·시주는 한국의 실제 시각을 유지합니다.
+  // 과거 한국의 UTC+8:30 시기와 서머타임도 Asia/Seoul의 시간대 이력을 우선 사용합니다.
+  const seoulOffsetFormat=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Seoul',timeZoneName:'longOffset'});
+  function seoulOffsetMinutes(ymdhms){
+    const [year,month,day,hour,minute]=ymdhms;
+    const guess=new Date(Date.UTC(year,month-1,day,hour-9,minute||0));
+    const zone=seoulOffsetFormat.formatToParts(guess).find(part=>part.type==='timeZoneName')?.value||'GMT+09:00';
+    const match=zone.match(/^GMT([+-])(\d{1,2})(?::(\d{2}))?/);
+    return match?(match[1]==='-'?-1:1)*(Number(match[2])*60+Number(match[3]||0)):540;
+  }
+  function koreanPillars(solar){
+    const y=solar.getYear(),m=solar.getMonth(),d=solar.getDay(),hour=solar.getHour(),minute=solar.getMinute();
+    const offset=seoulOffsetMinutes([y,m,d,hour,minute]);
+    const chinaTime=new Date(Date.UTC(y,m-1,d,hour,minute)-offset*60000+480*60000);
+    const solarForTerms=Solar.fromYmdHms(chinaTime.getUTCFullYear(),chinaTime.getUTCMonth()+1,chinaTime.getUTCDate(),chinaTime.getUTCHours(),chinaTime.getUTCMinutes(),0);
+    const localEight=solar.getLunar().getEightChar();
+    const termEight=solarForTerms.getLunar().getEightChar();
+    return {localEight,termEight,year:termEight.getYear(),month:termEight.getMonth(),day:localEight.getDay(),time:localEight.getTime()};
+  }
+  function readBirthTime(selectId,exactId){
+    const precise=$(exactId)?.value||'';
+    if(/^\d{2}:\d{2}$/.test(precise)){
+      const [hour,minute]=precise.split(':').map(Number);
+      if(hour<=23&&minute<=59)return {hour,minute,unknown:false,precise:true};
+    }
+    const selected=$(selectId).value;
+    return selected==='unknown'||selected==='exact'?{hour:12,minute:0,unknown:true,precise:false}:{hour:Number(selected),minute:0,unknown:false,precise:false};
+  }
+  /** 기기 기본 시간 입력 UI는 선택적으로만 열어 큰 팝업이나 긴 입력란을 만들지 않습니다. */
+  function initPreciseBirthTimes(){
+    for(const [id,exactId] of [['sajuTime','sajuExactTime'],['coupleTimeA','coupleExactTimeA'],['coupleTimeB','coupleExactTimeB']]){
+      const select=$('#'+id);
+      if(!select)continue;
+      const early=select.querySelector('[value="0"]');
+      if(early)early.textContent='자시 · 00:00~00:59';
+      const late=new Option('자시 · 23:00~23:59','23');
+      select.add(late);
+      const exactOption=new Option('분 단위로 입력한 시각','exact');
+      select.add(exactOption);
+      const details=document.createElement('details');
+      details.className='precise-birth-time';
+      details.innerHTML=`<summary>분 단위로 태어난 시각 입력 (선택)</summary><div class="precise-time-row"><label for="${exactId}">태어난 시각</label><input id="${exactId}" type="time" step="60"><small>정확한 시각을 입력하면 위 구간 선택보다 우선 적용해요.</small></div>`;
+      select.after(details);
+      const exact=$('#'+exactId);
+      exact.addEventListener('input',()=>{if(exact.value)select.value='exact';else select.value='unknown';});
+      select.addEventListener('change',()=>{if(select.value!=='exact')exact.value='';else details.open=true;});
+    }
+  }
   let sajuKnowledge=null; // 창작된 분야별 해석 DB. 계산식과 분리하여 교정·확장합니다.
   let recentSaju=null; // 기기 메모리에서만 메뉴 간 연동. 서버/저장소에 남기지 않습니다.
   const kstParts = new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'});
@@ -190,30 +239,31 @@
     const calButtons=$$('#sajuCalendarType button');let calendar='solar';
     calButtons.forEach(btn=>btn.addEventListener('click',()=>{calendar=btn.dataset.cal;calButtons.forEach(x=>{x.classList.toggle('selected',x===btn);x.setAttribute('aria-checked',String(x===btn));});$('#leapLine').hidden=calendar!=='lunar';}));
     $('#sajuForm').addEventListener('submit',e=>{
-      e.preventDefault(); const input=$('#sajuBirth').value,time=$('#sajuTime').value,unknown=time==='unknown';
+      e.preventDefault(); const input=$('#sajuBirth').value,birthTime=readBirthTime('#sajuTime','#sajuExactTime'),unknown=birthTime.unknown;
       if(!safeDate(input,calendar)){toast('출생 연도·월·일을 정확히 입력해 주세요.');return;}
       if(typeof Solar==='undefined'||typeof Lunar==='undefined'){toast('사주 계산 자료를 불러오지 못했어요. 다시 접속해 주세요.');return;}
       const [year,month,day]=input.split('-').map(Number);
       if(year<1900||year>2099){toast('1900~2099 사이 생년월일을 입력해 주세요.');return;}
-      const hour=unknown?12:Number(time); let solar,lunar;
+      const {hour,minute}=birthTime; let solar,lunar;
       try{
         if(calendar==='lunar'){
           const lunarMonth=$('#sajuLeap').checked?-month:month;
-          lunar=Lunar.fromYmdHms(year,lunarMonth,day,hour,0,0);solar=lunar.getSolar();
+          lunar=Lunar.fromYmdHms(year,lunarMonth,day,hour,minute,0);solar=lunar.getSolar();
           if(lunar.getYear()!==year||lunar.getMonth()!==lunarMonth||lunar.getDay()!==day)throw Error('음력 날짜를 확인해 주세요.');
-        }else{solar=Solar.fromYmdHms(year,month,day,hour,0,0);lunar=solar.getLunar();
+        }else{solar=Solar.fromYmdHms(year,month,day,hour,minute,0);lunar=solar.getLunar();
           if(solar.getYear()!==year||solar.getMonth()!==month||solar.getDay()!==day)throw Error('양력 날짜를 확인해 주세요.');}
       }catch(err){toast(`해당 날짜를 계산할 수 없어요. ${err.message||''}`);return;}
       try{renderSaju(solar,lunar,unknown);}catch{toast('사주 계산 중 오류가 발생했어요. 날짜와 시간을 확인해 주세요.');}
     });
   }
   function renderSaju(solar,lunar,unknown){
-    const eight=lunar.getEightChar(),pairs=[eight.getYear(),eight.getMonth(),eight.getDay(),unknown?null:eight.getTime()];
+    const pillars=koreanPillars(solar),eight=pillars.localEight;
+    const pairs=[pillars.year,pillars.month,pillars.day,unknown?null:pillars.time];
     const counts=[0,0,0,0,0],labels=['년주','월주','일주','시주'];
     pairs.forEach(pair=>{if(!pair)return;for(const c of pair){let idx=stemElements[c]??branchElements[c];if(idx!==undefined)counts[idx]++;}});
     const name=$('#sajuName').value.trim().slice(0,20),total=counts.reduce((a,b)=>a+b,0),dominant=counts.indexOf(Math.max(...counts));
     $('#sajuResultTitle').textContent=`${name?name+'님의':'나의'} 사주팔자`;
-    $('#sajuDateInfo').textContent=`양력 ${solar.getYear()}.${solar.getMonth()}.${solar.getDay()} · 음력 ${lunar.getYear()}년 ${Math.abs(lunar.getMonth())}월 ${lunar.getDay()}일${lunar.getMonth()<0?' (윤달)':''}${unknown?' · 출생 시간 미상':''}`;
+    $('#sajuDateInfo').textContent=`양력 ${solar.getYear()}.${solar.getMonth()}.${solar.getDay()} · 음력 ${lunar.getYear()}년 ${Math.abs(lunar.getMonth())}월 ${lunar.getDay()}일${lunar.getMonth()<0?' (윤달)':''}${unknown?' · 출생 시간 미상':` · ${String(solar.getHour()).padStart(2,'0')}:${String(solar.getMinute()).padStart(2,'0')} 기준`}`;
     $('#pillarGrid').innerHTML=pairs.map((p,i)=>`<div class="pillar"><span class="pillar-label">${labels[i]}</span><span class="pillar-gan">${p?p[0]:'—'}</span><span class="pillar-ji">${p?p[1]:'—'}</span><small>${p?'천간 · 지지':'시간 미상'}</small></div>`).join('');
     $('#elementsChart').innerHTML=`<h4>오행의 분포 <small style="font:400 10px var(--sans);color:#a69bb9">(천간·지지의 대표 오행)</small></h4>`+counts.map((v,i)=>`<div class="element-line"><span>${elementNames[i]}</span><div class="element-track"><i style="width:${total?(v/total)*100:0}%;background:${elementColors[i]}"></i></div><b>${v}</b></div>`).join('');
     const dayStem=pairs[2]?.[0]||'甲';
@@ -225,14 +275,14 @@
       ? `<div class="reading-prologue"><span>나의 일간 · ${escapeHtml(master.name)} ${escapeHtml(dayStem)}</span><h4>${escapeHtml(master.image)}</h4><p>${paragraph(`전통 명리에서는 ${master.core}을 이 일간의 이미지로 읽어요.`)} ${paragraph(`특히 ${master.strength}도 오래 키워 갈 수 있는 강점이에요.`)}</p><p>${paragraph(`한편 ${master.shadow}도 함께 살펴볼 만해요.`)} 한 사람의 모든 모습은 사주만으로 단정할 수 없으니까요.</p></div><div class="reading-prologue"><span>오행의 균형 · ${escapeHtml(elementNames[dominant])}</span><p>${paragraph(elementMessage[dominant])}</p></div>${unknown?'<p class="saju-note">태어난 시간을 알면 네 번째 기둥까지 포함해 다시 살펴볼 수 있어요.</p>':''}`
       : `<b>✧ 일간 ${escapeHtml(dayStem)}의 이야기</b><br>${escapeHtml(dayStemMessage[dayStem]||'나만의 중심을 가꾸는 상징으로 읽을 수 있어요.')}<br><br><b>✧ 두드러지는 오행 — ${elementNames[dominant]}</b><br>${escapeHtml(elementMessage[dominant])}`;
     const relations=[
-      {label:'년간 · 뿌리',value:eight.getYearShiShenGan()},
-      {label:'월간 · 사회',value:eight.getMonthShiShenGan()},
+      {label:'년간 · 뿌리',value:LunarUtil.SHI_SHEN[dayStem+pairs[0][0]]},
+      {label:'월간 · 사회',value:LunarUtil.SHI_SHEN[dayStem+pairs[1][0]]},
       ...(!unknown?[{label:'시간 · 표현',value:eight.getTimeShiShenGan()}]:[])
     ].map(x=>({...x,name:koreanTenGod(x.value)}));
     const strongest=relations.find(x=>tenGodMessage[x.name])||relations[0];
     const relationMarkup=relations.map(x=>`<article class="saju-clue"><span>${escapeHtml(x.label)}</span><b>${escapeHtml(x.name)}</b><p>${paragraph(sajuKnowledge?.tenGods?.[x.name]?.core||tenGodMessage[x.name]||'삶의 여러 관계를 되돌아보는 상징으로 살펴보세요.')}</p></article>`).join('');
     // 태어난 절기 월지의 대표 오행과 일간, 지지의 합·충 관계를 계산 근거와 함께 설명합니다.
-    const seasonElement=branchElements[eight.getMonthZhi()],selfElement=stemElements[dayStem];
+    const seasonElement=branchElements[pairs[1][1]],selfElement=stemElements[dayStem];
     const elementRelation=seasonElement===selfElement
       ? '태어난 달과 나의 일간이 같은 오행으로 읽혀요. 익숙한 리듬을 든든한 바탕으로 삼을 수 있겠어요.'
       : (seasonElement+1)%5===selfElement
@@ -250,12 +300,12 @@
         if(x.branch!==y.branch&&patterns?.some(pair=>pair.includes(x.branch)&&pair.includes(y.branch)))interactions.push({title,between:`${x.label} ${x.branch} · ${y.label} ${y.branch}`,message:rules?.[`${type}Message`]});
       }
     }
-    const seasonalMarkup=sajuKnowledge?`<section class="saju-depth seasonal-reading"><p class="kicker">SEASON & RELATION</p><h4>태어난 달과 네 기둥의 연결</h4><p class="saju-note">절기를 반영한 월지 ${escapeHtml(eight.getMonthZhi())}(${elementNames[seasonElement]})와 나의 일간 ${escapeHtml(dayStem)}(${elementNames[selfElement]})를 비교했어요.</p><p class="seasonal-note">${escapeHtml(elementRelation)}</p><div class="branch-interactions">${interactions.length?interactions.slice(0,4).map(x=>`<article><span>${escapeHtml(x.title)}의 관계 · ${escapeHtml(x.between)}</span><p>${paragraph(x.message)}</p></article>`).join(''):'<p class="saju-note">네 기둥에서 대표적인 육합·육충 관계가 따로 잡히지 않았어요. 이것이 관계의 좋고 나쁨을 뜻하지는 않아요.</p>'}</div><details class="personal-calculation"><summary>계산의 범위</summary><p>월지의 대표 오행과 일간의 생극, 네 지지 사이의 육합·육충만 살펴본 기본 분석이에요. 지장간, 격국, 용신 전체를 종합 판정한 결과는 아니며 출생 지역과 자시 보정은 별도 검증이 필요해요.</p></details></section>`:'';
+    const seasonalMarkup=sajuKnowledge?`<section class="saju-depth seasonal-reading"><p class="kicker">SEASON & RELATION</p><h4>태어난 달과 네 기둥의 연결</h4><p class="saju-note">한국 시간대 이력을 적용한 월지 ${escapeHtml(pairs[1][1])}(${elementNames[seasonElement]})와 일간 ${escapeHtml(dayStem)}(${elementNames[selfElement]})를 비교했어요.</p><p class="seasonal-note">${escapeHtml(elementRelation)}</p><div class="branch-interactions">${interactions.length?interactions.slice(0,4).map(x=>`<article><span>${escapeHtml(x.title)}의 관계 · ${escapeHtml(x.between)}</span><p>${paragraph(x.message)}</p></article>`).join(''):'<p class="saju-note">네 기둥에서 대표적인 육합·육충 관계가 따로 잡히지 않았어요. 이것이 관계의 좋고 나쁨을 뜻하지는 않아요.</p>'}</div><details class="personal-calculation"><summary>계산의 범위</summary><p>한국 표준시 이력을 고려해 연·월주 절기 경계를 보정하고, 일·시주는 입력한 현지 시각을 적용했어요. 지장간·격국·용신 전체 판정이나 출생 지역의 진태양시 보정은 포함하지 않았어요. 출생 시간이 미상인 절기 경계일은 결과가 달라질 수 있어요.</p></details></section>`:'';
     const gender=$('#sajuGender').value;
     let cyclesMarkup='<p class="saju-note">전통 대운의 순행·역행은 선택한 기준에 따라 계산해요. 남성 또는 여성을 선택하면 10년 흐름을 살펴볼 수 있어요.</p>';
     let cycleVoice='';
     if(gender!=='unknown'){
-      const yun=eight.getYun(gender==='male'?1:0,2),cycles=yun.getDaYun(9).slice(1),currentYear=Number(kstNow().slice(0,4));
+      const yun=pillars.termEight.getYun(gender==='male'?1:0,2),cycles=yun.getDaYun(9).slice(1),currentYear=Number(kstNow().slice(0,4));
       const active=cycles.find(d=>d.getStartYear()<=currentYear&&currentYear<=d.getEndYear());
       cyclesMarkup=`<p class="saju-note">${escapeHtml(yun.isForward()?'순행':'역행')}으로 계산한 전통 대운표예요. 나이는 전통식 기준이며 계산법에 따라 시작 시점이 달라질 수 있어요.</p><div class="saju-cycles">${cycles.map(d=>`<div class="saju-cycle ${active===d?'current':''}"><b>${escapeHtml(d.getGanZhi())}</b><span>${d.getStartYear()}~${d.getEndYear()}년</span><small>${d.getStartAge()}~${d.getEndAge()}세</small></div>`).join('')}</div>`;
       cycleVoice=active?`지금은 전통 대운표상 ${active.getGanZhi()} 흐름에 해당합니다. 한 시기의 이름보다 지금 쌓고 있는 경험과 선택이 더 중요해요.`:'대운표를 통해 지나온 과정과 앞으로의 변화를 함께 돌아보세요.';
@@ -283,8 +333,8 @@
     if(period==='weekly')basis.setUTCDate(basis.getUTCDate()-(basis.getUTCDay()+6)%7);
     if(period==='yearly')basis.setUTCMonth(6,1); // 입춘 경계 영향을 피한 해당 년도 세운 대표 간지
     const by=basis.getUTCFullYear(),bm=basis.getUTCMonth()+1,bd=basis.getUTCDate();
-    const e=Solar.fromYmdHms(by,bm,bd,12,0,0).getLunar().getEightChar();
-    const pair=period==='yearly'?e.getYear():period==='monthly'?e.getMonth():e.getDay();
+    const computed=koreanPillars(Solar.fromYmdHms(by,bm,bd,12,0,0));
+    const pair=period==='yearly'?computed.year:period==='monthly'?computed.month:computed.day;
     const relation=koreanTenGod(LunarUtil.SHI_SHEN?.[dayStem+pair[0]]);
     const knowledge=sajuKnowledge?.tenGods?.[relation];
     if(!knowledge)throw Error('해석 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
@@ -531,23 +581,23 @@
       if(!safeDate(date,cal))throw Error('두 사람의 출생 연도·월·일을 모두 확인해 주세요.');
       const [year,month,day]=date.split('-').map(Number);
       if(year<1900||year>2099)throw Error('1900~2099년 생년월일을 입력해 주세요.');
-      const time=$('#coupleTime'+suffix).value, hour=time==='unknown'?12:Number(time);
+      const birthTime=readBirthTime('#coupleTime'+suffix,'#coupleExactTime'+suffix),{hour,minute}=birthTime;
       let solar,lunar;
       if(cal==='lunar'){
         const calendarMonth=$('#coupleLeap'+suffix).checked?-month:month;
-        lunar=Lunar.fromYmdHms(year,calendarMonth,day,hour,0,0);solar=lunar.getSolar();
+        lunar=Lunar.fromYmdHms(year,calendarMonth,day,hour,minute,0);solar=lunar.getSolar();
         if(lunar.getYear()!==year||lunar.getMonth()!==calendarMonth||lunar.getDay()!==day)throw Error('음력 생일이나 윤달 여부를 확인해 주세요.');}
-      else{solar=Solar.fromYmdHms(year,month,day,hour,0,0);lunar=solar.getLunar();
+      else{solar=Solar.fromYmdHms(year,month,day,hour,minute,0);lunar=solar.getLunar();
         if(solar.getYear()!==year||solar.getMonth()!==month||solar.getDay()!==day)throw Error('양력 생일을 확인해 주세요.');}
-      const eight=lunar.getEightChar(),stem=eight.getDay()?.[0]||'甲',gender=$('#coupleGender'+suffix).value;
+      const pillars=koreanPillars(solar),eight=pillars.localEight,stem=pillars.day?.[0]||'甲',gender=$('#coupleGender'+suffix).value;
       const name=$('#coupleName'+suffix).value.trim().slice(0,20)||'소중한 사람';
       let phase='';
       if(gender!=='unknown'){
         const todayYear=Number(kstNow().slice(0,4));
-        const current=eight.getYun(gender==='male'?1:0,2).getDaYun(12).slice(1).find(d=>d.getStartYear()<=todayYear&&todayYear<=d.getEndYear());
+        const current=pillars.termEight.getYun(gender==='male'?1:0,2).getDaYun(12).slice(1).find(d=>d.getStartYear()<=todayYear&&todayYear<=d.getEndYear());
         if(current)phase=`${name}님의 전통 대운은 ${current.getGanZhi()} 흐름에 해당해요.`;
       }
-      return {name,stem,dayBranch:eight.getDay()?.[1],element:stemElements[stem]??0,solarDate:solar.toYmd(),unknown:time==='unknown',phase};
+      return {name,stem,dayBranch:pillars.day?.[1],element:stemElements[stem]??0,solarDate:solar.toYmd(),unknown:birthTime.unknown,phase};
     };
     $('#coupleForm').addEventListener('submit',event=>{
       event.preventDefault();
@@ -647,7 +697,7 @@
   async function start(){
     await loadCopyManifests();
     if($('#currentYear'))$('#currentYear').textContent=kstNow().slice(0,4);
-    initNavigation();initFortune();initTarot();initMoonDateInputs();initSaju();initNewyear();initCouple();
+    initNavigation();initFortune();initTarot();initMoonDateInputs();initPreciseBirthTimes();initSaju();initNewyear();initCouple();
     if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
       const registerOffline=()=>navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'}).catch(()=>{});
       if(document.readyState==='complete')registerOffline();
