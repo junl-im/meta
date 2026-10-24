@@ -176,6 +176,52 @@
   const toast = (message) => {const el=$('#toast');el.textContent=message;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),2600);};
   async function copyText(text) {try {await navigator.clipboard.writeText(text);toast('결과를 복사했어요 ✧');}catch{toast('복사가 지원되지 않는 환경이에요.');}}
 
+  // 모바일 첫 화면은 핵심을 보여 주고, 기존 긴 풀이 전체는 접근 가능한 펼침 영역으로 보존합니다.
+  const compactMedia=window.matchMedia('(max-width:850px)');
+  function readingPreview(value,limit=120){
+    const text=String(value||'').replace(/\s+/g,' ').trim();
+    if(text.length<=limit)return text;
+    const first=text.match(/^.*?[.!?](?=\s|$)/u)?.[0];
+    if(first&&first.length<=limit+30)return first;
+    const prefix=text.slice(0,limit),lastSpace=prefix.lastIndexOf(' ');
+    return `${lastSpace>limit*.55?prefix.slice(0,lastSpace):prefix}…`;
+  }
+  function resetCompactDetail(id){const detail=$('#'+id);if(detail)detail.open=!compactMedia.matches;}
+  function initMobileReadings(){
+    const wrap=(id,label,nodes,before)=>{
+      const detail=document.createElement('details');detail.className='mobile-reading-detail';detail.id=id;
+      const summary=document.createElement('summary');summary.textContent=label;detail.append(summary);
+      before.before(detail);nodes.forEach(node=>detail.append(node));resetCompactDetail(id);
+      return detail;
+    };
+    const preview=(id,before)=>{const p=document.createElement('p');p.id=id;p.className='mobile-reading-preview';before.before(p);return p;};
+
+    const fortuneText=$('#fortuneDescription');
+    const zodiacDetail=wrap('zodiacMore','분야별 운세와 전체 풀이 펼쳐 보기',[fortuneText,$('#fortuneStats')],fortuneText);
+    preview('fortuneQuickText',zodiacDetail);
+
+    const elements=$('#elementsChart');
+    const sajuDetail=wrap('sajuMore','오행·십성·대운·세운 자세히 읽기',[elements,$('#sajuReading'),$('#sajuAdvanced'),$('#sajuResult .calculation-note')],elements);
+    preview('sajuQuickText',sajuDetail);
+    const sajuAgain=document.createElement('button');sajuAgain.type='button';sajuAgain.className='mobile-result-again';sajuAgain.textContent='출생 정보 다시 입력하기 ↗';
+    sajuDetail.after(sajuAgain);sajuAgain.addEventListener('click',()=>$('#sajuDialog').showModal());
+
+    const nyText=$('#newyearResultText');
+    const nyDetail=wrap('newyearMore','사계절과 신년운세 전체 풀이 보기',[nyText,$('#seasonGrid'),$('#newyearAdvice')],$('#seasonGrid'));
+    preview('newyearQuickText',nyDetail);
+    const nyAgain=document.createElement('button');nyAgain.type='button';nyAgain.className='mobile-result-again';nyAgain.textContent='다른 해·띠로 다시 보기 ↗';
+    nyDetail.after(nyAgain);nyAgain.addEventListener('click',()=>{$('#newyear').dataset.mobileStage='choose';$('#newyearResult').hidden=true;$('#newyear').scrollTop=0;});
+
+    const coupleText=$('#coupleDescription');
+    const coupleDetail=wrap('coupleMore','관계의 자세한 해석 펼쳐 보기',[coupleText,$('#coupleAdvice'),$('#coupleResult .calculation-note')],coupleText);
+    preview('coupleQuickText',coupleDetail);
+    const coupleAgain=document.createElement('button');coupleAgain.type='button';coupleAgain.className='mobile-result-again';coupleAgain.textContent='두 사람 정보 다시 입력하기 ↗';
+    coupleDetail.after(coupleAgain);coupleAgain.addEventListener('click',()=>$('#coupleDialog').showModal());
+
+    const resize=()=>['zodiacMore','sajuMore','newyearMore','coupleMore'].forEach(resetCompactDetail);
+    compactMedia.addEventListener?.('change',resize);
+  }
+
   // 한국식 일반 띠(음력 설 기준) 계산 — 출생 연도만 입력한 간편 선택은 경계의 정확도를 보장하지 않음.
   const zodiacFromYear = (year) => ((year-2020)%12+12)%12;
   let selectedZodiac = 4;
@@ -215,6 +261,7 @@
     $('#fortuneStars').textContent='★'.repeat(f.score)+'☆'.repeat(5-f.score);
     $('#fortuneScoreText').textContent=['','','','조용히 준비하기 좋은 흐름','기분 좋은 가능성이 보이는 흐름','기운이 반짝이는 흐름'][f.score];
     $('#fortuneHeadline').textContent=f.headline;$('#fortuneDescription').textContent=f.description;
+    $('#fortuneQuickText').textContent=readingPreview(f.description,114);resetCompactDetail('zodiacMore');
     window.DalbitByeolha?.read(`${a.label} ${periodLabels[selectedPeriod]} 운세입니다. ${f.headline} ${f.description}`);
     $('#fortuneStats').innerHTML=f.categories.map((v,i)=>`<div class="fortune-stat"><span>${categoryNames[i]}</span><b>${v}<small>/100</small></b><div class="stat-meter"><i style="width:${v}%"></i></div></div>`).join('');
     $('#luckyColor').textContent=f.color;$('#luckyNumber').textContent=f.number;$('#luckyDirection').textContent=f.direction;
@@ -321,7 +368,10 @@
     const privateAnalysis=master?`<section class="saju-depth personal-reading"><p class="kicker">YOUR PERSONAL STAR MAP</p><h4>나에게 찾아오는 시간의 결</h4><p class="saju-note">띠만으로 고른 문구가 아니에요. 나의 일간과 실제 날짜의 간지 관계를 계산해, 일·관계·금전·돌봄의 네 갈래를 살펴봅니다.</p><div class="personal-periods" role="group" aria-label="개인별 운세 기간"><button type="button" class="selected" data-personal-period="daily">오늘</button><button type="button" data-personal-period="weekly">이번 주</button><button type="button" data-personal-period="monthly">이번 달</button><button type="button" data-personal-period="yearly">올해</button><button type="button" data-personal-period="date">날짜 선택</button></div><div class="personal-date-control" hidden><label for="personalFortuneDate">운세를 볼 날짜</label><input id="personalFortuneDate" type="date" value="${kstNow()}" min="1900-01-01" max="2099-12-31"></div><div id="personalFlowResult" class="personal-flow-result" aria-live="polite"></div></section>`:'';
     $('#sajuAdvanced').innerHTML=`${privateAnalysis}${seasonalMarkup}<section class="saju-depth"><p class="kicker">YOUR INNER PATTERN</p><h4>내 사주를 더 깊게 읽는 관계</h4><div class="saju-clues">${relationMarkup}</div><p class="saju-note">십성은 태어난 날의 천간을 기준으로 다른 천간의 관계를 읽는 전통 분류예요. 우열이나 성격을 확정하지 않아요.</p></section><section class="saju-depth"><p class="kicker">TEN-YEAR RHYTHM</p><h4>10년의 흐름 · 대운</h4>${cyclesMarkup}</section><section class="saju-depth"><p class="kicker">THE NEXT TWO YEARS</p><h4>올해와 내년의 기운 · 세운</h4><div class="saju-years">${yearStories}</div></section>`;
     if(master)initPersonalPeriods(dayStem,master);
-    $('#sajuPlaceholder').hidden=true;$('#sajuResult').hidden=false;$('#sajuDialog').close();$('#sajuResult').scrollIntoView({behavior:'smooth',block:'center'});
+    $('#sajuQuickText').textContent=`나의 일간은 ${master?master.name+' ':''}${dayStem}이며, 오행 중 ${elementNames[dominant]}의 기운이 두드러져요. 상세한 해석은 아래에서 펼쳐 볼 수 있어요.`;
+    resetCompactDetail('sajuMore');
+    $('#sajuPlaceholder').hidden=true;$('#sajuResult').hidden=false;$('#saju').dataset.mobileStage='result';$('#sajuDialog').close();
+    $('#saju').scrollTop=0;$('#sajuResult').scrollIntoView({behavior:'smooth',block:'start'});
     window.DalbitByeolha?.read(master?`전통 명리에서는 ${master.core}을 이 일간의 이미지로 읽어요. ${master.strength}도 소중한 강점이에요. ${master.work} ${elementMessage[dominant]} ${strongest?.name?`${strongest.name}의 의미도 함께 살펴보세요.`:''} ${cycleVoice}`:`${dayStemMessage[dayStem]} ${elementMessage[dominant]} ${cycleVoice}`);
   }
 
@@ -554,9 +604,11 @@
         personal=`당신의 일간 ${recentSaju.dayStem}${master?`(${master.name})`:''}과 ${year}년의 간지 ${year8.getYear()}를 함께 보면, ${relation}의 상징을 만나요. ${god?`${god.core}. 관계에서는 ${god.love} 생활에서는 ${god.money}`:tenGodMessage[relation]||'변화 속에서 나의 중심을 살펴보세요.'} `;
       }
       $('#newyearResultText').textContent=`${personal}${choose(annualStarts,key,1)} ${choose(annualEnds,key,2)}`;
+      $('#newyearQuickText').textContent=readingPreview($('#newyearResultText').textContent,135);
       $('#seasonGrid').innerHTML=seasons.map((s,i)=>`<article class="season-card"><span>✦ ${s[0]}</span><h4>${s[1]}</h4><p>${choose([s[2],opening[(mix(key,i)+i)%opening.length],closings[(mix(key,i+8)+i)%closings.length]],key,i+20)}</p></article>`).join('');
       $('#newyearAdvice').textContent=`올해의 작은 제안 · ${choose(closings,key,12)}`;
-      $('#newyearResult').hidden=false;$('#newyearResult').scrollIntoView({behavior:'smooth',block:'center'});
+      resetCompactDetail('newyearMore');$('#newyearResult').hidden=false;$('#newyear').dataset.mobileStage='result';
+      $('#newyear').scrollTop=0;$('#newyearResult').scrollIntoView({behavior:'smooth',block:'start'});
       window.DalbitByeolha?.read(`${$('#newyearResultText').textContent} ${$('#newyearAdvice').textContent}`);
     });
   }
@@ -623,8 +675,9 @@
       $('#coupleDescription').textContent=`${a.name}님의 일간 ${a.stem}(${elementNames[a.element]})과 ${b.name}님의 일간 ${b.stem}(${elementNames[b.element]})을 오행으로 살펴보면, ${relationMessage}\n\n${branchMessage}\n\n${msg.description}`;
       const phaseMessage=[a.phase,b.phase].filter(Boolean).join(' ');
       $('#coupleAdvice').textContent=`달빛의 작은 제안 · ${msg.advice}${phaseMessage?`\n\n각자의 10년 흐름도 함께 살펴봤어요. ${phaseMessage}`:''}`;
-      $('#coupleResult').hidden=false;$('#coupleDialog').close();
-      $('#coupleResult').scrollIntoView({behavior:'smooth',block:'center'});
+      $('#coupleQuickText').textContent=readingPreview(relationMessage,120);resetCompactDetail('coupleMore');
+      $('#coupleResult').hidden=false;$('#couple').dataset.mobileStage='result';$('#coupleDialog').close();
+      $('#couple').scrollTop=0;$('#coupleResult').scrollIntoView({behavior:'smooth',block:'start'});
       window.DalbitByeolha?.read(`${msg.headline} ${$('#coupleDescription').textContent} ${$('#coupleAdvice').textContent}`);
     });
   }
@@ -697,7 +750,7 @@
   async function start(){
     await loadCopyManifests();
     if($('#currentYear'))$('#currentYear').textContent=kstNow().slice(0,4);
-    initNavigation();initFortune();initTarot();initMoonDateInputs();initPreciseBirthTimes();initSaju();initNewyear();initCouple();
+    initMobileReadings();initNavigation();initFortune();initTarot();initMoonDateInputs();initPreciseBirthTimes();initSaju();initNewyear();initCouple();
     if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
       const registerOffline=()=>navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'}).catch(()=>{});
       if(document.readyState==='complete')registerOffline();

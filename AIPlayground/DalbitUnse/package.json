@@ -1,11 +1,11 @@
 {
   "name": "dalbit-unse",
   "private": true,
-  "version": "4.9.0",
+  "version": "4.10.0",
   "type": "module",
   "scripts": {
     "build": "tsc --noEmit && vite build",
-    "check": "tsc --noEmit && node scripts/validate-tarot.mjs && node scripts/validate-saju.mjs && node scripts/validate-knowledge.mjs",
+    "check": "tsc --noEmit && node scripts/validate-tarot.mjs && node scripts/validate-saju.mjs && node scripts/validate-knowledge.mjs && node scripts/validate-mobile.mjs",
     "dev:modules": "vite --host 127.0.0.1"
   },
   "devDependencies": {
