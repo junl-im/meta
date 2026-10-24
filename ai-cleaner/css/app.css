@@ -1051,3 +1051,58 @@ body{background:linear-gradient(180deg,#f9f4ed 0,#fcfaf6 280px,#f9f8f5 100%)}
   .moonStudioGroup .audioStudios{display:block;width:100%!important}
   .moonStudioGroup .studioCard{min-height:34px;padding:4px 2px;font-size:10px}.moonStudioGroup .studioCard b{font-size:10px}
 }
+
+/* v1.22 · 브랜드와 서비스 데크. 모바일은 한 시야에서 모든 도구를 보여 줍니다. */
+.top{gap:clamp(12px,2vw,26px);background:linear-gradient(130deg,#fffefa 0%,#fff8ef 65%,#faf2e9 100%);border-color:#e6d7c6;box-shadow:0 10px 30px #60442513}
+.brand{align-self:center;flex:none}
+.brand>div:last-child{min-width:0}
+.brandKicker{font:800 9.5px/1.15 system-ui,sans-serif;letter-spacing:.17em;color:#a66a39;white-space:nowrap}
+.brandKicker span{color:#e57525}
+.brandName{display:flex;align-items:center;gap:5px;margin-top:4px;white-space:nowrap}
+.brandName b{font-size:clamp(15px,1.35vw,20px);font-weight:900;letter-spacing:-.045em;color:#3d2c20}
+.brandName em{font-style:normal;color:#bd5819}
+.brandName .pill{margin-left:2px;border-radius:7px;background:#413024;padding:3px 6px;font-size:9.5px;box-shadow:0 2px 6px #3e2b2426}
+.workspaceNav{gap:7px;width:min(100%,760px);justify-items:stretch}
+.workspaceNav>.studioGroup:first-child{justify-items:stretch;width:100%;grid-template-columns:minmax(0,1fr)}
+.workspaceNav .studioGroupLabel{color:#876d59;font-size:9.5px;letter-spacing:.035em}
+.workspaceNav .toolnav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;width:100%;padding:3px;border:1px solid #e7d8c9;border-radius:13px;background:#f6eadd;box-shadow:inset 0 1px #fff8}
+.workspaceNav .toolnav .studioCard{border:0;border-radius:10px;box-shadow:none;min-height:34px;padding:6px 10px;background:transparent;color:#6a5040}
+.workspaceNav .toolnav .studioCard.active{background:#fffdf9;box-shadow:0 3px 11px #6d452820,inset 0 0 0 1px #e8bf9a}
+.workspaceNav .toolnav .studioCard.active b{color:#a9490b}
+.workspaceNav .toolnav .studioCard:hover:not(.active){background:#ffffff9a}
+.workspaceNav .studioExternalRow{display:grid;grid-template-columns:minmax(0,2fr) repeat(2,minmax(0,1fr));gap:7px;width:100%;max-width:none;align-items:start}
+.studioExternalRow .studioGroup{display:grid;gap:4px;min-width:0}
+.studioExternalRow .audioStudios{display:flex;gap:4px}
+.studioExternalRow .studioCard{border-radius:9px;border-color:#ded0c4;background:#fffdf8;min-height:31px;padding:5px 9px;box-shadow:none}
+.studioExternalRow .studioCard b{font-size:10px}
+.moonStudioGroup .studioCard{background:linear-gradient(130deg,#312643,#4e375d);border-color:#745e7a;color:#f7ddac}
+.moonStudioGroup .studioCard:hover{background:linear-gradient(130deg,#463054,#674575)}
+.moonStudioGroup .studioGroupLabel{color:#80647b}
+@media(max-width:1180px){
+  .top{align-items:stretch;flex-wrap:wrap}
+  .brand{align-self:flex-start}
+  .workspaceNav{justify-items:stretch}
+  .workspaceNav .toolnav{grid-template-columns:repeat(4,minmax(0,1fr));width:100%;max-width:100%}
+}
+@media(max-width:600px){
+  .top{gap:7px;padding:8px 14px 9px;margin-inline:-16px;background:linear-gradient(150deg,#fffcf7 0%,#fff5e9 100%);border-bottom:1px solid #e9d8c9;box-shadow:0 4px 16px #60442514}
+  .brand{gap:8px;min-height:33px}
+  .brand .logo{width:34px;height:34px;flex-basis:34px}
+  .brandKicker{font-size:9.5px;letter-spacing:.12em}
+  .brandName{margin-top:2px}
+  .brandName b{font-size:15px}
+  .brandName .pill{font-size:9.5px;padding:2px 5px}
+  .workspaceNav{gap:5px}
+  .workspaceNav>.studioGroup:first-child{gap:2px;grid-template-columns:minmax(0,1fr);justify-items:stretch}
+  .workspaceNav .studioGroupLabel{font-size:9.5px;line-height:1.1}
+  .workspaceNav .toolnav{grid-template-columns:minmax(0,1.06fr) minmax(0,1.17fr) minmax(0,1.13fr) minmax(0,.6fr);gap:1px;width:100%;max-width:none;padding:2px;border-radius:11px}
+  .workspaceNav .toolnav .studioCard{min-height:32px;padding:4px 1px;border-radius:8px}
+  .workspaceNav .toolnav .studioCard b{font-size:clamp(9.5px,2.65vw,11px)}
+  .workspaceNav .studioExternalRow{grid-template-columns:minmax(0,2fr) repeat(2,minmax(0,1fr));gap:5px;padding-top:4px;border-color:#eadbc9;max-width:none}
+  .studioExternalRow .studioGroup{gap:3px}
+  .studioExternalRow .audioStudios{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px;width:100%}
+  .studioExternalRow .studioGroup:not(:first-child) .audioStudios{grid-template-columns:1fr}
+  .studioExternalRow .studioCard{min-height:31px;padding:3px 1px;border-radius:8px}
+  .studioExternalRow .studioCard b,.moonStudioGroup .studioCard b{font-size:clamp(9.5px,2.6vw,10px)}
+}
+@media(max-width:350px){.brandName b{font-size:14px}.workspaceNav .studioGroupLabel{font-size:9.5px}}

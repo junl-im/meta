@@ -2,6 +2,7 @@
 interface ByeolhaVoice {
   speak(options: { text: string; voice: 'byeolha'; style: 'mystical-gentle' }): Promise<void> | void;
   stop?(): Promise<void> | void;
+  unlock?(): void;
 }
 
 declare global {
@@ -26,14 +27,28 @@ export function mountByeolhaBridge(button: HTMLButtonElement): void {
   let readingEpoch = 0;
   let active = false;
   let activeUtterance: SpeechSynthesisUtterance | null = null;
+  let progressBadge: HTMLElement | null = null;
+  const clearProgress = (): void => { progressBadge?.remove(); progressBadge = null; button.removeAttribute('data-loading'); };
+  const showProgress = (message: string): void => {
+    if (!enabled) return;
+    progressBadge ??= document.createElement('div');
+    progressBadge.className = 'voice-loading-note';
+    progressBadge.setAttribute('role', 'status');
+    progressBadge.setAttribute('aria-live', 'polite');
+    progressBadge.textContent = message;
+    if (!progressBadge.isConnected) document.body.append(progressBadge);
+    button.dataset.loading = 'true';
+    button.title = message;
+  };
   const engine = (): ByeolhaVoice | undefined => window.SoriOn?.voices?.byeolha;
-  const soundEnd = (): void => { if (!active) return; active = false; window.dispatchEvent(new Event('dalbit:voice-end')); };
+  const soundEnd = (): void => { clearProgress(); if (!active) return; active = false; window.dispatchEvent(new Event('dalbit:voice-end')); };
   const cancel = (): void => {
     readingEpoch += 1;
     if (supportsNativeSpeech()) {
       try { window.speechSynthesis.cancel(); } catch { /* 미지원 환경 */ }
     }
     activeUtterance = null;
+    clearProgress();
     soundEnd();
     try { void Promise.resolve(engine()?.stop?.()).catch(() => undefined); } catch { /* 음성 공급자 오류 격리 */ }
   };
@@ -58,9 +73,31 @@ export function mountByeolhaBridge(button: HTMLButtonElement): void {
   button.addEventListener('click', () => {
     enabled = !enabled;
     if (!enabled) cancel();
-    else if (supportsNativeSpeech()) preferredKoreanVoice(); // 클릭 시 브라우저 음성 목록 준비.
+    else { engine()?.unlock?.(); if (supportsNativeSpeech()) preferredKoreanVoice(); } // 실제 별하 엔진은 클릭 후에만 준비.
     update();
   });
+
+  const readNative = (message: string, current: number): void => {
+    if (!supportsNativeSpeech() || !enabled || readingEpoch !== current) { update(); return; }
+    try {
+      const utterance = new SpeechSynthesisUtterance(message);
+      utterance.lang = 'ko-KR';
+      utterance.rate = 0.89;
+      utterance.pitch = 1.07;
+      utterance.volume = 0.93;
+      const voice = preferredKoreanVoice();
+      if (voice) utterance.voice = voice;
+      utterance.onstart = () => {
+        if (!enabled || current !== readingEpoch) return;
+        active = true;
+        window.dispatchEvent(new Event('dalbit:voice-start'));
+      };
+      utterance.onend = () => { if (current === readingEpoch) soundEnd(); };
+      utterance.onerror = () => { if (current === readingEpoch) soundEnd(); };
+      activeUtterance = utterance;
+      window.speechSynthesis.speak(utterance);
+    } catch { soundEnd(); }
+  };
 
   window.DalbitByeolha = {
     read: text => {
@@ -78,36 +115,24 @@ export function mountByeolhaBridge(button: HTMLButtonElement): void {
             active = true;
             window.dispatchEvent(new Event('dalbit:voice-start'));
             await liveEngine.speak({ text: message, voice: 'byeolha', style: 'mystical-gentle' });
-          } catch { /* 소리온 오류는 결과를 방해하지 않음. */ }
-          finally { if (readingEpoch === current) soundEnd(); }
+          } catch (error) {
+            if (readingEpoch === current) {
+              soundEnd();
+              window.dispatchEvent(new CustomEvent('dalbit:voice-fallback', { detail: error }));
+              readNative(message, current);
+            }
+          } finally { if (readingEpoch === current && !activeUtterance) soundEnd(); }
         })();
         return;
       }
-      if (!supportsNativeSpeech()) { update(); return; }
-      try {
-        const utterance = new SpeechSynthesisUtterance(message);
-        utterance.lang = 'ko-KR';
-        utterance.rate = 0.89;
-        utterance.pitch = 1.07;
-        utterance.volume = 0.93;
-        const voice = preferredKoreanVoice();
-        if (voice) utterance.voice = voice;
-        utterance.onstart = () => {
-          if (!enabled || current !== readingEpoch) return;
-          active = true;
-          window.dispatchEvent(new Event('dalbit:voice-start'));
-        };
-        utterance.onend = () => { if (current === readingEpoch) soundEnd(); };
-        utterance.onerror = () => { if (current === readingEpoch) soundEnd(); };
-        activeUtterance = utterance;
-        window.speechSynthesis.speak(utterance);
-      } catch { soundEnd(); }
+      readNative(message, current);
     },
     silence: cancel
   };
 
   if (supportsNativeSpeech()) window.speechSynthesis.addEventListener('voiceschanged', update);
   window.addEventListener('sorion:byeolha-ready', () => { cancel(); update(); });
+  window.addEventListener('sorion:byeolha-progress', event => showProgress(String((event as CustomEvent<string>).detail)));
   window.addEventListener('pagehide', cancel);
   update();
 }
