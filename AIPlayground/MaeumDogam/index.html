@@ -40,6 +40,18 @@
       <h2 id="types-title">16가지 성격마을</h2>
       <p class="section-lead">마음의 이름표를 하나 골라 봐. 나와 꼭 똑같아야 할 필요는 없어. 오늘 가장 끌리는 이야기도 좋아.</p>
       <div class="selection-status" role="status" aria-live="polite"><span class="dot"></span><span id="chosen-type">아직 선택한 유형이 없어요</span></div>
+      <div class="explore-intro">
+        <div><span class="explore-kicker">OPTIONAL · 12 SCENES</span><h3>아직 내 유형을 모르겠다면?</h3><p>12개의 짧은 상상 장면을 골라 오늘의 이야기 유형을 추천받아 봐. 언제든 직접 바꿀 수 있어!</p></div>
+        <button id="explore-toggle" class="explore-open" type="button" aria-expanded="false" aria-controls="explore-panel">나의 마음 탐험하기</button>
+      </div>
+      <div id="explore-panel" class="explore-panel" hidden>
+        <div class="explore-progress-row"><span id="explore-count">1 / 12</span><span>정답 없는 이야기 놀이</span></div>
+        <progress id="explore-progress" max="12" value="0" aria-label="마음 탐험 진행률"></progress>
+        <h3 id="explore-question"></h3>
+        <div id="explore-choices" class="explore-choices" role="group" aria-label="마음 탐험 선택지"></div>
+        <div class="explore-controls"><button id="explore-prev" type="button">이전 장면</button><button id="explore-close" type="button">닫기</button></div>
+      </div>
+      <div id="explore-result" class="explore-recommendation" role="status" aria-live="polite" hidden></div>
       <div id="types-grid" class="types-grid" role="group" aria-label="16가지 유형 중 한 가지 선택"></div>
       <p class="fineprint">직접 선택하는 창작 이야기입니다. 공식 MBTI® 검사나 전문 심리 진단이 아닙니다.</p>
     </section>
@@ -102,7 +114,7 @@
     </section>
   </main>
   <footer class="site-footer">
-    <span>🦊 곰같은여우의 마음도감</span><span>매일 다른 마음을 만나는 무료 이야기 여행</span><small>v0.3 개발 검수판 · 진단 서비스 아님</small>
+    <span>🦊 곰같은여우의 마음도감</span><span>매일 다른 마음을 만나는 무료 이야기 여행</span><small>v0.4 개발 검수판 · 진단 서비스 아님</small>
   </footer>
 </body>
 </html>
