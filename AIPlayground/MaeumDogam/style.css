@@ -69,3 +69,14 @@ main{overflow:hidden}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
 
 .result-link{margin-top:30px}.bridge-field-label{font-size:13px;font-weight:850;color:#675a71}
+
+/* v0.4: optional story explorer */
+.explore-intro{display:flex;align-items:center;justify-content:space-between;gap:24px;max-width:1030px;margin:0 auto 24px;padding:22px 26px;text-align:left;background:#fffcf7e8;border:1px solid #f0d8cb;border-radius:25px;box-shadow:0 7px 25px #68546b13}
+.explore-intro h3{margin:3px 0 5px;font-size:clamp(18px,2vw,23px)}.explore-intro p{margin:0;color:#625a6c;font-size:14px}.explore-kicker{font-weight:900;font-size:11px;letter-spacing:.1em;color:#ad706e}
+.explore-open{flex:none;border:0;min-height:48px;padding:10px 22px;border-radius:99px;background:#8a669d;color:white;font-weight:800}
+.explore-panel{max-width:800px;margin:0 auto 24px;padding:clamp(18px,4vw,32px);border:2px solid #d9caef;border-radius:25px;background:#fffdfb;box-shadow:var(--shadow);text-align:left}
+.explore-progress-row{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:#6d6176;font-weight:750}.explore-panel progress{display:block;width:100%;height:12px;margin:9px 0 20px;accent-color:#9a75b0}.explore-panel h3{font-size:clamp(20px,3vw,27px);margin:0 0 18px;line-height:1.45}
+.explore-choices{display:grid;gap:10px}.explore-choice{min-height:58px;padding:13px 18px;border:2px solid #e7dceb;border-radius:15px;background:#faf6fe;text-align:left;color:#392b49;font-weight:750}.explore-choice:hover{border-color:#9571a8;background:#f1e8fc}
+.explore-controls{display:flex;justify-content:space-between;margin-top:16px}.explore-controls button{border:0;background:transparent;color:#6f5c82;min-height:44px;padding:8px 12px;font-weight:750}.explore-controls button:disabled{opacity:.35}
+.explore-recommendation{max-width:800px;margin:0 auto 24px;padding:17px 20px;border:2px solid #eabcb2;border-radius:19px;background:#fff0e7;color:#5d465e;text-align:left}.explore-recommendation strong{font-size:18px}.explore-recommendation a{display:inline-block;margin-left:8px;text-decoration:underline;text-underline-offset:4px;font-weight:800}
+@media(max-width:650px){.explore-intro{display:block;padding:18px}.explore-open{width:100%;margin-top:14px}.explore-recommendation a{display:block;margin:10px 0 0}.explore-panel{padding:18px}.explore-choice{font-size:14px}}
