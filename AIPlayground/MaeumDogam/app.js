@@ -1,8 +1,11 @@
 import {TYPES, SODAS, BLOOD_CODES, getStory} from "./data/content.mjs";
+import {EXPLORE_QUESTIONS, recommendStoryType} from "./data/explore.mjs";
 
 const STORAGE_KEY = "maeumdogam:selection:v03";
 const $ = (selector) => document.querySelector(selector);
 const state = {type:null, blood:null, friend:null, scene:"friend"};
+const SCENES=["friend","love","work"];
+const exploreState={answers:[],step:0};
 
 function validType(code){return TYPES.some((item)=>item.code===code);}
 function validBlood(code){return BLOOD_CODES.includes(code);}
@@ -10,20 +13,20 @@ function readInitialState(){
   let saved={};
   try{saved=JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") || {};}catch{}
   const params=new URLSearchParams(location.search);
-  const type=params.has("t")?params.get("t"):saved.type;
-  const blood=params.has("b")?params.get("b"):saved.blood;
-  const friend=params.has("f")?params.get("f"):saved.friend;
-  state.type=validType(type)?type:null;
-  state.blood=validBlood(blood)?blood:null;
-  state.friend=validType(friend)?friend:null;
-  state.scene=["friend","love","work"].includes(saved.scene)?saved.scene:"friend";
+  const fromLink=["t","b","f","s"].some(key=>params.has(key));
+  const source=fromLink?{type:params.get("t"),blood:params.get("b"),friend:params.get("f"),scene:params.get("s")}:saved;
+  state.type=validType(source.type)?source.type:null;
+  state.blood=validBlood(source.blood)?source.blood:null;
+  state.friend=validType(source.friend)?source.friend:null;
+  state.scene=SCENES.includes(source.scene)?source.scene:"friend";
 }
 function pageUrl(){
   const url=new URL(location.href);
-  for(const key of ["t","b","f"])url.searchParams.delete(key);
+  for(const key of ["t","b","f","s"])url.searchParams.delete(key);
   if(state.type)url.searchParams.set("t",state.type);
   if(state.blood)url.searchParams.set("b",state.blood);
   if(state.friend)url.searchParams.set("f",state.friend);
+  if(state.scene!=="friend")url.searchParams.set("s",state.scene);
   url.hash="theater";
   return url.toString();
 }
@@ -31,10 +34,11 @@ function persist(){
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch{}
   try{
     const url=new URL(location.href);
-    ["t","b","f"].forEach((name)=>url.searchParams.delete(name));
+    ["t","b","f","s"].forEach((name)=>url.searchParams.delete(name));
     if(state.type)url.searchParams.set("t",state.type);
     if(state.blood)url.searchParams.set("b",state.blood);
     if(state.friend)url.searchParams.set("f",state.friend);
+    if(state.scene!=="friend")url.searchParams.set("s",state.scene);
     history.replaceState(null,"",url.pathname+url.search+url.hash);
   }catch{}
 }
@@ -124,6 +128,7 @@ async function copyText(text){
 }
 function choose(field,value){
   state[field]=value;
+  if(field==="type")$("#explore-result").hidden=true;
   persist();render();
   if(field==="blood" && state.type && state.blood){
     const link=$("#result-link");if(link)link.focus({preventScroll:true});
@@ -174,11 +179,79 @@ function renderStory(myType){
   };
   $("#scene-question").textContent=prompts[state.scene];
 }
+
+function renderExplorer(){
+  const index=exploreState.step;
+  const question=EXPLORE_QUESTIONS[index];
+  if(!question)return;
+  $("#explore-count").textContent=(index+1)+" / "+EXPLORE_QUESTIONS.length;
+  $("#explore-progress").value=index;
+  $("#explore-question").textContent=question.prompt;
+  $("#explore-prev").disabled=index===0;
+  const choices=$("#explore-choices");
+  choices.replaceChildren();
+  question.options.forEach((option,answer)=>{
+    const button=makeText("button","explore-choice",option.label);
+    button.type="button";
+    button.addEventListener("click",()=>{
+      exploreState.answers[index]=answer;
+      exploreState.step++;
+      if(exploreState.step===EXPLORE_QUESTIONS.length){
+        const code=recommendStoryType(exploreState.answers);
+        const profile=TYPES.find(item=>item.code===code);
+        if(!profile)return;
+        choose("type",code);
+        const result=$("#explore-result");
+        const heading=makeText("strong","","오늘의 이야기 추천: "+code+" · "+profile.name);
+        const detail=makeText("p","","12개 선택 장면을 바탕으로 골라 본 창작 이야기야. 공식 MBTI 검사가 아니며 언제든 다른 유형을 직접 선택할 수 있어.");
+        const link=makeText("a","","소다상점에서 이야기 이어가기");
+        link.href="#blood";
+        result.replaceChildren(heading,detail,link);
+        result.hidden=false;
+        $("#explore-panel").hidden=true;
+        $("#explore-toggle").setAttribute("aria-expanded","false");
+        result.tabIndex=-1;
+        result.focus({preventScroll:true});
+        result.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});
+      }else{
+        renderExplorer();
+        $("#explore-choices button").focus({preventScroll:true});
+      }
+    });
+    choices.append(button);
+  });
+}
+function setupExplorer(){
+  const toggle=$("#explore-toggle");
+  const panel=$("#explore-panel");
+  toggle.addEventListener("click",()=>{
+    const opening=panel.hidden;
+    if(opening && exploreState.step>=EXPLORE_QUESTIONS.length){
+      exploreState.answers=[];exploreState.step=0;
+    }
+    panel.hidden=!opening;
+    toggle.setAttribute("aria-expanded",String(opening));
+    if(opening){
+      renderExplorer();
+      $("#explore-question").tabIndex=-1;
+      $("#explore-question").focus({preventScroll:true});
+    }
+  });
+  $("#explore-prev").addEventListener("click",()=>{
+    if(exploreState.step>0){exploreState.step--;renderExplorer();$("#explore-question").focus({preventScroll:true});}
+  });
+  $("#explore-close").addEventListener("click",()=>{
+    panel.hidden=true;
+    toggle.setAttribute("aria-expanded","false");
+    toggle.focus({preventScroll:true});
+  });
+}
+
 function run(){
   if(TYPES.length!==16||SODAS.length!==4||TYPES.some((type)=>type.scenes.length!==4)){
     $("#chosen-type").textContent="콘텐츠를 확인하고 있어요.";
     return;
   }
-  readInitialState();renderOptions();render();
+  readInitialState();renderOptions();setupExplorer();render();
 }
 run();
