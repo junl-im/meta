@@ -1,10 +1,10 @@
 /* 달빛운세 오프라인 지원. 범위는 설치된 달빛운세 경로로 제한됩니다. */
-const CACHE_NAME='dalbit-ritual-v4.11.0';
+const CACHE_NAME='dalbit-ritual-v4.12.0';
 const CORE_FILES=[
   './','./index.html','./style.css','./art.css','./integration.css','./byeolha-connector.js','./app.js','./experience.js',
   './manifest.webmanifest','./data/tarot-artwork.json','./data/tarot-minor-readings.json','./data/couple-copy.json',
   './data/fortune-copy.json','./data/tarot-meanings.json','./data/newyear-copy.json','./data/saju-knowledge.json',
-  './assets/lunar.js','./assets/favicon.png',
+  './assets/lunar.js','./assets/favicon.png','./assets/playground-fox-dock.webp',
   './assets/pwa-192.png','./assets/pwa-512.png',
   './assets/tarot-face.webp','./assets/tarot-back.webp','./assets/moonlit-brand-ornament.webp',
   './assets/hero-desktop.webp','./assets/hero-mobile.webp','./assets/voice-on.webp','./assets/voice-off.webp',

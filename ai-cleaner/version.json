@@ -1,7 +1,7 @@
 {
-  "version": "1.22.0",
-  "assetVersion": "1220",
+  "version": "1.23.0",
+  "assetVersion": "1230",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Refined playground navigation and Dalbit disclosures; added optional SoriON Byeolha narration bridge."
+  "notes": "Added custom raster playground icon, illustrated typewriter action, and compact local-processing footer."
 }

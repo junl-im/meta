@@ -77,3 +77,10 @@
 /* 별하의 첫 모델 준비 상태를 결과와 메뉴를 가리지 않는 작은 안내로 표시. */
 .voice-loading-note{position:fixed;z-index:120;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);width:max-content;max-width:min(90vw,370px);padding:10px 15px;border:1px solid #d6bc859c;border-radius:16px;background:#231d39f2;color:#ffe9bb;box-shadow:0 9px 26px #0d0a1caa;font:600 12px/1.45 var(--sans);text-align:center;pointer-events:none}
 @media(max-width:850px){.voice-loading-note{bottom:calc(76px + env(safe-area-inset-bottom))}}
+
+/* AI 놀이터로 돌아가는 링크에 전용 래스터 마스코트 사용. */
+.playground-nav-link{display:inline-flex;align-items:center;gap:5px}
+.playground-nav-link img{display:block;width:20px;height:20px;object-fit:contain}
+.mobile-dock .playground-dock .playground-icon{display:grid;place-items:center;overflow:visible;border-color:#e2be8191;background:radial-gradient(circle,#453254,#241a3d);box-shadow:0 0 0 1px #f4d6a435,0 2px 9px #09071687}
+.mobile-dock .playground-dock .playground-icon img{display:block;width:27px;height:27px;max-width:none;object-fit:contain;filter:drop-shadow(0 1px 2px #110c1d9a)}
+@media(max-width:350px){.mobile-dock .playground-dock .playground-icon img{width:22px;height:22px}}
