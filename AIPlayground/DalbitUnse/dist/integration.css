@@ -1,0 +1,61 @@
+
+/* AI 놀이터 내부 서비스 · 달빛운세 결과 화면의 시각 계층 */
+.desktop-nav a:last-child{color:#f2d7a4;border:1px solid #d5b87c55;border-radius:999px;padding:8px 12px;white-space:nowrap}
+.mobile-nav a:last-child{color:#ffe0a8;border-top:1px solid #d6b9864a}
+#saju .saju-result{position:relative;isolation:isolate;overflow:hidden;border:1px solid #d1af775c!important;border-radius:26px;background:radial-gradient(circle at 50% 12%,#51436dca 0%,#211b3bd9 54%,#17152be9 100%),url('./assets/saju-celestial.webp') center/cover;box-shadow:inset 0 1px #fff3,0 22px 58px #0b091d9c;padding:clamp(19px,3vw,35px)}
+#saju .saju-result::before{content:'';position:absolute;z-index:-1;inset:10px;border:1px solid #e5c89129;border-radius:20px;pointer-events:none}
+#saju .saju-result>.kicker{color:#f3d9aa;letter-spacing:.19em}
+#saju .saju-result h3{color:#fff3dc;text-shadow:0 2px 20px #080619;font-size:clamp(23px,3vw,31px)}
+#saju .saju-result .result-muted{color:#ded2e6;line-height:1.55}
+#saju .pillar-grid{position:relative;gap:clamp(5px,1.5vw,15px);margin:20px 0 0;padding:13px 0;background:linear-gradient(90deg,transparent,#c6a16a55 15%,#c6a16a55 85%,transparent) center/100% 1px no-repeat}
+#saju .pillar{position:relative;min-width:0;padding:14px 4px 11px;border:1px solid #d5b88070;border-radius:17px;background:linear-gradient(165deg,#3b3157e8,#1d1935e8);box-shadow:inset 0 1px #fff2,0 8px 20px #0c0a224d}
+#saju .pillar:nth-child(2){border-color:#efd59c;box-shadow:inset 0 1px #fff5,0 0 0 2px #e8c88727,0 8px 22px #0c0a2259}
+#saju .pillar .pillar-label{color:#d7c8db;font-size:11px;font-weight:700;letter-spacing:.08em}
+#saju .pillar:nth-child(2) .pillar-label{color:#ffe2a4}
+#saju .pillar .pillar-gan,#saju .pillar .pillar-ji{font-size:clamp(27px,4vw,40px);line-height:1.35;text-shadow:0 2px 18px #0b091e}
+#saju .pillar .pillar-gan{color:#f7dfa7}
+#saju .pillar .pillar-ji{color:#bad7f1}
+#saju .pillar small{display:block;color:#bdb1ce;font-size:10px}
+.saju-element-summary{margin:15px 0 6px;padding:11px 13px;border:1px solid #dac4923b;border-radius:14px;background:#17152c9c}
+.saju-element-caption{display:flex;justify-content:space-between;gap:8px;color:#d9cfe4;font-size:11px}
+.saju-element-caption b{color:#f8dcab}
+.saju-element-bar{display:flex;gap:3px;height:7px;margin:9px 0 7px;border-radius:99px;overflow:hidden}
+.saju-element-bar i{display:block;min-width:2px;border-radius:99px}
+.saju-element-key{display:flex;justify-content:space-between;gap:4px;color:#cbbfd2;font-size:10px}
+#saju #sajuQuickText{color:#f2e7ed;line-height:1.65}
+#saju #sajuMore{border-color:#d7b87b65;background:linear-gradient(120deg,#52406788,#2b224088)}
+#saju #sajuMore>summary{color:#ffdfa3}
+#saju .mobile-result-again{border-color:#d7bb8566;color:#f6e2be}
+@media(max-width:850px){
+ #saju[data-mobile-stage='result'] .saju-result{padding:18px clamp(12px,3.5vw,20px) 16px;margin:0 auto}
+ #saju[data-mobile-stage='result'] .saju-result>.kicker{font-size:10px;margin-bottom:5px}
+ #saju[data-mobile-stage='result'] .saju-result h3{font-size:clamp(22px,5.5vw,27px);line-height:1.35}
+ #saju[data-mobile-stage='result'] .result-muted{font-size:11px;margin:6px 0 10px}
+ #saju[data-mobile-stage='result'] .pillar-grid{margin:11px 0 0;padding:9px 0;gap:6px}
+ #saju[data-mobile-stage='result'] .pillar{padding:9px 2px 7px;border-radius:12px}
+ #saju[data-mobile-stage='result'] .pillar .pillar-label{font-size:10px}
+ #saju[data-mobile-stage='result'] .pillar :is(.pillar-gan,.pillar-ji){font-size:clamp(23px,6.8vw,30px);line-height:1.35}
+ #saju[data-mobile-stage='result'] .pillar small{font-size:9px}
+ #saju[data-mobile-stage='result'] .saju-element-summary{margin:9px 0 3px;padding:9px 10px}
+ #saju[data-mobile-stage='result'] #sajuQuickText{font-size:12px;margin:8px 0}
+ #saju[data-mobile-stage='result'] #sajuMore{margin:7px 0}
+}
+@media(max-width:390px) and (max-height:720px){#saju[data-mobile-stage='result'] .pillar small{display:block}}
+@media(max-width:350px){.saju-element-key{font-size:9px}#saju[data-mobile-stage='result'] .pillar :is(.pillar-gan,.pillar-ji){font-size:22px}}
+@media(prefers-reduced-motion:reduce){#saju .saju-result{scroll-behavior:auto}}
+
+@media(max-width:350px) and (max-height:600px){#saju[data-mobile-stage='result'] .saju-result{padding:11px 11px 9px}#saju[data-mobile-stage='result'] .saju-result>.kicker{margin-bottom:2px}#saju[data-mobile-stage='result'] .result-muted{margin:3px 0 5px}#saju[data-mobile-stage='result'] .pillar-grid{margin-top:5px;padding:4px 0}#saju[data-mobile-stage='result'] .pillar{padding:5px 2px 3px}#saju[data-mobile-stage='result'] .saju-element-summary{margin:5px 0 2px;padding:6px 8px}#saju[data-mobile-stage='result'] #sajuQuickText{margin:5px 0}#saju[data-mobile-stage='result'] #sajuMore{margin:4px 0}}
+
+@media(max-width:850px){.mobile-dock{grid-template-columns:repeat(7,minmax(0,1fr))}.mobile-dock .playground-dock{color:#f4d9a9}.mobile-dock .playground-dock .dock-icon{display:grid;place-items:center;border:1px solid #e2be816e;border-radius:50%;font-size:17px;background:#302344}}
+@media(max-width:350px){.mobile-dock a{font-size:8px}.mobile-dock .dock-icon{width:22px;height:22px}}
+
+/* 다른 운세 화면은 기존 인터랙션을 유지하며 선택·결과의 대비만 정돈합니다. */
+#zodiac .animal-button.selected{border-color:#f4d49d;box-shadow:inset 0 0 0 1px #f3d49b91,0 0 24px #dcb67831}
+#zodiac .period-tab.selected,#zodiac .period-tab[aria-selected='true']{border-color:#e7c78f;color:#fff1d1;box-shadow:0 2px 10px #d7b7782a}
+#zodiac .fortune-panel{border-radius:22px}
+#newyear .newyear-result-head{position:relative;padding-bottom:10px;border-bottom:1px solid #d9bb8252}
+#newyear .season-card{border-color:#d8ba8152;background:linear-gradient(150deg,#3a2c4b9c,#241e3b8c)}
+#tarot .tarot-result-actions .button{min-height:42px}
+#couple .couple-result{border-radius:24px!important}
+#couple .couple-meter{padding:9px 12px;border-top:1px solid #d6bc8255;border-bottom:1px solid #d6bc8255}
+@media(max-width:850px){#newyear[data-mobile-stage='result'] .newyear-result-head{padding-bottom:7px}#couple[data-mobile-stage='result'] .couple-meter{padding:6px 10px}}

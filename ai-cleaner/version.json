@@ -1,7 +1,7 @@
 {
-  "version": "1.20.0",
-  "assetVersion": "1200",
+  "version": "1.21.0",
+  "assetVersion": "1210",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Unified studio navigation, buttons, cards and responsive reading layout."
+  "notes": "Added Dalbit Unse as an internal playground service with isolated PWA scope."
 }

@@ -56,15 +56,16 @@ npm run build
 - `dist/sw.js`는 정적 코드·JSON·그림을 캐시하고, 새로운 버전으로 갱신합니다.
 - 모바일 주소창·키보드 때문에 달라지는 실제 표시 영역의 높이는 `src/modules/viewport-fit.ts`에서 Visual Viewport를 이용해 맞춥니다. `src/modules/interaction-guard.ts`가 일반 화면의 우클릭·끌기·텍스트 드래그를 제한하지만 입력칸은 그대로 사용할 수 있게 합니다.
 
-## AI 놀이터 이식
+## AI 놀이터 통합
 
-원본 소스의 기준 경로는 GitHub 공개 저장소 `junl-im/meta`의 `AIPlayground/DalbitUnse/`입니다. 이 위치에서 코드를 버전 관리하며, 현재 공개 사이트는 별도 정적 배포본으로 운영합니다. GitHub Pages 배포는 저장소의 Pages 설정을 별도로 확인한 뒤 활성화해야 합니다.
+GitHub Pages는 기존 `AIPlayground/DalbitUnse/dist/`를 `/meta/AIPlayground/DalbitUnse/dist/`에 그대로 게시합니다. AI 놀이터의 `ai-cleaner/` 메뉴에서 같은 사이트 내부 경로로 이동하고, 달빛운세에서는 PC 상단 메뉴 또는 모바일 하단 메뉴의 `놀이터`로 돌아갑니다. 두 앱은 DOM·JavaScript·CSS를 공유하지 않으며 각각 자기 경로의 Service Worker만 등록합니다.
 
-1. `dist/` 정적 앱을 독립 iframe이나 하위 경로로 먼저 넣어 서비스 워커 스코프를 격리합니다.
-2. HTML/CSS를 호스트 화면에 직접 삽입한다면 전역 선택자를 프로젝트 고유 루트 이름으로 감싸 충돌을 제거합니다.
-3. `dist/data/*.json`, `src/modules`를 필요에 따라 공용 콘텐츠 및 음성 모듈로 교체합니다.
-4. 소리온 별하의 실제 SDK/API가 준비된 후 인터페이스와 보안·요금·지연 등을 합의하여 연결합니다.
+- 배포 산출물 생성: 저장소 루트에서 `node .github/scripts/build-pages-artifact.mjs`
+- 검증: 이 디렉터리에서 `npm run check` 및 `npm run build`, 저장소 루트에서 `npm run test:e2e`
+- 정식 주소: `https://junl-im.github.io/meta/AIPlayground/DalbitUnse/dist/`
+- 되돌리기: 통합 커밋을 Git에서 revert하면 Pages 메뉴·배포 경로가 이전 상태로 돌아갑니다. 별도 호스팅 원본과 사용자 브라우저의 다른 앱 저장 데이터는 건드리지 않습니다.
 
+사주 결과에서는 기존 계산 엔진을 유지하면서 4기둥·오행 간단 분포·핵심 해석을 첫 장에 배치하고 전문 분석은 기존 펼침 영역에 둡니다. 브라우저 음성 낭독은 원래 정책대로 매 방문 기본 꺼짐이며, 배경음 켜짐/꺼짐은 기존 로컬 설정을 유지합니다.
 ## 사용 조건·참고
 
 - 사주 간지 계산: [6tail/lunar-javascript](https://github.com/6tail/lunar-javascript) (MIT)

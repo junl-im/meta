@@ -1,12 +1,12 @@
 {
   "name": "ai-cleaner-browser-checks",
   "private": true,
-  "version": "1.20.0",
+  "version": "1.21.0",
   "devDependencies": {
     "@playwright/test": "1.62.1"
   },
   "scripts": {
-    "test:e2e": "playwright test ai-cleaner/tests/e2e.spec.mjs ai-cleaner/tests/research.spec.mjs --browser=chromium --workers=1",
+    "test:e2e": "playwright test ai-cleaner/tests/e2e.spec.mjs ai-cleaner/tests/research.spec.mjs ai-cleaner/tests/dalbit-integration.spec.mjs --browser=chromium --workers=1",
     "test:modules": "node ai-cleaner/tests/module-check.mjs",
     "build:vendor": "node .github/scripts/build-runtime-vendor.mjs",
     "test:research": "playwright test ai-cleaner/tests/research.spec.mjs --browser=chromium --workers=1"

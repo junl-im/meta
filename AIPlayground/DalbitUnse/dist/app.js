@@ -311,7 +311,8 @@
     const name=$('#sajuName').value.trim().slice(0,20),total=counts.reduce((a,b)=>a+b,0),dominant=counts.indexOf(Math.max(...counts));
     $('#sajuResultTitle').textContent=`${name?name+'님의':'나의'} 사주팔자`;
     $('#sajuDateInfo').textContent=`양력 ${solar.getYear()}.${solar.getMonth()}.${solar.getDay()} · 음력 ${lunar.getYear()}년 ${Math.abs(lunar.getMonth())}월 ${lunar.getDay()}일${lunar.getMonth()<0?' (윤달)':''}${unknown?' · 출생 시간 미상':` · ${String(solar.getHour()).padStart(2,'0')}:${String(solar.getMinute()).padStart(2,'0')} 기준`}`;
-    $('#pillarGrid').innerHTML=pairs.map((p,i)=>`<div class="pillar"><span class="pillar-label">${labels[i]}</span><span class="pillar-gan">${p?p[0]:'—'}</span><span class="pillar-ji">${p?p[1]:'—'}</span><small>${p?'천간 · 지지':'시간 미상'}</small></div>`).join('');
+    $('#pillarGrid').innerHTML=[3,2,1,0].map(i=>{const p=pairs[i];return `<div class="pillar"><span class="pillar-label">${labels[i]}</span><span class="pillar-gan">${p?p[0]:'—'}</span><span class="pillar-ji">${p?p[1]:'—'}</span><small>${p?'천간 · 지지':'시간 미상'}</small></div>`;}).join('');
+    $('#sajuElementSummary').innerHTML=`<span class="saju-element-caption">오행의 결 <b>${elementNames[dominant]} 중심</b></span><span class="saju-element-bar" aria-hidden="true">${counts.map((value,i)=>`<i style="flex:${Math.max(value,0.12)};background:${elementColors[i]}"></i>`).join('')}</span><span class="saju-element-key">${counts.map((value,i)=>`<span>${elementNames[i]} ${value}</span>`).join('')}</span>`;
     $('#elementsChart').innerHTML=`<h4>오행의 분포 <small style="font:400 10px var(--sans);color:#a69bb9">(천간·지지의 대표 오행)</small></h4>`+counts.map((v,i)=>`<div class="element-line"><span>${elementNames[i]}</span><div class="element-track"><i style="width:${total?(v/total)*100:0}%;background:${elementColors[i]}"></i></div><b>${v}</b></div>`).join('');
     const dayStem=pairs[2]?.[0]||'甲';
     recentSaju={dayStem,name,solarDate:solar.toYmd()};
