@@ -1,0 +1,45 @@
+{
+  "version": "0.2.0-prototype",
+  "title": "곰같은여우의 마음도감",
+  "typeCodes": [
+    "ISTJ",
+    "ISFJ",
+    "INFJ",
+    "INTJ",
+    "ISTP",
+    "ISFP",
+    "INFP",
+    "INTP",
+    "ESTP",
+    "ESFP",
+    "ENFP",
+    "ENTP",
+    "ESTJ",
+    "ESFJ",
+    "ENFJ",
+    "ENTJ"
+  ],
+  "bloodTypes": [
+    "A",
+    "B",
+    "O",
+    "AB"
+  ],
+  "notes": [
+    "형식은 MBTI 유형 직접 선택과 문화적 혈액형 이야기 결합",
+    "정식 MBTI 검사 아님, 혈액형과 성격은 과학적으로 연결되지 않음",
+    "64개 조합 표시 가능하지만 64개 전용 스토리 완성본 아님"
+  ],
+  "assets": {
+    "ready": [
+      "assets/branding/mascot-fox-guide-v01.png",
+      "assets/backgrounds/entry-mobile-v01.webp"
+    ],
+    "pending": [
+      "16유형 개별 원화",
+      "메뉴·버튼 개별 웹 최적화본 검수 및 GitHub 업로드",
+      "PC 와이드 5장면 배경",
+      "혈액형 개별 캐릭터"
+    ]
+  }
+}
