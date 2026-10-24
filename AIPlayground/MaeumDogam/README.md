@@ -60,3 +60,8 @@
 - 모든 로고·아이콘·캐릭터·배경·장식은 개별 PNG 원화와 검수된 WebP/PNG 배포본으로만 사용합니다.
 - 외부 기능이나 디자인 자료가 SVG를 요구하면 먼저 동등한 PNG 자산을 생성하거나 원본을 PNG로 변환한 후 WebP/PNG로 보관·검수한 뒤 적용합니다. SVG는 저장소·최종 웹사이트에 포함하지 않습니다.
 - `node tests/verify-no-svg.mjs`로 프로젝트 내 SVG 자산·참조를 확인합니다.
+
+## v0.4.1 원화·백업 동기화 (2026-10-25)
+- [최신 v0.4.1 전체 ZIP](https://drive.google.com/file/d/1TGFC6_75jtBeZNOEBgmx6gqGKzbuuESH/view?usp=drivesdk) 업로드 및 압축 검사 통과.
+- ISTJ·ISFJ PNG 원본과 WebP 경량 미리보기 각 2개를 구글드라이브 폴더에 분리 보존. 두 캐릭터 모두 현재 **미승인 시안**으로 제품 화면 미사용.
+- GitHub 자산 manifest v0.4.1 / 노션 자산 대장의 상태·경로·원본 링크 갱신.
