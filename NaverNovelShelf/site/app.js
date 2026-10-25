@@ -8,7 +8,6 @@
     .filter(w=>AUTHORS.includes(w.author) && /^\d+$/.test(w.id) && ["best","challenge"].includes(w.league))
     .filter(w=>w.url === "https://m.novel.naver.com/"+w.league+"/list?novelId="+w.id)
     .sort((a,b)=>Number(b.id)-Number(a.id));
-  const ranking=window.NOVEL_RANKING_SNAPSHOT;
   let selectedLeague="all";
   let lastReadId=null;
   let toastTimer=null;
@@ -84,28 +83,6 @@
     byId("copy-recent-link").hidden=!work;
     if(work)byId("resume-button").textContent="최근 열어본 ‘"+work.title+"’ 다시 보기 ↗";
   }
-  function renderRanking() {
-    const host=byId("ranking-spotlight");
-    if(!ranking||!/^\d{4}-\d{2}-\d{2}$/.test(ranking.date)||!Array.isArray(ranking.entries))return;
-    const ageDays=Math.floor((Date.now()-new Date(ranking.date+"T00:00:00+09:00").getTime())/86400000);
-    if(!Number.isFinite(ageDays)||ageDays<0||ageDays>14)return;
-    const found=ranking.entries.filter(entry=>
-      Number.isInteger(entry.rank)&&entry.rank>=1&&entry.rank<=100&&works.some(w=>w.id===entry.id&&w.league===entry.league)
-    ).sort((a,b)=>a.rank-b.rank);
-    if(!found.length)return;
-    byId("ranking-caption").textContent=ranking.date.replaceAll("-",".")+" 확인 · 당시 베스트리그 일간 TOP 100";
-    byId("ranking-links").innerHTML=found.slice(0,3).map(entry=>{
-      const work=works.find(w=>w.id===entry.id&&w.league===entry.league);
-      return `<a href="${escapeHTML(work.url)}" target="_blank" rel="noopener noreferrer" data-open-novel="${escapeHTML(work.id)}"><b>${entry.rank}위</b><span>${escapeHTML(work.title)}</span><span aria-hidden="true">↗</span></a>`;
-    }).join("");
-    host.hidden=false;
-    host.querySelectorAll("[data-open-novel]").forEach(el=>el.addEventListener("click",()=>{
-      lastReadId=el.dataset.openNovel;
-      try{localStorage.setItem(LAST_KEY,lastReadId);}catch{}
-      renderResumeButtons();
-      renderWorks();
-    }));
-  }
   function openLast() {
     const work=findLast();if(!work)return;
     const link=document.createElement("a");
@@ -139,5 +116,5 @@
   byId("resume-button").addEventListener("click",openLast);
   byId("reopen-last").addEventListener("click",openLast);
   byId("copy-recent-link").addEventListener("click",copyLast);
-  renderWorks();renderResumeButtons();renderRanking();
+  renderWorks();renderResumeButtons();
 })();
