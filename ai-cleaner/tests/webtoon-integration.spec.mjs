@@ -268,6 +268,31 @@ test('PNG split keeps a bubble tail crossing the page boundary',async({page})=>{
   expect(count).toBeGreaterThan(0);
 });
 
+test('speech bubble fill stays continuous from body to tail tip',async({page})=>{
+  await page.setViewportSize({width:390,height:568});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'◯ 말풍선'}).click();
+  await expect(page.locator('.web-bubble-canvas')).toBeVisible();
+  const sample=await page.locator('.web-bubble-canvas').evaluate(canvas=>{
+    const ctx=canvas.getContext('2d'),pixels=[],scale=canvas.width/310;
+    for(let y=125;y<=190;y+=5)pixels.push(ctx.getImageData(Math.round(215*scale),Math.round((y+5)*scale),1,1).data[3]);
+    const seam=[...ctx.getImageData(Math.round(215*scale),Math.round(135*scale),1,1).data].slice(0,3);
+    return{pixels,seam};
+  });
+  expect(sample.pixels.every(alpha=>alpha>0)).toBe(true);
+  expect(sample.seam.every(channel=>channel>240)).toBe(true);
+});
+
+for(const [width,height] of [[320,360],[320,568],[390,568],[430,900]])test(`mobile bottom navigation remains within ${width}x${height}`,async({page})=>{
+  await page.setViewportSize({width,height});
+  await page.goto(studio);
+  const bounds=await page.evaluate(()=>({nav:document.querySelector('.web-mobile-nav').getBoundingClientRect().toJSON(),status:document.querySelector('.web-status').getBoundingClientRect().toJSON(),viewport:visualViewport?.height||innerHeight}));
+  expect(bounds.nav.top).toBeGreaterThanOrEqual(0);
+  expect(bounds.nav.bottom).toBeLessThanOrEqual(bounds.viewport+1);
+  expect(bounds.status.bottom).toBeLessThanOrEqual(bounds.viewport+1);
+});
+
 for(const [width,height] of [[320,568],[360,740],[390,844],[768,1024],[1280,800]])test(`webtoon workspace fits ${width}x${height}`,async({page})=>{
   await page.setViewportSize({width,height});
   await page.goto(studio);

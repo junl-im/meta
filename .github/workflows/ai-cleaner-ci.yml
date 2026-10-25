@@ -79,6 +79,7 @@ jobs:
           node --check ai-cleaner/tests/webtoon-integration.spec.mjs
           node --check AIPlayground/WebtoonStudio/assets/index-GomFoxWebtoon-v1.js
           node --check AIPlayground/WebtoonStudioSource/scripts/upgrade-deployed-web.mjs
+          node --check AIPlayground/WebtoonStudioSource/scripts/fix-bubble-contour.mjs
           node --check .github/scripts/build-pages-artifact.mjs
           node --check .github/scripts/build-runtime-vendor.mjs
           node --check ai-cleaner/sw.js
