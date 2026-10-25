@@ -1,7 +1,7 @@
 {
-  "version": "1.36.0",
-  "assetVersion": "1360",
+  "version": "1.36.1",
+  "assetVersion": "1361",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Integrate the illustrated Webtoon Studio as an isolated AI Playground service."
+  "notes": "Prevent delayed panel focus from interrupting source clearing; verify Webtoon Studio editing, drafts, exports and responsive layouts."
 }

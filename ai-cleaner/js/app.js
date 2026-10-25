@@ -703,11 +703,16 @@ function focusOpenedPanel(panel){
   // Focus immediately so keyboard cancellation is available before the trigger button
   // can be disabled by a work lock. Re-assert on the next frame after panel layout settles.
   const focusNow=()=>{if(panel.hidden)return;try{panel.focus({preventScroll:true});}catch(_){try{panel.focus();}catch(__){}}};
-  focusNow();requestAnimationFrame(focusNow);
+  focusNow();requestAnimationFrame(()=>{if(document.activeElement===panel)focusNow();});
 }
 function restorePanelReturnFocus(id){
   const target=panelReturnFocus.get(id);panelReturnFocus.delete(id);if(!target||!target.isConnected||target.disabled)return;
-  requestAnimationFrame(()=>{try{target.focus({preventScroll:true});}catch(_){try{target.focus();}catch(__){}}});
+  const focusAtClose=document.activeElement;
+  if(focusAtClose?.matches?.('input,textarea,[contenteditable="true"]'))return;
+  requestAnimationFrame(()=>{
+    if(document.activeElement!==focusAtClose||document.activeElement?.matches?.('input,textarea,[contenteditable="true"]'))return;
+    try{target.focus({preventScroll:true});}catch(_){try{target.focus();}catch(__){}}
+  });
 }
 function closeAllPanels(except=''){if(except!=='rewritePanel')invalidatePendingRewriteOpen();if(except!=='rewritePanel'&&!$('#rewritePanel').hidden)window.AICleanerRewriteStudio?.cancelGeneration?.({status:'패널을 닫아 생성 작업을 취소했습니다.'});panelManager.closeAll(except);syncPanelAria();}
 function openPanel(id){
