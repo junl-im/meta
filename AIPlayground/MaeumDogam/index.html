@@ -9,6 +9,7 @@
   <link rel="icon" type="image/png" href="./assets/branding/mascot-fox-guide-v01.png">
   <link rel="stylesheet" href="./style.css">
   <script type="module" src="./app.js"></script>
+  <script type="module" src="./talk-lab.js"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">본문으로 바로가기</a>
@@ -18,6 +19,7 @@
       <a href="#types">성격마을</a><a href="#blood">소다상점</a><a href="#bridge">관계 다리</a><a href="#theater">마음 극장</a>
     </nav>
   </header>
+  <div class="review-ribbon" role="note"><strong>공개 체험판 v0.4.2</strong><span>가입 없이 이용 가능 · 개별 캐릭터 원화 3/16종 제작 · 원화는 승인 전 시안</span></div>
   <main id="main">
     <section class="hero" id="home">
       <div class="hero-sky" aria-hidden="true"></div>
@@ -27,6 +29,7 @@
         <p class="hero-tag">나를 발견하는 가장 재미있는 방법</p>
         <p class="hero-description">16가지 성격마을과 4가지 소다상점에서<br>지금의 나에게 어울리는 이야기를 골라봐!</p>
         <a class="primary-link" href="#types">무료 마음 탐험 시작 <span aria-hidden="true">↗</span></a>
+        <a class="preview-shortcut" href="#art-review">제작된 캐릭터 원화 3종 미리보기</a>
         <p class="hero-caption">가입 없이 무료 · 64개 조합 이야기 · 결과 공유</p>
       </div>
       <img class="hero-mascot" src="./assets/branding/mascot-fox-guide-v01.png" alt="책을 안고 탐험을 안내하는 둥근 곰같은여우" width="480" height="480" fetchpriority="high">
@@ -54,6 +57,32 @@
       <div id="explore-result" class="explore-recommendation" role="status" aria-live="polite" hidden></div>
       <div id="types-grid" class="types-grid" role="group" aria-label="16가지 유형 중 한 가지 선택"></div>
       <p class="fineprint">직접 선택하는 창작 이야기입니다. 공식 MBTI® 검사나 전문 심리 진단이 아닙니다.</p>
+      <section class="art-review" id="art-review" aria-labelledby="art-review-title">
+        <div class="art-review-heading"><span class="review-pill">원화 제작 3 / 16</span><h3 id="art-review-title">마음마을 주민을 만나 봐!</h3><p>지금은 세 친구의 첫 번째 원화를 확인할 수 있어. 아직 최종 승인 전이라 표정·비율·디테일은 보정될 수 있어.</p></div>
+        <div class="art-review-grid">
+          <article class="art-review-card"><div class="art-review-image"><img src="./assets/characters/mbti/istj-hedgehog-draft-v01.webp" loading="lazy" decoding="async" width="592" height="664" alt="체크 노트와 연필을 든 갈색 고슴도치 캐릭터"></div><span class="art-review-state">캐릭터 시안 · 검토 중</span><h4>ISTJ · 약속의 기록가</h4><p>고슴도치의 차분하고 단단한 실루엣, 기록장과 작은 연필. 약속을 끝까지 돌보는 이야기의 주인공.</p></article>
+          <article class="art-review-card"><div class="art-review-image"><img src="./assets/characters/mbti/isfj-gardener-draft-v01.webp" loading="lazy" decoding="async" width="512" height="768" alt="작은 꽃과 물뿌리개를 챙긴 복슬복슬한 토끼 정원사 캐릭터"></div><span class="art-review-state">캐릭터 시안 · 검토 중</span><h4>ISFJ · 마음의 정원사</h4><p>조용히 꽃을 돌보는 토끼. 누군가를 보살피면서도 자신의 마음에 물을 주는 장면을 담았어.</p></article>
+          <article class="art-review-card"><div class="art-review-image"><img src="./assets/characters/mbti/infj-owl-draft-v01.webp" loading="lazy" decoding="async" width="592" height="664" alt="별 무늬 책과 따뜻한 등불을 든 연보랏빛 부엉이 캐릭터"></div><span class="art-review-state">캐릭터 시안 · 검토 중</span><h4>INFJ · 별빛 해석가</h4><p>책과 별등불을 든 부엉이. 남의 마음을 단정하지 않고 천천히 귀 기울이는 역할이야.</p></article>
+        </div>
+        <details class="concept-roster"><summary>아직 그림을 준비 중인 13유형 캐릭터 콘셉트 보기</summary>
+          <ul>
+            <li><strong>INTJ</strong> · 검은고양이 설계자 — 접이식 별지도와 작은 설계 도구</li>
+            <li><strong>ISTP</strong> · 너구리 수리공 — 실용적인 공구 가방과 기계 부품</li>
+            <li><strong>ISFP</strong> · 사슴 산책자 — 색연필·물감·자연색 망토</li>
+            <li><strong>INFP</strong> · 수달 이야기꾼 — 종이배와 손편지</li>
+            <li><strong>INTP</strong> · 미어캣 연구자 — 돋보기와 펼친 질문 노트</li>
+            <li><strong>ESTP</strong> · 치타 모험가 — 빨간 운동화와 방향 리본</li>
+            <li><strong>ESFP</strong> · 앵무새 무대장 — 축제 리본과 작은 마이크</li>
+            <li><strong>ENFP</strong> · 강아지 탐험가 — 무지개 망원경과 여행 가방</li>
+            <li><strong>ENTP</strong> · 까마귀 발명가 — 분해 가능한 발명품과 질문 배지</li>
+            <li><strong>ESTJ</strong> · 비버 운영자 — 계획표와 마을 도구 상자</li>
+            <li><strong>ESFJ</strong> · 알파카 초대장 — 꽃무늬 찻잔과 환영카드</li>
+            <li><strong>ENFJ</strong> · 백조 연결자 — 은빛 실타래와 응원 편지</li>
+            <li><strong>ENTJ</strong> · 사자 항해사 — 나침반과 큰 항로 지도</li>
+          </ul>
+          <p>동물·직업은 이 작품 속 창작 배역이야. MBTI 유형별 실제 능력·성격을 단정하는 뜻은 아니야.</p>
+        </details>
+      </section>
     </section>
 
     <section class="chapter soda-shop" id="blood" aria-labelledby="blood-title">
@@ -79,6 +108,25 @@
         </article>
         <p id="bridge-prompt" class="fineprint">성격마을에서 나의 유형을 고르고, 상대 유형을 선택하면 이야기가 열려요.</p>
       </div>
+      <section class="talk-lab" id="talk-lab" aria-labelledby="talk-lab-title">
+        <span class="review-pill">공감형 밈 체험 · NEW</span>
+        <h3 id="talk-lab-title">“너 T야?” 마음 말풍선 번역소</h3>
+        <p class="talk-intro">같은 걱정도 다른 말투로 전해질 수 있어. 이번엔 어떤 대답을 건네고 싶어?</p>
+        <div class="talk-stage">
+          <span class="talk-index" id="talk-index">상황 1 / 4</span>
+          <div class="talk-message"><span class="talk-person">친구</span><p id="talk-situation">나 오늘 발표 완전 망했어...</p></div>
+          <p class="talk-prompt">지금 내 대답은?</p>
+          <div class="talk-choices" role="group" aria-label="말풍선 답변 방식 선택">
+            <button type="button" data-talk-style="empathy" aria-pressed="false">마음부터 읽기</button>
+            <button type="button" data-talk-style="solution" aria-pressed="false">해결부터 찾기</button>
+            <button type="button" data-talk-style="ask" aria-pressed="true">먼저 물어보기</button>
+          </div>
+          <div class="talk-answer" aria-live="polite"><span>나의 답장</span><p id="talk-answer">지금은 들어주는 게 좋을까, 아니면 같이 방법을 찾아볼까?</p></div>
+          <p class="talk-insight" id="talk-insight">상대가 원하는 도움을 먼저 물으면 오해를 줄일 수도 있어.</p>
+          <button class="talk-next" id="talk-next" type="button">다음 상황 만나기 <span aria-hidden="true">→</span></button>
+        </div>
+        <p class="fineprint">‘너 T야?’ 밈을 소재로 만든 대화 놀이예요. T도 충분히 다정할 수 있고, F도 논리적으로 해결할 수 있어요. 대답 스타일은 유형 판정이 아닙니다.</p>
+      </section>
     </section>
 
     <section class="chapter theater" id="theater" aria-labelledby="theater-title">
@@ -114,7 +162,7 @@
     </section>
   </main>
   <footer class="site-footer">
-    <span>🦊 곰같은여우의 마음도감</span><span>매일 다른 마음을 만나는 무료 이야기 여행</span><small>v0.4 개발 검수판 · 진단 서비스 아님</small>
+    <span>🦊 곰같은여우의 마음도감</span><span>매일 다른 마음을 만나는 무료 이야기 여행</span><small>v0.4.2 공개 체험판 · 진단 서비스 아님</small>
   </footer>
 </body>
 </html>

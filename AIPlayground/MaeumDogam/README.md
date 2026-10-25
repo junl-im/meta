@@ -65,3 +65,11 @@
 - [최신 v0.4.1 전체 ZIP](https://drive.google.com/file/d/1TGFC6_75jtBeZNOEBgmx6gqGKzbuuESH/view?usp=drivesdk) 업로드 및 압축 검사 통과.
 - ISTJ·ISFJ PNG 원본과 WebP 경량 미리보기 각 2개를 구글드라이브 폴더에 분리 보존. 두 캐릭터 모두 현재 **미승인 시안**으로 제품 화면 미사용.
 - GitHub 자산 manifest v0.4.1 / 노션 자산 대장의 상태·경로·원본 링크 갱신.
+
+## v0.4.3 공개 체험판·원화 검토 (2026-10-25)
+- **공개 웹 체험판:** https://maeumdogam-preview-2026.glassyroot13.chatgpt.site/ — Sites 독립 프로젝트로 공개 접근. 기존 main·달빛운세 Pages는 변경하지 않음.
+- ISTJ 고슴도치·ISFJ 토끼·INFJ 부엉이 3종 WebP를 **미승인 시안**으로 전시. 고해상도 PNG 원본은 공개 웹 경로에서 제외.
+- 신규 **“너 T야?” 마음 말풍선 번역소**: 4상황, 공감 먼저/해결 먼저/먼저 물어보기 3가지 표현. T/F로 공감·인성을 단정하지 않음.
+- 브라우저에서 유형→소다→친구 비교와 대화 답장 전환 확인. Node 콘텐츠·SVG 금지 검사 PASS, 실제 휴대폰 화면 전체 QA는 미완료.
+- 13종 나머지 유형 배역 제안과 캐릭터 원화 검토는 docs/PHASE_05_PUBLIC_REVIEW.md 참고.
+- 작업은 Draft PR #5에서 진행하며 main 병합 없음. 공개 Sites는 별도 호스팅 코드.

@@ -1,10 +1,11 @@
 {
   "project": "곰같은여우의 마음도감",
   "projectId": "maeumdogam",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "updatedAt": "2026-10-25",
   "repository": "junl-im/meta",
   "projectRoot": "AIPlayground/MaeumDogam",
+  "publicReviewUrl": "https://maeumdogam-preview-2026.glassyroot13.chatgpt.site/",
   "notionMaster": "https://app.notion.com/p/403fff243ec98170ac40ea10ec641872",
   "notionAssetDatabase": "https://app.notion.com/p/b87e8e0317824781a82e5f26119f619d",
   "driveOriginalRoot": "https://drive.google.com/drive/folders/1_N4NnbUyRPjaAKb38m0_hPMDzioD5dN3",
@@ -687,6 +688,9 @@
       "sha256": "1869a596a1efbd076410049f8427e223ac96a50c4799c65b89491f7f318ea8cb",
       "webPreview": {
         "format": "webp",
+        "githubPath": "assets/characters/mbti/istj-hedgehog-draft-v01.webp",
+        "githubSha256": "7b718a8d5639a2de416b6b0aad40a7ff25610ac96533c642357a9074941d9bd8",
+        "githubSize": "600x673",
         "size": "592x664",
         "sha256": "de50d211cce09db799b91464349df989e842cf21527b0d74627c409e7aef3412",
         "driveFileId": "1h3AfghOvMb3GQUP6gLSqqGtD0scoqlTk"
@@ -705,6 +709,9 @@
       "githubBlobSha": "a966eedd55077288d19939cf7dc5e20f3b903af0",
       "webPreview": {
         "format": "webp",
+        "githubPath": "assets/characters/mbti/isfj-gardener-draft-v01.webp",
+        "githubSha256": "a39754a247ecc3a3a800bf279339187b596059aefb71b37c662d9869e61a1b4c",
+        "githubSize": "533x800",
         "size": "512x768",
         "sha256": "c1a200a03ea86cdc56780b81219aa84975138bb7d4b6262754693b3f8a6af433",
         "driveFileId": "1RT-D_7h7TSgi6GaUVIHzCEUPHybNVOrp"
@@ -723,6 +730,9 @@
       "githubBlobSha": "4a8e46c61f0ae4911a62e7bc93bb6e430f13f02e",
       "webPreview": {
         "format": "webp",
+        "githubPath": "assets/characters/mbti/infj-owl-draft-v01.webp",
+        "githubSha256": "4d51ccf8d2d641679a0235e8c991e4b3a920f8091debd71962a60649544b9b6a",
+        "githubSize": "600x673",
         "size": "592x664",
         "sha256": "5d7f7d85178c8c1824d6a37d8bac0d2b10b42df02357f778714fc4e6114f9851",
         "driveFileId": "1GO3oq0Jk1bGxuk3TwGAlHgRcDbsK3ynk"
@@ -737,6 +747,7 @@
       "webp",
       "png"
     ],
-    "approvalBeforeUse": true
+    "approvalBeforeUse": true,
+    "publicReviewDisplaysClearlyLabeledDrafts": true
   }
 }
