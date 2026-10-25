@@ -31,7 +31,9 @@ re-host chapter text. Never add SVG assets or inline vector markup.
 
 - `dist/popularity.js` stores a *dated* verified snapshot of works appearing in
   Naver's public Best League daily Top 100, not a fabricated ranking of all works.
-- The published site hides the historical spotlight automatically after 14 days.
+- The public website intentionally does **not** show a ranking spotlight or
+  a "랭킹에 올랐던 이야기" section. Keep this metadata internal only. Do not
+  re-add that UI during automated updates.
 - On scheduled checks, inspect the official public
   `https://m.novel.naver.com/best/ranking` page. Match entries by novelId and league,
   and read the displayed ranking basis date. Update the snapshot only if its
