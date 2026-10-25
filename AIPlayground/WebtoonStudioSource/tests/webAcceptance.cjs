@@ -45,6 +45,8 @@ app.whenReady().then(async()=>{
     assert.notEqual(await mobileJs(`getComputedStyle(document.querySelector('.web-right')).display`),'none')
     await mobileJs(`Array.from(document.querySelectorAll('.web-mobile-nav button')).find(b=>b.textContent==='캔버스').click()`)
     assert.notEqual(await mobileJs(`getComputedStyle(document.querySelector('.web-center')).display`),'none')
+    assert.equal(await mobileJs(`(()=>{const area=document.querySelector('.web-canvas-scroll');return area.scrollWidth<=area.clientWidth+1})()`),true)
+    require('node:fs').writeFileSync(join(process.cwd(),'.test-tmp','web-mobile.png'),(await mobile.webContents.capturePage()).toPNG())
     console.log('WEB_MOBILE_TOOLS_CANVAS_PROPERTIES=PASS')
     await mobile.close()
     await win.close();app.exit(0)
