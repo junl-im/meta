@@ -569,7 +569,9 @@ test('clearing the source immediately clears stale output and analysis state', a
   await input.fill('앞\u200B뒤\u00A0끝');
   await analyzeNow(page,{silent:true});
   await expect(output).toHaveValue('앞뒤 끝');
-  await input.fill('');
+  await input.focus();
+  await input.press('ControlOrMeta+A');
+  await input.press('Backspace');
   await expect(input).toHaveValue('');
   await expect(output).toHaveValue('');
   await expect(page.locator('#issuesWidget')).toBeHidden();
@@ -596,7 +598,9 @@ test('empty source stays authoritative after rewrite studio lifecycle callbacks 
   await input.fill('앞\u200B뒤\u00A0끝');
   await analyzeNow(page,{silent:true});
   await expect(output).toHaveValue('앞뒤 끝');
-  await input.fill('');
+  await input.focus();
+  await input.press('ControlOrMeta+A');
+  await input.press('Backspace');
   await expect(output).toHaveValue('');
   await page.waitForTimeout(140);
   await expect(output).toHaveValue('');
@@ -658,7 +662,9 @@ test('foundation flow keeps state, layout and rewrite tools coherent', async ({ 
   await expect(output).toHaveValue('앞뒤 끝');
   await expect(page.locator('[data-resulttab="xray"]')).toHaveCount(0);
 
-  await input.fill('');
+  await input.focus();
+  await input.press('ControlOrMeta+A');
+  await input.press('Backspace');
   await expect(input).toHaveValue('');
   await analyzeNow(page,{silent:true});
   await expect(output).toHaveValue('');
