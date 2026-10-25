@@ -1,7 +1,7 @@
 {
   "project": "곰같은여우의 마음도감",
   "projectId": "maeumdogam",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "updatedAt": "2026-10-25",
   "repository": "junl-im/meta",
   "projectRoot": "AIPlayground/MaeumDogam",
@@ -710,6 +710,24 @@
         "driveFileId": "1RT-D_7h7TSgi6GaUVIHzCEUPHybNVOrp"
       },
       "notes": "RGBA 알파 확인. 개별 WebP 미리보기 생성·Drive 동기화. 스타일 일치·원화 승인·기기별 시각 QA 미완료."
+    },
+    {
+      "id": "CHAR-INFJ",
+      "category": "character",
+      "name": "INFJ 별빛 해석가 부엉이 시안",
+      "path": "assets/characters/mbti/infj-owl-draft-v01.png",
+      "status": "generated",
+      "approved": false,
+      "originalDriveFileId": "12yQ9jLMpg6ifgkPVWuWh9hsbeOd8ZPnz",
+      "sha256": "19ac847497de8e360c112a832c63d0aef4d0cef993c7b78658a3879e86de550e",
+      "githubBlobSha": "4a8e46c61f0ae4911a62e7bc93bb6e430f13f02e",
+      "webPreview": {
+        "format": "webp",
+        "size": "592x664",
+        "sha256": "5d7f7d85178c8c1824d6a37d8bac0d2b10b42df02357f778714fc4e6114f9851",
+        "driveFileId": "1GO3oq0Jk1bGxuk3TwGAlHgRcDbsK3ynk"
+      },
+      "notes": "고급 구아슈 원화, ISTJ/ISFJ 스타일 참고. RGBA 알파 검사 통과, WebP 미리보기 Drive 동기화. 사용자 품질 승인 및 실기기 검수 전 웹앱 미사용."
     }
   ],
   "rasterOnlyPolicy": {
