@@ -1,7 +1,7 @@
 {
-  "version": "1.27.0",
-  "assetVersion": "1270",
+  "version": "1.28.0",
+  "assetVersion": "1280",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Two-step browser Back behavior with an illustrated exit confirmation and honest close fallback."
+  "notes": "Firebase Hosting mirror with GitHub Pages redirect and old-origin storage access."
 }

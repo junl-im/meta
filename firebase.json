@@ -1,0 +1,17 @@
+{
+  "hosting": {
+    "site": "meta-deee1",
+    "public": ".pages-site",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "headers": [
+      {
+        "source": "/ai-cleaner/version.json",
+        "headers": [{"key": "Cache-Control", "value": "no-cache"}]
+      },
+      {
+        "source": "/ai-cleaner/sw.js",
+        "headers": [{"key": "Cache-Control", "value": "no-cache"}]
+      }
+    ]
+  }
+}
