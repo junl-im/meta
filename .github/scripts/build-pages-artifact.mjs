@@ -18,6 +18,7 @@ const assetFiles = [
   'typewriter-action.webp',
   'playground-home-v1.webp',
   'home-divider-v1.webp',
+  'exit-fox-v1.webp',
   'home-icon-text.webp',
   'home-icon-image.webp',
   'home-icon-writing.webp',

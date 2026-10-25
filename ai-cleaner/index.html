@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://r.jina.ai; worker-src 'self' blob:; font-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1260">
+<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1270">
 <style id="bootCritical">html:not(.boot-ready) body{visibility:hidden}html{background:#fff8f0}html.app-booting{overflow-anchor:none}html.app-booting body{cursor:progress}html.app-booting body *{cursor:progress!important}</style>
 <script src="js/boot.js" defer></script>
 </head>
@@ -501,6 +501,16 @@
 <div class="footer">브라우저 로컬 처리</div>
 </div>
 
+<dialog class="exitDialog" id="exitDialog" aria-labelledby="exitTitle" aria-describedby="exitDescription">
+  <div class="exitDialogArt"><img src="assets/exit-fox-v1.webp" alt="작별 인사를 건네는 여우 일러스트" width="420" height="420" decoding="async"></div>
+  <div class="exitDialogCopy">
+    <span class="exitDialogEyebrow">SEE YOU AGAIN</span>
+    <h2 id="exitTitle">놀이터를 떠날까요?</h2>
+    <p id="exitDescription">나가면 작성 중인 내용은 남지 않을 수 있어요. 탭 닫기가 제한된 브라우저에서는 이전 페이지로 이동합니다.</p>
+    <p class="exitDialogStatus" id="exitStatus" role="status" aria-live="polite" hidden></p>
+    <div class="exitDialogActions"><button id="exitStay" type="button">계속 둘러보기</button><button id="exitLeave" type="button">나가기</button></div>
+  </div>
+</dialog>
 <div class="floatingDock" id="floatingDock" aria-label="분석 도우미">
   <button class="floatWidget rewrite" id="rewriteWidget" type="button" hidden aria-controls="rewritePanel" aria-expanded="false"><span class="widgetIcon">✦</span><span>새 글 재작성</span><b id="rewriteBadge">NEW</b></button>
   <button class="floatWidget" id="issuesWidget" type="button" hidden aria-controls="issuesPanel" aria-expanded="false"><span class="widgetIcon">✨</span><span>교정 제안</span><b id="issueCount">0</b></button>

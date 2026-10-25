@@ -47,6 +47,46 @@ test('illustrated home opens first and cards, brand and browser back connect the
   await expect(page.locator('#homeTool')).toBeVisible();
 });
 
+test('Back returns to home before opening the illustrated exit confirmation', async ({ page }) => {
+  await page.setViewportSize({width:320,height:568});
+  await gotoReady(page,{home:true});
+  await page.locator('.homeToolCard[data-open-tool="text"]').click();
+  await page.evaluate(()=>history.back());
+  await expect(page.locator('#homeTool')).toBeVisible();
+  await expect(page.locator('#exitDialog')).toBeHidden();
+  await page.evaluate(()=>history.back());
+  await expect(page.locator('#exitDialog')).toBeVisible();
+  await expect.poll(()=>page.locator('#exitDialog img').evaluate(img=>img.naturalWidth)).toBeGreaterThan(0);
+  await expect(page.locator('#exitStay')).toBeFocused();
+  await page.locator('#exitStay').click();
+  await expect(page.locator('#exitDialog')).toBeHidden();
+  await page.evaluate(()=>history.back());
+  await expect(page.locator('#exitDialog')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#exitDialog')).toBeHidden();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
+
+test('direct tool links and reloads also return home on the first Back', async ({ page }) => {
+  await page.goto(BASE+'#text');
+  await page.waitForFunction(()=>window.__AI_CLEANER_APP_READY__===true);
+  await expect(page.locator('#textTool')).toBeVisible();
+  await page.reload();
+  await expect(page.locator('#textTool')).toBeVisible();
+  await page.evaluate(()=>history.back());
+  await expect(page.locator('#homeTool')).toBeVisible();
+  await page.evaluate(()=>history.back());
+  await expect(page.locator('#exitDialog')).toBeVisible();
+});
+test('exit confirmation closes a window opened by the site', async ({ page }) => {
+  await page.setContent('<button id="open">open</button><script>document.querySelector("#open").onclick=()=>window.open("'+BASE+'","_blank")</script>');
+  const [popup]=await Promise.all([page.waitForEvent('popup'),page.locator('#open').click()]);
+  await popup.waitForFunction(()=>window.__AI_CLEANER_APP_READY__===true);
+  await popup.evaluate(()=>history.back());
+  await expect(popup.locator('#exitDialog')).toBeVisible();
+  await popup.locator('#exitLeave').click();
+  await expect.poll(()=>popup.isClosed()).toBe(true);
+});
 test('mobile home cards keep readable text and icon-first service layout', async ({ page }) => {
   for (const width of [320, 360, 390, 430]) {
     await page.setViewportSize({width,height:844});
