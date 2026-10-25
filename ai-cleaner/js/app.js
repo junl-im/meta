@@ -948,9 +948,33 @@ $$('[data-resulttab]').forEach(t=>{t.onclick=()=>activateResultTab(t.dataset.res
 let imageRunSeq=0;
 const TOOL_SECTION_IDS={text:'textTool',image:'imageTool',writing:'writingTool',reach:'reachTool'};
 const toolTabs=$$('[data-tool]');
+const exitDialog=$('#exitDialog');
+const exitStatus=$('#exitStatus');
+const startingUrl=new URL(location.href);
+const initialTool=startingUrl.hash.slice(1);
+const hadPriorPage=history.state?.playgroundHadPriorPage??history.length>1;
+const homeUrl=new URL(startingUrl);homeUrl.hash='';
+if(history.state?.playgroundGuarded!==true){
+  history.replaceState({playgroundExitGuard:true,playgroundHadPriorPage:hadPriorPage},'',homeUrl);
+  history.pushState({playgroundTool:TOOL_SECTION_IDS[initialTool]?initialTool:'home',playgroundGuarded:true,playgroundHadPriorPage:hadPriorPage},'',startingUrl);
+}
 function writeToolHistory(tool){
   const url=new URL(location.href);url.hash=tool==='home'?'':tool;
-  if(url.href!==location.href)history.pushState({playgroundTool:tool},'',url);
+  history.replaceState({playgroundTool:tool,playgroundGuarded:true,playgroundHadPriorPage:hadPriorPage},'',url);
+}
+function showExitDialog(){
+  exitStatus.hidden=true;exitStatus.textContent='';
+  if(!exitDialog.open)exitDialog.showModal();
+  $('#exitStay').focus({preventScroll:true});
+}
+function leavePlayground(){
+  try{window.close();}catch(_){}
+  setTimeout(()=>{
+    if(window.closed)return;
+    if(hadPriorPage){history.go(-2);return;}
+    exitStatus.textContent='이 탭은 브라우저가 자동 종료를 허용하지 않아요. 브라우저의 탭 닫기 버튼을 눌러 주세요.';
+    exitStatus.hidden=false;
+  },220);
 }
 function showHome({updateHistory=true}={}){
   invalidatePendingRewriteOpen();closeAllPanels();invalidatePendingImageRun({status:'홈으로 이동해 이미지 분석을 중지했습니다.'});window.cancelImageAnalysis?.({status:'홈으로 이동해 이미지 분석을 중지했습니다.'});
@@ -990,8 +1014,19 @@ window.addEventListener('resize',syncMobileBriefs,{passive:true});
 $('#homeButton').addEventListener('click',()=>showHome());
 $('#homeExploreButton').addEventListener('click',()=>$('#homeTools').scrollIntoView({behavior:'smooth',block:'start'}));
 $$('[data-open-tool]').forEach(button=>button.addEventListener('click',()=>activateToolTab(document.querySelector(`[data-tool="${button.dataset.openTool}"]`))));
-window.addEventListener('popstate',()=>{const tool=location.hash.slice(1);if(TOOL_SECTION_IDS[tool])activateToolTab(document.querySelector(`[data-tool="${tool}"]`),{updateHistory:false});else showHome({updateHistory:false});});
-const initialTool=location.hash.slice(1);
+$('#exitStay').addEventListener('click',()=>exitDialog.close());
+$('#exitLeave').addEventListener('click',leavePlayground);
+window.addEventListener('popstate',event=>{
+  if(event.state?.playgroundExitGuard){
+    const wasHome=!$('#homeTool').classList.contains('hidden');
+    history.pushState({playgroundTool:'home',playgroundGuarded:true,playgroundHadPriorPage:hadPriorPage},'',homeUrl);
+    if(!wasHome){showHome({updateHistory:false});return;}
+    if(exitDialog.open){exitDialog.close();return;}
+    showExitDialog();return;
+  }
+  const tool=location.hash.slice(1);
+  if(TOOL_SECTION_IDS[tool])activateToolTab(document.querySelector(`[data-tool="${tool}"]`),{updateHistory:false});else showHome({updateHistory:false});
+});
 queueMicrotask(()=>{if(TOOL_SECTION_IDS[initialTool])activateToolTab(document.querySelector(`[data-tool="${initialTool}"]`),{updateHistory:false});else showHome({updateHistory:false});});
 toolTabs.forEach(b=>{
   b.onclick=()=>activateToolTab(b);

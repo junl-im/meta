@@ -1222,3 +1222,23 @@ body{background:radial-gradient(circle at 8% 7%,#f8dbc6b8 0,transparent 28%),rad
   .homeToolCard small{font-size:11.5px}
   .homeWorldGrid a{min-height:128px;padding:9px 11px}
 }
+
+
+/* 1.27 · illustrated, accessible exit confirmation. */
+.exitDialog{width:min(440px,calc(100vw - 28px));max-height:min(88dvh,680px);overflow:auto;padding:0;border:0;border-radius:28px;background:linear-gradient(150deg,#fffdfa 0%,#fff4e8 63%,#f9edf0 100%);color:#37261e;box-shadow:0 30px 90px #34251e64,0 1px 0 #ffffffc8 inset;text-align:center}
+.exitDialog::backdrop{background:#211a2fa8;backdrop-filter:blur(7px)}
+.exitDialogArt{position:relative;height:185px;overflow:hidden;background:radial-gradient(circle at 50% 68%,#ffd99099,transparent 55%),radial-gradient(circle at 78% 5%,#e6d5efa6,transparent 48%)}
+.exitDialogArt::after{content:'';position:absolute;inset:auto 0 0;height:32px;background:linear-gradient(transparent,#fff7ed)}
+.exitDialogArt img{display:block;width:180px;height:180px;object-fit:contain;margin:2px auto 0;filter:drop-shadow(0 12px 12px #8c542c2b)}
+.exitDialogCopy{padding:2px 30px 30px}
+.exitDialogEyebrow{color:#b66734;font-size:10px;font-weight:900;letter-spacing:.18em}
+.exitDialog h2{margin:9px 0 10px;font-size:28px;letter-spacing:-.05em}
+.exitDialog p{margin:0;color:#725f52;font-size:13px;line-height:1.65;word-break:keep-all}
+.exitDialog .exitDialogStatus{margin-top:12px;padding:10px 12px;border-radius:12px;background:#fff0d9;color:#704922;font-size:12px}
+.exitDialogActions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px}
+.exitDialogActions button{min-height:46px;border:0;border-radius:13px;font:inherit;font-size:13px;font-weight:800;cursor:pointer;transition:transform .18s,box-shadow .18s}
+.exitDialogActions button:hover{transform:translateY(-2px)}
+.exitDialogActions button:focus-visible{outline:3px solid #c35c1e;outline-offset:3px}
+#exitStay{background:#fffdf9;color:#664638;box-shadow:0 5px 18px #79543a1b,0 0 0 1px #f1ddc8 inset}
+#exitLeave{background:linear-gradient(135deg,#b95421,#df8242);color:white;box-shadow:0 8px 19px #aa5a2c3b}
+@media(max-width:380px){.exitDialogArt{height:160px}.exitDialogArt img{width:158px;height:158px}.exitDialogCopy{padding:2px 18px 22px}.exitDialog h2{font-size:24px}.exitDialogActions{gap:7px}}
