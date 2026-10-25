@@ -263,6 +263,7 @@ if(!failures.length){
   ['mobile panel expand logic exists',app.includes('setMobilePanelExpanded')&&app.includes("$$('[data-panel-size]')")],
   ['mobile compact mode hides secondary text',css.includes('.floatPanel:not(.mobileExpanded) .floatHead .sub')],
   ['floating dock stays switchable above panels',css.includes('floatingDock{position:fixed')&&css.includes('z-index:520')],
+  ['music play icon is published',html.includes('assets/music-play.png')&&pagesBuilder.includes("'music-play.png'")&&fs.existsSync(path.join(root,'assets','music-play.png'))],
   ['e2e hidden typewriter speed setup',e2e.includes("typingPreviewSpeed').evaluate")&&!e2e.includes("typingPreviewSpeed').selectOption")],
   ['e2e panel switch coverage',e2e.includes("issuesPanel')).toBeHidden")],
   ['e2e completed rewrite transaction wait',e2e.includes("#rewritePanel')).toHaveAttribute('aria-busy','true')")&&e2e.includes("#rewritePanel')).toHaveAttribute('aria-busy','false')")],

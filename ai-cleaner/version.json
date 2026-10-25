@@ -1,7 +1,7 @@
 {
-  "version": "1.35.2",
-  "assetVersion": "1352",
+  "version": "1.35.3",
+  "assetVersion": "1353",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Add a custom play image and expand the verified artist shuffle catalog to twelve tracks."
+  "notes": "Include the home music play icon in Firebase and GitHub Pages deployment artifacts."
 }
