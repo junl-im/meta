@@ -1,8 +1,21 @@
 import {test,expect} from '@playwright/test';
 import fs from 'node:fs';
+import {inflateRawSync} from 'node:zlib';
 
 const playground=process.env.AI_CLEANER_TEST_URL||'http://127.0.0.1:4173/ai-cleaner/';
 const studio=new URL('../AIPlayground/WebtoonStudio/',playground).href;
+function pngPagesFromZip(bytes){
+  let offset=0;const pages=new Map();
+  while(offset+30<=bytes.length&&bytes.readUInt32LE(offset)===0x04034b50){
+    const method=bytes.readUInt16LE(offset+8),size=bytes.readUInt32LE(offset+18),nameSize=bytes.readUInt16LE(offset+26),extraSize=bytes.readUInt16LE(offset+28);
+    const name=bytes.subarray(offset+30,offset+30+nameSize).toString(),start=offset+30+nameSize+extraSize,end=start+size;
+    if(name.endsWith('.png'))pages.set(name,method===8?inflateRawSync(bytes.subarray(start,end)):bytes.subarray(start,end));
+    offset=end;
+  }
+  if(!pages.size)throw Error('PNG page missing from export ZIP');
+  return pages;
+}
+const firstPngFromZip=bytes=>pngPagesFromZip(bytes).values().next().value;
 
 test('illustrated playground card opens the isolated webtoon studio and returns home',async({page})=>{
   await page.setViewportSize({width:390,height:844});
@@ -109,6 +122,150 @@ test('webtoon edit history, layer visibility and damaged-file handling work with
   await expect(page.locator('.web-status')).not.toContainText('열기 완료');
   await expect(page.locator('.web-text')).toContainText('되돌릴 대사');
   expect(errors).toEqual([]);
+});
+
+test('bubble tail moves by touch-sized handle and coordinates survive save and reopen',async({page})=>{
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'◯ 말풍선'}).click();
+  const handle=page.getByRole('button',{name:'말풍선 꼬리 이동'});
+  await expect(handle).toBeVisible();
+  const before=await handle.boundingBox();
+  await page.mouse.move(before.x+20,before.y+20);
+  await page.mouse.down();
+  await page.mouse.move(before.x+48,before.y+55,{steps:5});
+  await page.mouse.up();
+  const after=await handle.boundingBox();
+  expect(after.x).toBeGreaterThan(before.x+15);
+  expect(after.y).toBeGreaterThan(before.y+15);
+  await page.getByRole('button',{name:/레이어·속성/}).click();
+  const tailX=page.getByRole('spinbutton',{name:'꼬리 좌우'}),tailY=page.getByRole('spinbutton',{name:'꼬리 상하'});
+  await expect(tailX).not.toHaveValue('210');
+  await tailX.fill('130');await tailY.fill('190');
+  const savePromise=page.waitForEvent('download');
+  await page.getByRole('button',{name:'.wtoon 저장'}).click();
+  const saved=await savePromise;
+  const bytes=await saved.createReadStream().then(async stream=>{const chunks=[];for await(const chunk of stream)chunks.push(chunk);return Buffer.concat(chunks)});
+  await page.locator('input[type=file][accept=".wtoon,.json"]').setInputFiles({name:'tail.wtoon',mimeType:'application/octet-stream',buffer:bytes});
+  await expect(page.locator('.web-status')).toContainText('열기 완료');
+  await page.getByRole('button',{name:/레이어·속성/}).click();
+  await page.locator('.web-layers button').first().click();
+  await expect(tailX).toHaveValue('130');await expect(tailY).toHaveValue('190');
+  await page.getByRole('button',{name:'캔버스',exact:true}).click();
+  const pngPromise=page.waitForEvent('download');
+  await page.getByRole('button',{name:'PNG 초안'}).click();
+  const pngZip=await pngPromise;
+  const zipBytes=await pngZip.createReadStream().then(async stream=>{const chunks=[];for await(const chunk of stream)chunks.push(chunk);return Buffer.concat(chunks)});
+  const png=firstPngFromZip(zipBytes);
+  expect(png.subarray(0,8).toString('hex')).toBe('89504e470d0a1a0a');
+  const tailPixels=await page.evaluate(async encoded=>{
+    const image=new Image();image.src='data:image/png;base64,'+encoded;await image.decode();const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;const ctx=canvas.getContext('2d');ctx.drawImage(image,0,0);
+    let count=0;for(let y=245;y<285;y++)for(let x=170;x<200;x++){const pixel=ctx.getImageData(x,y,1,1).data;if(pixel[0]<200||pixel[1]<200||pixel[2]<200)count++}return count;
+  },png.toString('base64'));
+  expect(tailPixels).toBeGreaterThan(0);
+  expect(errors).toEqual([]);
+});
+
+test('mobile canvas fit stays available after manual zoom and rotation',async({page})=>{
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.setViewportSize({width:320,height:568});
+  await page.goto(studio);
+  const fit=page.getByRole('button',{name:'너비 맞춤'}),slider=page.locator('.web-toolbar input[type=range]');
+  await expect(fit).toBeVisible();await expect(slider).toBeVisible();
+  await slider.fill('1.25');
+  await expect(page.locator('.web-canvas')).toHaveCSS('width','862.5px');
+  await fit.click();
+  expect(await page.locator('.web-canvas').evaluate(el=>el.getBoundingClientRect().width)).toBeLessThanOrEqual(290);
+  await page.setViewportSize({width:430,height:900});
+  await expect.poll(()=>page.locator('.web-canvas').evaluate(el=>el.getBoundingClientRect().width)).toBeGreaterThan(300);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(430);
+  expect(errors).toEqual([]);
+});
+
+test('image-heavy edit history keeps the imported artwork through repeated metadata edits',async({page})=>{
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  const image=fs.readFileSync(new URL('../assets/icon-v66-512.png',import.meta.url));
+  await page.locator('input[type=file][accept="image/*"]').setInputFiles({name:'art.png',mimeType:'image/png',buffer:image});
+  await expect(page.locator('.web-assets img')).toHaveCount(1);
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  const title=page.locator('.web-side label').filter({hasText:'작품명'}).locator('input');
+  for(let index=0;index<10;index++)await title.fill(`원고 ${index}`);
+  await page.getByRole('button',{name:'캔버스',exact:true}).click();
+  await expect(page.locator('.web-panel img')).toHaveCount(1);
+  await page.getByRole('button',{name:'↶ 되돌리기'}).click();
+  await expect(page.locator('.web-panel img')).toHaveCount(1);
+  await page.getByRole('button',{name:'↷ 다시'}).click();
+  await expect(page.locator('.web-panel img')).toHaveCount(1);
+  expect(errors).toEqual([]);
+});
+
+test('locked bubble resists property edits and deletion, and narration hides the tail controls',async({page})=>{
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'◯ 말풍선'}).click();
+  await page.getByRole('button',{name:/레이어·속성/}).click();
+  await page.locator('.web-right textarea').fill('잠금 전 대사');
+  await page.getByTitle('잠금 전환').first().click();
+  await page.locator('.web-right textarea').fill('잠금 후 대사');
+  await page.getByRole('button',{name:'선택 요소 삭제'}).click();
+  await page.getByRole('button',{name:'캔버스',exact:true}).click();
+  await expect(page.locator('.web-bubble')).toContainText('잠금 전 대사');
+  await page.getByRole('button',{name:/레이어·속성/}).click();
+  await page.getByTitle('잠금 전환').first().click();
+  await page.locator('.web-right select').filter({has:page.locator('option[value="narration"]')}).selectOption('narration');
+  await expect(page.locator('.web-tail-controls')).toHaveCount(0);
+  await page.getByRole('button',{name:'캔버스',exact:true}).click();
+  await expect(page.locator('.web-tail-handle')).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
+test('touch drag adjusts the bubble tail on an emulated phone',async({browser})=>{
+  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+  const page=await context.newPage(),errors=[];page.on('pageerror',error=>errors.push(error.message));
+  try{
+    await page.goto(studio);
+    await page.getByRole('button',{name:'도구',exact:true}).click();
+    await page.getByRole('button',{name:'◯ 말풍선'}).click();
+    const handle=page.getByRole('button',{name:'말풍선 꼬리 이동'}),before=await handle.boundingBox();
+    const x=before.x+20,y=before.y+20,cdp=await context.newCDPSession(page);
+    await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});
+    await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x+35,y:y+45}]});
+    await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+    const after=await handle.boundingBox();
+    expect(after.x).toBeGreaterThan(before.x+10);
+    await page.getByRole('button',{name:/레이어·속성/}).click();
+    await expect(page.getByRole('spinbutton',{name:'꼬리 좌우'})).not.toHaveValue('210');
+    expect(errors).toEqual([]);
+  }finally{await context.close()}
+});
+
+test('PNG split keeps a bubble tail crossing the page boundary',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'◯ 말풍선'}).click();
+  await page.getByRole('button',{name:/레이어·속성/}).click();
+  await page.locator('.web-right .web-metrics label').filter({hasText:'위쪽'}).locator('input').first().fill('1850');
+  await page.getByRole('button',{name:'캔버스',exact:true}).click();
+  const downloadPromise=page.waitForEvent('download');
+  await page.getByRole('button',{name:'PNG 초안'}).click();
+  const saved=await downloadPromise;
+  const bytes=await saved.createReadStream().then(async stream=>{const chunks=[];for await(const chunk of stream)chunks.push(chunk);return Buffer.concat(chunks)});
+  const pages=pngPagesFromZip(bytes);
+  const second=pages.get('002.png');expect(second).toBeTruthy();
+  const count=await page.evaluate(async encoded=>{
+    const image=new Image();image.src='data:image/png;base64,'+encoded;await image.decode();const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;const ctx=canvas.getContext('2d');ctx.drawImage(image,0,0);
+    let count=0;for(let y=1;y<55;y++)for(let x=210;x<280;x++){const data=ctx.getImageData(x,y,1,1).data;if(data[0]<200||data[1]<200||data[2]<200)count++}return count;
+  },second.toString('base64'));
+  expect(count).toBeGreaterThan(0);
 });
 
 for(const [width,height] of [[320,568],[360,740],[390,844],[768,1024],[1280,800]])test(`webtoon workspace fits ${width}x${height}`,async({page})=>{

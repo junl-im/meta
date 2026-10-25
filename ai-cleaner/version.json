@@ -1,7 +1,7 @@
 {
-  "version": "1.36.1",
-  "assetVersion": "1361",
+  "version": "1.36.2",
+  "assetVersion": "1362",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Prevent delayed panel focus from interrupting source clearing; verify Webtoon Studio editing, drafts, exports and responsive layouts."
+  "notes": "Add Webtoon Studio bubble-tail controls, mobile canvas fit and lighter image editing; verify project and PNG output."
 }
