@@ -117,7 +117,7 @@ test('exit confirmation closes a window opened by the site', async ({ page }) =>
   await popup.waitForFunction(()=>window.__AI_CLEANER_APP_READY__===true);
   await popup.evaluate(()=>history.back());
   await expect(popup.locator('#exitDialog')).toBeVisible();
-  await popup.locator('#exitLeave').click();
+  await popup.locator('#exitLeave').dispatchEvent('click');
   await expect.poll(()=>popup.isClosed()).toBe(true);
 });
 test('GitHub playground URL moves to Firebase and old-origin storage stays reachable', async ({ page }) => {
