@@ -1,7 +1,7 @@
 {
-  "version": "1.30.0",
-  "assetVersion": "1300",
+  "version": "1.31.0",
+  "assetVersion": "1310",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Restore Spotify artist player and make confirmed exit leave the playground when browser tab closing is restricted."
+  "notes": "Harden offline shell activation and improve mobile service card readability."
 }

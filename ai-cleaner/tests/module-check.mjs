@@ -170,3 +170,4 @@ function assert(ok,msg){if(!ok)throw new Error(msg);}
   const budget=M.createResultCheckpointStore({storage:null,limit:8,maxChars:1000,maxTotalChars:1500,now:()=>++t});budget.add({text:'a'.repeat(800),sourceStamp:stampA});budget.add({text:'b'.repeat(800),sourceStamp:stampA});assert(budget.size===1&&budget.list()[0].text.startsWith('b'),'checkpoint total text budget should evict oldest entries');
 }
 console.log('PASS Blog Factory GitHub Actions Daily Engine + local prompt builder unit checks');
+await import('./sw-install-check.mjs');
