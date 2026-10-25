@@ -20,14 +20,16 @@
     frame.title=`Spotify ${song.title} 플레이어`;
     status.textContent=`선택된 곡 · ${song.title}`;
     player.hidden=false;
-    shuffle.textContent='다른 곡 고르기';
+    shuffle.textContent='다른 곡';
+    shuffle.setAttribute('aria-label','곰같은여우 다른 곡 고르기');
     shuffle.setAttribute('aria-expanded','true');
   });
   const stop=({restoreFocus=false}={})=>{
     frame.removeAttribute('src');
     player.hidden=true;
     status.textContent='노래 한 곡, 쉬어 가기';
-    shuffle.textContent='무작위 곡 고르기';
+    shuffle.textContent='랜덤 듣기';
+    shuffle.setAttribute('aria-label','곰같은여우 무작위 곡 고르기');
     shuffle.setAttribute('aria-expanded','false');
     if(restoreFocus)shuffle.focus();
   };

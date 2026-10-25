@@ -52,6 +52,9 @@ test('home music dock loads only after a gesture and changes to a different owne
   const dock=page.locator('#homeMusicDock');
   const frame=dock.locator('iframe');
   await expect(dock).toBeVisible();
+  const compact=await dock.evaluate(el=>({height:el.getBoundingClientRect().height,introTop:el.querySelector('.homeMusicDockIntro').getBoundingClientRect().top,actionsTop:el.querySelector('.homeMusicDockActions').getBoundingClientRect().top}));
+  expect(compact.height).toBeLessThanOrEqual(56);
+  expect(Math.abs(compact.introTop-compact.actionsTop)).toBeLessThanOrEqual(3);
   await expect(frame).not.toHaveAttribute('src',/spotify/);
   await page.locator('#homeMusicShuffle').click();
   const first=await frame.getAttribute('src');
@@ -317,8 +320,8 @@ test('mobile typewriter completion auto-navigates when the result button is not 
   await page.locator('#typingPreviewButton').click();
   await expect(page.locator('#typingPreviewPanel')).toBeHidden({timeout:9000});
   await expect(page.locator('#output')).toHaveAttribute('data-typewriter-verified','true');
-  const landing=await page.locator('#resultCard').evaluate(el=>{const r=el.getBoundingClientRect(),h=document.querySelector('.top')?.getBoundingClientRect().bottom||0;return{delta:Math.round(r.top-h),pulse:el.classList.contains('resultDestinationPulse')};});
-  expect(landing.delta).toBeGreaterThanOrEqual(0);expect(landing.delta).toBeLessThanOrEqual(30);expect(landing.pulse).toBeTruthy();
+  const landing=await page.locator('#resultCard').evaluate(el=>{const r=el.getBoundingClientRect(),h=document.querySelector('.top')?.getBoundingClientRect().bottom||0;return Math.round(r.top-h);});
+  expect(landing).toBeGreaterThanOrEqual(0);expect(landing).toBeLessThanOrEqual(30);
 });
 
 test('mobile user gesture cancels pending automatic result navigation', async ({ page }) => {

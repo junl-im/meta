@@ -1,7 +1,7 @@
 {
-  "version": "1.33.0",
-  "assetVersion": "1330",
+  "version": "1.34.0",
+  "assetVersion": "1340",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Add an on-demand random Spotify track dock to the home page and audit linked services."
+  "notes": "Blend the home music dock into the illustrated hero and compact its mobile controls."
 }
