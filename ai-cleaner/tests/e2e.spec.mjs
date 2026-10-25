@@ -47,6 +47,30 @@ test('illustrated home opens first and cards, brand and browser back connect the
   await expect(page.locator('#homeTool')).toBeVisible();
 });
 
+test('mobile home cards keep readable text and icon-first service layout', async ({ page }) => {
+  for (const width of [320, 360, 390, 430]) {
+    await page.setViewportSize({width,height:844});
+    await gotoReady(page,{home:true});
+    const layout=await page.evaluate(()=>{
+      const tool=document.querySelector('.homeToolCard');
+      const service=document.querySelector('.homeWorldGrid a');
+      const icon=service.querySelector('.homeWorldIcon').getBoundingClientRect();
+      const title=service.querySelector('strong').getBoundingClientRect();
+      return {
+        viewport:innerWidth,scrollWidth:document.documentElement.scrollWidth,
+        toolText:parseFloat(getComputedStyle(tool.querySelector('small')).fontSize),
+        serviceText:parseFloat(getComputedStyle(service.querySelector('small')).fontSize),
+        iconBottom:icon.bottom,titleTop:title.top,
+        cardRight:Math.max(...[...document.querySelectorAll('.homeToolCard,.homeWorldGrid a')].map(el=>el.getBoundingClientRect().right))
+      };
+    });
+    expect(layout.scrollWidth).toBeLessThanOrEqual(layout.viewport);
+    expect(layout.cardRight).toBeLessThanOrEqual(layout.viewport+1);
+    expect(layout.toolText).toBeGreaterThanOrEqual(11.5);
+    expect(layout.serviceText).toBeGreaterThanOrEqual(11.5);
+    expect(layout.iconBottom).toBeLessThanOrEqual(layout.titleTop+3);
+  }
+});
 test('original auto typewriter preserves the exact source including hidden and special characters', async ({ page }) => {
   await gotoReady(page);
   const source='가\u200B나다\u00AD\u061C\nABC🙂e\u0301\u00A0끝👩‍💻';

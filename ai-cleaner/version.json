@@ -1,7 +1,7 @@
 {
-  "version": "1.25.0",
-  "assetVersion": "1250",
+  "version": "1.26.0",
+  "assetVersion": "1260",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Home header simplified, custom raster icons and illustrated translucent section boundaries."
+  "notes": "Mobile home cards use readable type and an uncluttered icon-first layout."
 }
