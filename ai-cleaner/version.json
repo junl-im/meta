@@ -1,7 +1,7 @@
 {
-  "version": "1.35.3",
-  "assetVersion": "1353",
+  "version": "1.35.4",
+  "assetVersion": "1354",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Include the home music play icon in Firebase and GitHub Pages deployment artifacts."
+  "notes": "Give all twelve music tracks an equal chance on the first shuffle pick."
 }

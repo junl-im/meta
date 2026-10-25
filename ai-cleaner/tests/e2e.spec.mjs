@@ -80,6 +80,15 @@ test('home music dock loads only after a gesture and changes to a different owne
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
 
+test('first music shuffle can select the last track and the next pick differs', async ({ page }) => {
+  await page.addInitScript(() => { Math.random=()=>0.999999; });
+  await gotoReady(page,{home:true});
+  await page.locator('#homeMusicShuffle').click();
+  await expect(page.locator('#homeMusicFrame')).toHaveAttribute('src',/5Q1FQUxag4EvI1BiFifzle/);
+  await page.locator('#homeMusicShuffle').click();
+  await expect(page.locator('#homeMusicFrame')).not.toHaveAttribute('src',/5Q1FQUxag4EvI1BiFifzle/);
+});
+
 test('Back returns to home before opening the illustrated exit confirmation', async ({ page }) => {
   await page.setViewportSize({width:320,height:568});
   await gotoReady(page,{home:true});
