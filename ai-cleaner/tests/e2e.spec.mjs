@@ -1076,7 +1076,8 @@ test('related worlds, custom icons and GomFox Music return path work on mobile',
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
   await page.locator('.homeWorldCollection a').filter({has:page.locator('strong',{hasText:'곰같은여우 뮤직'})}).click();
   await expect(page).toHaveURL(/AIPlayground\/GomFoxMusic\//);
-  await expect(page.locator('iframe[title*="Spotify"]')).toHaveAttribute('src',/open\.spotify\.com\/embed\/artist\/57qGfDOq59XvGh7HTeu3CY/);
+  await expect(page.locator('iframe')).toHaveCount(0);
+  await expect(page.locator('.artist-card')).toHaveAttribute('href','https://open.spotify.com/artist/57qGfDOq59XvGh7HTeu3CY');
   await page.locator('.return-link').click();
   await expect(page.locator('#homeTool')).toBeVisible();
 });
