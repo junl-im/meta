@@ -5,6 +5,8 @@ on:
     paths:
       - 'ai-cleaner/**'
       - 'AIPlayground/DalbitUnse/**'
+      - 'AIPlayground/WebtoonStudio/**'
+      - 'AIPlayground/WebtoonStudioSource/**'
       - 'index.html'
       - 'package.json'
       - 'package-lock.json'
@@ -17,6 +19,8 @@ on:
     paths:
       - 'ai-cleaner/**'
       - 'AIPlayground/DalbitUnse/**'
+      - 'AIPlayground/WebtoonStudio/**'
+      - 'AIPlayground/WebtoonStudioSource/**'
       - 'index.html'
       - 'OPTION/SS_OPTION.txt'
       - 'package.json'
@@ -72,6 +76,7 @@ jobs:
           node --check ai-cleaner/tests/static-check.mjs
           node --check ai-cleaner/tests/module-check.mjs
           node --check ai-cleaner/tests/e2e.spec.mjs
+          node --check ai-cleaner/tests/webtoon-integration.spec.mjs
           node --check .github/scripts/build-pages-artifact.mjs
           node --check .github/scripts/build-runtime-vendor.mjs
           node --check ai-cleaner/sw.js

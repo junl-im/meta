@@ -30,7 +30,7 @@ test('illustrated home opens first and cards, brand and browser back connect the
   await expect(page.locator('#homeTool')).toBeVisible();
   await expect(page.locator('#textTool')).toBeHidden();
   await expect(page.locator('.workspaceNav')).toBeHidden();
-  await expect(page.locator('#homeTool img')).toHaveCount(13);
+  await expect(page.locator('#homeTool img')).toHaveCount(14);
   for(const icon of await page.locator('#homeTool img').all()){await icon.scrollIntoViewIfNeeded();await expect.poll(()=>icon.evaluate(img=>img.naturalWidth)).toBeGreaterThan(0);}
   await expect(page).toHaveTitle(/곰같은여우의 AI 놀이터/);
   await page.locator('.homeToolCard[data-open-tool="text"]').click();

@@ -22,3 +22,39 @@
   .web-mobile-nav button[aria-pressed=true]{background:#d9f2f4;color:#097f8a}
   .web-status span:last-child{display:none}
 }
+
+.web-mark{
+  width:42px;
+  height:42px;
+  flex:none;
+  border-radius:12px;
+  background:#f4e8dc url("./assets/home-icon-webtoon.png") center/contain no-repeat;
+  color:transparent;
+  font-size:0;
+}
+.web-return{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:36px;
+  padding:7px 11px;
+  border:1px solid #e6c8a8;
+  border-radius:10px;
+  background:#fff5e9;
+  color:#8b4b2b;
+  font-size:12px;
+  font-weight:800;
+  text-decoration:none;
+  white-space:nowrap;
+}
+.web-return:hover{background:#f9e7d2}
+.web-return:focus-visible{outline:3px solid #b96632;outline-offset:2px}
+@media(max-width:760px){
+  .web-mark{width:36px;height:36px}
+  .web-top-actions{gap:5px}
+  .web-return{min-height:32px;padding:6px 7px;font-size:10px}
+}
+@media(max-width:360px){
+  .web-top-actions button{padding-inline:5px}
+  .web-return{padding-inline:5px}
+}
