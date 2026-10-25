@@ -1,7 +1,7 @@
 {
-  "version": "1.29.1",
-  "assetVersion": "1291",
+  "version": "1.30.0",
+  "assetVersion": "1300",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "GomFox Music opens Spotify on demand without starting protected media playback on page load."
+  "notes": "Restore Spotify artist player and make confirmed exit leave the playground when browser tab closing is restricted."
 }

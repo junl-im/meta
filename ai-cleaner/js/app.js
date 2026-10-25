@@ -949,7 +949,6 @@ let imageRunSeq=0;
 const TOOL_SECTION_IDS={text:'textTool',image:'imageTool',writing:'writingTool',reach:'reachTool'};
 const toolTabs=$$('[data-tool]');
 const exitDialog=$('#exitDialog');
-const exitStatus=$('#exitStatus');
 const startingUrl=new URL(location.href);
 const initialTool=startingUrl.hash.slice(1);
 const hadPriorPage=history.state?.playgroundHadPriorPage??history.length>1;
@@ -963,18 +962,23 @@ function writeToolHistory(tool){
   history.replaceState({playgroundTool:tool,playgroundGuarded:true,playgroundHadPriorPage:hadPriorPage},'',url);
 }
 function showExitDialog(){
-  exitStatus.hidden=true;exitStatus.textContent='';
   if(!exitDialog.open)exitDialog.showModal();
   $('#exitStay').focus({preventScroll:true});
 }
 function leavePlayground(){
+  // Browsers may close script-opened tabs, but user-opened tabs must leave by navigation.
+  exitDialog.close();
   try{window.close();}catch(_){}
   setTimeout(()=>{
     if(window.closed)return;
-    if(hadPriorPage){history.go(-2);return;}
-    exitStatus.textContent='이 탭은 브라우저가 자동 종료를 허용하지 않아요. 브라우저의 탭 닫기 버튼을 눌러 주세요.';
-    exitStatus.hidden=false;
-  },220);
+    if(hadPriorPage&&history.length>2){
+      history.go(-2);
+      // A history entry may be blocked or point back into the guarded app.
+      setTimeout(()=>{if(!window.closed)location.replace('about:blank');},900);
+      return;
+    }
+    location.replace('about:blank');
+  },120);
 }
 function showHome({updateHistory=true}={}){
   invalidatePendingRewriteOpen();closeAllPanels();invalidatePendingImageRun({status:'홈으로 이동해 이미지 분석을 중지했습니다.'});window.cancelImageAnalysis?.({status:'홈으로 이동해 이미지 분석을 중지했습니다.'});
