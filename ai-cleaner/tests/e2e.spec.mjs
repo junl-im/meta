@@ -87,6 +87,20 @@ test('exit confirmation closes a window opened by the site', async ({ page }) =>
   await popup.locator('#exitLeave').click();
   await expect.poll(()=>popup.isClosed()).toBe(true);
 });
+test('GitHub playground URL moves to Firebase and old-origin storage stays reachable', async ({ page }) => {
+  const redirectScript=fs.readFileSync(new URL('../js/hosting-redirect.js',import.meta.url),'utf8');
+  await page.route(/^https:\/\/junl-im\.github\.io\/meta\/ai-cleaner\//,route=>{
+    const url=new URL(route.request().url());
+    if(url.pathname.endsWith('/hosting-redirect.js'))return route.fulfill({contentType:'application/javascript',body:redirectScript});
+    return route.fulfill({contentType:'text/html',body:'<!doctype html><script src="/meta/ai-cleaner/js/hosting-redirect.js"></script><main>old origin</main>'});
+  });
+  await page.route(/^https:\/\/meta-deee1\.web\.app\/ai-cleaner\//,route=>route.fulfill({contentType:'text/html',body:'<!doctype html><main>Firebase site</main>'}));
+  await page.goto('https://junl-im.github.io/meta/ai-cleaner/?draft=1#text');
+  await expect(page).toHaveURL('https://meta-deee1.web.app/ai-cleaner/?draft=1#text');
+  await page.goto('https://junl-im.github.io/meta/ai-cleaner/?stay=github');
+  await expect(page).toHaveURL('https://junl-im.github.io/meta/ai-cleaner/?stay=github');
+  await expect(page.locator('main')).toHaveText('old origin');
+});
 test('mobile home cards keep readable text and icon-first service layout', async ({ page }) => {
   for (const width of [320, 360, 390, 430]) {
     await page.setViewportSize({width,height:844});

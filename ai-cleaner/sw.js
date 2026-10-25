@@ -1,7 +1,7 @@
 'use strict';
-const CACHE_NAME='ai-cleaner-shell-1.27.0';
+const CACHE_NAME='ai-cleaner-shell-1.28.0';
 const CORE_ASSETS=[
-  './','./index.html','./version.json','./site.webmanifest','./css/app.css','./js/boot.js',
+  './','./index.html','./version.json','./site.webmanifest','./css/app.css','./js/boot.js','./js/hosting-redirect.js',
   './js/core/event-bus.js','./js/core/history-store.js','./js/core/work-lock.js','./js/core/text-utils.js',
   './js/core/state-store.js','./js/core/text-engine.js','./js/core/diff-engine.js','./js/services/analysis-worker-adapter.js',
   './js/services/analysis-performance-governor.js','./js/services/analysis-coordinator.js','./js/services/update-manager.js',
@@ -28,7 +28,7 @@ self.addEventListener('install',event=>{
       if(!response.ok)throw new Error(`${relative}: ${response.status}`);
       await cache.put(normalizeKey(request),response);
     }));
-    const critical=['./index.html','./css/app.css','./js/boot.js','./js/app.js'];
+    const critical=['./index.html','./css/app.css','./js/boot.js','./js/hosting-redirect.js','./js/app.js'];
     const failedCritical=results.map((result,index)=>({result,asset:CORE_ASSETS[index]})).filter(x=>x.result.status==='rejected'&&critical.includes(x.asset));
     if(failedCritical.length)throw new Error('critical offline shell cache failed');
   })());
