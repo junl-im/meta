@@ -608,6 +608,25 @@ test('empty source stays authoritative after rewrite studio lifecycle callbacks 
   await expect(page.locator('#detailSummary')).toHaveText('분석 전');
 });
 
+test('deferred panel focus does not steal source editing or clearing', async ({ page }) => {
+  await gotoReady(page);
+  const input=page.locator('#input');
+  await input.fill('원본을 비우는 동안 패널 포커스가 끼어들면 안 됩니다.');
+  await analyzeNow(page,{silent:true});
+  await page.locator('#rewriteWidget').click();
+  await expect(page.locator('#rewritePanel')).toBeVisible();
+  await page.evaluate(() => {
+    document.querySelector('[data-close-panel="rewritePanel"]').click();
+    document.querySelector('#input').focus();
+  });
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  await expect(input).toBeFocused();
+  await input.press('ControlOrMeta+A');
+  await input.press('Backspace');
+  await expect(input).toHaveValue('');
+  await expect(page.locator('#output')).toHaveValue('');
+});
+
 test('foundation flow keeps state, layout and rewrite tools coherent', async ({ page }) => {
   await gotoReady(page);
   await expect(page.locator('#versionBadge')).toHaveText('v'+APP_VERSION);
