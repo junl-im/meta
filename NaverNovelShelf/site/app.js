@@ -47,7 +47,7 @@
             ${isLast?'<span class="recent-tag">최근 열어봄</span>':""}
           </div>
           <div class="novel-info">
-            <div class="novel-meta"><span>${w.league==="best"?"베스트리그":"챌린지리그"}</span><span class="genre-tiny">${escapeHTML(w.genre)}</span></div>
+            <div class="novel-meta"><span class="genre-label">${escapeHTML(w.genre)}</span></div>
             <h3>${escapeHTML(w.title)}</h3>
             <div class="novel-card-bottom"><span>회차 목록 보기</span><span aria-hidden="true">↗</span></div>
           </div>
