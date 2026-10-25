@@ -61,7 +61,8 @@ test('home music dock loads only after a gesture and changes to a different owne
   await expect(frame).not.toHaveAttribute('src',/spotify/);
   await page.locator('#homeMusicShuffle').click();
   const first=await frame.getAttribute('src');
-  expect(first).toMatch(/^https:\/\/open\.spotify\.com\/embed\/track\/(?:7tHDyufKgMGt3qnGnxt52V|6tGXxCzjM8ITzxPXRoWgcF|6dZ4FEEqykrfAOoCcWT0BR)/);
+  const ownedTrackIds=['7tHDyufKgMGt3qnGnxt52V','6tGXxCzjM8ITzxPXRoWgcF','6dZ4FEEqykrfAOoCcWT0BR','2BwbGZpj9cN20N4T94B2AW','46Jyixc5S41aS8ivzhE0OA','40f3q3Gnw7s0Vl7LxfuAqd','6acQRifnKihYz6ADstRjx3','67fZar2nbB2aZElT4med8W','1LugoliyiInISgC8bEpvz4','1c9gRsbdYEXWMGTtOGGDVe','0XG0pagGR4H4MsoPEOQ4zO','5Q1FQUxag4EvI1BiFifzle'];
+  expect(ownedTrackIds).toContain(first?.match(/^https:\/\/open\.spotify\.com\/embed\/track\/([A-Za-z0-9]{22})/)?.[1]);
   await expect(page.locator('#homeMusicPlayer')).toBeVisible();
   await expect(page.locator('#homeMusicShuffle')).toHaveAttribute('aria-expanded','true');
   await expect(playIcon).toBeVisible();

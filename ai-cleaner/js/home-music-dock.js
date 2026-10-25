@@ -3,7 +3,16 @@
   const songs=[
     {title:'너라는 기적',id:'7tHDyufKgMGt3qnGnxt52V'},
     {title:'찬란한 너의 계절에',id:'6tGXxCzjM8ITzxPXRoWgcF'},
-    {title:'밤꽃 산책',id:'6dZ4FEEqykrfAOoCcWT0BR'}
+    {title:'밤꽃 산책',id:'6dZ4FEEqykrfAOoCcWT0BR'},
+    {title:'곰같은여우와 여우같은곰',id:'2BwbGZpj9cN20N4T94B2AW'},
+    {title:'별동별',id:'46Jyixc5S41aS8ivzhE0OA'},
+    {title:'유통기한 지난 사랑',id:'40f3q3Gnw7s0Vl7LxfuAqd'},
+    {title:'모든 순간이 이별이었다',id:'6acQRifnKihYz6ADstRjx3'},
+    {title:'오직 너를 위해',id:'67fZar2nbB2aZElT4med8W'},
+    {title:'첫눈이 내리면',id:'1LugoliyiInISgC8bEpvz4'},
+    {title:'Butter',id:'1c9gRsbdYEXWMGTtOGGDVe'},
+    {title:'공허함',id:'0XG0pagGR4H4MsoPEOQ4zO'},
+    {title:'행복 주문',id:'5Q1FQUxag4EvI1BiFifzle'}
   ];
   const shuffle=document.getElementById('homeMusicShuffle');
   const shuffleLabel=shuffle?.querySelector('.homeMusicShuffleLabel');
