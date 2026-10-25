@@ -1,7 +1,7 @@
 {
-  "version": "1.29.0",
-  "assetVersion": "1290",
+  "version": "1.29.1",
+  "assetVersion": "1291",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Grouped story, audio, and play destinations with GomFox Music listening page."
+  "notes": "GomFox Music opens Spotify on demand without starting protected media playback on page load."
 }
