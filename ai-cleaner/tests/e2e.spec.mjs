@@ -1076,8 +1076,26 @@ test('related worlds, custom icons and GomFox Music return path work on mobile',
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
   await page.locator('.homeWorldCollection a').filter({has:page.locator('strong',{hasText:'곰같은여우 뮤직'})}).click();
   await expect(page).toHaveURL(/AIPlayground\/GomFoxMusic\//);
-  await expect(page.locator('iframe')).toHaveCount(0);
-  await expect(page.locator('.artist-card')).toHaveAttribute('href','https://open.spotify.com/artist/57qGfDOq59XvGh7HTeu3CY');
+  await expect(page.locator('iframe[title*="Spotify"]')).toHaveAttribute('src',/open\.spotify\.com\/embed\/artist\/57qGfDOq59XvGh7HTeu3CY/);
   await page.locator('.return-link').click();
   await expect(page.locator('#homeTool')).toBeVisible();
+});
+
+test('confirmed exit leaves a user-opened tab even when the browser blocks window.close', async ({ page }) => {
+  await gotoReady(page,{home:true});
+  await page.evaluate(()=>history.back());
+  await expect(page.locator('#exitDialog')).toBeVisible();
+  await page.locator('#exitLeave').click();
+  await expect.poll(()=>page.isClosed()||page.url()==='about:blank').toBe(true);
+});
+
+test('confirmed exit returns to the previous site when browser closing is blocked', async ({ page }) => {
+  const previous='http://127.0.0.1:4173/AIPlayground/GomFoxMusic/';
+  await page.goto(previous);
+  await page.goto(BASE);
+  await page.waitForFunction(()=>window.__AI_CLEANER_APP_READY__===true);
+  await page.evaluate(()=>history.back());
+  await expect(page.locator('#exitDialog')).toBeVisible();
+  await page.locator('#exitLeave').click();
+  await expect(page).toHaveURL(previous);
 });
