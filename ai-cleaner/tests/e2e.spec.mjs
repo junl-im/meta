@@ -20,7 +20,7 @@ async function gotoReady(page,{home=false}={}){
   await page.waitForFunction(()=>window.__AI_CLEANER_APP_READY__===true&&!!window.AICleanerApp,{timeout:15000});
   await expect(page.locator('html')).toHaveClass(/app-ready/);
   await expect(page.locator('body')).toHaveAttribute('aria-busy','false');
-  if(!home)await page.locator('#toolTabText').click();
+  if(!home)await page.locator('.homeToolCard[data-open-tool="text"]').click();
 }
 async function analyzeNow(page,{silent=false}={}){return page.evaluate(silentArg=>window.AICleanerApp.analyzeNow(silentArg),silent);}
 
@@ -29,11 +29,14 @@ test('illustrated home opens first and cards, brand and browser back connect the
   await gotoReady(page,{home:true});
   await expect(page.locator('#homeTool')).toBeVisible();
   await expect(page.locator('#textTool')).toBeHidden();
-  await expect.poll(()=>page.locator('#homeTool img').evaluate(img=>img.naturalWidth)).toBeGreaterThan(0);
+  await expect(page.locator('.workspaceNav')).toBeHidden();
+  await expect(page.locator('#homeTool img')).toHaveCount(9);
+  for(const icon of await page.locator('#homeTool img').all()){await icon.scrollIntoViewIfNeeded();await expect.poll(()=>icon.evaluate(img=>img.naturalWidth)).toBeGreaterThan(0);}
   await expect(page).toHaveTitle(/곰같은여우의 AI 놀이터/);
   await page.locator('.homeToolCard[data-open-tool="text"]').click();
   await expect(page.locator('#textTool')).toBeVisible();
   await expect(page.locator('#toolTabText')).toHaveAttribute('aria-selected','true');
+  await expect(page.locator('.workspaceNav')).toBeVisible();
   await page.reload();
   await expect(page.locator('#textTool')).toBeVisible();
   await page.goBack();

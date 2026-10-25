@@ -5,6 +5,10 @@ const playground=process.env.AI_CLEANER_TEST_URL||'http://127.0.0.1:4173/ai-clea
 test('AI 놀이터에서 내부 달빛운세로 이동하고 모바일 메뉴로 돌아온다',async({page})=>{
   await page.setViewportSize({width:320,height:568});
   await page.goto(playground);
+  await expect(page.locator('#homeTool')).toBeVisible();
+  await expect(page.locator('.workspaceNav')).toBeHidden();
+  await expect(page.locator('.homeWorldGrid a[href="../AIPlayground/DalbitUnse/dist/"]')).toBeVisible();
+  await page.locator('.homeToolCard[data-open-tool="text"]').click();
   await expect(page.locator('#openDalbit')).toBeVisible();
   await expect(page.locator('#openMastering')).toHaveAttribute('href',/foxbear-mastering-studio/);
   await expect(page.locator('#openSorion')).toHaveAttribute('href',/AI-/);
@@ -17,7 +21,8 @@ test('AI 놀이터에서 내부 달빛운세로 이동하고 모바일 메뉴로
   await expect(page.locator('#saju')).toBeAttached();
   await page.locator('.mobile-dock .playground-dock').click();
   expect(page.url()).toContain('/ai-cleaner/');
-  await expect(page.locator('#toolTabText')).toBeVisible();
+  await expect(page.locator('#homeTool')).toBeVisible();
+  await expect(page.locator('.workspaceNav')).toBeHidden();
 });
 
 for(const [width,height] of [[320,568],[390,844],[768,1024]])test('사주 결과 '+width+'x'+height+': 핵심 결과와 조작 유지',async({page})=>{
@@ -134,6 +139,7 @@ test('태블릿·PC 상단 메뉴도 내부 왕복 경로를 제공한다',async
   for(const width of [900,1024,1280]){
     await page.setViewportSize({width,height:800});
     await page.goto(playground);
+    await page.locator('.homeToolCard[data-open-tool="text"]') .click();
     await expect(page.locator('#openDalbit')).toBeVisible();
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await page.locator('#openDalbit').click();
@@ -149,6 +155,7 @@ test('새 상단 메뉴는 주요 화면 너비에서 읽히고 가로로 넘치
   for(const width of [320,360,375,390,412,430,768,1024,1280]){
     await page.setViewportSize({width,height:844});
     await page.goto(playground);
+    await page.locator('.homeToolCard[data-open-tool="text"]') .click();
     const bounds=await page.evaluate(()=>({
       viewport:innerWidth,
       width:document.documentElement.scrollWidth,

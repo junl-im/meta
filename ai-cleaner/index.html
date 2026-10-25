@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://r.jina.ai; worker-src 'self' blob:; font-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1240">
+<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1250">
 <style id="bootCritical">html:not(.boot-ready) body{visibility:hidden}html{background:#fff8f0}html.app-booting{overflow-anchor:none}html.app-booting body{cursor:progress}html.app-booting body *{cursor:progress!important}</style>
 <script src="js/boot.js" defer></script>
 </head>
@@ -26,7 +26,7 @@
   <button class="brand brandHome" id="homeButton" type="button" aria-label="AI 놀이터 홈으로">
     <div class="logo" id="brandIcon" role="img" aria-label="곰같은여우 아이콘"></div>
     <div>
-      <div class="brandKicker">GOMFOX <span aria-hidden="true">✦</span> CREATIVE PLAYGROUND</div>
+      <div class="brandKicker">GOMFOX CREATIVE PLAYGROUND</div>
       <div class="brandName"><b>곰같은여우의 <em>AI 놀이터</em></b><span class="pill" id="versionBadge">version</span></div>
     </div>
   </button>
@@ -69,8 +69,8 @@
       <h1 id="homeTitle">오늘은 무엇을<br><em>만들어 볼까요?</em></h1>
       <p>글을 다듬고, 이미지를 살피고, 아이디어를 키워 보세요. 여우와 함께 내게 맞는 놀이터를 골라요.</p>
       <div class="homeHeroActions">
-        <button class="homePrimary" type="button" data-open-tool="text">AI 글 다듬기 시작 <span aria-hidden="true">→</span></button>
-        <button class="homeSecondary" id="homeExploreButton" type="button">도구 둘러보기 <span aria-hidden="true">↓</span></button>
+        <button class="homePrimary" type="button" data-open-tool="text">AI 글 다듬기 시작</button>
+        <button class="homeSecondary" id="homeExploreButton" type="button">도구 둘러보기</button>
       </div>
     </div>
     <div class="homeHeroArt"><img src="assets/playground-home-v1.webp" alt="따뜻한 창작 작업실에서 돋보기를 든 여우가 글, 이미지, 음악과 달빛을 살펴보는 일러스트" width="1440" height="810" fetchpriority="high"></div>
@@ -78,19 +78,19 @@
   <section class="homeExplore" id="homeTools" aria-labelledby="homeToolsTitle">
     <div class="homeSectionHeading"><span>CREATE &amp; DISCOVER</span><h2 id="homeToolsTitle">무엇부터 해볼까요?</h2></div>
     <div class="homeToolGrid">
-      <button class="homeToolCard" type="button" data-open-tool="text"><span class="homeCardNum">01</span><strong>AI 글 다듬기</strong><small>숨은 문자와 특수 공백을 정리하고 결과를 확인해요.</small><span class="homeCardArrow" aria-hidden="true">↗</span></button>
-      <button class="homeToolCard" type="button" data-open-tool="image"><span class="homeCardNum">02</span><strong>AI 이미지 검사</strong><small>이미지에 남은 출처와 편집 신호를 살펴봐요.</small><span class="homeCardArrow" aria-hidden="true">↗</span></button>
-      <button class="homeToolCard" type="button" data-open-tool="writing"><span class="homeCardNum">03</span><strong>블로그 팩토리</strong><small>아이디어를 정리하고 글쓰기 프롬프트를 만들어요.</small><span class="homeCardArrow" aria-hidden="true">↗</span></button>
-      <button class="homeToolCard" type="button" data-open-tool="reach"><span class="homeCardNum">04</span><strong>GomFox Reach</strong><small>여러 자료의 출처와 서로 다른 주장을 비교해요.</small><span class="homeCardArrow" aria-hidden="true">↗</span></button>
+      <button class="homeToolCard" type="button" data-open-tool="text"><img class="homeCardIcon" src="assets/home-icon-text.webp" alt="" width="80" height="80" loading="lazy"><strong>AI 글 다듬기</strong><small>숨은 문자와 특수 공백을 정리하고 결과를 확인해요.</small></button>
+      <button class="homeToolCard" type="button" data-open-tool="image"><img class="homeCardIcon" src="assets/home-icon-image.webp" alt="" width="80" height="80" loading="lazy"><strong>AI 이미지 검사</strong><small>이미지에 남은 출처와 편집 신호를 살펴봐요.</small></button>
+      <button class="homeToolCard" type="button" data-open-tool="writing"><img class="homeCardIcon" src="assets/home-icon-writing.webp" alt="" width="80" height="80" loading="lazy"><strong>블로그 팩토리</strong><small>아이디어를 정리하고 글쓰기 프롬프트를 만들어요.</small></button>
+      <button class="homeToolCard" type="button" data-open-tool="reach"><img class="homeCardIcon" src="assets/home-icon-reach.webp" alt="" width="80" height="80" loading="lazy"><strong>GomFox Reach</strong><small>여러 자료의 출처와 서로 다른 주장을 비교해요.</small></button>
     </div>
   </section>
   <section class="homeWorlds" aria-labelledby="homeWorldsTitle">
     <div class="homeSectionHeading"><span>MORE WORLDS</span><h2 id="homeWorldsTitle">다른 놀이터도 가볼까요?</h2></div>
     <div class="homeWorldGrid">
-      <a href="../AIPlayground/DalbitUnse/dist/"><span aria-hidden="true">☾</span><strong>달빛운세</strong><small>운세 · 사주 · 타로</small><b aria-hidden="true">↗</b></a>
-      <a href="https://junl-im.github.io/foxbear-mastering-studio/" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">♫</span><strong>마스터링</strong><small>소리를 더 근사하게</small><b aria-hidden="true">↗</b></a>
-      <a href="https://junl-im.github.io/AI-/" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">♪</span><strong>소리온</strong><small>대본과 음성 제작</small><b aria-hidden="true">↗</b></a>
-      <a href="https://cardville.web.app/" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">✦</span><strong>라니팡</strong><small>잠깐 즐기는 카드 게임</small><b aria-hidden="true">↗</b></a>
+      <a href="../AIPlayground/DalbitUnse/dist/"><span class="homeWorldIcon" aria-hidden="true"><img src="assets/home-icon-dalbit.webp" alt="" width="56" height="56" loading="lazy"></span><strong>달빛운세</strong><small>운세 · 사주 · 타로</small></a>
+      <a href="https://junl-im.github.io/foxbear-mastering-studio/" target="_blank" rel="noopener noreferrer"><span class="homeWorldIcon" aria-hidden="true"><img src="assets/home-icon-mastering.webp" alt="" width="56" height="56" loading="lazy"></span><strong>마스터링</strong><small>소리를 더 근사하게</small></a>
+      <a href="https://junl-im.github.io/AI-/" target="_blank" rel="noopener noreferrer"><span class="homeWorldIcon" aria-hidden="true"><img src="assets/home-icon-sorion.webp" alt="" width="56" height="56" loading="lazy"></span><strong>소리온</strong><small>대본과 음성 제작</small></a>
+      <a href="https://cardville.web.app/" target="_blank" rel="noopener noreferrer"><span class="homeWorldIcon" aria-hidden="true"><img src="assets/home-icon-ranipang.webp" alt="" width="56" height="56" loading="lazy"></span><strong>라니팡</strong><small>잠깐 즐기는 카드 게임</small></a>
     </div>
   </section>
 </main>
