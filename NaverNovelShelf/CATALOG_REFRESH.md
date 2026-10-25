@@ -24,6 +24,8 @@ re-host chapter text. Never add SVG assets or inline vector markup.
 4. When catalog records change, update `window.NOVEL_CATALOG_LAST_CHECK` with the date of successful verification. If nothing changed, do not modify source just to record the check date. Retain records if any source check was incomplete.
 5. Validate that all `id` values are numeric, `author` is one of the 4 names, `league` is `best` or `challenge`, images use HTTPS `novel-phinf.pstatic.net`, and no records are duplicated.
 6. Preserve public site access, all hand-painted WebP assets, SVG prohibition, and the distinct Best League and Challenge League presentation. The visible Korean labels are `베스트리그` and `챌린지리그`; never relabel Challenge League as General League. Mobile cards must remain in 3 columns.
+   Preserve full-bleed official 5:4 thumbnails (no oversized dark mat around
+   a smaller image) and keep each work's genre visibly labeled on desktop and mobile.
 7. Push the verified source and deploy a new Site version only when verified catalog records changed. Do not redeploy daily solely to update a successful-check date.
 8. Do not invent results. On lookup failure, report the affected author(s), retain the prior published data, and try again on the next scheduled run.
 
