@@ -1,7 +1,7 @@
 {
-  "version": "1.23.0",
-  "assetVersion": "1230",
+  "version": "1.24.0",
+  "assetVersion": "1240",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Added custom raster playground icon, illustrated typewriter action, and compact local-processing footer."
+  "notes": "Added an illustrated AI Playground home with direct entry to every studio."
 }

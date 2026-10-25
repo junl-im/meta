@@ -16,6 +16,7 @@ const assetFiles = [
   'apple-touch-icon-v66.png',
   'fox-logo.png',
   'typewriter-action.webp',
+  'playground-home-v1.webp',
   'icon-v66-192.png',
   'icon-v66-512.png'
 ];
