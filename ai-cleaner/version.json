@@ -1,7 +1,7 @@
 {
-  "version": "1.24.0",
-  "assetVersion": "1240",
+  "version": "1.25.0",
+  "assetVersion": "1250",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Added an illustrated AI Playground home with direct entry to every studio."
+  "notes": "Home header simplified, custom raster icons and illustrated translucent section boundaries."
 }

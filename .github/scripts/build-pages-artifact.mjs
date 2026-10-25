@@ -17,6 +17,15 @@ const assetFiles = [
   'fox-logo.png',
   'typewriter-action.webp',
   'playground-home-v1.webp',
+  'home-divider-v1.webp',
+  'home-icon-text.webp',
+  'home-icon-image.webp',
+  'home-icon-writing.webp',
+  'home-icon-reach.webp',
+  'home-icon-dalbit.webp',
+  'home-icon-mastering.webp',
+  'home-icon-sorion.webp',
+  'home-icon-ranipang.webp',
   'icon-v66-192.png',
   'icon-v66-512.png'
 ];
