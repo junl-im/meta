@@ -32,6 +32,7 @@ const assetFiles = [
   'home-icon-maeum.webp',
   'home-icon-shelf.webp',
   'home-icon-music.webp',
+  'home-icon-webtoon.png',
   'icon-v66-192.png',
   'icon-v66-512.png'
 ];
@@ -125,6 +126,7 @@ async function main() {
   // Publish the existing fortune app at its own path. Its relative assets and SW remain scoped there.
   await copyDirRelative(ROOT, 'AIPlayground/DalbitUnse/dist', OUT);
   await copyDirRelative(ROOT, 'AIPlayground/GomFoxMusic', OUT);
+  await copyDirRelative(ROOT, 'AIPlayground/WebtoonStudio', OUT);
   // Publish configuration booleans only; credentials never enter the public artifact.
   if (['true','false'].includes(process.env.DAILY_HAS_KEY) && ['true','false'].includes(process.env.DAILY_HAS_SEED)) {
     const configured=process.env.DAILY_HAS_KEY==='true'&&process.env.DAILY_HAS_SEED==='true';

@@ -1,7 +1,7 @@
 {
-  "version": "1.35.4",
-  "assetVersion": "1354",
+  "version": "1.36.0",
+  "assetVersion": "1360",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Give all twelve music tracks an equal chance on the first shuffle pick."
+  "notes": "Integrate the illustrated Webtoon Studio as an isolated AI Playground service."
 }
