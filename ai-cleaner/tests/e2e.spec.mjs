@@ -115,11 +115,13 @@ test('mobile home cards keep readable text and icon-first service layout', async
         toolText:parseFloat(getComputedStyle(tool.querySelector('small')).fontSize),
         serviceText:parseFloat(getComputedStyle(service.querySelector('small')).fontSize),
         iconBottom:icon.bottom,titleTop:title.top,
-        cardRight:Math.max(...[...document.querySelectorAll('.homeToolCard,.homeWorldGrid a')].map(el=>el.getBoundingClientRect().right))
+        cardRight:Math.max(...[...document.querySelectorAll('.homeToolCard,.homeWorldGrid a')].map(el=>el.getBoundingClientRect().right)),
+        clippedCards:[...document.querySelectorAll('.homeToolCard,.homeWorldGrid a')].filter(el=>el.scrollHeight>el.clientHeight+1).length
       };
     });
     expect(layout.scrollWidth).toBeLessThanOrEqual(layout.viewport);
     expect(layout.cardRight).toBeLessThanOrEqual(layout.viewport+1);
+    expect(layout.clippedCards).toBe(0);
     expect(layout.toolText).toBeGreaterThanOrEqual(11.5);
     expect(layout.serviceText).toBeGreaterThanOrEqual(11.5);
     expect(layout.iconBottom).toBeLessThanOrEqual(layout.titleTop+3);
