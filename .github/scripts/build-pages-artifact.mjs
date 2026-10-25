@@ -6,6 +6,7 @@ const OUT = path.join(ROOT, '.pages-site');
 const APP = path.join(ROOT, 'ai-cleaner');
 const OS = path.join(APP, 'ai-writing-os');
 const DALBIT = path.join(ROOT, 'AIPlayground', 'DalbitUnse', 'dist');
+const GOMFOX_MUSIC = path.join(ROOT, 'AIPlayground', 'GomFoxMusic');
 
 const rootFiles = ['index.html'];
 const optionalSharedPublicFiles = ['OPTION/SS_OPTION.txt'];
@@ -27,6 +28,9 @@ const assetFiles = [
   'home-icon-mastering.webp',
   'home-icon-sorion.webp',
   'home-icon-ranipang.webp',
+  'home-icon-maeum.webp',
+  'home-icon-shelf.webp',
+  'home-icon-music.webp',
   'icon-v66-192.png',
   'icon-v66-512.png'
 ];
@@ -119,6 +123,7 @@ async function main() {
   for (const dir of appDirs) await copyDirRelative(APP, dir, appOut);
   // Publish the existing fortune app at its own path. Its relative assets and SW remain scoped there.
   await copyDirRelative(ROOT, 'AIPlayground/DalbitUnse/dist', OUT);
+  await copyDirRelative(ROOT, 'AIPlayground/GomFoxMusic', OUT);
   // Publish configuration booleans only; credentials never enter the public artifact.
   if (['true','false'].includes(process.env.DAILY_HAS_KEY) && ['true','false'].includes(process.env.DAILY_HAS_SEED)) {
     const configured=process.env.DAILY_HAS_KEY==='true'&&process.env.DAILY_HAS_SEED==='true';

@@ -30,7 +30,7 @@ test('illustrated home opens first and cards, brand and browser back connect the
   await expect(page.locator('#homeTool')).toBeVisible();
   await expect(page.locator('#textTool')).toBeHidden();
   await expect(page.locator('.workspaceNav')).toBeHidden();
-  await expect(page.locator('#homeTool img')).toHaveCount(9);
+  await expect(page.locator('#homeTool img')).toHaveCount(12);
   for(const icon of await page.locator('#homeTool img').all()){await icon.scrollIntoViewIfNeeded();await expect.poll(()=>icon.evaluate(img=>img.naturalWidth)).toBeGreaterThan(0);}
   await expect(page).toHaveTitle(/곰같은여우의 AI 놀이터/);
   await page.locator('.homeToolCard[data-open-tool="text"]').click();
@@ -1060,4 +1060,23 @@ test('Blog Factory keeps compact presets and disclosure targets inside narrow mo
   await page.setViewportSize({width:320,height:568});
   const first320=await presets.nth(0).boundingBox(),second320=await presets.nth(1).boundingBox();
   expect(first320&&second320).toBeTruthy();expect(second320.y).toBeGreaterThan(first320.y+10);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBeTruthy();
+});
+
+
+test('related worlds, custom icons and GomFox Music return path work on mobile', async ({ page }) => {
+  await page.setViewportSize({width:320,height:720});
+  await gotoReady(page,{home:true});
+  await expect(page.locator('.homeWorldCollection')).toHaveCount(3);
+  for(const name of ['마음도감','곰같은여우의 서재','곰같은여우 뮤직']){
+    const card=page.locator('.homeWorldCollection a').filter({has:page.locator('strong',{hasText:name})});
+    await expect(card).toBeVisible();
+    await card.locator('img').scrollIntoViewIfNeeded();
+    await expect.poll(()=>card.locator('img').evaluate(img=>img.naturalWidth)).toBeGreaterThan(0);
+  }
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+  await page.locator('.homeWorldCollection a').filter({has:page.locator('strong',{hasText:'곰같은여우 뮤직'})}).click();
+  await expect(page).toHaveURL(/AIPlayground\/GomFoxMusic\//);
+  await expect(page.locator('iframe[title*="Spotify"]')).toHaveAttribute('src',/open\.spotify\.com\/embed\/artist\/57qGfDOq59XvGh7HTeu3CY/);
+  await page.locator('.return-link').click();
+  await expect(page.locator('#homeTool')).toBeVisible();
 });

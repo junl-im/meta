@@ -1,7 +1,7 @@
 {
-  "version": "1.28.0",
-  "assetVersion": "1280",
+  "version": "1.29.0",
+  "assetVersion": "1290",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Firebase Hosting mirror with GitHub Pages redirect and old-origin storage access."
+  "notes": "Grouped story, audio, and play destinations with GomFox Music listening page."
 }
