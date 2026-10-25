@@ -999,6 +999,7 @@ function showHome({updateHistory=true}={}){
 }
 function activateToolTab(b,{updateHistory=true}={}){
   if(!b)return;const nextTool=b.dataset.tool;
+  window.GomFoxHomeMusicDock?.stop();
   $('#homeTool').classList.add('hidden');document.body.classList.remove('homeActive');
   if(nextTool!=='text'){invalidatePendingRewriteOpen();try{window.AICleanerRewriteStudio?.saveSession?.();}catch(_){}window.AICleanerRewriteStudio?.cancelGeneration?.({status:'다른 도구로 이동해 생성 작업을 취소했습니다.'});closeAllPanels();}
   if(nextTool!=='image'){invalidatePendingImageRun({status:'다른 도구로 이동해 이미지 분석을 중지했습니다.'});window.cancelImageAnalysis?.({status:'다른 도구로 이동해 이미지 분석을 중지했습니다.'});}

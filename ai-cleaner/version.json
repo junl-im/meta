@@ -1,7 +1,7 @@
 {
-  "version": "1.32.0",
-  "assetVersion": "1320",
+  "version": "1.33.0",
+  "assetVersion": "1330",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Reduce mobile paint cost and bound text forensic work for long drafts."
+  "notes": "Add an on-demand random Spotify track dock to the home page and audit linked services."
 }

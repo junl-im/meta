@@ -46,6 +46,29 @@ test('illustrated home opens first and cards, brand and browser back connect the
   await page.locator('#homeButton').click();
   await expect(page.locator('#homeTool')).toBeVisible();
 });
+test('home music dock loads only after a gesture and changes to a different owned track', async ({ page }) => {
+  await page.setViewportSize({width:320,height:568});
+  await gotoReady(page,{home:true});
+  const dock=page.locator('#homeMusicDock');
+  const frame=dock.locator('iframe');
+  await expect(dock).toBeVisible();
+  await expect(frame).not.toHaveAttribute('src',/spotify/);
+  await page.locator('#homeMusicShuffle').click();
+  const first=await frame.getAttribute('src');
+  expect(first).toMatch(/^https:\/\/open\.spotify\.com\/embed\/track\/(?:7tHDyufKgMGt3qnGnxt52V|6tGXxCzjM8ITzxPXRoWgcF|6dZ4FEEqykrfAOoCcWT0BR)/);
+  await expect(page.locator('#homeMusicPlayer')).toBeVisible();
+  await expect(page.locator('#homeMusicShuffle')).toHaveAttribute('aria-expanded','true');
+  await page.locator('#homeMusicShuffle').click();
+  expect(await frame.getAttribute('src')).not.toBe(first);
+  await page.locator('#homeMusicClose').click();
+  await expect(page.locator('#homeMusicPlayer')).toBeHidden();
+  await expect(frame).not.toHaveAttribute('src',/spotify/);
+  await expect(page.locator('#homeMusicShuffle')).toBeFocused();
+  await page.locator('#homeMusicShuffle').click();
+  await page.locator('.homeToolCard[data-open-tool="text"]').click();
+  await expect(frame).not.toHaveAttribute('src',/spotify/);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
 
 test('Back returns to home before opening the illustrated exit confirmation', async ({ page }) => {
   await page.setViewportSize({width:320,height:568});

@@ -1,7 +1,7 @@
 'use strict';
-const CACHE_NAME='ai-cleaner-shell-1.32.0';
+const CACHE_NAME='ai-cleaner-shell-1.33.0';
 const CORE_ASSETS=[
-  './','./index.html','./version.json','./site.webmanifest','./css/app.css','./js/boot.js','./js/hosting-redirect.js',
+  './','./index.html','./version.json','./site.webmanifest','./css/app.css','./js/boot.js','./js/hosting-redirect.js','./js/home-music-dock.js',
   './js/core/event-bus.js','./js/core/history-store.js','./js/core/work-lock.js','./js/core/text-utils.js',
   './js/core/state-store.js','./js/core/text-engine.js','./js/core/diff-engine.js','./js/services/analysis-worker-adapter.js',
   './js/services/analysis-performance-governor.js','./js/services/analysis-coordinator.js','./js/services/update-manager.js',
