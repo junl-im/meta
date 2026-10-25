@@ -1249,3 +1249,14 @@ body{background:radial-gradient(circle at 8% 7%,#f8dbc6b8 0,transparent 28%),rad
 /* 1.30 · readable mobile disclosure control. */
 @media(max-width:600px){.mobileBriefToggle:not([hidden]){display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:34px;margin-top:8px;padding:5px 13px;border:1px solid #e8c7a8;border-radius:999px;background:#fff9f1;color:#98450c;font-size:11.5px;font-weight:850;text-decoration:none;box-shadow:0 2px 8px #7d492018}.mobileBriefToggle:not([hidden])::after{content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:translateY(-2px) rotate(45deg)}.mobileBriefToggle[aria-expanded="true"]::after{transform:translateY(2px) rotate(225deg)}.mobileBriefToggle:not([hidden]):hover{background:#fff2df}}
 @media(max-width:620px){.homeWorldCollection h3 small{font-size:11.5px;line-height:1.4}.homeWorldGrid small{font-size:12px}.homeWorldGrid a{min-height:130px}}
+@media(max-width:760px) and (pointer:coarse){
+  .top,.workspaceNav .toolnav,.homeHero,.homeHeroActions .homeSecondary,.homeToolCard,.homeWorldGrid a{backdrop-filter:none;-webkit-backdrop-filter:none}
+  .workspaceNav .toolnav{background:#f3e7d9}
+  .homeHero{background:linear-gradient(138deg,#fffdf8,#fff0df 58%,#f4e3da)}
+  .homeToolCard{background:linear-gradient(142deg,#fffefa,#fff7ed 72%,#f7e9e0)}
+  .homeWorldGrid a{background:linear-gradient(135deg,#fffefa,#fff6ed)}
+  .exitDialog::backdrop{backdrop-filter:none;-webkit-backdrop-filter:none}
+  .floatWidget.attention,.floatWidget.attention .widgetIcon,#typingPreviewButton.previewBridge.typewriterRecommended{animation:none}
+  .floatWidget.attention{border-color:#ed892f;box-shadow:0 0 0 2px #ff7a0026,0 6px 16px #6b432426}
+  #typingPreviewButton.previewBridge.typewriterRecommended{outline:3px solid #ff8b2650;outline-offset:4px}
+}

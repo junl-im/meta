@@ -1,7 +1,7 @@
 {
-  "version": "1.31.0",
-  "assetVersion": "1310",
+  "version": "1.32.0",
+  "assetVersion": "1320",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Harden offline shell activation and improve mobile service card readability."
+  "notes": "Reduce mobile paint cost and bound text forensic work for long drafts."
 }

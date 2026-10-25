@@ -127,6 +127,35 @@ test('mobile home cards keep readable text and icon-first service layout', async
     expect(layout.iconBottom).toBeLessThanOrEqual(layout.titleTop+3);
   }
 });
+test('large forensic findings keep the full count with a bounded detail list', async ({ page }) => {
+  await gotoReady(page);
+  const input=page.locator('#input');
+  await page.locator('#liveScan').uncheck();
+  await input.fill('A'+'\u200B'.repeat(1000)+'B');
+  await analyzeNow(page);
+  await expect(page.locator('#forensicWidget')).toBeVisible();
+  await expect(page.locator('#forensicCount')).toHaveText('1000');
+  await page.locator('#forensicWidget').click();
+  await expect(page.locator('#forensicList .forensicRow')).toHaveCount(300);
+  await input.fill('일반 글');
+  await expect(page.locator('#forensicWidget')).toBeHidden();
+  await analyzeNow(page);
+  await expect(page.locator('#forensicWidget')).toBeHidden();
+});
+test('coarse mobile screens avoid costly backdrop blur on the illustrated home', async ({ browser }) => {
+  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,serviceWorkers:'block'});
+  const page=await context.newPage();
+  try{
+    await gotoReady(page,{home:true});
+    const styles=await page.evaluate(()=>({
+      coarse:matchMedia('(pointer:coarse)').matches,
+      hero:getComputedStyle(document.querySelector('.homeHero')).backdropFilter,
+      card:getComputedStyle(document.querySelector('.homeToolCard')).backdropFilter,
+      service:getComputedStyle(document.querySelector('.homeWorldGrid a')).backdropFilter
+    }));
+    expect(styles).toEqual({coarse:true,hero:'none',card:'none',service:'none'});
+  }finally{await context.close();}
+});
 test('original auto typewriter preserves the exact source including hidden and special characters', async ({ page }) => {
   await gotoReady(page);
   const source='가\u200B나다\u00AD\u061C\nABC🙂e\u0301\u00A0끝👩‍💻';

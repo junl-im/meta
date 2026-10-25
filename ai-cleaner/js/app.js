@@ -355,7 +355,8 @@ function renderAll({preserveOutput=false,deferHeavy=false}={}){
 
 
 function buildTextForensics(text){
-  const source=String(text||''),items=[],push=(kind,label,pos,code,detail='')=>items.push({kind,label,pos,code,detail});
+  const source=String(text||''),items=[],groups=Object.create(null);let count=0;
+  const push=(kind,label,pos,code,detail='')=>{count++;groups[kind]=(groups[kind]||0)+1;if(items.length<300)items.push({kind,label,pos,code,detail});};
   const patterns=[
     {kind:'zero-width',label:'제로폭/숨은 문자',re:/[\u200B\u200C\u200D\u2060\uFEFF]/gu},
     {kind:'bidi',label:'Bidi 방향 제어',re:/[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/gu},
@@ -373,8 +374,15 @@ function buildTextForensics(text){
   for(const [label,re] of mojibake){let m;while((m=re.exec(source)))push('encoding',label,m.index,'ENC',m[0]);}
   const homoglyphs=Array.isArray(state.homoglyphs)?state.homoglyphs:[];
   for(const h of homoglyphs)push('homoglyph','유사 문자(Homoglyph)',Number(h.pos??h.start??-1),String(h.code||''),String(h.char||h.value||''));
-  const groups=items.reduce((acc,x)=>{acc[x.kind]=(acc[x.kind]||0)+1;return acc;},Object.create(null));
-  return{items,groups,count:items.length,clean:items.length===0};
+  return{items,groups,count,clean:count===0};
+}
+let forensicCountCache={source:null,homoglyphs:null,count:0};
+function getForensicCount(){
+  if(inputDirty||!state.original)return 0;
+  if(forensicCountCache.source!==state.original||forensicCountCache.homoglyphs!==state.homoglyphs){
+    forensicCountCache={source:state.original,homoglyphs:state.homoglyphs,count:buildTextForensics(state.original).count};
+  }
+  return forensicCountCache.count;
 }
 function renderForensics(){
   const summary=$('#forensicSummary'),list=$('#forensicList'),status=$('#forensicPanelStatus');if(!summary||!list)return;
@@ -650,7 +658,7 @@ function clearResultCheckpoints(){if(!checkpointStore.clear())return;syncCheckpo
 
 function download(name,data,type){const url=URL.createObjectURL(new Blob([data],{type})),a=document.createElement('a');a.href=url;a.download=name;a.hidden=true;document.body.appendChild(a);try{a.click();}finally{a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);}}
 function syncWidgets(){
-  const textVisible=!$('#textTool').classList.contains('hidden'),out=$('#output'),resultEditing=out?.readOnly===false,issueCount=inputDirty||resultEditing?0:state.issues.length,reviewCount=inputDirty||resultEditing?0:(Number(state.reviewCount)||0),techCount=inputDirty?0:state.allChars.length+state.homoglyphs.length,forensicAudit=inputDirty?{count:0}:buildTextForensics(state.original||$('#input')?.value||''),forensicCount=forensicAudit.count;
+  const textVisible=!$('#textTool').classList.contains('hidden'),out=$('#output'),resultEditing=out?.readOnly===false,issueCount=inputDirty||resultEditing?0:state.issues.length,reviewCount=inputDirty||resultEditing?0:(Number(state.reviewCount)||0),techCount=inputDirty?0:state.allChars.length+state.homoglyphs.length,forensicCount=textVisible?getForensicCount():0;
   const iw=$('#issuesWidget'),rw=$('#reviewWidget'),fw=$('#forensicWidget'),tw=$('#techWidget'),ww=$('#rewriteWidget');
   const hasText=!!((state.original||$('#input')?.value||'').trim()),hasFreshResult=hasText&&!inputDirty&&!!out?.value&&state.original===($('#input')?.value||''),typewriterIsNext=hasText&&!window.__AI_CLEANER_TYPEWRITER_BUSY__&&out?.dataset.typewriterVerified!=='true'&&!typewriterRecommendationSuppressed;
   iw.hidden=!textVisible||issueCount===0;rw.hidden=!textVisible||reviewCount===0;if(fw)fw.hidden=!textVisible||forensicCount===0;tw.hidden=!textVisible||techCount===0;if(ww)ww.hidden=!textVisible||!hasText||resultEditing;
