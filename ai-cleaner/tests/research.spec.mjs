@@ -4,7 +4,7 @@ const uncaughtErrors=new WeakMap();
 test.beforeEach(async({page})=>{const errors=[];uncaughtErrors.set(page,errors);page.on('pageerror',error=>errors.push(error.message));});
 test.afterEach(async({page})=>{expect(uncaughtErrors.get(page)||[]).toEqual([]);});
 test.use({serviceWorkers:'block'});
-async function ready(page,reach=true){await page.goto(BASE);await page.waitForFunction(()=>window.__AI_CLEANER_APP_READY__);if(reach){await page.locator('#toolTabReach').click();await page.waitForFunction(()=>window.GomFoxReach?.active);}}
+async function ready(page,reach=true){await page.goto(BASE);await page.waitForFunction(()=>window.__AI_CLEANER_APP_READY__);if(reach){await page.locator('#toolTabReach').click();await page.waitForFunction(()=>window.GomFoxReach?.active);}else await page.locator('#toolTabText').click();}
 const articles=[
  '서울시는 육아 지원 신청 절차를 공식 안내문에 게시했습니다. 서류 제출과 가구 조건을 확인하고 주민센터에서 신청하세요.',
  '부산 항구에서 바다 생태계 관찰 행사가 열립니다. 해양 동물을 보호하기 위해 낚시 장비와 쓰레기 처리 방법을 안내합니다.',
