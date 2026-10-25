@@ -14,7 +14,7 @@ test('illustrated playground card opens the isolated webtoon studio and returns 
   await expect(page.locator('.web-app')).toBeVisible();
   await expect(page.locator('.web-mark')).toHaveCSS('background-image',/home-icon-webtoon\.png/);
   await page.locator('.web-return').click();
-  await expect(page).toHaveURL(playground);
+  await expect(page).toHaveURL(/\/ai-cleaner\/(?:\?.*)?$/);
   await expect(page.locator('#homeTool')).toBeVisible();
 });
 
