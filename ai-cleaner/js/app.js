@@ -238,12 +238,10 @@ function renderDiff(){return diffView.render(state.base||'', $('#output')?.value
 function restoreUpdateDraftData(draft){
   if(!draft)return false;
   const s=draft.settings||{};if($('#cleanProfile'))$('#cleanProfile').value=s.profile||'standard';if($('#norm'))$('#norm').checked=!!s.norm;if($('#repeat'))$('#repeat').checked=s.repeat!==false;if($('#length'))$('#length').checked=s.length!==false;if($('#liveScan'))$('#liveScan').checked=s.liveScan!==false;
-  let discardedStaleOutput=false;
   if((draft.input||'').trim()){
     replaceSourceText(draft.input||'',{analyzeNow:true,resetPerformance:true});
     const outputWasCurrent=draft.analysisFresh!==false&&(!draft.outputBasis||draft.outputBasis===draft.input);
     if(outputWasCurrent&&typeof draft.output==='string'&&draft.output!==$('#output').value){$('#output').value=draft.output;refreshSuggestionBaseline(draft.output,{unread:false});renderAll({preserveOutput:true});}
-    else if(!outputWasCurrent&&typeof draft.output==='string'&&draft.output!==$('#output').value)discardedStaleOutput=true;
     if(outputWasCurrent&&draft.outputReadOnly===false&&typeof draft.output==='string'){
       manualEditBaseline=draft.output;state.manual=true;$('#output').readOnly=false;$('#editResult').textContent='✓ 수정 완료';
     }
@@ -255,7 +253,7 @@ function restoreUpdateDraftData(draft){
   if(draft.aiWritingOs)aiWritingOs.restoreState(draft.aiWritingOs);
   if(draft.resultTab)activateResultTab(draft.resultTab);
   if(draft.activeTool==='home')showHome({updateHistory:false});else if(draft.activeTool){const b=document.querySelector(`[data-tool="${draft.activeTool}"]`);if(b)activateToolTab(b,{updateHistory:false});}
-  showToast(discardedStaleOutput?'새 버전을 적용했습니다. 원본 변경 중이던 이전 결과는 버리고 최신 원본으로 다시 다듬었습니다.':'새 버전을 적용하고 작성 중이던 내용을 복원했습니다.');return true;
+  return true;
 }
 
 function configureEditors(root=document){
@@ -1101,11 +1099,12 @@ function resumePageWork(event){
   if(!event?.persisted)return;queueViewportSync();configureEditors();syncWidgets();
   if(document.querySelector('[data-tool="writing"]')?.classList.contains('active'))void aiWritingOs.activate().catch(()=>{});
   if(document.querySelector('[data-tool="reach"]')?.classList.contains('active'))void ensureGomFoxReach().then(reach=>reach.activate?.()).catch(()=>{});
-  updateManager.start({initialDelay:1200,interval:120000});
+  updateManager.start({initialDelay:1200,interval:45000});
   if(inputDirty&&$('#input').value.trim()&&$('#liveScan').checked)queueLiveAnalysis();else{queueStats();if($('#detailDiagnostics').open)queueCompare();}
 }
 
 applyVersionUi();configureEditors();renderStats();syncWidgets();syncCheckpointUi();updateManager.restorePending();syncResultFreshnessUi();syncPanelAria();syncTypewriterRecommendation();
-updateManager.start({initialDelay:5000,interval:120000});
+updateManager.start({initialDelay:1500,interval:45000});
+if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('controllerchange',()=>void updateManager.check());
 window.addEventListener('pagehide',suspendPageWork);window.addEventListener('pageshow',resumePageWork);
 })();

@@ -1,7 +1,7 @@
 {
-  "version": "1.34.0",
-  "assetVersion": "1340",
+  "version": "1.35.0",
+  "assetVersion": "1350",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Blend the home music dock into the illustrated hero and compact its mobile controls."
+  "notes": "Refresh legacy PWA clients with immediate worker activation and network-first versioned assets."
 }

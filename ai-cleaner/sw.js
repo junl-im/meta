@@ -1,5 +1,5 @@
 'use strict';
-const CACHE_NAME='ai-cleaner-shell-1.34.0';
+const CACHE_NAME='ai-cleaner-shell-1.35.0';
 const CORE_ASSETS=[
   './','./index.html','./version.json','./site.webmanifest','./css/app.css','./js/boot.js','./js/hosting-redirect.js','./js/home-music-dock.js',
   './js/core/event-bus.js','./js/core/history-store.js','./js/core/work-lock.js','./js/core/text-utils.js',
@@ -33,6 +33,7 @@ self.addEventListener('install',event=>{
     const sourceFallback=CORE_ASSETS.filter(asset=>asset.startsWith('./js/core/')||asset.startsWith('./js/services/')||asset.startsWith('./js/ui/')||asset.startsWith('./js/features/')||asset==='./js/app.js');
     const missingRuntime=failed.has('./vendor/app-core.bundle.js')&&sourceFallback.some(asset=>failed.has(asset));
     if(critical.some(asset=>failed.has(asset))||missingRuntime)throw new Error('critical offline shell cache failed');
+    await self.skipWaiting();
   })());
 });
 self.addEventListener('activate',event=>{
@@ -61,6 +62,6 @@ self.addEventListener('fetch',event=>{
   const relativePath='/'+url.pathname.slice(scopePath.length);
   const key=normalizeKey(request);
   if(request.mode==='navigate'){event.respondWith(networkFirst(request,new Request(new URL('./index.html',self.registration.scope))));return;}
-  if(FRESH_PATHS.has(relativePath)){event.respondWith(networkFirst(request,key));return;}
+  if(FRESH_PATHS.has(relativePath)||url.searchParams.has('v')){event.respondWith(networkFirst(request,key));return;}
   event.respondWith(cacheFirst(request,key));
 });
