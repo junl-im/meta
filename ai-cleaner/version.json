@@ -1,7 +1,7 @@
 {
-  "version": "1.36.2",
-  "assetVersion": "1362",
+  "version": "1.36.3",
+  "assetVersion": "1363",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Add Webtoon Studio bubble-tail controls, mobile canvas fit and lighter image editing; verify project and PNG output."
+  "notes": "Connect Webtoon Studio speech bubbles and tails with one contour and keep mobile navigation inside the visible viewport."
 }
