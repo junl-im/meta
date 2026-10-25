@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#18252b">
+  <meta name="description" content="곰같은여우의 네이버 웹소설 작품 서재. 베스트리그와 챌린지리그 소설을 모아 네이버 공식 회차 목록으로 연결합니다.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="곰같은여우의 소설 서재">
+  <meta property="og:description" content="베스트리그와 챌린지리그 작품을 한곳에. 마음에 드는 이야기를 네이버에서 이어 읽어요.">
+  <meta property="og:image" content="https://gomfox-naver-novels.glassyroot13.chatgpt.site/assets/hero-books.webp">
+  <title>곰같은여우의 소설 서재</title>
+  <link rel="icon" type="image/webp" href="./assets/hero-books.webp">
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./catalog.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="소설 서재 첫 화면">
+        <span class="brand-symbol asset-icon asset-book" aria-hidden="true"></span>
+        <span><strong>곰같은여우의 서재</strong><small>MY NAVER NOVELS</small></span>
+      </a>
+      <div class="header-actions">
+        <span class="official-badge"><span class="dot"></span> 네이버 웹소설 원문 연결</span>
+        <a class="header-shelf-link" href="#bookshelf">작품 보기 <span aria-hidden="true">↘</span></a>
+      </div>
+    </header>
+    <main id="top">
+      <section class="hero compact-hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="eyebrow-line"></span> THE STORY COLLECTION</div>
+          <h1 id="hero-title">이야기가 모이는 곳,<br><em>곰같은여우의 서재.</em></h1>
+          <p>제가 써 내려온 이야기들을 한 책장에 모았어요.<br>마음에 드는 작품을 골라 네이버에서 이어 읽어보세요.</p>
+          <div class="hero-actions">
+            <a href="#bookshelf" class="primary-button">작품 둘러보기 <span aria-hidden="true">↗</span></a>
+            <button id="resume-button" class="text-button" hidden>최근 열어본 작품 다시 보기 →</button>
+          </div>
+          <div class="hero-stats" aria-label="작품 현황">
+            <span><strong id="hero-total">27</strong><small>등록 작품</small></span>
+            <i aria-hidden="true"></i>
+            <span><strong>네이버</strong><small>공식 회차로 연결</small></span>
+          </div>
+        </div>
+        <div class="hero-art hero-custom-art" aria-hidden="true"><img src="./assets/hero-books.webp" width="900" height="900" alt="" decoding="async" fetchpriority="high"></div>
+      </section>
+      <section id="bookshelf" class="catalog-section">
+        <div class="section-heading catalog-heading">
+          <div><span class="section-kicker">MY COLLECTION</span><h2>모든 작품 <span id="work-count" class="count-pill">27</span></h2></div>
+          <label class="search-wrap catalog-search"><span class="asset-icon asset-search" aria-hidden="true"></span><input id="search-input" type="search" placeholder="작품 제목 검색" aria-label="작품 제목 검색" autocomplete="off" spellcheck="false"></label>
+        </div>
+        <div class="catalog-filters">
+          <div class="league-filter-row" role="group" aria-label="연재 리그 선택">
+            <button type="button" class="league-chip active" data-league="all" aria-pressed="true">전체 리그</button>
+            <button type="button" class="league-chip" data-league="best" aria-pressed="false"><span class="asset-icon asset-best" aria-hidden="true"></span> 베스트리그</button>
+            <button type="button" class="league-chip" data-league="challenge" aria-pressed="false"><span class="asset-icon asset-quill" aria-hidden="true"></span> 챌린지리그</button>
+          </div>
+        </div>
+        <section id="ranking-spotlight" class="ranking-spotlight" aria-label="네이버 랭킹에 올랐던 작품" hidden>
+          <div class="ranking-copy"><span class="asset-icon asset-best" aria-hidden="true"></span><div><strong>네이버 랭킹에 올랐던 이야기</strong><small id="ranking-caption"></small></div></div>
+          <div id="ranking-links" class="ranking-links"></div>
+        </section>
+        <div class="catalog-summary"><span id="result-description" role="status" aria-live="polite">총 27편의 이야기</span><span>표지를 누르면 네이버 회차 목록이 열려요 <span aria-hidden="true">↗</span></span></div>
+        <div id="league-groups" class="league-groups"></div>
+        <div id="empty-books" class="empty-state" hidden><span aria-hidden="true">✧</span><h3>찾는 작품이 없어요</h3><p>다른 제목으로 찾아보세요.</p></div>
+      </section>
+      <section class="reading-note">
+        <div class="reading-icon asset-icon asset-book" aria-hidden="true"></div>
+        <div><h2>네이버에서 그대로 읽어요</h2><p>이 서재는 작품을 찾기 쉽게 모아둔 공간이에요. 작품을 선택하면 네이버 웹소설의 공식 회차 목록으로 이동하며, 소설 본문은 이곳에 복사하거나 저장하지 않습니다.</p>
+          <details id="reader-help" class="reader-help">
+            <summary>네이버 페이지가 멈추거나 열리지 않나요?<span class="asset-icon asset-quill" aria-hidden="true"></span></summary>
+            <div class="reader-help-body">
+              <p>네이버 화면이 멈췄다면 그 탭만 닫고 이 서재로 돌아와 작품을 다시 열어보세요. 계속 문제가 생기면 작품 주소를 복사해 다른 브라우저에서 열 수 있어요. 네이버 자체 오류는 이 서재에서 강제로 해결할 수 없습니다.</p>
+              <button type="button" id="copy-recent-link" class="help-copy-button" hidden>최근 작품 주소 복사</button>
+            </div>
+          </details>
+        </div>
+        <button id="reopen-last" class="outline-button" hidden>최근 작품 새 탭으로 다시 열기 ↗</button>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <span>곰같은여우의 소설 서재</span>
+      <span>작품·표지 출처: 네이버 웹소설 · 네이버와 공식 제휴된 서비스가 아닙니다. <a href="#top" class="footer-top">맨 위로 ↑</a></span>
+    </footer>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="./catalog.js" defer></script>
+  <script src="./popularity.js" defer></script>
+  <script src="./app.js" defer></script>
+</body>
+</html>
