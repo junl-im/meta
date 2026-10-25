@@ -6,11 +6,12 @@
     {title:'밤꽃 산책',id:'6dZ4FEEqykrfAOoCcWT0BR'}
   ];
   const shuffle=document.getElementById('homeMusicShuffle');
+  const shuffleLabel=shuffle?.querySelector('.homeMusicShuffleLabel');
   const close=document.getElementById('homeMusicClose');
   const player=document.getElementById('homeMusicPlayer');
   const frame=document.getElementById('homeMusicFrame');
   const status=document.getElementById('homeMusicStatus');
-  if(!shuffle||!close||!player||!frame||!status)return;
+  if(!shuffle||!shuffleLabel||!close||!player||!frame||!status)return;
   let last=-1;
   shuffle.addEventListener('click',()=>{
     const next=songs.length<2?0:(last+1+Math.floor(Math.random()*(songs.length-1)))%songs.length;
@@ -20,7 +21,7 @@
     frame.title=`Spotify ${song.title} 플레이어`;
     status.textContent=`선택된 곡 · ${song.title}`;
     player.hidden=false;
-    shuffle.textContent='다른 곡';
+    shuffleLabel.textContent='다른 곡';
     shuffle.setAttribute('aria-label','곰같은여우 다른 곡 고르기');
     shuffle.setAttribute('aria-expanded','true');
   });
@@ -28,7 +29,7 @@
     frame.removeAttribute('src');
     player.hidden=true;
     status.textContent='노래 한 곡, 쉬어 가기';
-    shuffle.textContent='랜덤 듣기';
+    shuffleLabel.textContent='랜덤 듣기';
     shuffle.setAttribute('aria-label','곰같은여우 무작위 곡 고르기');
     shuffle.setAttribute('aria-expanded','false');
     if(restoreFocus)shuffle.focus();

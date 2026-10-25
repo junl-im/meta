@@ -51,7 +51,10 @@ test('home music dock loads only after a gesture and changes to a different owne
   await gotoReady(page,{home:true});
   const dock=page.locator('#homeMusicDock');
   const frame=dock.locator('iframe');
+  const playIcon=dock.locator('#homeMusicShuffle img');
   await expect(dock).toBeVisible();
+  await expect(playIcon).toHaveAttribute('src','assets/music-play.png');
+  expect(await playIcon.evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
   const compact=await dock.evaluate(el=>({height:el.getBoundingClientRect().height,introTop:el.querySelector('.homeMusicDockIntro').getBoundingClientRect().top,actionsTop:el.querySelector('.homeMusicDockActions').getBoundingClientRect().top}));
   expect(compact.height).toBeLessThanOrEqual(56);
   expect(Math.abs(compact.introTop-compact.actionsTop)).toBeLessThanOrEqual(3);
@@ -61,12 +64,15 @@ test('home music dock loads only after a gesture and changes to a different owne
   expect(first).toMatch(/^https:\/\/open\.spotify\.com\/embed\/track\/(?:7tHDyufKgMGt3qnGnxt52V|6tGXxCzjM8ITzxPXRoWgcF|6dZ4FEEqykrfAOoCcWT0BR)/);
   await expect(page.locator('#homeMusicPlayer')).toBeVisible();
   await expect(page.locator('#homeMusicShuffle')).toHaveAttribute('aria-expanded','true');
+  await expect(playIcon).toBeVisible();
+  await expect(dock.locator('.homeMusicShuffleLabel')).toHaveText('다른 곡');
   await page.locator('#homeMusicShuffle').click();
   expect(await frame.getAttribute('src')).not.toBe(first);
   await page.locator('#homeMusicClose').click();
   await expect(page.locator('#homeMusicPlayer')).toBeHidden();
   await expect(frame).not.toHaveAttribute('src',/spotify/);
   await expect(page.locator('#homeMusicShuffle')).toBeFocused();
+  await expect(dock.locator('.homeMusicShuffleLabel')).toHaveText('랜덤 듣기');
   await page.locator('#homeMusicShuffle').click();
   await page.locator('.homeToolCard[data-open-tool="text"]').click();
   await expect(frame).not.toHaveAttribute('src',/spotify/);
