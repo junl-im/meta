@@ -1,0 +1,253 @@
+{
+  "schema_version": 1,
+  "app_id": "gomfox-naver-novel-shelf",
+  "source_site": "https://gomfox-naver-novels.glassyroot13.chatgpt.site",
+  "catalog_last_verified": "2026-10-25",
+  "copyright_policy": "metadata-and-links-only",
+  "navigation_mode": "open-official-naver-novel-url",
+  "works": [
+    {
+      "id": "1249028",
+      "title": "섀도 닥터",
+      "author_search_identity": "[곰같은여우]",
+      "league": "best",
+      "genre": "현판",
+      "official_url": "https://m.novel.naver.com/best/list?novelId=1249028",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20261020_49/novel_1792475165311swk8z_PNG/1.png?type=f280_224_2"
+    },
+    {
+      "id": "1244916",
+      "title": "내 남편을 죽인 범인과 결혼했다",
+      "author_search_identity": "[곰같은여우]",
+      "league": "best",
+      "genre": "로판",
+      "official_url": "https://m.novel.naver.com/best/list?novelId=1244916",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20260929_276/novel_1790661757423nG4oy_JPEG/400.jpg?type=f280_224_2"
+    },
+    {
+      "id": "1248094",
+      "title": "내 학생 아빠가 첫사랑이었다",
+      "author_search_identity": "[곰같은여우]",
+      "league": "best",
+      "genre": "로맨스",
+      "official_url": "https://m.novel.naver.com/best/list?novelId=1248094",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20261020_257/novel_1792475086048LYr20_PNG/1.png?type=f280_224_2"
+    },
+    {
+      "id": "1247301",
+      "title": "기사들이 집착하는 힐러가 되었다",
+      "author_search_identity": "[곰같은여우]",
+      "league": "best",
+      "genre": "판타지",
+      "official_url": "https://m.novel.naver.com/best/list?novelId=1247301",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20261006_41/novel_1791261296018Fysve_JPEG/400x500.jpg?type=f280_224_2"
+    },
+    {
+      "id": "1245426",
+      "title": "회귀한 천마는 죽일수록 약해진다",
+      "author_search_identity": "[곰같은여우]",
+      "league": "best",
+      "genre": "무협",
+      "official_url": "https://m.novel.naver.com/best/list?novelId=1245426",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20260922_5/novel_1790055988142o7T0q_JPEG/400.jpg?type=f280_224_2"
+    },
+    {
+      "id": "1243166",
+      "title": "회귀 7회차 악녀는 착하게 살기를 그만두었다",
+      "author_search_identity": "[곰같은여우]",
+      "league": "best",
+      "genre": "로판",
+      "official_url": "https://m.novel.naver.com/best/list?novelId=1243166",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20260902_198/novel_1788317225295Wj4L2_JPEG/60x40.jpg?type=f280_224_2"
+    },
+    {
+      "id": "1242457",
+      "title": "AI ZERO: AI가 사라진 날",
+      "author_search_identity": "[곰같은여우]",
+      "league": "best",
+      "genre": "미스터리",
+      "official_url": "https://m.novel.naver.com/best/list?novelId=1242457",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20261006_202/novel_1791265473356qvdyV_JPEG/400.jpg?type=f280_224_2"
+    },
+    {
+      "id": "1244202",
+      "title": "헌터들이 집착하는 공간 설계자가 되었다",
+      "author_search_identity": "[곰같은여우]",
+      "league": "best",
+      "genre": "판타지",
+      "official_url": "https://m.novel.naver.com/best/list?novelId=1244202",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20260908_117/novel_1788844952226cLO2T_PNG/2.png?type=f280_224_2"
+    },
+    {
+      "id": "1244489",
+      "title": "격수들이 집착하는 힐러가 되었다",
+      "author_search_identity": "[곰같은여우]",
+      "league": "best",
+      "genre": "판타지",
+      "official_url": "https://m.novel.naver.com/best/list?novelId=1244489",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20260915_67/novel_1789450514766ltWaR_JPEG/111.jpg?type=f280_224_2"
+    },
+    {
+      "id": "1249473",
+      "title": "《천하제일 호랑이》",
+      "author_search_identity": "[곰같은여우]",
+      "league": "challenge",
+      "genre": "무협",
+      "official_url": "https://m.novel.naver.com/challenge/list?novelId=1249473",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20221231_129/novel_1672413772682DpyJj_PNG/moohyup_320_2.png?type=f280_224_2"
+    },
+    {
+      "id": "1248545",
+      "title": "《악녀는 고용직입니다》",
+      "author_search_identity": "[곰같은여우]",
+      "league": "challenge",
+      "genre": "로맨스",
+      "official_url": "https://m.novel.naver.com/challenge/list?novelId=1248545",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20221231_150/novel_16724131363820elHi_PNG/romance_320_4.png?type=f280_224_2"
+    },
+    {
+      "id": "1247798",
+      "title": "《잿빛 복원사》",
+      "author_search_identity": "[곰같은여우]",
+      "league": "challenge",
+      "genre": "판타지",
+      "official_url": "https://m.novel.naver.com/challenge/list?novelId=1247798",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20221231_3/novel_1672413559639liBqM_PNG/fantasy_320_7.png?type=f280_224_2"
+    },
+    {
+      "id": "1247361",
+      "title": "사무라이 코코",
+      "author_search_identity": "[곰같은여우]",
+      "league": "challenge",
+      "genre": "로맨스",
+      "official_url": "https://m.novel.naver.com/challenge/list?novelId=1247361",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20221231_166/novel_1672413105791DV8AY_PNG/romance_320_2.png?type=f280_224_2"
+    },
+    {
+      "id": "1245900",
+      "title": "배틀그라운드 : 모션플레이",
+      "author_search_identity": "[곰같은여우]",
+      "league": "challenge",
+      "genre": "판타지",
+      "official_url": "https://m.novel.naver.com/challenge/list?novelId=1245900",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20221231_95/novel_1672413539316vuaf9_PNG/fantasy_320_4.png?type=f280_224_2"
+    },
+    {
+      "id": "1244599",
+      "title": "범죄도시: THE FIRST",
+      "author_search_identity": "[곰같은여우]",
+      "league": "challenge",
+      "genre": "현판",
+      "official_url": "https://m.novel.naver.com/challenge/list?novelId=1244599",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20221231_64/novel_1672414879501cizJd_PNG/mof_320_4.png?type=f280_224_2"
+    },
+    {
+      "id": "1243880",
+      "title": "《블립: 사라진 자들》",
+      "author_search_identity": "[곰같은여우]",
+      "league": "challenge",
+      "genre": "판타지",
+      "official_url": "https://m.novel.naver.com/challenge/list?novelId=1243880",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20221231_3/novel_1672413559639liBqM_PNG/fantasy_320_7.png?type=f280_224_2"
+    },
+    {
+      "id": "1242664",
+      "title": "스펙 리셋: 어웨이크 어스",
+      "author_search_identity": "[곰같은여우]",
+      "league": "challenge",
+      "genre": "현판",
+      "official_url": "https://m.novel.naver.com/challenge/list?novelId=1242664",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20221231_84/novel_1672414913875vBYmT_PNG/mof_320_9.png?type=f280_224_2"
+    },
+    {
+      "id": "1243882",
+      "title": "시그널이 울릴 때면, 나는 동감한다",
+      "author_search_identity": "[여우같은곰]",
+      "league": "best",
+      "genre": "미스터리",
+      "official_url": "https://m.novel.naver.com/best/list?novelId=1243882",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20261006_283/novel_17912652495988huyN_PNG/400.png?type=f280_224_2"
+    },
+    {
+      "id": "1245626",
+      "title": "«리니지 1998»",
+      "author_search_identity": "[여우같은곰]",
+      "league": "challenge",
+      "genre": "판타지",
+      "official_url": "https://m.novel.naver.com/challenge/list?novelId=1245626",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20221231_119/novel_1672413532877mUe9P_PNG/fantasy_320_3.png?type=f280_224_2"
+    },
+    {
+      "id": "1245094",
+      "title": "죽은 남편은 모른다",
+      "author_search_identity": "[여우같은곰]",
+      "league": "challenge",
+      "genre": "로맨스",
+      "official_url": "https://m.novel.naver.com/challenge/list?novelId=1245094",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20221231_194/novel_1672413226738B6sKY_PNG/romance_320_16.png?type=f280_224_2"
+    },
+    {
+      "id": "1244781",
+      "title": "두 번째 세계",
+      "author_search_identity": "고양이와사비",
+      "league": "best",
+      "genre": "판타지",
+      "official_url": "https://m.novel.naver.com/best/list?novelId=1244781",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20260922_32/novel_1790056077587ioLPi_JPEG/400.jpg?type=f280_224_2"
+    },
+    {
+      "id": "1246406",
+      "title": "GOAT : 내 이름으로",
+      "author_search_identity": "고양이와사비",
+      "league": "challenge",
+      "genre": "로맨스",
+      "official_url": "https://m.novel.naver.com/challenge/list?novelId=1246406",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20221231_191/novel_1672413166837cBwDh_PNG/romance_320_8.png?type=f280_224_2"
+    },
+    {
+      "id": "1245097",
+      "title": "《캡슐》",
+      "author_search_identity": "고양이와사비",
+      "league": "challenge",
+      "genre": "판타지",
+      "official_url": "https://m.novel.naver.com/challenge/list?novelId=1245097",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20221231_48/novel_1672413526425ovYHx_PNG/fantasy_320_2.png?type=f280_224_2"
+    },
+    {
+      "id": "1243383",
+      "title": "《FC온라인 : 나 혼자 뛴다》",
+      "author_search_identity": "고양이와사비",
+      "league": "challenge",
+      "genre": "현판",
+      "official_url": "https://m.novel.naver.com/challenge/list?novelId=1243383",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20221231_179/novel_1672414893885IEnNO_PNG/mof_320_6.png?type=f280_224_2"
+    },
+    {
+      "id": "1249457",
+      "title": "폐급 능력 밀도 조절로 이세계 최강",
+      "author_search_identity": "[ZERO]",
+      "league": "challenge",
+      "genre": "판타지",
+      "official_url": "https://m.novel.naver.com/challenge/list?novelId=1249457",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20221231_188/novel_1672413545996l4AvH_PNG/fantasy_320_5.png?type=f280_224_2"
+    },
+    {
+      "id": "1248550",
+      "title": "눈 떠보니 박보검",
+      "author_search_identity": "[ZERO]",
+      "league": "challenge",
+      "genre": "로맨스",
+      "official_url": "https://m.novel.naver.com/challenge/list?novelId=1248550",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20221231_33/novel_1672413126990maFR1_PNG/romance_320_3.png?type=f280_224_2"
+    },
+    {
+      "id": "1242932",
+      "title": "검은 나를 기억한다",
+      "author_search_identity": "[ZERO]",
+      "league": "challenge",
+      "genre": "판타지",
+      "official_url": "https://m.novel.naver.com/challenge/list?novelId=1242932",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20221231_133/novel_1672413518094fk60i_PNG/fantasy_320_1.png?type=f280_224_2"
+    }
+  ]
+}
