@@ -225,6 +225,21 @@ test('bubble variants, inline text, context actions and sidebar scroll work',asy
   expect(await page.locator('.web-right').evaluate(el=>el.scrollTop)).toBeGreaterThan(0);
 });
 
+test('all ten bubble kinds draw distinct outlines in the editor',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  const thumbnails=await page.locator('.web-bubble-types canvas').evaluateAll(nodes=>nodes.map(canvas=>canvas.toDataURL()));
+  expect(new Set(thumbnails).size).toBe(10);
+  await page.getByRole('button',{name:'◯ 말풍선'}).click();
+  const kinds=['speech','thought','shout','whisper','narration','cloud','burst','tremble','radio','rounded'];
+  const images=[];
+  for(const kind of kinds){
+    await page.getByLabel('말풍선 유형').selectOption(kind);
+    images.push(await page.locator('.web-bubble-canvas').evaluate(canvas=>canvas.toDataURL()));
+  }
+  expect(new Set(images).size).toBe(kinds.length);
+});
+
 test('new project clears the restored draft',async({page})=>{
   await page.goto(studio);
   await page.getByRole('button',{name:'▣ 컷'}).click();
