@@ -106,3 +106,10 @@
 .web-align-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:12px 0}
 .web-align-controls span{grid-column:1/-1;color:#55717c;font-size:12px;font-weight:700}
 .web-align-controls button{min-width:0;padding:6px 2px;font-size:11px}
+.web-empty-guide{position:absolute;z-index:1;top:28px;left:50%;width:min(86%,420px);padding:22px 17px;border:1px solid #bcd8dc;border-radius:18px;background:#f8fdfde8;box-shadow:0 12px 30px #16424f24;text-align:center;transform:translateX(-50%)}
+.web-empty-mark{display:grid;place-items:center;width:35px;height:35px;margin:0 auto 9px;border-radius:12px;background:#d5f1f1;color:#148590;font-size:21px}
+.web-empty-guide strong{display:block;color:#244853;font-size:17px}.web-empty-guide p{margin:7px 0 14px;color:#5c7780;font-size:12px;line-height:1.5;word-break:keep-all}
+.web-empty-guide>div{display:flex;justify-content:center;gap:7px;flex-wrap:wrap}.web-empty-guide button:first-child{background:#138e9a;border-color:#138e9a;color:#fff;font-weight:800}
+.web-move-handle{position:absolute;z-index:5;top:-35px;left:50%;min-width:66px;height:29px;padding:2px 9px;border:2px solid #fff;border-radius:16px;background:#176f7c;color:#fff;font-size:11px;font-weight:800;box-shadow:0 3px 9px #17445177;touch-action:none;cursor:grab;transform:translateX(-50%)}
+.web-move-handle:active{cursor:grabbing}
+@media(max-width:760px){.web-empty-guide{top:18px;width:min(86%,315px);padding:18px 12px}.web-empty-guide strong{font-size:15px}.web-empty-guide p{font-size:11px}.web-empty-guide button{font-size:12px;padding:7px}.web-move-handle{min-width:74px;height:32px}}
