@@ -95,6 +95,7 @@ jobs:
           npm ci --prefix AIPlayground/WebtoonStudioSource --no-audit --no-fund
           npm run typecheck --prefix AIPlayground/WebtoonStudioSource
           npm run build:web --prefix AIPlayground/WebtoonStudioSource
+          npm run verify:deployed --prefix AIPlayground/WebtoonStudioSource
       - name: Modular core unit checks
         run: node ai-cleaner/tests/module-check.mjs
       - name: Static checks

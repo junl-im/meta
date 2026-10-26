@@ -16,7 +16,8 @@
   "name": "webtoon-studio-web-source",
   "scripts": {
     "typecheck": "tsc -p tsconfig.web.json --noEmit",
-    "build:web": "vite build --config vite.web.config.ts"
+    "build:web": "vite build --config vite.web.config.ts",
+    "verify:deployed": "node scripts/verify-deployed-build.mjs"
   },
   "private": true
 }

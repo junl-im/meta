@@ -319,3 +319,56 @@ test('desktop shortcuts save and undo without stealing text field undo',async({p
   await page.keyboard.press('Control+s');
   expect((await download).suggestedFilename()).toMatch(/\.wtoon$/);
 });
+
+test('panel shape preview matches rounded and ellipse PNG outlines',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  const panel=page.locator('.web-panel-content');
+  const shape=page.locator('.web-right label').filter({hasText:'컷 모양'}).locator('select');
+  await shape.selectOption('ellipse');
+  await expect(panel).toHaveCSS('border-radius','50%');
+  const download=page.waitForEvent('download');
+  await page.getByRole('button',{name:'PNG 초안'}).click();
+  const file=await download;
+  const bytes=await file.createReadStream().then(async stream=>{const chunks=[];for await(const chunk of stream)chunks.push(chunk);return Buffer.concat(chunks)});
+  const first=pngPagesFromZip(bytes).get('001.png');
+  const pixels=await page.evaluate(async data=>{
+    const image=new Image();image.src='data:image/png;base64,'+data;await image.decode();
+    const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;
+    const ctx=canvas.getContext('2d');ctx.drawImage(image,0,0);
+    const at=(x,y)=>[...ctx.getImageData(Math.round(x*image.width/690),Math.round(y*image.width/690),1,1).data].slice(0,3);
+    return {corner:at(57,102),top:at(345,100),side:at(55,320)};
+  },first.toString('base64'));
+  expect(pixels.corner.every(value=>value>245)).toBe(true);
+  expect(pixels.top.some(value=>value<150)).toBe(true);
+  expect(pixels.side.some(value=>value<150)).toBe(true);
+  await shape.selectOption('rounded');
+  await expect(panel).toHaveCSS('border-radius',/px/);
+});
+
+test('panel image flip is editable and survives file round trip',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  const image=await page.evaluate(()=>{const canvas=document.createElement('canvas');canvas.width=20;canvas.height=10;const ctx=canvas.getContext('2d');ctx.fillStyle='#f00';ctx.fillRect(0,0,10,10);ctx.fillStyle='#00f';ctx.fillRect(10,0,10,10);return canvas.toDataURL('image/png').split(',')[1]});
+  await page.getByRole('button',{name:/레이어·속성/}).click();
+  await page.locator('input[type=file][accept="image/*"]').setInputFiles({name:'halves.png',mimeType:'image/png',buffer:Buffer.from(image,'base64')});
+  const flip=page.getByRole('button',{name:/이미지 좌우 반전/});
+  await expect(flip).toBeVisible();
+  await flip.click();
+  await expect(flip).toHaveAttribute('aria-pressed','true');
+  const download=page.waitForEvent('download');await page.getByRole('button',{name:'.wtoon 저장'}).click();
+  const saved=await download;const bytes=await saved.createReadStream().then(async stream=>{const chunks=[];for await(const chunk of stream)chunks.push(chunk);return Buffer.concat(chunks)});
+  await page.locator('input[type=file][accept=".wtoon,.json"]').setInputFiles({name:'flipped.wtoon',mimeType:'application/octet-stream',buffer:bytes});
+  await page.locator('.web-layers button').first().click();
+  await expect(flip).toHaveAttribute('aria-pressed','true');
+  const pngDownload=page.waitForEvent('download');
+  await page.getByRole('button',{name:'캔버스',exact:true}).click();
+  await page.getByRole('button',{name:'PNG 초안'}).click();
+  const png=firstPngFromZip(await (await pngDownload).createReadStream().then(async stream=>{const chunks=[];for await(const chunk of stream)chunks.push(chunk);return Buffer.concat(chunks)}));
+  const colors=await page.evaluate(async encoded=>{const image=new Image();image.src='data:image/png;base64,'+encoded;await image.decode();const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;const ctx=canvas.getContext('2d');ctx.drawImage(image,0,0);return {left:[...ctx.getImageData(100,300,1,1).data],right:[...ctx.getImageData(580,300,1,1).data]}},png.toString('base64'));
+  expect(colors.left[2]).toBeGreaterThan(colors.left[0]);
+  expect(colors.right[0]).toBeGreaterThan(colors.right[2]);
+});

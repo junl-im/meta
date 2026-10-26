@@ -76,3 +76,5 @@
 .web-tail,.web-tail-fill{display:none}
 .web-bubble-content{background:transparent!important;border:0!important;border-radius:0;position:relative;z-index:1}
 @media(max-width:760px){.web-app{height:100dvh;min-height:0}.web-mobile-nav{height:auto;min-height:calc(55px + env(safe-area-inset-bottom));padding-bottom:max(5px,env(safe-area-inset-bottom))}}
+
+.web-image-flip{width:100%;margin-top:8px;font-size:12px;font-weight:700}.web-image-flip[aria-pressed="true"]{background:#e5f5f3;border-color:#58a9a5;color:#176b68}
