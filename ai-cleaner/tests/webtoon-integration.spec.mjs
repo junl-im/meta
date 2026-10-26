@@ -223,6 +223,8 @@ test('canvas resize handles and editing shortcuts work without hijacking text in
   await page.keyboard.press('Escape');
   await expect(page.getByRole('menu')).toHaveCount(0);
   await page.locator('.web-canvas').click({button:'right',position:{x:5,y:5}});
+  await expect(page.getByRole('menu',{name:'캔버스 메뉴'})).toBeVisible();
+  await page.keyboard.press('Escape');
   await expect(page.getByRole('menu')).toHaveCount(0);
 });
 
@@ -262,6 +264,33 @@ test('bubble variants, inline text, context actions and sidebar scroll work',asy
   expect(await page.locator('.web-right').evaluate(el=>el.scrollTop)).toBeGreaterThan(0);
 });
 
+test('blank canvas right-click places elements at the chosen point',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  const canvas=page.locator('.web-canvas');
+  await canvas.click({button:'right',position:{x:280,y:340}});
+  await expect(page.getByRole('menu',{name:'캔버스 메뉴'})).toBeVisible();
+  await page.getByRole('menuitem',{name:'말풍선 추가'}).click();
+  const canvasBox=await canvas.boundingBox(),bubbleBox=await page.locator('.web-bubble').boundingBox();
+  expect(Math.abs(bubbleBox.x-canvasBox.x-280)).toBeLessThan(3);
+  expect(Math.abs(bubbleBox.y-canvasBox.y-340)).toBeLessThan(3);
+});
+
+test('selected bubble changes kind in place from thumbnails and right-click',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'◯ 말풍선'}).click();
+  await page.getByRole('textbox',{name:'말풍선에 바로 글쓰기'}).fill('같은 말풍선 유지');
+  await page.getByRole('button',{name:'구름',exact:true}).click();
+  await expect(page.getByLabel('말풍선 유형')).toHaveValue('cloud');
+  await expect(page.locator('.web-bubble')).toHaveCount(1);
+  await page.locator('.web-bubble').click({button:'right',position:{x:5,y:5}});
+  await page.getByRole('menuitem',{name:'외침'}).click();
+  await expect(page.getByLabel('말풍선 유형')).toHaveValue('shout');
+  await expect(page.locator('.web-bubble')).toHaveCount(1);
+  await expect(page.locator('.web-bubble')).toContainText('같은 말풍선 유지');
+});
+
 test('all ten bubble kinds draw distinct outlines in the editor',async({page})=>{
   await page.setViewportSize({width:1280,height:800});
   await page.goto(studio);
@@ -297,7 +326,7 @@ test('illustrated playground card opens the isolated webtoon studio and returns 
   await card.click();
   await expect(page).toHaveURL(studio);
   await expect(page.locator('.web-app')).toBeVisible();
-  await expect(page.locator('.web-mark')).toHaveCSS('background-image',/home-icon-webtoon\.png/);
+  await expect(page.locator('.web-mark')).toHaveCSS('background-image',/home-icon-webtoon(?:-[\w-]+)?\.png/);
   await page.locator('.web-return').click();
   await expect(page).toHaveURL(/\/ai-cleaner\/(?:\?.*)?$/);
   await expect(page.locator('#homeTool')).toBeVisible();
