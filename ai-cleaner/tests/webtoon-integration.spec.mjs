@@ -65,6 +65,58 @@ test('dragging a library image replaces a panel or creates a new one',async({pag
   await expect(page.locator('.web-assets button')).toHaveCount(1);
 });
 
+test('shift selection moves and deletes two panels together with undo',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  const layers=page.locator('.web-layers > div > button:first-child');
+  await layers.first().click();
+  await layers.nth(1).click({modifiers:['Shift']});
+  await expect(page.locator('.web-panel.is-group-selected')).toHaveCount(2);
+  const panels=page.locator('.web-panel');
+  const before=await panels.evaluateAll(items=>items.map(item=>Number.parseFloat(item.style.left)));
+  const zoom=await panels.first().evaluate(item=>Number.parseFloat(item.style.width)/580);
+  await page.keyboard.press('ArrowRight');
+  await expect.poll(async()=>(await panels.evaluateAll(items=>items.map(item=>Number.parseFloat(item.style.left)))).map((x,i)=>Math.round((x-before[i])/zoom))).toEqual([1,1]);
+  await page.keyboard.press('Control+z');
+  await expect.poll(async()=>panels.evaluateAll(items=>items.map(item=>Number.parseFloat(item.style.left)))).toEqual(before);
+  await page.getByRole('button',{name:'왼쪽',exact:true}).click();
+  await expect.poll(async()=>panels.evaluateAll(items=>items.map(item=>Number.parseFloat(item.style.left)))).toEqual([before[1],before[1]]);
+  await page.keyboard.press('Control+z');
+  await expect.poll(async()=>panels.evaluateAll(items=>items.map(item=>Number.parseFloat(item.style.left)))).toEqual(before);
+  const top=await panels.last().boundingBox();
+  await page.mouse.move(top.x+top.width/2,top.y+top.height/2);
+  await page.mouse.down();
+  await page.mouse.move(top.x+top.width/2+36,top.y+top.height/2+20,{steps:5});
+  await page.mouse.up();
+  const dragged=await panels.evaluateAll(items=>items.map(item=>Number.parseFloat(item.style.left)));
+  expect(dragged[0]).toBeGreaterThan(before[0]);
+  expect(Math.abs((dragged[0]-before[0])-(dragged[1]-before[1]))).toBeLessThan(0.1);
+  await page.keyboard.press('Control+z');
+  await expect.poll(async()=>panels.evaluateAll(items=>items.map(item=>Number.parseFloat(item.style.left)))).toEqual(before);
+  await page.keyboard.press('Delete');
+  await expect(panels).toHaveCount(0);
+  await page.keyboard.press('Control+z');
+  await expect(panels).toHaveCount(2);
+});
+
+test('mobile multi-select mode selects panels without a shift key',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.getByRole('button',{name:'레이어·속성'}).click();
+  await page.getByRole('button',{name:'여러 개 선택'}).click();
+  const layers=page.locator('.web-layers > div > button:first-child');
+  await layers.nth(1).click();
+  await expect(page.locator('.web-panel.is-group-selected')).toHaveCount(2);
+  await page.getByRole('button',{name:'선택 마침'}).click();
+  await expect(page.locator('.web-panel.is-group-selected')).toHaveCount(2);
+});
+
 test('mobile image import creates a panel and the library reuses it',async({page})=>{
   await page.setViewportSize({width:390,height:844});
   await page.goto(studio);
