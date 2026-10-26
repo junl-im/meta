@@ -555,6 +555,20 @@ test('speech bubble fill stays continuous from body to tail tip',async({page})=>
   expect(sample.seam.every(channel=>channel>240)).toBe(true);
 });
 
+test('decorative bubble tails have no dark join line inside the shape',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'◯ 말풍선'}).click();
+  for(const kind of ['cloud','burst','shout','tremble']){
+    await page.getByLabel('말풍선 유형').selectOption(kind);
+    const seam=await page.locator('.web-bubble-canvas').evaluate(canvas=>{
+      const ctx=canvas.getContext('2d'),scale=canvas.width/310;
+      return [115,120,125,130,135,140,145,150].map(y=>[...ctx.getImageData(Math.round(185*scale),Math.round((y+5)*scale),1,1).data]);
+    });
+    expect(seam.every(([red,green,blue,alpha])=>alpha===255&&red>240&&green>240&&blue>240),kind).toBe(true);
+  }
+});
+
 for(const [width,height] of [[320,360],[320,568],[390,568],[430,900]])test(`mobile bottom navigation remains within ${width}x${height}`,async({page})=>{
   await page.setViewportSize({width,height});
   await page.goto(studio);

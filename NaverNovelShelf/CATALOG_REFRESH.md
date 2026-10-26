@@ -10,6 +10,7 @@ re-host chapter text. Never add SVG assets or inline vector markup.
   - `[여우같은곰]`
   - `고양이와사비`
   - `[ZERO]` (uppercase; lowercase `[zero]` returns different search results)
+  - `닥터X`
 - Source search pattern: `https://m.novel.naver.com/search?keyword=<encoded_author>&section=<best|challenge>&target=author`.
 - Include all public pages of each Best League and Challenge League search result, not merely the three preview items in the all-results tab.
 - On each search result, collect exact pen name, work title, `novelId`, league, publicly served `novel-phinf.pstatic.net` image URL, and genre if present.
@@ -19,10 +20,10 @@ re-host chapter text. Never add SVG assets or inline vector markup.
 ## Update procedure
 
 1. Read `dist/catalog.js`, `dist/app.js`, `dist/index.html`, and the current hosting manifest.
-2. Re-check all four pen names and both leagues from the official public search pages.
+2. Re-check all five pen names and both leagues from the official public search pages.
 3. Compare with `window.NOVEL_CATALOG`. If there are additions, removals, title changes, cover changes, or league changes, update only the catalog records, preserving the 6-field tuple format and existing site design.
 4. When catalog records change, update `window.NOVEL_CATALOG_LAST_CHECK` with the date of successful verification. If nothing changed, do not modify source just to record the check date. Retain records if any source check was incomplete.
-5. Validate that all `id` values are numeric, `author` is one of the 4 names, `league` is `best` or `challenge`, images use HTTPS `novel-phinf.pstatic.net`, and no records are duplicated.
+5. Validate that all `id` values are numeric, `author` is one of the 5 names, `league` is `best` or `challenge`, images use HTTPS `novel-phinf.pstatic.net`, and no records are duplicated.
 6. Preserve public site access, all hand-painted WebP assets, SVG prohibition, and the distinct Best League and Challenge League presentation. The visible Korean labels are `베스트리그` and `챌린지리그`; never relabel Challenge League as General League. Mobile cards must remain in 3 columns.
    Preserve full-bleed official 5:4 thumbnails (no oversized dark mat around
    a smaller image) and keep each work's genre visibly labeled on desktop and mobile.

@@ -12,10 +12,10 @@ window.NOVEL_CATALOG = [
   ["헌터들이 집착하는 공간 설계자가 되었다","[곰같은여우]","1244202","best","https://novel-phinf.pstatic.net/20260908_117/novel_1788844952226cLO2T_PNG/2.png?type=f280_224_2","판타지"],
   ["격수들이 집착하는 힐러가 되었다","[곰같은여우]","1244489","best","https://novel-phinf.pstatic.net/20260915_67/novel_1789450514766ltWaR_JPEG/111.jpg?type=f280_224_2","판타지"],
   ["《천하제일 호랑이》","[곰같은여우]","1249473","challenge","https://novel-phinf.pstatic.net/20221231_129/novel_1672413772682DpyJj_PNG/moohyup_320_2.png?type=f280_224_2","무협"],
-  ["《악녀는 고용직입니다》","[곰같은여우]","1248545","challenge","https://novel-phinf.pstatic.net/20221231_150/novel_16724131363820elHi_PNG/romance_320_4.png?type=f280_224_2","로맨스"],
+  ["《악녀는 고용직입니다》","닥터X","1248545","challenge","https://novel-phinf.pstatic.net/20221231_150/novel_16724131363820elHi_PNG/romance_320_4.png?type=f280_224_2","로맨스"],
   ["《잿빛 복원사》","[곰같은여우]","1247798","challenge","https://novel-phinf.pstatic.net/20221231_3/novel_1672413559639liBqM_PNG/fantasy_320_7.png?type=f280_224_2","판타지"],
   ["사무라이 코코","[곰같은여우]","1247361","challenge","https://novel-phinf.pstatic.net/20221231_166/novel_1672413105791DV8AY_PNG/romance_320_2.png?type=f280_224_2","로맨스"],
-  ["배틀그라운드 : 모션플레이","[곰같은여우]","1245900","challenge","https://novel-phinf.pstatic.net/20221231_95/novel_1672413539316vuaf9_PNG/fantasy_320_4.png?type=f280_224_2","판타지"],
+  ["배틀그라운드 : 모션플레이","닥터X","1245900","challenge","https://novel-phinf.pstatic.net/20221231_95/novel_1672413539316vuaf9_PNG/fantasy_320_4.png?type=f280_224_2","판타지"],
   ["범죄도시: THE FIRST","[곰같은여우]","1244599","challenge","https://novel-phinf.pstatic.net/20221231_64/novel_1672414879501cizJd_PNG/mof_320_4.png?type=f280_224_2","현판"],
   ["《블립: 사라진 자들》","[곰같은여우]","1243880","challenge","https://novel-phinf.pstatic.net/20221231_3/novel_1672413559639liBqM_PNG/fantasy_320_7.png?type=f280_224_2","판타지"],
   ["스펙 리셋: 어웨이크 어스","[곰같은여우]","1242664","challenge","https://novel-phinf.pstatic.net/20221231_84/novel_1672414913875vBYmT_PNG/mof_320_9.png?type=f280_224_2","현판"],
@@ -33,4 +33,4 @@ window.NOVEL_CATALOG = [
   title, author, id, league, image, genre,
   url: `https://m.novel.naver.com/${league}/list?novelId=${id}`
 }));
-window.NOVEL_CATALOG_LAST_CHECK = "2026-10-25";
+window.NOVEL_CATALOG_LAST_CHECK = "2026-10-26";
