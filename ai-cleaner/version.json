@@ -1,7 +1,7 @@
 {
-  "version": "1.36.8",
-  "assetVersion": "1368",
+  "version": "1.36.9",
+  "assetVersion": "1369",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Add illustrated menu icons and webtoon canvas resize handles and keyboard controls."
+  "notes": "Publish the more-worlds illustration in the Pages and Firebase runtime."
 }
