@@ -291,6 +291,54 @@ test('selected bubble changes kind in place from thumbnails and right-click',asy
   await expect(page.locator('.web-bubble')).toContainText('같은 말풍선 유지');
 });
 
+test('element copy, cut and paste work from canvas menu and keyboard',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.locator('.web-panel').click({button:'right',position:{x:5,y:5}});
+  await page.getByRole('menuitem',{name:'요소 복사'}).click();
+  await page.locator('.web-canvas').click({button:'right',position:{x:5,y:5}});
+  await page.getByRole('menuitem',{name:'여기에 붙여넣기'}).click();
+  await expect(page.locator('.web-panel')).toHaveCount(2);
+  await page.keyboard.press('Control+x');
+  await expect(page.locator('.web-panel')).toHaveCount(1);
+  await page.keyboard.press('Control+v');
+  await expect(page.locator('.web-panel')).toHaveCount(2);
+  await page.keyboard.press('Control+z');
+  await expect(page.locator('.web-panel')).toHaveCount(1);
+});
+
+test('mobile tools can paste a copied bubble without intercepting dialogue editing',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'◯ 말풍선'}).click();
+  await page.getByRole('button',{name:/레이어·속성/}).click();
+  await page.getByRole('button',{name:'요소 복사'}).click();
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'▤ 붙여넣기'}).click();
+  await expect(page.locator('.web-bubble')).toHaveCount(2);
+  const dialogue=page.getByRole('textbox',{name:'말풍선에 바로 글쓰기'});
+  await dialogue.fill('대사는 편집 중');
+  await dialogue.press('Control+v');
+  await expect(page.locator('.web-bubble')).toHaveCount(2);
+});
+
+test('copying an illustrated panel preserves its image and undo history',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  const icon=fs.readFileSync(new URL('../assets/music-play.png',import.meta.url));
+  await page.locator('input[type=file][accept="image/*"]').setInputFiles({name:'art.png',mimeType:'image/png',buffer:icon});
+  await expect(page.locator('.web-panel img')).toHaveCount(1);
+  await page.keyboard.press('Control+c');
+  await page.keyboard.press('Control+v');
+  await expect(page.locator('.web-panel img')).toHaveCount(2);
+  const sources=await page.locator('.web-panel img').evaluateAll(images=>images.map(image=>image.getAttribute('src')));
+  expect(sources[0]).toBe(sources[1]);
+  await page.keyboard.press('Control+z');
+  await expect(page.locator('.web-panel img')).toHaveCount(1);
+});
+
 test('all ten bubble kinds draw distinct outlines in the editor',async({page})=>{
   await page.setViewportSize({width:1280,height:800});
   await page.goto(studio);
