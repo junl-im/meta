@@ -33,6 +33,63 @@ test('mobile image import creates a panel and the library reuses it',async({page
   await expect(panel.locator('img')).toBeVisible();
 });
 
+test('several images become separate panels and extend the canvas',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(studio);
+  const icon=fs.readFileSync(new URL('../assets/music-play.png',import.meta.url));
+  await page.locator('input[type=file][accept="image/*"]').setInputFiles(['one.png','two.png','three.png'].map(name=>({name,mimeType:'image/png',buffer:icon})));
+  const panels=page.locator('.web-panel');
+  await expect(panels).toHaveCount(3);
+  await expect(panels.locator('img')).toHaveCount(3);
+  const boxes=await panels.evaluateAll(nodes=>nodes.map(node=>({top:Number.parseFloat(node.style.top),height:Number.parseFloat(node.style.height)})));
+  expect(boxes[1].top).toBeGreaterThan(boxes[0].top+boxes[0].height);
+  expect(boxes[2].top).toBeGreaterThan(boxes[1].top+boxes[1].height);
+  const canvasHeight=await page.locator('.web-canvas').evaluate(node=>Number.parseFloat(node.style.height));
+  expect(canvasHeight).toBeGreaterThan(boxes[2].top+boxes[2].height);
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await expect(page.locator('.web-assets button')).toHaveCount(3);
+});
+
+test('touch-sized image adjustment moves artwork inside a panel without moving the panel',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(studio);
+  const icon=fs.readFileSync(new URL('../assets/music-play.png',import.meta.url));
+  await page.locator('input[type=file][accept="image/*"]').setInputFiles({name:'art.png',mimeType:'image/png',buffer:icon});
+  const panel=page.locator('.web-panel');
+  const before=await panel.boundingBox();
+  await panel.getByRole('button',{name:'이미지 위치 조절'}).click();
+  const point={x:before.x+before.width*.4,y:before.y+before.height*.5};
+  await page.mouse.move(point.x,point.y);await page.mouse.down();
+  await page.mouse.move(point.x+38,point.y+22,{steps:5});await page.mouse.up();
+  const after=await panel.boundingBox();
+  expect(after.x).toBeCloseTo(before.x,0);
+  expect(after.y).toBeCloseTo(before.y,0);
+  const transform=await panel.locator('img').evaluate(node=>getComputedStyle(node).transform);
+  const [,x,y]=transform.match(/matrix\(1, 0, 0, 1, ([\d.]+), ([\d.]+)\)/)||[];
+  expect(Number(x)).toBeGreaterThan(30);
+  expect(Number(y)).toBeGreaterThan(15);
+  await panel.getByRole('button',{name:'위치 조절 끝'}).click();
+});
+
+test('image adjustment responds to a phone touch gesture',async({browser})=>{
+  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+  const page=await context.newPage();
+  try{
+    await page.goto(studio);
+    const icon=fs.readFileSync(new URL('../assets/music-play.png',import.meta.url));
+    await page.locator('input[type=file][accept="image/*"]').setInputFiles({name:'touch.png',mimeType:'image/png',buffer:icon});
+    const panel=page.locator('.web-panel'),before=await panel.boundingBox();
+    await panel.getByRole('button',{name:'이미지 위치 조절'}).click();
+    const x=before.x+before.width*.4,y=before.y+before.height*.5,cdp=await context.newCDPSession(page);
+    await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});
+    await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x+32,y:y+24}]});
+    await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+    const transform=await panel.locator('img').evaluate(node=>getComputedStyle(node).transform);
+    expect(Number(transform.match(/matrix\(1, 0, 0, 1, ([\d.]+),/)?.[1])).toBeGreaterThan(20);
+    expect((await panel.boundingBox()).x).toBeCloseTo(before.x,0);
+  }finally{await context.close()}
+});
+
 test('mobile first-use guide starts a panel and a typed bubble can still be dragged',async({page})=>{
   await page.setViewportSize({width:390,height:844});
   await page.goto(studio);
