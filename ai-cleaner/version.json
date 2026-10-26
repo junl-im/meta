@@ -1,7 +1,7 @@
 {
-  "version": "1.36.6",
-  "assetVersion": "1366",
+  "version": "1.36.7",
+  "assetVersion": "1367",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Group additional playground services in a compact picker and right-align the desktop home music dock."
+  "notes": "Improve webtoon bubble editing, context actions, sidebar scrolling, and draft reset."
 }

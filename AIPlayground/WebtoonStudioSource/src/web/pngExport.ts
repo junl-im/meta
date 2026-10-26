@@ -5,7 +5,7 @@ const loadImage=(src:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{c
 const canvasBlob=(canvas:HTMLCanvasElement)=>new Promise<Uint8Array>((resolve,reject)=>canvas.toBlob(async blob=>blob?resolve(new Uint8Array(await blob.arrayBuffer())):reject(Error('PNG를 만들지 못했습니다.')),'image/png'))
 function wrap(ctx:CanvasRenderingContext2D,text:string,x:number,y:number,width:number,lineHeight:number){let line='';for(const paragraph of text.split('\n')){for(const char of paragraph){if(ctx.measureText(line+char).width>width&&line){ctx.fillText(line,x,y);y+=lineHeight;line=''}line+=char}ctx.fillText(line,x,y);y+=lineHeight;line=''}}
 function drawUnifiedBubblePath(ctx:CanvasRenderingContext2D,e:Extract<EditorElement,{type:'bubble'}>,tailX=e.tailX??e.w*.65,tailY=e.tailY??e.h+35){
-  const w=e.w,h=e.h,r=e.kind==='narration'?8:Math.min(38,h/2),x=Math.max(0,Math.min(w,tailX)),y=Math.max(h+12,tailY),base=Math.max(r+32,Math.min(w-r-32,x));
+  const w=e.w,h=e.h,r=e.kind==='narration'||e.kind==='radio'?8:e.kind==='tremble'?4:e.kind==='shout'||e.kind==='burst'?0:e.kind==='whisper'?18:e.kind==='thought'||e.kind==='cloud'||e.kind==='rounded'?Math.min(h/2,w/4):Math.min(38,h/2),x=Math.max(0,Math.min(w,tailX)),y=Math.max(h+12,tailY),base=Math.max(r+32,Math.min(w-r-32,x));
   ctx.beginPath();ctx.moveTo(r,0);ctx.lineTo(w-r,0);ctx.quadraticCurveTo(w,0,w,r);ctx.lineTo(w,h-r);ctx.quadraticCurveTo(w,h,w-r,h);
   if(e.kind!=='narration'){ctx.lineTo(base+30,h);ctx.lineTo(x,y);ctx.lineTo(base-30,h)}
   ctx.lineTo(r,h);ctx.quadraticCurveTo(0,h,0,h-r);ctx.lineTo(0,r);ctx.quadraticCurveTo(0,0,r,0);ctx.closePath();
