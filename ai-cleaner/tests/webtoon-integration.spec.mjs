@@ -17,6 +17,36 @@ function pngPagesFromZip(bytes){
 }
 const firstPngFromZip=bytes=>pngPagesFromZip(bytes).values().next().value;
 
+test('bubble variants, inline text, context actions and sidebar scroll work',async({page})=>{
+  await page.setViewportSize({width:1280,height:650});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'생각',exact:true}).click();
+  await expect(page.locator('.web-bubble')).toHaveCount(1);
+  await page.getByRole('textbox',{name:'말풍선에 바로 글쓰기'}).fill('캔버스에서 바로 쓴 대사');
+  await expect(page.locator('.web-bubble')).toContainText('캔버스에서 바로 쓴 대사');
+  await page.locator('.web-bubble').click({button:'right'});
+  await expect(page.getByRole('menu')).toBeVisible();
+  await page.getByRole('menuitem',{name:'복제'}).click();
+  await expect(page.locator('.web-bubble')).toHaveCount(2);
+  const sidebar=await page.locator('.web-right').evaluate(el=>({height:el.clientHeight,content:el.scrollHeight,overflow:getComputedStyle(el).overflowY,track:getComputedStyle(el).scrollbarColor}));
+  expect(sidebar.content).toBeGreaterThan(sidebar.height);
+  expect(sidebar.overflow).toBe('auto');
+  expect(sidebar.track).toContain('rgb');
+  await page.locator('.web-right').evaluate(el=>el.scrollTop=el.scrollHeight);
+  expect(await page.locator('.web-right').evaluate(el=>el.scrollTop)).toBeGreaterThan(0);
+});
+
+test('new project clears the restored draft',async({page})=>{
+  await page.goto(studio);
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await expect(page.locator('.web-status')).toContainText('임시 원고 저장됨');
+  page.once('dialog',dialog=>dialog.accept());
+  await page.getByRole('button',{name:'새 원고'}).click();
+  await expect(page.locator('.web-panel')).toHaveCount(0);
+  await page.reload();
+  await expect(page.locator('.web-panel')).toHaveCount(0);
+});
+
 test('illustrated playground card opens the isolated webtoon studio and returns home',async({page})=>{
   await page.setViewportSize({width:390,height:844});
   await page.goto(playground);
