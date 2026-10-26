@@ -39,6 +39,32 @@ test('dropping an image on a panel fills it while canvas drop creates another pa
   await expect(page.locator('.web-panel')).toHaveCount(2);
 });
 
+test('dragging a library image replaces a panel or creates a new one',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  const icon=fs.readFileSync(new URL('../assets/music-play.png',import.meta.url));
+  await page.locator('input[type=file][accept="image/*"]').setInputFiles({name:'library.png',mimeType:'image/png',buffer:icon});
+  await expect(page.locator('.web-assets button')).toHaveCount(1);
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.evaluate(()=>{
+    const transfer=new DataTransfer();
+    document.querySelector('.web-assets button').dispatchEvent(new DragEvent('dragstart',{bubbles:true,dataTransfer:transfer}));
+    const panel=document.querySelector('.web-panel:last-child');
+    panel.dispatchEvent(new DragEvent('dragover',{bubbles:true,cancelable:true,dataTransfer:transfer}));
+    panel.dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:transfer}));
+  });
+  await expect(page.locator('.web-panel img')).toHaveCount(2);
+  await expect(page.locator('.web-panel')).toHaveCount(2);
+  await page.evaluate(()=>{
+    const transfer=new DataTransfer();
+    document.querySelector('.web-assets button').dispatchEvent(new DragEvent('dragstart',{bubbles:true,dataTransfer:transfer}));
+    const canvas=document.querySelector('.web-canvas');
+    canvas.dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:transfer}));
+  });
+  await expect(page.locator('.web-panel')).toHaveCount(3);
+  await expect(page.locator('.web-assets button')).toHaveCount(1);
+});
+
 test('mobile image import creates a panel and the library reuses it',async({page})=>{
   await page.setViewportSize({width:390,height:844});
   await page.goto(studio);
