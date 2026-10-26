@@ -10,13 +10,26 @@ function drawUnifiedBubblePath(ctx:CanvasRenderingContext2D,e:Extract<EditorElem
   if(e.kind!=='narration'){ctx.lineTo(base+30,h);ctx.lineTo(x,y);ctx.lineTo(base-30,h)}
   ctx.lineTo(r,h);ctx.quadraticCurveTo(0,h,0,h-r);ctx.lineTo(0,r);ctx.quadraticCurveTo(0,0,r,0);ctx.closePath();
 }
+function panelPath(ctx:CanvasRenderingContext2D,e:Extract<EditorElement,{type:'panel'}>){
+  const w=e.w,h=e.h
+  ctx.beginPath()
+  if(e.shape==='ellipse'){ctx.ellipse(w/2,h/2,w/2,h/2,0,0,Math.PI*2);ctx.closePath();return}
+  if(e.shape==='rounded'){
+    const r=Math.min(24,w/2,h/2)
+    ctx.moveTo(r,0);ctx.lineTo(w-r,0);ctx.quadraticCurveTo(w,0,w,r)
+    ctx.lineTo(w,h-r);ctx.quadraticCurveTo(w,h,w-r,h);ctx.lineTo(r,h)
+    ctx.quadraticCurveTo(0,h,0,h-r);ctx.lineTo(0,r);ctx.quadraticCurveTo(0,0,r,0)
+    ctx.closePath();return
+  }
+  ctx.rect(0,0,w,h)
+}
 function drawElement(ctx:CanvasRenderingContext2D,e:EditorElement,images:Map<string,HTMLImageElement>){
   ctx.save();ctx.translate(e.x+e.w/2,e.y+e.h/2);ctx.rotate((e.rotation||0)*Math.PI/180);ctx.translate(-e.w/2,-e.h/2)
   if(e.type==='panel'){
-    ctx.fillStyle=e.fill||'#fff';ctx.fillRect(0,0,e.w,e.h)
+    ctx.fillStyle=e.fill||'#fff';panelPath(ctx,e);ctx.fill()
     const image=e.image?images.get(e.image):null
-    if(image){ctx.save();ctx.beginPath();ctx.rect(0,0,e.w,e.h);ctx.clip();const fit=e.imageFit==='contain'?Math.min(e.w/image.width,e.h/image.height):Math.max(e.w/image.width,e.h/image.height),zoom=e.imageTransform?.zoom||1,w=image.width*fit*zoom,h=image.height*fit*zoom;ctx.translate(e.w/2+(e.imageTransform?.offsetX||0),e.h/2+(e.imageTransform?.offsetY||0));if(e.imageTransform?.flipX)ctx.scale(-1,1);ctx.drawImage(image,-w/2,-h/2,w,h);ctx.restore()}
-    ctx.strokeStyle=e.stroke||'#262b36';ctx.lineWidth=e.strokeWidth??3;ctx.strokeRect(0,0,e.w,e.h)
+    if(image){ctx.save();panelPath(ctx,e);ctx.clip();const fit=e.imageFit==='contain'?Math.min(e.w/image.width,e.h/image.height):Math.max(e.w/image.width,e.h/image.height),zoom=e.imageTransform?.zoom||1,w=image.width*fit*zoom,h=image.height*fit*zoom;ctx.translate(e.w/2+(e.imageTransform?.offsetX||0),e.h/2+(e.imageTransform?.offsetY||0));if(e.imageTransform?.flipX)ctx.scale(-1,1);ctx.drawImage(image,-w/2,-h/2,w,h);ctx.restore()}
+    ctx.strokeStyle=e.stroke||'#262b36';ctx.lineWidth=e.strokeWidth??3;panelPath(ctx,e);ctx.stroke()
   }else if(e.type==='bubble'){
     ctx.fillStyle=e.fill||'#fff';ctx.strokeStyle=e.stroke||'#262b36';ctx.lineWidth=e.strokeWidth??3
 
