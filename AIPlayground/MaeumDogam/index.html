@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fff9ef">
+  <meta name="description" content="곰같은여우와 떠나는 무료 마음 이야기 여행. 16유형과 4가지 소다 캐릭터, 64개의 창작 에피소드를 만나 보세요.">
+  <title>곰같은여우의 마음도감 | 나를 발견하는 가장 재미있는 방법</title>
+  <link rel="icon" type="image/png" href="./assets/branding/storybook-fox-app-icon-256.png">
+  <link rel="apple-touch-icon" href="./assets/branding/storybook-fox-app-icon-256.png">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./experience.css">
+  <script type="module" src="./app.js"></script>
+  <script type="module" src="./talk-lab.js"></script>
+  <script type="module" src="./experience.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">본문으로 바로가기</a>
+  <header class="site-header">
+    <a class="brand" href="#home" aria-label="곰같은여우의 마음도감 첫 화면"><img class="brand-icon" src="./assets/branding/maeum-header-fox-v01.webp" width="52" height="52" alt=""><span>곰같은여우의 <strong>마음도감</strong></span></a>
+    <nav aria-label="주요 메뉴">
+      <a href="#home" data-nav="home"><span class="nav-symbol">⌂</span><span>처음</span></a><a href="#types" data-nav="types"><span class="nav-symbol">✿</span><span>성격마을</span></a><a href="#blood" data-nav="blood"><span class="nav-symbol">◈</span><span>소다상점</span></a><a href="#bridge" data-nav="bridge"><span class="nav-symbol">♡</span><span>마음궁합</span></a><a href="#talk" data-nav="talk"><span class="nav-symbol">♬</span><span>T/F 대화</span></a><a href="#theater" data-nav="theater"><span class="nav-symbol">★</span><span>나의 이야기</span></a>
+    </nav>
+  </header>
+  <main id="main">
+    <section class="hero screen" id="home" data-screen="home">
+      <div class="hero-sky" aria-hidden="true"></div>
+      <div class="hero-content">
+        <span class="eyebrow"><span class="sparkle">✦</span> 마음의 숲에 온 걸 환영해 <span class="sparkle">✦</span></span>
+        <h1><span>곰같은여우의</span>마음도감</h1>
+        <p class="hero-tag">나를 발견하는 가장 재미있는 방법</p>
+        <p class="hero-description">16가지 성격마을과 4가지 소다상점에서<br>지금의 나에게 어울리는 이야기를 골라봐!</p>
+        <a class="primary-link" href="#types">무료 마음 탐험 시작 <span aria-hidden="true">↗</span></a>
+        <a class="playground-return" href="../../ai-cleaner/" aria-label="곰같은여우의 AI놀이터로 돌아가기"><span class="return-mark" aria-hidden="true">✦</span><span>AI놀이터로 돌아가기</span><span aria-hidden="true">↗</span></a>
+        <p class="hero-caption">가입 없이 무료 · 마음의 이야기를 간직해 봐</p>
+      </div>
+      <img class="hero-mascot" src="./assets/branding/mascot-fox-storykeeper-v02.webp" alt="마법의 이야기책을 펼쳐 마음의 숲으로 초대하는 곰같은여우" width="920" height="920" fetchpriority="high">
+      <div class="hero-meadow" aria-hidden="true"></div>
+    </section>
+
+
+    <section class="chapter village screen" id="types" data-screen="types" aria-labelledby="types-title" hidden>
+      <p class="eyebrow">첫 번째 이야기 · 성격마을</p>
+      <h2 id="types-title">16가지 성격마을</h2>
+      <p class="section-lead">꼭 나와 똑같을 필요는 없어. 오늘 가장 마음에 드는 친구를 골라 봐!</p>
+      <div class="selection-status" role="status" aria-live="polite"><span class="dot"></span><span id="chosen-type">아직 선택한 유형이 없어요</span></div>
+      <div class="explore-intro">
+        <div><span class="explore-kicker">OPTIONAL · 12 SCENES</span><h3>아직 내 유형을 모르겠다면?</h3><p>12개의 짧은 상상 장면을 골라 오늘의 이야기 유형을 추천받아 봐. 언제든 직접 바꿀 수 있어!</p></div>
+        <span class="explore-cta"><button id="explore-toggle" class="explore-open" type="button" aria-expanded="false" aria-controls="explore-panel">나의 MBTI 찾아보기</button><span class="click-coach" aria-hidden="true"><span class="click-coach-label">CLICK HERE!</span><img src="./assets/branding/maeum-click-paw-v01.webp" width="64" height="76" alt=""></span></span>
+      </div>
+      <div id="explore-panel" class="explore-panel" hidden>
+        <div class="explore-progress-row"><span id="explore-count">1 / 12</span><span>정답 없는 이야기 놀이</span></div>
+        <progress id="explore-progress" max="12" value="0" aria-label="마음 탐험 진행률"></progress>
+        <h3 id="explore-question"></h3>
+        <div id="explore-choices" class="explore-choices" role="group" aria-label="마음 탐험 선택지"></div>
+        <div class="explore-controls"><button id="explore-prev" type="button">이전 장면</button><button id="explore-close" type="button">닫기</button></div>
+      </div>
+      <div id="explore-result" class="explore-recommendation" role="status" aria-live="polite" hidden></div>
+      <div class="type-groups" role="group" aria-label="성격 친구들의 마을"><button class="group-tab" data-group="0" type="button" aria-pressed="true">반짝이는 숲</button><button class="group-tab" data-group="1" type="button" aria-pressed="false">달빛 오솔길</button><button class="group-tab" data-group="2" type="button" aria-pressed="false">햇살 언덕</button><button class="group-tab" data-group="3" type="button" aria-pressed="false">별빛 마을</button></div>
+      <div id="types-grid" class="types-grid" role="group" aria-label="16가지 유형 중 한 가지 선택"></div>
+      <div class="screen-bottom"><a class="primary-link next-link" href="#blood" id="types-next">다음 · 소다상점 <span aria-hidden="true">→</span></a></div>
+      <p class="fineprint">직접 선택하는 창작 이야기입니다. 공식 MBTI® 검사나 전문 심리 진단이 아닙니다.</p>
+    </section>
+
+    <section class="chapter soda-shop screen" id="blood" data-screen="blood" aria-labelledby="blood-title" hidden>
+      <p class="eyebrow">두 번째 이야기 · 소다상점</p>
+      <h2 id="blood-title">혈액형 소다상점</h2>
+      <p class="section-lead">혈액형을 골라서 소다 친구를 만나 봐! 4가지 캐릭터는 재미를 위한 가상 인물이고, 혈액형과 성격의 관련성을 뜻하지 않아.</p>
+      <div id="blood-grid" class="soda-grid" role="group" aria-label="네 가지 혈액형 이야기 캐릭터 중 한 가지 선택"></div>
+      <a id="result-link" class="primary-link result-link" href="#theater" hidden>나의 이야기 보러 가기 <span aria-hidden="true">↗</span></a>
+    </section>
+
+    <section class="chapter bridge screen" id="bridge" data-screen="bridge" aria-labelledby="bridge-title" hidden>
+      <p class="eyebrow">마음의 보너스 여행</p>
+      <h2 id="bridge-title">우리 사이, 마음의 다리</h2>
+      <p class="section-lead">친구나 연인의 유형도 골라 봐. 점수 대신 서로에게 건넬 수 있는 한마디를 찾아줄게.</p>
+      <div class="bridge-card">
+        <div class="bridge-selects">
+          <div><span class="bridge-field-label">나의 유형</span><output id="my-type-label">아직 선택 전</output></div>
+          <span class="bridge-heart" aria-hidden="true">♡</span>
+          <div><label for="friend-type">함께 볼 유형</label><select id="friend-type"><option value="">선택해 주세요</option></select></div>
+        </div>
+        <article id="bridge-result" class="bridge-result" hidden aria-live="polite">
+          <h3 id="bridge-headline"></h3><p id="bridge-story"></p><p id="bridge-tip"></p>
+        </article>
+        <div id="bridge-prompt" class="bridge-empty-state">
+          <p>서로의 마음을 이해하는 첫걸음!<br>나와 상대의 유형을 고르면 두 사람의 이야기가 열려.</p>
+          <a class="soft-button" href="#types">내 유형 만나러 가기</a>
+        </div>
+      </div>
+      <div class="screen-bottom"><a class="primary-link next-link" href="#talk">다음 · 마음 말풍선 <span aria-hidden="true">→</span></a></div>
+      <section class="talk-lab" id="talk-lab" aria-labelledby="talk-lab-title">
+        <h3 id="talk-lab-title">“너 T야?” 마음 말풍선 번역소</h3>
+        <p class="talk-intro">같은 걱정도 다른 말투로 전해질 수 있어. 이번엔 어떤 대답을 건네고 싶어?</p>
+        <div class="talk-stage">
+          <span class="talk-index" id="talk-index">상황 1 / 4</span>
+          <div class="talk-message"><span class="talk-person">친구</span><p id="talk-situation">나 오늘 발표 완전 망했어...</p></div>
+          <p class="talk-prompt">지금 내 대답은?</p>
+          <div class="talk-choices" role="group" aria-label="말풍선 답변 방식 선택">
+            <button type="button" data-talk-style="empathy" aria-pressed="false">마음부터 읽기</button>
+            <button type="button" data-talk-style="solution" aria-pressed="false">해결부터 찾기</button>
+            <button type="button" data-talk-style="ask" aria-pressed="true">먼저 물어보기</button>
+          </div>
+          <div class="talk-answer" aria-live="polite"><span>나의 답장</span><p id="talk-answer">지금은 들어주는 게 좋을까, 아니면 같이 방법을 찾아볼까?</p></div>
+          <p class="talk-insight" id="talk-insight">상대가 원하는 도움을 먼저 물으면 오해를 줄일 수도 있어.</p>
+          <button class="talk-next" id="talk-next" type="button">다음 상황 만나기 <span aria-hidden="true">→</span></button>
+        </div>
+        <p class="fineprint">‘너 T야?’ 밈을 소재로 만든 대화 놀이예요. T도 충분히 다정할 수 있고, F도 논리적으로 해결할 수 있어요. 대답 스타일은 유형 판정이 아닙니다.</p>
+      </section>
+    </section>
+
+    <section class="chapter theater screen" id="theater" data-screen="theater" aria-labelledby="theater-title" hidden>
+      <p class="eyebrow">오늘의 마지막 이야기</p>
+      <h2 id="theater-title">오늘의 마음 극장</h2>
+      <p class="section-lead">어느 날의 주인공이 될까? 유형과 소다를 고르면 나만의 짧은 에피소드가 열려.</p>
+      <div class="theater-stage">
+        <div id="story-placeholder" class="stage-placeholder">
+          <div class="curtain-star" aria-hidden="true">✦</div><p>아직 무대가 준비 중이야!</p><span>성격마을과 소다상점에서 하나씩 선택해 줘.</span>
+          <a href="#types" class="secondary-link">성격마을로 가기</a>
+        </div>
+        <article id="result" hidden aria-live="polite">
+          <span class="story-stamp" id="stamp"></span>
+          <h3 id="headline"></h3>
+          <p class="story-lead" id="story-lead"></p>
+          <p class="story-body" id="storyline"></p>
+          <div class="story-advice"><strong>마음의 한 줄</strong><p id="story-tip"></p></div>
+          <div class="scene-switch" role="group" aria-label="이야기 끝 질문 선택">
+            <button type="button" class="scene-button" data-scene="friend" aria-pressed="true">친구</button>
+            <button type="button" class="scene-button" data-scene="love" aria-pressed="false">연인</button>
+            <button type="button" class="scene-button" data-scene="work" aria-pressed="false">동료</button>
+          </div>
+          <p class="scene-question" id="scene-question"></p>
+          <div class="story-actions">
+            <button id="share" class="action-button" type="button">링크 공유하기</button>
+            <button id="copy" class="action-button subtle" type="button">이야기 복사</button>
+            <button id="reset" class="action-button subtle" type="button">다시 선택</button>
+          </div>
+          <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
+        </article>
+      </div>
+      <p class="fineprint">혈액형은 성격을 예측하는 과학적 지표가 아닙니다. 모든 결과는 소다상점 세계관의 창작 이야기예요.</p>
+    </section>
+  </main>
+  <dialog id="atlas-dialog" class="atlas-dialog" aria-label="곰같은여우의 마음 산책"><button id="atlas-close" class="atlas-close" aria-label="닫기" type="button">×</button><img class="dialog-mascot" src="./assets/branding/mascot-fox-storykeeper-v02.webp" alt="" width="105" height="105"><div id="dialog-slot"></div><p class="dialog-note">정답은 없어. 상상 이야기를 재미로 즐겨줘!</p></dialog>
+  <footer class="site-footer"><span>© 곰같은여우의 마음도감</span><span>세상에 하나뿐인 나의 마음 이야기</span></footer>
+</body>
+</html>

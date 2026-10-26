@@ -77,6 +77,8 @@ jobs:
           node --check ai-cleaner/tests/module-check.mjs
           node --check ai-cleaner/tests/e2e.spec.mjs
           node --check ai-cleaner/tests/webtoon-integration.spec.mjs
+          node --check ai-cleaner/tests/internal-worlds.spec.mjs
+          node --check AIPlayground/WebtoonStudio/studio-keyboard.js
           node --check AIPlayground/WebtoonStudio/assets/index-GomFoxWebtoon-v1.js
           node --check AIPlayground/WebtoonStudioSource/scripts/upgrade-deployed-web.mjs
           node --check AIPlayground/WebtoonStudioSource/scripts/fix-bubble-contour.mjs
@@ -212,4 +214,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-

@@ -301,3 +301,21 @@ for(const [width,height] of [[320,568],[360,740],[390,844],[768,1024],[1280,800]
   await expect(page.locator('.web-return')).toBeVisible();
   if(width<=760){await expect(page.locator('.web-mobile-nav')).toBeVisible();await page.getByRole('button',{name:'도구',exact:true}).click();await expect(page.locator('.web-side:not(.web-right)')).toBeVisible();}
 });
+
+
+test('desktop shortcuts save and undo without stealing text field undo',async({page})=>{
+  await page.goto(studio);
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await expect(page.locator('.web-panel')).toHaveCount(1);
+  await page.keyboard.press('Control+z');
+  await expect(page.locator('.web-panel')).toHaveCount(0);
+  await page.keyboard.press('Control+Shift+z');
+  await expect(page.locator('.web-panel')).toHaveCount(1);
+  const title=page.getByLabel('작품명');
+  await title.fill('바뀐 제목');
+  await title.press('Control+z');
+  await expect(page.locator('.web-panel')).toHaveCount(1);
+  const download=page.waitForEvent('download');
+  await page.keyboard.press('Control+s');
+  expect((await download).suggestedFilename()).toMatch(/\.wtoon$/);
+});
