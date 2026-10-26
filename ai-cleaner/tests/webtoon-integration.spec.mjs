@@ -17,6 +17,30 @@ function pngPagesFromZip(bytes){
 }
 const firstPngFromZip=bytes=>pngPagesFromZip(bytes).values().next().value;
 
+test('mobile first-use guide starts a panel and a typed bubble can still be dragged',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(studio);
+  const guide=page.locator('.web-empty-guide');
+  await expect(guide).toBeVisible();
+  await guide.getByRole('button',{name:'첫 컷 만들기'}).click();
+  await expect(guide).toHaveCount(0);
+  await expect(page.locator('.web-panel')).toHaveCount(1);
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'◯ 말풍선'}).click();
+  const bubble=page.locator('.web-bubble');
+  await page.getByRole('textbox',{name:'말풍선에 바로 글쓰기'}).fill('이동 테스트');
+  const before=await bubble.boundingBox();
+  const handle=bubble.getByRole('button',{name:'선택 요소 이동'});
+  const point=await handle.boundingBox();
+  await page.mouse.move(point.x+point.width/2,point.y+point.height/2);
+  await page.mouse.down();await page.mouse.move(point.x+point.width/2+32,point.y+point.height/2+24,{steps:5});await page.mouse.up();
+  const after=await bubble.boundingBox();
+  expect(after.x).toBeGreaterThan(before.x+20);
+  expect(after.y).toBeGreaterThan(before.y+12);
+  await expect(bubble).toContainText('이동 테스트');
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+});
+
 test('canvas alignment controls center and edge-place a panel without moving a locked one',async({page})=>{
   await page.setViewportSize({width:390,height:844});
   await page.goto(studio);

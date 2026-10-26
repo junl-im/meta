@@ -1,7 +1,7 @@
 {
-  "version": "1.37.1",
-  "assetVersion": "1371",
+  "version": "1.37.2",
+  "assetVersion": "1372",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Add webtoon canvas alignment controls for selected unlocked elements."
+  "notes": "Improve webtoon first-use canvas guidance and text-element dragging."
 }
