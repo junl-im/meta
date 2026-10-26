@@ -16,6 +16,28 @@ function pngPagesFromZip(bytes){
   return pages;
 }
 const firstPngFromZip=bytes=>pngPagesFromZip(bytes).values().next().value;
+async function dropImage(page,selector,buffer){
+  await page.evaluate(({selector,bytes})=>{
+    const file=new File([new Uint8Array(bytes)],'dropped.png',{type:'image/png'});
+    const transfer=new DataTransfer();transfer.items.add(file);
+    const target=document.querySelector(selector);
+    target.dispatchEvent(new DragEvent('dragover',{bubbles:true,cancelable:true,dataTransfer:transfer}));
+    target.dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:transfer}));
+  },{selector,bytes:[...buffer]});
+}
+
+test('dropping an image on a panel fills it while canvas drop creates another panel',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  const icon=fs.readFileSync(new URL('../assets/music-play.png',import.meta.url));
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await dropImage(page,'.web-panel',icon);
+  await expect(page.locator('.web-panel img')).toHaveCount(1);
+  await expect(page.locator('.web-panel')).toHaveCount(1);
+  await dropImage(page,'.web-canvas',icon);
+  await expect(page.locator('.web-panel img')).toHaveCount(2);
+  await expect(page.locator('.web-panel')).toHaveCount(2);
+});
 
 test('mobile image import creates a panel and the library reuses it',async({page})=>{
   await page.setViewportSize({width:390,height:844});
