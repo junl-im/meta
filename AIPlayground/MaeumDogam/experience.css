@@ -1,0 +1,566 @@
+/* 마음도감 이야기책 UI: 전체 문서 스크롤 대신 장면별 전환. */
+:root{--berry:#9a5d74;--rose:#ef9a94;--pearl:#fffaf4;--text:#594557;--mint:#bfe1cc;--sky:#e0eced}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+html{scroll-behavior:auto}
+body{height:100dvh;display:flex;flex-direction:column;min-height:0;background:#f5e6e4;line-height:1.45;min-width:280px}
+main{position:relative;flex:1;min-height:0;height:auto;overflow:hidden;isolation:isolate;background:linear-gradient(135deg,#f9eef0,#deebe9)}
+.site-header{position:relative;flex:0 0 68px;height:68px;z-index:30;background:#fff8f1f5;padding:7px max(18px,calc((100vw - 1200px)/2));border-bottom:1px solid #f6d7c9;box-shadow:0 3px 16px #836d7420}
+.brand{font-size:15px;gap:5px}.brand-icon{width:42px;height:42px;object-fit:contain;filter:drop-shadow(0 2px 2px #a5777530)}
+.site-header nav{gap:4px;overflow:visible}.site-header nav a{display:flex;gap:5px;align-items:center;justify-content:center;padding:8px 11px;color:#786478;font-size:13px;border-radius:18px;transition:background .2s,transform .2s}
+.site-header nav a[aria-current="page"]{background:#fce0e0;color:#8e506d;box-shadow:inset 0 -2px 0 #df9bac}
+.nav-symbol{font-size:19px;line-height:1.1;color:#ce8f9c}
+.site-footer{flex:0 0 29px;height:29px;padding:4px 23px;display:flex;align-items:center;justify-content:space-between;font-size:11px;background:#fff7ef;border-top:1px solid #efdfd9;opacity:.88}
+.site-footer span:first-child{font-size:11px}
+main>.screen[hidden]{display:none!important}
+main>.screen{position:relative;width:100%;height:100%;max-height:100%;min-height:0;overflow:hidden;isolation:isolate}
+.screen:before{content:"";pointer-events:none;position:absolute;inset:0;z-index:-3;background:radial-gradient(ellipse at 86% 13%,#fffefaac 0,transparent 37%),radial-gradient(ellipse at 12% 79%,#b6e1d8a6 0,transparent 38%),url("./assets/backgrounds/entry-mobile-v01.webp") center bottom/cover no-repeat;opacity:.48}
+.screen:after{content:"";pointer-events:none;position:absolute;left:-8%;right:-8%;bottom:-21%;height:28%;z-index:-2;border-radius:50% 50% 0 0;background:linear-gradient(#d4ebdbac,#c9e5d8e8);filter:blur(18px)}
+.hero.screen{display:flex;flex-direction:row;align-items:center;min-height:0;padding:2.5% max(24px,calc((100vw - 1150px)/2));background:radial-gradient(circle at 79% 18%,#fff8d7 2%,#ffebe7 48%,#e5f3e5)}
+.hero-content{width:58%;max-width:700px;z-index:2}.hero h1{font-size:clamp(64px,7.9vw,114px);line-height:1.05}.hero h1 span{font-size:.35em}
+.hero-description{margin-bottom:23px}.hero-tag{margin-top:19px}.hero-caption{font-size:12px;color:#846b75}
+.hero-mascot{right:max(3%,calc((100vw - 1180px)/2));bottom:4%;width:min(46vw,545px);height:83%;max-height:83%;object-fit:contain;object-position:center bottom;filter:drop-shadow(4px 17px 15px #9c72633c)}
+.hero-meadow{height:19%;bottom:-7%;opacity:.6}.hero-sky{z-index:-2}.primary-link,.next-link{min-height:45px;border:0;background:linear-gradient(138deg,#ffb8a0,#e98288);border-radius:17px;color:#fff;font-size:14px;box-shadow:0 6px 0 #d77c7e,0 10px 21px #b46c7844;text-align:center;transition:transform .2s,box-shadow .2s}
+.primary-link:hover,.next-link:hover{transform:translateY(-2px);box-shadow:0 8px 0 #d77c7e,0 13px 25px #b46c7844}.primary-link:active,.next-link:active{transform:translateY(4px);box-shadow:0 2px 0 #d77c7e}
+.hero .primary-link{min-height:53px;padding:15px 28px;border-radius:21px}
+.chapter.screen{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:clamp(12px,2vh,22px) 22px;scroll-margin:0;text-align:center;background:transparent}
+.chapter .eyebrow{margin:0 0 1px;font-size:11px;color:#a37481;letter-spacing:.03em}
+.chapter h2{margin:0 0 4px;font-size:clamp(26px,3.2vw,39px);line-height:1.16;color:#734f63;text-shadow:0 3px #fff9f4}
+.section-lead{margin:0 0 10px;max-width:680px;font-size:clamp(12px,1.35vw,15px);line-height:1.45;color:#726175}
+.chapter .fineprint{display:none}
+.screen-bottom{display:flex;justify-content:center;align-items:center;min-height:44px;flex:0 0 auto;gap:13px;margin-top:8px}
+.chapter .selection-status{margin:0 0 7px;min-height:27px;padding:4px 14px;border-radius:15px;background:#fff8f5cd;font-size:12px}
+.chapter .explore-intro{width:min(100%,840px);min-height:58px;padding:9px 16px;margin:0 auto 8px;gap:8px;border-radius:18px;background:#fffdfaeb}
+.explore-intro h3{margin:0;font-size:16px;color:#674d68}.explore-intro p{font-size:12px}.explore-kicker{display:none}
+.explore-open,.soft-button{flex:none;display:inline-flex;align-items:center;justify-content:center;min-height:38px;border:1px solid #e2bdd5;border-radius:16px;padding:8px 15px;background:linear-gradient(#fff8ff,#f2e2f7);box-shadow:0 3px 0 #ddc4d8;color:#7c5f84;font-size:13px;font-weight:850}
+.explore-open:hover,.soft-button:hover{background:#fff4f8}
+.type-groups{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;width:min(100%,920px);min-height:37px;margin:0 auto 9px}
+.group-tab{min-height:37px;border:1px solid #ead0d4;border-radius:15px;background:#fff9f6d9;color:#876979;font-size:12px;font-weight:850;white-space:nowrap;padding:5px 8px}
+.group-tab[aria-pressed="true"]{color:#fff;background:linear-gradient(#dd9caa,#c982a0);border-color:#c77c97;box-shadow:0 3px 8px #a56b8850}
+.types-grid{flex:1;min-height:0;width:min(100%,920px);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:minmax(0,1fr);gap:12px;margin:0 auto}
+.type-card{min-width:0;min-height:0;height:100%;overflow:hidden;align-items:center;justify-content:flex-start;gap:3px;padding:8px 8px 12px;border-radius:24px;background:linear-gradient(164deg,#fffefced,#f8ecf5ed);box-shadow:0 10px 23px #67546a18;text-align:center}
+.type-card:nth-child(4n+2){background:linear-gradient(165deg,#fffdf2ed,#e9f3e7f7)}.type-card:nth-child(4n+3){background:linear-gradient(165deg,#fffafced,#f1e7f6f3)}.type-card:nth-child(4n+4){background:linear-gradient(165deg,#fff9f3eb,#fbede2f2)}
+.type-card[hidden]{display:none!important}.type-card[aria-pressed="true"]{background:linear-gradient(#fffef0,#ffe8dc);border-color:#db8696;box-shadow:0 0 0 3px #f5bbc5,0 9px 23px #d1819f3b}
+.type-portrait{width:100%;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;position:relative}
+.type-portrait:before{content:"";position:absolute;inset:12% 17% 8%;border-radius:50%;background:radial-gradient(ellipse,#fffefa,#f8ebf0b7);box-shadow:inset 0 -10px 23px #c5adb422}
+.type-portrait img{position:relative;height:100%;width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 7px 5px #68506426)}
+.type-portrait img[src*="storybook-v01"]{mask-image:radial-gradient(ellipse 67% 58% at 50% 49%,#000 51%,transparent 91%)}
+.type-crest{position:relative;z-index:2;display:grid;place-items:center;font-size:clamp(58px,6.9vw,88px);filter:drop-shadow(0 9px 5px #a789a13d)}
+.type-code{position:absolute;top:11px;left:12px;background:#fff6f9e8;color:#855d7c;font-size:11px;z-index:3}
+.type-name{font-size:clamp(15px,1.5vw,21px);line-height:1.2;color:#6f4f65}.type-tagline{font-size:11px;line-height:1.25;max-width:100%}.type-prop{display:none}
+.type-card[aria-pressed="true"]:after{right:9px;top:9px}
+.types-bottom{margin-top:8px}.types-bottom .next-link{min-width:205px}
+.soda-shop.screen{background:radial-gradient(circle at 75% 9%,#fef6df,#f8e7e6 60%,#e6f2e9)}
+.soda-grid{display:grid;flex:1;min-height:0;width:min(100%,900px);grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:minmax(0,1fr);gap:12px;margin:10px auto}
+.soda-card{min-width:0;min-height:0;height:100%;padding:9px;border-radius:32px;gap:3px;justify-content:flex-start;background:linear-gradient(#fffefaed,var(--tint));box-shadow:0 10px 25px #6550681f}
+.soda-portrait{width:100%;min-height:0;flex:1;object-fit:contain;object-position:center center;border-radius:21px;filter:drop-shadow(0 7px 7px #ab768235)}
+.soda-symbol{display:none}.soda-code{font-size:clamp(17px,2vw,26px)}.soda-name{font-size:12px;margin-bottom:3px}.soda-card[aria-pressed="true"]{border-color:#b373a4;box-shadow:0 0 0 3px #e6c7e8,0 12px 27px #65506830}
+.soda-shop .result-link{margin:7px 0 0}.soda-shop .section-lead{max-width:570px}
+.bridge.screen{background:radial-gradient(circle at 15% 20%,#e1e9f8,#e9e0f5 55%,#f8e8e5)}
+.bridge-card{position:relative;display:flex;flex-direction:column;min-height:0;flex:1;width:min(100%,760px);margin:5px auto 3px;padding:25px;background:#fffdfaef;border:7px double #e5c6d0;border-radius:34px;box-shadow:0 20px 48px #836e8a31}
+.bridge-selects{flex:0 0 auto}.bridge-result{flex:1;min-height:0;overflow-y:auto;padding:20px;background:#f1e9f6a8}.bridge-prompt{padding-top:30px;font-size:17px;color:#9b7085}
+.bridge .screen-bottom{margin:4px 0 0}
+.talk-page.screen{background:radial-gradient(circle at 72% 15%,#fff3e2,#e6e8f5 58%,#f8e3e9)}
+.talk-lab{margin:3px auto;min-height:0;flex:1;width:min(100%,790px);display:flex;flex-direction:column;gap:3px}
+.talk-lab h3{margin:0;font-size:clamp(21px,3vw,31px)}.talk-intro{margin:1px 0 4px;font-size:13px;line-height:1.4}
+.talk-stage{flex:1;min-height:0;max-height:100%;overflow-y:auto;padding:clamp(11px,2vh,22px);border:7px double #edcad6;border-radius:27px;background:linear-gradient(154deg,#fffcfbea,#fff4f7f2);box-shadow:0 8px 22px #9b7b9950;text-align:left}
+.talk-index{font-size:12px}.talk-message{margin:7px 0 8px;padding:8px 13px;border-radius:17px 17px 17px 4px}.talk-message p{font-size:clamp(15px,1.8vw,18px)}.talk-prompt{margin:3px 0 5px}
+.talk-choices{gap:5px}.talk-choices button{min-height:37px;flex:1 1 auto;font-size:12px;padding:6px 8px;border-radius:13px}
+.talk-answer{margin:8px 0 5px auto;padding:9px 14px;border-radius:18px 18px 4px 18px}.talk-answer p{font-size:14px;line-height:1.5}
+.talk-insight{font-size:12px;line-height:1.4;margin:4px 0}.talk-next{margin:4px 0 0 auto;min-height:34px;font-size:12px;padding:7px 13px}
+.talk-to-story{flex:0 0 auto;margin:5px 0 2px;font-size:12px;padding:9px 20px}.talk-lab .fineprint{display:none}
+.theater.screen{background:radial-gradient(circle at 20% 10%,#f4deeb,#f3e6f3 55%,#feede5)}
+.theater-stage{flex:1;min-height:0;width:min(100%,850px);margin:3px auto 0;padding:12px 17px;border:8px double #d8a8b9;border-radius:30px;background:linear-gradient(145deg,#fffdf4f5,#fff4eef8);box-shadow:0 12px 32px #9e71822b;overflow:hidden}
+.theater-stage #result{height:100%;min-height:0;display:flex;flex-direction:column;align-items:stretch;gap:4px}.theater-stage #result[hidden]{display:none!important}
+.story-stamp{margin:1px 0 3px;font-size:10px}.theater-stage #result h3{font-size:clamp(19px,2.5vw,28px);margin:3px 0 5px}.story-lead{margin:0 0 3px;font-size:12px}
+.story-body{font-size:clamp(13px,1.5vw,16px);margin:0 0 10px;line-height:1.7}.story-advice{padding:11px;font-size:12px}.story-advice p{font-size:13px}
+.story-scroll{flex:1;min-height:0;overflow-y:auto;text-align:left;padding:13px 15px;border:1px dashed #dfc1cb;border-radius:17px;background:linear-gradient(#fffef9e8,#fff9f1ec)}
+.story-scroll .scene-question{margin:10px 0 0;min-height:0;font-size:12px}
+.scene-switch{margin:7px 0 1px;gap:6px}.scene-button{min-height:32px;padding:4px 13px;font-size:12px}.story-actions{margin:4px 0 0;gap:6px}.action-button{min-height:36px;padding:8px 14px;font-size:12px}
+.feedback{margin:2px 0 0;min-height:0;font-size:11px}.stage-placeholder{padding:20px 8px}.stage-placeholder .secondary-link{margin-top:10px}
+.theater .section-lead{margin-bottom:5px}
+.illustrated-scroll,.talk-stage,.atlas-dialog .explore-panel{scrollbar-color:#c28eaa #fdf1ed;scrollbar-width:thin;overscroll-behavior:contain}
+.illustrated-scroll::-webkit-scrollbar,.talk-stage::-webkit-scrollbar,.atlas-dialog .explore-panel::-webkit-scrollbar{width:9px}
+.illustrated-scroll::-webkit-scrollbar-track,.talk-stage::-webkit-scrollbar-track,.atlas-dialog .explore-panel::-webkit-scrollbar-track{background:#fff1ee;border-radius:12px}
+.illustrated-scroll::-webkit-scrollbar-thumb,.talk-stage::-webkit-scrollbar-thumb,.atlas-dialog .explore-panel::-webkit-scrollbar-thumb{background:linear-gradient(#f6b3c4,#a887c0);border-radius:12px;border:2px solid #fff6f5}
+.atlas-dialog{position:fixed;inset:0;max-width:min(640px,calc(100vw - 28px));width:640px;height:min(660px,calc(100dvh - 30px));max-height:calc(100dvh - 30px);overflow:hidden;padding:30px 24px 19px;border:9px double #dba3bb;border-radius:34px;background:radial-gradient(ellipse at 82% 5%,#fff6d3,#fff8f4 48%,#f2e8fb);box-shadow:0 25px 70px #352b3d7f,inset 0 0 0 4px #fffcf2;color:#584c62}
+.atlas-dialog::backdrop{background:#251d3599;backdrop-filter:blur(7px)}.atlas-dialog[open]{display:flex;flex-direction:column;align-items:stretch;gap:7px}
+.atlas-dialog:before{content:"✦ ✿ ✧";position:absolute;top:6px;left:27px;color:#ddaf7c;font-size:16px;letter-spacing:7px}
+.atlas-close{position:absolute;right:12px;top:10px;z-index:3;border:2px solid #e4bdd2;border-radius:50%;width:42px;height:42px;background:#fffaf5;color:#a3748e;font-size:25px;box-shadow:0 4px 0 #e7cfdb}
+.dialog-mascot{position:absolute;right:15px;bottom:3px;width:105px;height:105px;object-fit:contain;pointer-events:none;opacity:.88;z-index:1}
+#dialog-slot{min-height:0;flex:1;overflow:hidden;display:flex;flex-direction:column;gap:6px;padding-top:17px}
+.atlas-dialog .explore-panel{min-height:0;flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:16px 13px;margin:0;border:2px solid #ead8e9;border-radius:22px;background:#fffdf8cf}
+.atlas-dialog .explore-panel[hidden],.atlas-dialog .explore-recommendation[hidden]{display:none!important}
+.atlas-dialog .explore-panel h3{font-size:clamp(19px,3.2vw,25px);margin:4px 0 14px}
+.atlas-dialog .explore-progress-row{font-size:11px}.atlas-dialog .explore-panel progress{margin:7px 0 14px;height:11px}
+.atlas-dialog .explore-choices{flex:1;gap:10px}.atlas-dialog .explore-choice{min-height:62px;background:#fbf5ffed;border-radius:16px;font-size:14px}
+.atlas-dialog .explore-controls{margin:8px 0 0}.atlas-dialog .explore-recommendation{flex:1;margin:0;padding:22px;text-align:left}
+.atlas-dialog .dialog-note{font-size:11px;margin:2px 105px 0 0;color:#806f80}.atlas-dialog .explore-recommendation a{display:block;margin:16px 0 0;border-radius:14px;padding:13px;background:#de9dac;color:white;text-decoration:none;text-align:center}
+.enter-scene{animation:page-turn .34s cubic-bezier(.2,.7,.3,1)}@keyframes page-turn{from{opacity:.3;transform:translateY(8px) scale(.995)}to{opacity:1;transform:none}}
+@media(min-width:901px){.chapter.screen{padding-top:clamp(20px,4vh,42px);padding-bottom:clamp(18px,4vh,42px)}.soda-grid{max-height:510px}.types-grid{max-height:460px}.bridge-card{max-height:520px}.talk-stage{max-height:480px}.theater-stage{max-height:580px}}
+@media(max-width:900px){.site-header{padding:7px 11px;gap:4px}.site-header nav a{font-size:12px;padding:7px 6px;gap:3px}.brand{font-size:12px}.brand-icon{width:34px;height:34px}.type-crest{font-size:55px}.type-card{padding:7px}.soda-grid{gap:9px}}
+@media(max-width:650px){
+  .site-header{flex:0 0 55px;height:55px;justify-content:center;padding:3px 9px;background:#fff9f3f2}.brand{font-size:15px;justify-content:center}.brand-icon{width:42px;height:42px}
+  .site-header nav{position:fixed;bottom:0;left:0;right:0;height:calc(65px + env(safe-area-inset-bottom));padding:5px 4px calc(5px + env(safe-area-inset-bottom));z-index:65;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));background:#fffbf6f8;border-top:2px solid #f4d7cf;box-shadow:0 -5px 15px #86677523;max-width:100%;overflow:visible}
+  .site-header nav a{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;padding:5px 0 2px;line-height:1.1;border-radius:14px;font-weight:850;min-width:0}
+  .site-header nav .nav-symbol{font-size:20px}.site-header nav a[aria-current="page"]{background:#ffe9ec;box-shadow:inset 0 0 0 1px #ecc5cf}
+  main{margin-bottom:calc(65px + env(safe-area-inset-bottom))}.site-footer{display:none}
+  .hero.screen{padding:20px 17px 0;display:block;text-align:center;background:radial-gradient(circle at 85% 12%,#fff7d4,#ffe8e6 47%,#e3f3e4)}
+  .hero-content{width:100%;padding:0;display:flex;flex-direction:column;align-items:center}.hero .eyebrow{font-size:11px;margin:4px 0 8px}
+  .hero h1{font-size:clamp(45px,11.6vw,70px);line-height:1.04;letter-spacing:-.07em}.hero h1 span{font-size:.38em;margin:0 0 4px}
+  .hero-tag{font-size:15px;margin:10px 0 3px}.hero-description{font-size:12px;line-height:1.5;margin:2px 0 12px}
+  .hero .primary-link{font-size:13px;min-height:45px;padding:10px 18px;border-radius:17px}.hero-caption{font-size:10px;margin:11px 0 0}
+  .hero-mascot{width:auto;height:48%;max-height:48%;max-width:min(85vw,400px);right:50%;transform:translateX(50%);bottom:0;object-position:center bottom}
+  .hero-meadow{height:24%;bottom:0}
+  .chapter.screen{padding:10px 10px 8px}.chapter .eyebrow{font-size:10px;margin:0 0 3px}.chapter h2{font-size:clamp(23px,6.3vw,31px);margin:0 0 4px}.section-lead{font-size:11px;line-height:1.32;margin:0 0 7px;padding:0 7px}
+  .chapter .selection-status{order:0;margin:0 0 5px;min-height:23px;padding:3px 10px;font-size:11px}
+  .chapter .explore-intro{padding:4px 5px;min-height:41px;margin:0 auto 7px;width:auto;background:transparent;border:0;box-shadow:none}.explore-intro>div{display:none}.explore-open{min-height:34px;margin:0;padding:5px 19px;font-size:12px;width:auto}
+  .type-groups{min-height:34px;margin:0 0 7px;gap:4px}.group-tab{min-height:34px;padding:5px 3px;font-size:10px;border-radius:12px;letter-spacing:-.04em}
+  .types-grid{width:100%;height:auto;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:7px;flex:1;margin:0}
+  .type-card{border-radius:19px;min-height:0;height:100%;padding:5px 4px 7px;gap:1px;box-shadow:0 5px 10px #70556b1a}
+  .type-code{top:6px;left:6px;font-size:9px;padding:2px 6px}.type-name{font-size:clamp(13px,3.6vw,16px)}.type-tagline{font-size:10px;line-height:1.22;margin-top:1px;max-height:2.44em;overflow:hidden}
+  .type-crest{font-size:clamp(36px,12vw,64px)}.type-portrait:before{inset:4% 20%}
+  .screen-bottom{min-height:40px;margin-top:5px}.types-bottom .next-link,.result-link{min-width:185px;min-height:38px;padding:8px 14px;font-size:12px}
+  .soda-grid{width:100%;flex:1;min-height:0;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:8px;margin:5px 0 5px}
+  .soda-card{padding:5px 5px 7px;min-height:0;height:100%;gap:0;border-radius:19px}.soda-portrait{border-radius:14px}.soda-code{font-size:16px;line-height:1.3}.soda-name{font-size:10px;margin:0}
+  .bridge-card{width:100%;margin:3px 0;flex:1;padding:15px 10px;min-height:0;border-width:5px;border-radius:24px}
+  .bridge-selects{grid-template-columns:minmax(0,1fr) 22px minmax(0,1fr);gap:4px}.bridge-selects>div{gap:5px}
+  .bridge-selects label,.bridge-field-label{font-size:11px}.bridge-selects output,.bridge-selects select{font-size:11px;min-height:44px;padding:5px;border-radius:12px}
+  .bridge-heart{font-size:24px}.bridge-result{margin-top:11px;padding:12px}.bridge-result h3{font-size:17px}.bridge-result p{font-size:12px;line-height:1.55}.bridge-prompt{font-size:13px;line-height:1.6;margin:12px 0}
+  .talk-lab{margin:0 auto;gap:2px}.talk-lab h3{font-size:clamp(19px,5.2vw,26px);margin:0}.talk-intro{font-size:11px;margin:1px 0 5px}
+  .talk-stage{padding:9px 11px;border-width:5px;border-radius:19px}.talk-message{margin:4px 0 6px;padding:7px 10px}.talk-message p{font-size:13px}.talk-person,.talk-index{font-size:10px}
+  .talk-prompt{font-size:10px;margin:2px 0 4px}.talk-choices{gap:4px}.talk-choices button{flex:1 1 auto;min-height:33px;font-size:10px;padding:5px 4px}
+  .talk-answer{margin:6px 0 4px auto;padding:7px 10px}.talk-answer p{font-size:12px;line-height:1.4}.talk-answer span{font-size:10px}
+  .talk-insight{font-size:11px;margin:2px 0}.talk-next{font-size:11px;min-height:32px;padding:6px 13px}
+  .talk-to-story{min-height:38px;font-size:12px}
+  .theater-stage{flex:1;min-height:0;padding:10px;border-width:6px;border-radius:22px;margin:2px 0 0}.theater-stage #result h3{font-size:19px;margin:2px 0}.story-stamp{font-size:10px;margin:0}.story-lead{font-size:11px;margin:0}
+  .story-scroll{padding:10px}.story-body{font-size:13px;line-height:1.62}.story-advice{padding:9px}.scene-switch{margin:3px 0 0}.scene-button{min-height:32px;min-width:61px;font-size:11px}
+  .story-actions{gap:5px;margin:2px 0}.action-button{padding:7px 10px;min-height:33px;font-size:11px}.feedback{font-size:10px}
+  .atlas-dialog{padding:23px 13px 16px;border-width:6px;border-radius:25px}.atlas-close{right:6px;top:6px;width:36px;height:36px}.dialog-mascot{height:65px;width:65px;right:6px;bottom:6px}.atlas-dialog .dialog-note{font-size:10px;margin-right:62px}.atlas-dialog .explore-panel{padding:12px 10px}.atlas-dialog .explore-choice{font-size:13px;min-height:56px;padding:12px}
+}
+@media(max-width:650px) and (max-height:710px){
+  .hero-mascot{height:43%;max-height:43%}.hero .eyebrow{margin:0 0 4px}.hero h1{font-size:clamp(43px,11vw,61px)}.hero-description{line-height:1.34;margin-bottom:9px}.hero-tag{margin-top:6px}
+  .chapter.screen{padding-top:5px;padding-bottom:4px}.chapter h2{font-size:23px;margin-bottom:2px}.section-lead{font-size:10px;margin-bottom:4px}
+  .chapter .selection-status{margin-bottom:2px}.chapter .explore-intro{min-height:32px;margin-bottom:3px}.explore-open{min-height:30px}
+  .type-groups{min-height:28px;margin-bottom:4px}.group-tab{min-height:28px;font-size:9px;padding:3px}
+  .type-name{font-size:13px}.type-tagline{font-size:9px}.types-grid{gap:5px}.screen-bottom{min-height:37px;margin-top:3px}
+  .talk-lab h3{font-size:18px}.talk-intro{font-size:10px;margin:0}.talk-message p{font-size:12px}.talk-choices button{min-height:30px}.talk-insight{font-size:10px}
+  .story-scroll{padding:7px}.scene-switch{margin:0}.story-actions{margin:0}
+}
+@media(max-width:340px){.site-header nav a{font-size:9px}.site-header nav .nav-symbol{font-size:18px}.group-tab{font-size:8px}.type-tagline{display:none}.soda-name{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.enter-scene{animation:none!important}}
+
+/* 개별 제작한 래스터 원화를 배경, 페이지 버튼, 메뉴의 실물 장식으로 사용한다. */
+.screen:before{background:linear-gradient(115deg,#fff9f4a8,#fff9f4b8),url("./assets/branding/story-forest-bg-v01.webp") center/cover no-repeat;opacity:.87}
+.hero.screen:before{background:linear-gradient(105deg,#fff0ef96,#fff0ee65),url("./assets/branding/story-forest-bg-v01.webp") center center/cover no-repeat;opacity:.83}
+.primary-link.next-link,.hero .primary-link,.result-link,.talk-to-story{background: url("./assets/branding/storybook-button-v01.webp") center/100% 100% no-repeat;color:#713f56;border:0;border-radius:0;box-shadow:0 8px 13px #a76d8133;text-shadow:0 1px #fff3ee;min-width:210px;font-weight:950;padding-left:23px;padding-right:23px}
+.primary-link.next-link:hover,.hero .primary-link:hover,.result-link:hover,.talk-to-story:hover{box-shadow:0 11px 16px #a76d813a;transform:translateY(-2px)}
+.primary-link.next-link:active,.hero .primary-link:active,.result-link:active,.talk-to-story:active{transform:translateY(2px);box-shadow:0 2px 5px #a76d812c}
+.site-header nav .nav-symbol{display:inline-block;width:24px;height:24px;font-size:0;background-position:center;background-size:contain;background-repeat:no-repeat;flex:none}
+.site-header nav a[data-nav="home"] .nav-symbol{background-image:url("./assets/branding/storybook-fox-app-icon-v01.webp")}
+.site-header nav a[data-nav="types"] .nav-symbol{background-image:url("./assets/characters/mbti/istj-hedgehog-draft-v01.webp")}
+.site-header nav a[data-nav="blood"] .nav-symbol{background-image:url("./assets/branding/blood-a-bunny-v02.webp")}
+.site-header nav a[data-nav="bridge"] .nav-symbol{background-image:url("./assets/branding/mascot-fox-storykeeper-v02.webp")}
+.site-header nav a[data-nav="talk"] .nav-symbol{background-image:url("./assets/branding/blood-ab-owl-v01.webp")}
+.site-header nav a[data-nav="theater"] .nav-symbol{background-image:url("./assets/branding/storybook-fox-app-icon-v01.webp")}
+.atlas-dialog{background:linear-gradient(#fffaf5d9,#fff4f8ee),url("./assets/branding/story-forest-bg-v01.webp") center/cover no-repeat;height:min(540px,calc(100dvh - 30px))}
+.atlas-dialog .explore-choices{flex:0 0 auto}.atlas-dialog .explore-choice{min-height:76px}
+
+.story-scroll{display:flex;flex-direction:column;gap:10px}
+.story-cameos{display:flex;justify-content:space-around;gap:18px;align-items:end;margin-top:auto;padding-top:4px}
+.story-cameos[hidden]{display:none!important}
+.cameo-frame{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;width:27%;padding:7px 8px;border:1px solid #e9d4db;border-radius:18px;background:#fff6f9d9;box-shadow:0 5px 8px #ad92a721}
+.cameo-frame img{width:100%;height:95px;object-fit:contain;border-radius:10px;mask-image:radial-gradient(ellipse at center,black 47%,transparent 83%)}
+.cameo-frame span{font-size:11px;font-weight:900;color:#816979}
+.bridge-result{position:relative;padding-bottom:105px}
+.bridge-result:after{content:"";position:absolute;right:12px;bottom:5px;width:145px;height:115px;background:url("./assets/branding/mascot-fox-storykeeper-v02.webp") center bottom/contain no-repeat;opacity:.5;pointer-events:none}
+.talk-stage{background:linear-gradient(160deg,#fffafde8,#fff2f8e5),url("./assets/branding/storybook-fox-app-icon-v01.webp") 98% 98%/160px auto no-repeat}
+@media(max-width:650px){.story-cameos{gap:8px}.cameo-frame{width:39%;padding:3px 5px}.cameo-frame img{height:65px}.cameo-frame span{font-size:10px}.bridge-result{padding-bottom:60px}.bridge-result:after{height:65px;width:75px}.talk-stage{background-size:auto,70px auto}}
+
+#friend-type.enhanced{display:none}
+.friend-picker{width:100%;min-height:54px;border:2px solid #e7dce8;border-radius:16px;background:linear-gradient(#fffefa,#fbf1fa);padding:10px 12px;color:#664c65;font-weight:850;text-align:left;font-size:14px;box-shadow:0 3px 0 #e8d7e2}
+.friend-picker:after{content:"⌄";float:right;color:#ba87a5;font-size:20px;line-height:1}
+.friend-dialog{gap:8px}.friend-dialog h2{font-size:26px;margin:25px 0 0;text-align:center;color:#795c75}.friend-dialog .dialog-note{margin:0 0 7px;text-align:center;color:#836c7c}
+.friend-choice-list{min-height:0;flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(61px,auto);gap:8px;padding:6px}
+.friend-choice{display:flex;align-items:center;gap:8px;min-width:0;min-height:61px;padding:6px 9px;border:1px solid #eccbd8;border-radius:17px;background:#fff9f9d9;color:#72576c;font-size:12px;font-weight:850;text-align:left}
+.friend-choice:hover{background:#ffebf0;border-color:#cb8fa7}.friend-choice img{height:48px;width:48px;object-fit:contain;flex:none;border-radius:9px}.friend-choice span{line-height:1.3}
+@media(max-width:650px){.friend-picker{font-size:11px;min-height:44px;padding:5px;border-radius:12px}.friend-dialog h2{font-size:21px;margin-top:16px}.friend-choice-list{gap:5px;grid-auto-rows:minmax(53px,auto)}.friend-choice{font-size:10px;min-height:53px;gap:4px;padding:3px 5px}.friend-choice img{width:35px;height:40px}}
+.atlas-dialog .dialog-mascot{filter:drop-shadow(0 5px 6px #a582a85c)}
+@media(max-width:650px){.site-header nav .nav-symbol{width:25px;height:25px}.hero .primary-link{min-width:245px}.primary-link.next-link,.result-link,.talk-to-story{min-width:220px;padding:8px 24px}.screen:before{background-position:center bottom}}
+
+/* v0.6 · 각 장면의 개별 손그림 배경과 정돈된 카드 깊이. PNG 원본, WebP 배포. */
+.soda-shop.screen:before{background:linear-gradient(110deg,#fffaf1ad,#fff4f0b9),url("./assets/backgrounds/storybook-soda-scene-v02.webp") center/cover no-repeat;opacity:.91}
+.bridge.screen:before{background:linear-gradient(110deg,#fffaf2b9,#fdf2f6ba),url("./assets/backgrounds/storybook-bridge-scene-v02.webp") center/cover no-repeat;opacity:.94}
+.theater.screen:before{background:linear-gradient(110deg,#fffaf1ba,#fff2f0b1),url("./assets/backgrounds/storybook-theater-scene-v02.webp") center/cover no-repeat;opacity:.94}
+.talk-page.screen:before{background:linear-gradient(120deg,#fff8f5c5,#f7eaf3c2),url("./assets/backgrounds/storybook-bridge-scene-v02.webp") center/cover no-repeat;opacity:.88}
+.chapter h2,.hero h1{text-wrap:balance;text-rendering:optimizeLegibility}
+.chapter .eyebrow{font-weight:800;letter-spacing:.065em}
+.chapter .section-lead{color:#6c5366;text-shadow:0 1px 0 #fff9f4dd}
+.type-card,.soda-card{outline:1px solid #fffefaad;outline-offset:-5px;transition:box-shadow .22s,transform .22s,border-color .22s}
+.type-card:hover,.soda-card:hover{transform:translateY(-3px);box-shadow:0 14px 28px #79566636}
+.type-card[aria-pressed="true"],.soda-card[aria-pressed="true"]{transform:translateY(-2px)}
+.type-card:focus-visible,.soda-card:focus-visible,.group-tab:focus-visible,.friend-choice:focus-visible,.site-header nav a:focus-visible,.next-link:focus-visible{outline:3px solid #7d668c;outline-offset:3px}
+.type-code{box-shadow:0 1px 5px #916b7a1f;border:1px solid #f9e4e5}
+.type-groups{padding:3px;border-radius:18px;background:#fff9f6bb;box-shadow:inset 0 0 0 1px #e6cad03d,0 6px 19px #cda5ae24}
+.group-tab{box-shadow:inset 0 1px 0 #fff9f5aa}
+.chapter .explore-intro{position:relative;border:2px solid #faebe3;box-shadow:0 8px 19px #bd869e22;background:linear-gradient(112deg,#fffef9f2,#fff4f5e8)}
+.chapter .explore-intro:before{content:"";position:absolute;left:8px;top:2px;bottom:2px;width:48px;background:url("./assets/branding/storybook-fox-app-icon-v01.webp") center/contain no-repeat;opacity:.58;pointer-events:none}
+.chapter .explore-intro>div{padding-left:37px}
+.bridge-card,.theater-stage{box-shadow:0 19px 44px #7e5b803e,inset 0 0 0 3px #fffaf7ad}
+.bridge-card{background:linear-gradient(135deg,#fffdf7f8,#fff7f8f8)}
+.bridge-result{background:linear-gradient(160deg,#fefafae8,#efe8f5df);border:1px solid #e9d2e5;border-radius:20px}
+.theater-stage{background:linear-gradient(145deg,#fffef9f8,#fff5f0f5)}
+.story-scroll{background:linear-gradient(160deg,#fffdfaeb,#fff6f1eb);border-color:#e5c8ca}
+.talk-stage{box-shadow:0 13px 29px #8d72963a}
+.friend-dialog{background:linear-gradient(#fff9f6dc,#fff3f7ea),url("./assets/backgrounds/storybook-bridge-scene-v02.webp") center/cover no-repeat}
+.atlas-dialog:not(.friend-dialog){background:linear-gradient(#fffaf5df,#fff4f8ee),url("./assets/backgrounds/storybook-theater-scene-v02.webp") center/cover no-repeat}
+.site-header nav a[aria-current="page"]{outline:1px solid #edc0ce;outline-offset:-1px}
+
+/* 아주 작은 휴대전화는 장식보다 정보와 터치 판정이 우선. */
+@media(max-width:650px){
+  .chapter .explore-intro{border:0;box-shadow:none;background:transparent}.chapter .explore-intro:before{display:none}
+  .type-groups{padding:2px;gap:3px;border-radius:13px;margin-bottom:5px}
+  .group-tab{padding:5px 2px;line-height:1.16;white-space:normal;word-break:keep-all}
+  .type-card:hover,.soda-card:hover{transform:none}
+  .type-card,.soda-card{outline-offset:-3px}
+  .site-header nav{min-height:65px}.site-header nav a{min-height:51px;touch-action:manipulation}
+  .story-scroll,.bridge-result,.talk-stage{overflow-wrap:anywhere;word-break:keep-all}
+  .bridge-result,.story-scroll{scrollbar-width:thin}
+  .theater-stage{box-shadow:0 8px 22px #7e5b8036}
+}
+@media(max-width:650px) and (max-height:710px){
+  .chapter .eyebrow{font-size:9px}
+  .chapter .section-lead{line-height:1.28}
+  .type-groups{min-height:29px;margin-bottom:3px}
+  .group-tab{min-height:28px}
+  .chapter .explore-intro{min-height:33px}
+  .bridge-card,.theater-stage{border-width:4px;padding:8px}
+  .bridge-result{padding:8px}
+  .story-cameos{margin-top:1px}
+}
+@media(prefers-reduced-motion:reduce){.type-card,.soda-card{transition:none!important}}
+
+/* 선택 전에도 비어 보이지 않는 그림책 안내 장면. */
+.bridge-empty-state{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;padding:12px;color:#806278;font-size:16px;font-weight:750;line-height:1.65;text-align:center}
+.bridge-empty-state:before{content:"";display:block;width:min(190px,42%);height:min(210px,30vh);background:url("./assets/branding/mascot-fox-storykeeper-v02.webp") center/contain no-repeat;filter:drop-shadow(0 11px 13px #b98f9b46)}
+.bridge-empty-state p{margin:0}.bridge-empty-state .soft-button{font-size:12px;text-decoration:none;min-height:39px}
+.bridge-empty-state[hidden],.theater-stage .stage-placeholder[hidden]{display:none!important}
+.theater-stage .stage-placeholder{height:100%;min-height:0;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:13px 10px 8px;gap:3px}
+.theater-stage .stage-placeholder .curtain-star{font-size:39px;line-height:1.1}
+.theater-stage .stage-placeholder p{font-size:clamp(17px,2.3vw,23px);margin:4px 0}
+.theater-stage .stage-placeholder span{margin-bottom:9px}
+.theater-stage .stage-placeholder:after{content:"";display:block;flex:0 1 auto;margin-top:9px;width:220px;height:min(240px,30vh);min-height:70px;max-height:34%;background:url("./assets/branding/mascot-fox-storykeeper-v02.webp") center bottom/contain no-repeat;filter:drop-shadow(0 9px 11px #bba0af39)}
+@media(max-width:650px){
+  .bridge-empty-state{font-size:12px;gap:7px;padding:7px;line-height:1.48}.bridge-empty-state:before{width:140px;height:min(160px,22vh)}
+  .bridge-empty-state .soft-button{min-height:33px;padding:5px 12px;font-size:11px}
+  .theater-stage .stage-placeholder .curtain-star{font-size:29px}
+  .theater-stage .stage-placeholder span{font-size:11px;margin:3px 0 5px}
+  .theater-stage .stage-placeholder:after{width:145px;height:min(150px,20vh);min-height:40px;max-height:30%}
+}
+@media(max-width:650px) and (max-height:710px){
+  .bridge-empty-state{font-size:11px;gap:5px}.bridge-empty-state:before{width:100px;height:110px}
+  .theater-stage .stage-placeholder:after{width:100px;height:86px;min-height:0}
+}
+
+/* v0.7 · 버튼의 시각 언어를 통일한다. PNG 원본에서 최적화한 WebP 장식을 쓴다. */
+:root{--button-ink:#69485d;--button-focus:#80618d;--button-outline:#e5c2d1;--button-highlight:#fffdf8}
+.site-header nav a{border:1px solid transparent;border-radius:17px;color:#74576c;font-weight:850;gap:7px;box-shadow:none;text-shadow:0 1px #fff8f3;transition:background .18s,border-color .18s,transform .18s,box-shadow .18s}
+.site-header nav a:hover{background:#fff5efcb;border-color:#f0d8d8;transform:translateY(-1px)}
+.site-header nav a[aria-current="page"]{background:linear-gradient(165deg,#fff2f0f0,#f5ddeaf2);border-color:#e9bcca;color:#773f62;outline:none;box-shadow:0 3px 8px #b6819633,inset 0 1px 1px #fffdf8}
+.site-header nav .nav-symbol{width:30px;height:30px;display:inline-block;background-size:contain;background-repeat:no-repeat;background-position:center;filter:drop-shadow(0 2px 2px #9a728c35)}
+.site-header nav a[data-nav="home"] .nav-symbol{background-image:url("./assets/branding/storybook-nav-home-v01.webp")}
+.site-header nav a[data-nav="types"] .nav-symbol{background-image:url("./assets/branding/storybook-nav-types-v01.webp")}
+.site-header nav a[data-nav="blood"] .nav-symbol{background-image:url("./assets/branding/storybook-nav-blood-v01.webp")}
+.site-header nav a[data-nav="bridge"] .nav-symbol{background-image:url("./assets/branding/storybook-nav-bridge-v01.webp")}
+.site-header nav a[data-nav="talk"] .nav-symbol{background-image:url("./assets/branding/storybook-nav-talk-v01.webp")}
+.site-header nav a[data-nav="theater"] .nav-symbol{background-image:url("./assets/branding/storybook-nav-theater-v01.webp")}
+
+.primary-link.next-link,.hero .primary-link,.result-link,.talk-to-story{
+  min-width:244px;min-height:56px;padding:10px 45px;display:inline-flex;align-items:center;justify-content:center;
+  border:0;border-radius:0;background:url("./assets/branding/storybook-button-primary-v02.webp") center/100% 100% no-repeat;
+  box-shadow:none;filter:drop-shadow(0 5px 5px #9c71863b);color:#653b54;font-size:14px;font-weight:950;
+  letter-spacing:-.02em;line-height:1.25;text-shadow:0 1px #fff8f4;transition:transform .17s,filter .17s;
+}
+.primary-link.next-link:hover,.hero .primary-link:hover,.result-link:hover,.talk-to-story:hover{transform:translateY(-2px);filter:brightness(1.035) drop-shadow(0 8px 7px #9870884a);box-shadow:none}
+.primary-link.next-link:active,.hero .primary-link:active,.result-link:active,.talk-to-story:active{transform:translateY(1px);filter:brightness(.99) drop-shadow(0 2px 2px #9870883f);box-shadow:none}
+.primary-link.next-link span,.hero .primary-link span{padding-left:6px}
+
+.secondary-link,.soft-button,.explore-open,.talk-next,.theater-stage .stage-placeholder .secondary-link,.bridge-empty-state .soft-button{
+  min-height:43px;padding:8px 28px;border:0;border-radius:0;display:inline-flex;align-items:center;justify-content:center;
+  background:url("./assets/branding/storybook-button-secondary-v02.webp") center/100% 100% no-repeat;
+  color:#62516c;font-size:12px;font-weight:900;line-height:1.2;text-decoration:none;
+  box-shadow:none;filter:drop-shadow(0 3px 3px #9e83a63d);transition:transform .17s,filter .17s;
+}
+.secondary-link:hover,.soft-button:hover,.explore-open:hover,.talk-next:hover{transform:translateY(-1px);background:url("./assets/branding/storybook-button-secondary-v02.webp") center/100% 100% no-repeat;filter:brightness(1.035) drop-shadow(0 5px 5px #9e83a64a)}
+.secondary-link:active,.soft-button:active,.explore-open:active,.talk-next:active{transform:translateY(1px);filter:brightness(.985)}
+.explore-open{min-width:168px}.talk-next{margin-left:auto}
+
+.group-tab,.scene-button,.talk-choices button,.atlas-dialog .explore-choice,.friend-choice{
+  border:1px solid var(--button-outline);border-radius:14px;background:linear-gradient(160deg,#fffefcee,#fbecf4ec);
+  color:#795b76;font-weight:850;box-shadow:inset 0 1px #fffefa,0 3px 0 #ddc6d49e;
+  transition:background .16s,transform .16s,border-color .16s,box-shadow .16s;
+}
+.group-tab:hover,.scene-button:hover,.talk-choices button:hover,.atlas-dialog .explore-choice:hover,.friend-choice:hover{transform:translateY(-1px);background:linear-gradient(#fffbf8,#ffe7ee);border-color:#d89fb3}
+.group-tab[aria-pressed="true"],.scene-button[aria-pressed="true"],.talk-choices button[aria-pressed="true"]{
+  background:linear-gradient(160deg,#f7c6c8,#edd0e0);border-color:#ca8ca4;color:#633950;
+  box-shadow:inset 0 2px 3px #d397a03b,0 2px 4px #ab7a963b;text-shadow:0 1px #ffeff2;
+}
+.atlas-dialog .explore-choice{padding-left:18px;padding-right:18px;line-height:1.4}
+.friend-picker{border:1px solid #dcb9d2;border-radius:17px;background:linear-gradient(165deg,#fffdfaf7,#f4e9f4f4);box-shadow:inset 0 1px #fffdfa,0 3px 0 #e5cddd;color:#65506a}
+.friend-picker:hover{border-color:#c899ba;background:#fff8fb}
+.story-actions .action-button{min-height:38px;padding:8px 17px;border-radius:14px;border:1px solid #d499aa;background:linear-gradient(160deg,#f6bebf,#eb9ea8);color:#674157;box-shadow:0 3px 0 #d394a3;font-weight:900}
+.story-actions .action-button.subtle{background:linear-gradient(160deg,#fffdfa,#f4e9f3);border-color:#e3ccdf;color:#6c5775;box-shadow:0 3px 0 #e0d0df}
+.story-actions .action-button:hover{transform:translateY(-1px);filter:brightness(1.025)}
+.story-actions .action-button:active{transform:translateY(2px);box-shadow:0 1px 0 #d394a3}
+.atlas-dialog .explore-recommendation a{background:url("./assets/branding/storybook-button-primary-v02.webp") center/100% 100% no-repeat;color:#643d51;font-weight:950;min-height:54px;border-radius:0;text-shadow:0 1px #fff8f3;box-shadow:none}
+.atlas-close{background:linear-gradient(145deg,#fffefd,#f7eaf2);border:2px solid #dcacc5;box-shadow:0 3px 0 #e4c5d6;color:#8e5879}
+
+.site-header nav a:focus-visible,.primary-link:focus-visible,.secondary-link:focus-visible,.soft-button:focus-visible,.explore-open:focus-visible,.group-tab:focus-visible,.scene-button:focus-visible,.talk-choices button:focus-visible,.talk-next:focus-visible,.action-button:focus-visible,.explore-choice:focus-visible,.friend-choice:focus-visible,.friend-picker:focus-visible,.atlas-close:focus-visible{
+  outline:3px solid var(--button-focus);outline-offset:3px;
+}
+.site-header nav a[aria-current="page"]:focus-visible{outline:3px solid var(--button-focus);outline-offset:3px}
+
+@media(max-width:650px){
+  .site-header nav{height:calc(69px + env(safe-area-inset-bottom));min-height:69px;padding-top:5px;padding-bottom:calc(5px + env(safe-area-inset-bottom));gap:2px}
+  main{margin-bottom:calc(69px + env(safe-area-inset-bottom))}
+  .site-header nav a{min-height:54px;padding:4px 0;font-size:10px;gap:2px;border-radius:13px;line-height:1.12;letter-spacing:-.04em}
+  .site-header nav .nav-symbol{width:27px;height:27px;flex:none}
+  .primary-link.next-link,.hero .primary-link,.result-link,.talk-to-story{min-width:220px;min-height:46px;padding:7px 34px;font-size:12px}
+  .hero .primary-link{min-width:236px;min-height:51px;font-size:13px}
+  .secondary-link,.soft-button,.explore-open,.talk-next,.theater-stage .stage-placeholder .secondary-link,.bridge-empty-state .soft-button{min-height:38px;font-size:11px;padding:6px 23px}
+  .explore-open{min-width:165px}
+  .group-tab{border-radius:11px;font-size:10px}
+  .talk-choices button{min-height:35px;padding:6px 7px;border-radius:11px;font-size:11px}
+  .story-actions .action-button{min-height:36px;padding:7px 11px;font-size:11px;border-radius:12px}
+  .atlas-dialog .explore-choice{padding:10px 14px}
+}
+@media(max-width:360px){
+  .site-header nav a{font-size:9px;letter-spacing:-.075em}
+  .site-header nav .nav-symbol{width:23px;height:23px}
+  .group-tab{font-size:9px}
+  .story-actions .action-button{padding:6px 8px;font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){.site-header nav a,.primary-link,.secondary-link,.soft-button,.explore-open,.group-tab,.scene-button,.talk-choices button,.talk-next,.action-button{transition:none!important}}
+
+/* v0.7.1 · 문구가 짧아도 보조 버튼 장식이 찌그러지지 않도록 최소 면적 확보 */
+.explore-open,.talk-next,.bridge-empty-state .soft-button,.theater-stage .stage-placeholder .secondary-link{
+  min-width:204px;min-height:49px;padding:10px 33px;font-size:13px;line-height:1.15;
+  white-space:nowrap;flex-shrink:0;
+}
+.explore-open{min-width:222px;margin:0}
+.talk-next{min-width:203px}
+.bridge-empty-state .soft-button{min-width:211px}
+.theater-stage .stage-placeholder .secondary-link{min-width:198px}
+@media(max-width:650px){
+  .explore-open,.talk-next,.bridge-empty-state .soft-button,.theater-stage .stage-placeholder .secondary-link{
+    min-width:184px;min-height:43px;padding:7px 27px;font-size:12px;
+  }
+  .explore-open{min-width:203px}
+  .talk-next{min-width:188px}
+  .bridge-empty-state .soft-button{min-width:195px}
+}
+@media(max-width:650px) and (max-height:710px){
+  .explore-open,.talk-next,.bridge-empty-state .soft-button{min-height:39px}
+}
+
+/* v0.7.2 · 메뉴·결과 화면의 마감 재정리. 그림 자산은 기존 WebP만 사용. */
+.group-tab{
+  min-height:45px;padding:7px 13px;border:0;border-radius:0;
+  background:url("./assets/branding/storybook-button-secondary-v02.webp") center/100% 100% no-repeat;
+  color:#715268;box-shadow:none;filter:drop-shadow(0 3px 3px #b28eaa36);
+  white-space:normal;word-break:keep-all;line-height:1.24;
+}
+.group-tab:hover{
+  background:url("./assets/branding/storybook-button-secondary-v02.webp") center/100% 100% no-repeat;
+  transform:translateY(-1px);filter:brightness(1.05) drop-shadow(0 5px 4px #ae83983a);
+}
+.group-tab[aria-pressed="true"]{
+  background:url("./assets/branding/storybook-button-primary-v02.webp") center/100% 100% no-repeat;
+  border:0;box-shadow:none;color:#623e57;
+  filter:drop-shadow(0 4px 3px #a57b8b43);
+}
+.friend-picker{
+  border:0;border-radius:0;min-height:48px;
+  background:url("./assets/branding/storybook-button-secondary-v02.webp") center/100% 100% no-repeat;
+  box-shadow:none;filter:drop-shadow(0 4px 4px #9f78913b);
+}
+.friend-picker:hover{
+  background:url("./assets/branding/storybook-button-secondary-v02.webp") center/100% 100% no-repeat;
+  filter:brightness(1.05) drop-shadow(0 5px 5px #9f78914a);
+}
+.story-actions .action-button,.story-actions .action-button.subtle{
+  min-height:44px;min-width:96px;padding:8px 16px;border:0;border-radius:0;
+  background:url("./assets/branding/storybook-button-secondary-v02.webp") center/100% 100% no-repeat;
+  box-shadow:none;color:#6a4e68;filter:drop-shadow(0 3px 3px #a9829337);
+}
+.story-actions .action-button:not(.subtle){
+  background:url("./assets/branding/storybook-button-primary-v02.webp") center/100% 100% no-repeat;
+  color:#673e55;
+}
+.story-actions .action-button:hover{filter:brightness(1.05) drop-shadow(0 5px 4px #ad81933d)}
+.story-actions .action-button:active{box-shadow:none;transform:translateY(1px)}
+.bridge-result{
+  scrollbar-color:#c28eaa #fdf1ed;scrollbar-width:thin;overscroll-behavior:contain;
+}
+.bridge-result::-webkit-scrollbar{width:9px}
+.bridge-result::-webkit-scrollbar-track{background:#fff1ee;border-radius:12px}
+.bridge-result::-webkit-scrollbar-thumb{
+  background:linear-gradient(#f6b3c4,#a887c0);border-radius:12px;border:2px solid #fff6f5;
+}
+/* 완성된 탐험 결과는 내용 높이에 맞는 작은 일러스트 창으로 전환한다. */
+.atlas-dialog:has(.explore-recommendation:not([hidden])){
+  height:min(345px,calc(100dvh - 30px));min-height:0;
+}
+.atlas-dialog:has(.explore-recommendation:not([hidden])) .explore-recommendation{
+  padding:15px 18px 4px;overflow-y:auto;scrollbar-color:#c28eaa #fdf1ed;scrollbar-width:thin;
+}
+@media(max-width:650px){
+  .group-tab{min-height:44px;padding:6px 8px;font-size:10px}
+  .friend-picker{min-height:44px}
+  .story-actions .action-button,.story-actions .action-button.subtle{
+    min-height:44px;min-width:88px;padding:7px 10px;font-size:11px;
+  }
+  .talk-choices button{min-height:44px;padding:8px}
+  .scene-button{min-height:42px;min-width:66px}
+  .atlas-dialog:has(.explore-recommendation:not([hidden])){
+    height:min(350px,calc(100dvh - 18px));
+  }
+}
+
+/* v0.7.3: The inherited header backdrop-filter was the containing block for
+   position:fixed mobile navigation, pinning it to the 55px header instead of
+   the viewport. Remove that containing block; keep the illustrated header. */
+@media(max-width:650px){
+  .site-header{backdrop-filter:none;-webkit-backdrop-filter:none}
+  .site-header nav{position:fixed;top:auto;bottom:0;left:0;right:0;margin-top:0;
+    min-height:calc(69px + env(safe-area-inset-bottom));
+    padding-bottom:calc(5px + env(safe-area-inset-bottom));
+    background:linear-gradient(180deg,#fffaf9f8,#fff4f3f9);
+    border-top:1px solid #dfb8cb;box-shadow:0 -5px 17px #88677d25;
+  }
+  .chapter.screen{padding-top:clamp(14px,2.2dvh,21px)}
+  .hero.screen{padding-top:clamp(22px,3.2dvh,32px)}
+  .site-header nav a{font-size:10px;letter-spacing:-.035em}
+  .site-header nav .nav-symbol{width:27px;height:27px}
+}
+@media(max-width:650px) and (max-height:710px){
+  .chapter.screen{padding-top:12px}
+}
+
+/* v0.7.4 · 이야기책 표지형 타이틀과 손가락 안내 스티커. SVG 대신 PNG 원화/WebP 사용. */
+.site-header{
+  background:linear-gradient(90deg,#fffaf4cb,#fffbf5b8),url("./assets/branding/maeum-header-parchment-v01.webp") center / cover no-repeat;
+  border-bottom:1px solid #e8c8c4;
+  box-shadow:0 4px 16px #84697820,inset 0 -1px 0 #fffefa;
+}
+.site-header .brand{gap:5px;line-height:1.2;letter-spacing:-.025em;color:#684f65;text-shadow:0 1px 0 #fffdf9}
+.site-header .brand strong{color:#915c6c}
+.site-header .brand-icon{width:52px;height:52px;object-fit:contain;flex-shrink:0;filter:drop-shadow(0 3px 3px #b5878a4d)}
+.explore-cta{display:inline-flex;position:relative;align-items:center;justify-content:center;min-width:0;flex:none;padding-right:61px}
+.explore-cta .explore-open{z-index:1;min-width:224px;min-height:50px;white-space:nowrap}
+.click-coach{position:absolute;right:0;top:50%;transform:translateY(-50%);z-index:2;width:63px;height:73px;pointer-events:none;display:flex;align-items:flex-end;justify-content:center}
+.click-coach img{display:block;width:60px;height:67px;object-fit:contain;filter:drop-shadow(0 3px 3px #a7858738);animation:point-at-button 2.3s ease-in-out infinite}
+.click-coach-label{position:absolute;right:-2px;top:-2px;z-index:2;padding:2px 7px;border:1px solid #eac9bc;border-radius:99px;background:#fffdf3f5;color:#985e70;font:900 9px/1.2 system-ui,sans-serif;letter-spacing:.01em;white-space:nowrap;transform:rotate(-5deg);box-shadow:0 2px 5px #bd919329}
+@keyframes point-at-button{0%,100%{transform:translate(0,0) rotate(-4deg)}50%{transform:translate(-5px,3px) rotate(-8deg)}}
+
+/* 문장이 길어도 높이가 0으로 눌려 카드에 겹치지 않도록 콘텐츠 고유 높이를 보존. */
+.theater-stage #result>*{min-width:0}
+.theater-stage #result>.story-stamp,.theater-stage #result>h3,.theater-stage #result>.story-lead,
+.theater-stage #result>.scene-switch,.theater-stage #result>.story-actions,.theater-stage #result>.feedback{flex-shrink:0}
+.story-scroll{min-height:0;min-width:0;flex:1 1 0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable}
+.story-scroll>.story-body,.story-scroll>.story-advice,.story-scroll>.scene-question,.story-scroll>.story-cameos{flex:0 0 auto;min-width:0;max-width:100%}
+.story-scroll>.story-body{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.story-scroll>.story-advice{margin:0}
+.story-scroll>.scene-question{min-height:1.5em!important;height:auto;line-height:1.55;margin:3px 0 0;padding:7px 10px;border-left:3px solid #d6aac1;border-radius:0 10px 10px 0;background:#fff8f7;color:#77566d;overflow-wrap:anywhere}
+.story-scroll>.story-cameos{margin-top:4px;padding-top:10px;border-top:1px dashed #e5d0da;align-items:stretch}
+.story-cameos .cameo-frame{flex:0 1 210px;width:auto;max-width:45%;justify-content:flex-start;min-height:0}
+.story-cameos .cameo-frame img{flex:none;max-width:100%;object-fit:contain}
+.theater-stage #result>.scene-switch{margin-top:5px}
+.theater-stage #result>.story-actions{margin-top:5px}
+
+@media(max-width:900px){
+  .site-header .brand-icon{width:45px;height:45px}
+}
+@media(max-width:650px){
+  .site-header{background:linear-gradient(90deg,#fffcf6e6,#fff8f3dd),url("./assets/branding/maeum-header-parchment-v01.webp") center / cover no-repeat;backdrop-filter:none;-webkit-backdrop-filter:none}
+  .site-header .brand{gap:5px;font-size:14px}
+  .site-header .brand-icon{width:45px;height:45px}
+  .explore-cta{padding-right:42px;max-width:100%}
+  .explore-cta .explore-open{min-width:210px;min-height:43px;padding:7px 21px;font-size:12px}
+  .click-coach{width:48px;height:54px;right:0}
+  .click-coach img{width:45px;height:52px}
+  .click-coach-label{right:-2px;top:-6px;font-size:8px;padding:2px 5px}
+  .chapter .explore-intro{padding:1px 3px 3px;min-height:46px;overflow:visible}
+  .theater-stage #result{gap:3px}
+  .theater-stage #result h3{font-size:clamp(16px,4.7vw,19px);line-height:1.23;overflow-wrap:anywhere}
+  .theater-stage #result .story-lead{line-height:1.3}
+  .story-scroll{padding:9px 10px}
+  .story-scroll>.story-body{font-size:12px;line-height:1.6}
+  .story-scroll>.scene-question{font-size:11px;padding:6px 8px}
+  .story-scroll>.story-cameos{gap:7px;justify-content:center;padding-top:8px}
+  .story-cameos .cameo-frame{flex:0 1 120px;max-width:47%;padding:5px 4px}
+  .story-cameos .cameo-frame img{height:68px}
+  .theater-stage #result>.story-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;width:100%}
+  .theater-stage #result>.story-actions .action-button{min-width:0!important;width:100%;padding:5px 3px;font-size:10px;white-space:nowrap}
+  .theater-stage #result>.scene-switch{width:100%;justify-content:center;gap:5px}
+  .theater-stage #result>.scene-switch .scene-button{flex:1 1 0;min-width:0;max-width:100px}
+}
+@media(max-width:350px){
+  .explore-cta{padding-right:32px}
+  .explore-cta .explore-open{min-width:195px;font-size:11px;padding:6px 14px}
+  .click-coach{right:-2px;width:38px}.click-coach img{width:38px;height:48px}
+  .click-coach-label{font-size:7px;right:-2px}
+  .theater .section-lead{font-size:10px}
+  .theater-stage{padding:6px}
+  .theater-stage #result>.story-actions .action-button{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){.click-coach img{animation:none}}
+
+/* v0.7.5 · 모바일은 하단 내비게이션만 사용해 상단 타이틀바 55px을 본문에 반환한다.
+   헤더 자체를 display:none 하면 그 안의 하단 메뉴도 사라지므로 높이만 없앤다. */
+@media(max-width:650px){
+  .site-header{
+    flex:0 0 0!important;
+    height:0!important;
+    min-height:0!important;
+    padding:0!important;
+    margin:0!important;
+    border:0!important;
+    background:none!important;
+    box-shadow:none!important;
+    overflow:visible!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+  }
+  .site-header>.brand{display:none!important}
+  .site-header nav{
+    position:fixed;
+    top:auto;
+    bottom:0;
+    left:0;
+    right:0;
+    z-index:65;
+  }
+  .chapter.screen{padding-top:calc(18px + env(safe-area-inset-top))}
+  .hero.screen{padding-top:calc(23px + env(safe-area-inset-top))}
+  .theater-stage{padding:8px;border-width:5px}
+}
+@media(max-width:650px) and (max-height:710px){
+  .chapter.screen{padding-top:calc(12px + env(safe-area-inset-top))}
+  .hero.screen{padding-top:calc(16px + env(safe-area-inset-top))}
+  .theater-stage{padding:6px;border-width:4px}
+}
+/* Short, narrow phones cannot fit three bridge columns when the decorative
+   heart is hidden. Use two real, equally sized fields. */
+@media(max-width:350px){
+  .bridge-selects{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .bridge-selects>div{min-width:0}
+  .bridge-heart{display:none}
+  .friend-picker{min-width:0;white-space:nowrap;font-size:10px;line-height:1.25}
+  .type-tagline{display:block;font-size:9px;white-space:nowrap;text-overflow:ellipsis;max-height:1.2em}
+}
+/* On taller mobile screens, center the conversation inside its illustrated
+   panel instead of piling everything at the top with an empty lower half. */
+@media(max-width:650px) and (min-height:760px){
+  .talk-stage{display:flex;flex-direction:column;justify-content:center}
+  .talk-stage .talk-next{align-self:flex-end}
+}

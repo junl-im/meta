@@ -125,6 +125,8 @@ async function main() {
   for (const dir of appDirs) await copyDirRelative(APP, dir, appOut);
   // Publish the existing fortune app at its own path. Its relative assets and SW remain scoped there.
   await copyDirRelative(ROOT, 'AIPlayground/DalbitUnse/dist', OUT);
+  await copyDirRelative(ROOT, 'AIPlayground/MaeumDogam', OUT);
+  await copyDirRelative(ROOT, 'NaverNovelShelf/site', OUT);
   await copyDirRelative(ROOT, 'AIPlayground/GomFoxMusic', OUT);
   await copyDirRelative(ROOT, 'AIPlayground/WebtoonStudio', OUT);
   // Publish configuration booleans only; credentials never enter the public artifact.

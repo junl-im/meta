@@ -1,7 +1,7 @@
 {
-  "version": "1.36.3",
-  "assetVersion": "1363",
+  "version": "1.36.4",
+  "assetVersion": "1364",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Connect Webtoon Studio speech bubbles and tails with one contour and keep mobile navigation inside the visible viewport."
+  "notes": "Serve MaeumDogam and Novel Shelf from Firebase internal paths and add Webtoon Studio desktop shortcuts."
 }
