@@ -111,6 +111,8 @@
 .web-rotate-handle::after{content:'↻';display:block;color:#fff;font-size:19px;line-height:21px;text-align:center;font-weight:800}
 .web-rotate-handle:hover,.web-rotate-handle:focus-visible{background:#965a20;outline:2px solid #ffe6b5;outline-offset:2px}
 .web-rotate-handle:active{cursor:grabbing}
+.web-canvas.is-file-over{outline:3px dashed #1c9aa4;outline-offset:8px}
+.web-panel.is-drop-target{outline:4px solid #dca259;outline-offset:5px;box-shadow:0 0 0 8px #f7d8a86b}
 .web-resize-nw{left:0;top:0;cursor:nwse-resize}.web-resize-n{left:50%;top:0;cursor:ns-resize}.web-resize-ne{left:100%;top:0;cursor:nesw-resize}.web-resize-e{left:100%;top:50%;cursor:ew-resize}
 .web-resize-se{left:100%;top:100%;cursor:nwse-resize}.web-resize-s{left:50%;top:100%;cursor:ns-resize}.web-resize-sw{left:0;top:100%;cursor:nesw-resize}.web-resize-w{left:0;top:50%;cursor:ew-resize}
 @media(max-width:760px){.web-resize-handle{width:24px;height:24px}}
