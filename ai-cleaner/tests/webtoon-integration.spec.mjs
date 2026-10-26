@@ -50,6 +50,43 @@ test('several images become separate panels and extend the canvas',async({page})
   await expect(page.locator('.web-assets button')).toHaveCount(3);
 });
 
+test('mobile panel can split left and right and undo restores the original',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.getByRole('button',{name:/레이어·속성/}).click();
+  await page.getByRole('button',{name:'좌우로 나누기'}).click();
+  const panels=page.locator('.web-panel');
+  await expect(panels).toHaveCount(2);
+  const boxes=await panels.evaluateAll(nodes=>nodes.map(node=>({left:Number.parseFloat(node.style.left),width:Number.parseFloat(node.style.width)})));
+  expect(boxes[1].left).toBeGreaterThan(boxes[0].left+boxes[0].width);
+  await page.getByRole('button',{name:'되돌리기'}).click();
+  await expect(panels).toHaveCount(1);
+  await panels.first().click();
+  await page.getByRole('button',{name:/레이어·속성/}).click();
+  await page.getByRole('button',{name:'위아래로 나누기'}).click();
+  await expect(panels).toHaveCount(2);
+  const rows=await panels.evaluateAll(nodes=>nodes.map(node=>({top:Number.parseFloat(node.style.top),height:Number.parseFloat(node.style.height)})));
+  expect(rows[1].top).toBeGreaterThan(rows[0].top+rows[0].height);
+});
+
+test('splitting an illustrated panel keeps the original image composition in PNG',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  const image=await page.evaluate(()=>{const canvas=document.createElement('canvas');canvas.width=20;canvas.height=10;const ctx=canvas.getContext('2d');ctx.fillStyle='#f00';ctx.fillRect(0,0,10,10);ctx.fillStyle='#00f';ctx.fillRect(10,0,10,10);return canvas.toDataURL('image/png').split(',')[1]});
+  await page.locator('input[type=file][accept="image/*"]').setInputFiles({name:'halves.png',mimeType:'image/png',buffer:Buffer.from(image,'base64')});
+  await page.getByRole('button',{name:'좌우로 나누기'}).click();
+  await expect(page.locator('.web-panel img')).toHaveCount(2);
+  const download=page.waitForEvent('download');
+  await page.getByRole('button',{name:'PNG 초안'}).click();
+  const png=firstPngFromZip(await (await download).createReadStream().then(async stream=>{const chunks=[];for await(const chunk of stream)chunks.push(chunk);return Buffer.concat(chunks)}));
+  const colors=await page.evaluate(async encoded=>{const image=new Image();image.src='data:image/png;base64,'+encoded;await image.decode();const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;const ctx=canvas.getContext('2d');ctx.drawImage(image,0,0);return {left:[...ctx.getImageData(200,300,1,1).data],right:[...ctx.getImageData(500,300,1,1).data]}},png.toString('base64'));
+  expect(colors.left[0]).toBeGreaterThan(200);expect(colors.left[2]).toBeLessThan(50);
+  expect(colors.right[2]).toBeGreaterThan(200);expect(colors.right[0]).toBeLessThan(50);
+});
+
 test('touch-sized image adjustment moves artwork inside a panel without moving the panel',async({page})=>{
   await page.setViewportSize({width:390,height:844});
   await page.goto(studio);
