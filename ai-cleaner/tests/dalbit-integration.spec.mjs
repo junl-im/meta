@@ -9,13 +9,15 @@ test('AI 놀이터에서 내부 달빛운세로 이동하고 모바일 메뉴로
   await expect(page.locator('.workspaceNav')).toBeHidden();
   await expect(page.locator('.homeWorldGrid a[href="../AIPlayground/DalbitUnse/dist/"]')).toBeVisible();
   await page.locator('.homeToolCard[data-open-tool="text"]').click();
+  await page.locator('#studioPicker > summary').click();
   await expect(page.locator('#openDalbit')).toBeVisible();
   await expect(page.locator('#openMastering')).toHaveAttribute('href',/foxbear-mastering-studio/);
   await expect(page.locator('#openSorion')).toHaveAttribute('href',/AI-/);
   await expect(page.locator('#openRanipang')).toHaveAttribute('href',/cardville/);
-  const layout=await page.evaluate(()=>({width:document.documentElement.scrollWidth,viewport:innerWidth,studio:[...document.querySelectorAll('#studioExternalRow>.studioGroup')].map(el=>Math.round(el.getBoundingClientRect().top))}));
+  const layout=await page.evaluate(()=>({width:document.documentElement.scrollWidth,viewport:innerWidth,panel:document.querySelector('.studioPickerPanel').getBoundingClientRect()}));
   expect(layout.width).toBeLessThanOrEqual(layout.viewport);
-  expect(new Set(layout.studio).size).toBe(1);
+  expect(layout.panel.left).toBeGreaterThanOrEqual(0);
+  expect(layout.panel.right).toBeLessThanOrEqual(layout.viewport+1);
   await page.locator('#openDalbit').click();
   expect(page.url()).toContain('/AIPlayground/DalbitUnse/dist/');
   await expect(page.locator('#saju')).toBeAttached();
@@ -140,6 +142,7 @@ test('태블릿·PC 상단 메뉴도 내부 왕복 경로를 제공한다',async
     await page.setViewportSize({width,height:800});
     await page.goto(playground);
     await page.locator('.homeToolCard[data-open-tool="text"]') .click();
+    await page.locator('#studioPicker > summary').click();
     await expect(page.locator('#openDalbit')).toBeVisible();
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await page.locator('#openDalbit').click();
