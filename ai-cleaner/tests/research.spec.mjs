@@ -96,17 +96,20 @@ test('Daily generation distinguishes missing configuration from no generated dat
  }
 });
 
-test('mobile header fits four tools in one row and keeps both studio groups visible',async({page})=>{
+test('four tool tabs and the illustrated service picker fit every header width',async({page})=>{
  await ready(page,false);
  for(const [id,url] of [['#openMastering','https://junl-im.github.io/foxbear-mastering-studio/'],['#openSorion','https://junl-im.github.io/AI-/'],['#openRanipang','https://cardville.web.app/']]){await expect(page.locator(id)).toHaveAttribute('href',url);await expect(page.locator(id)).toHaveAttribute('target','_blank');}
+ for(const [id,href] of [['#openDalbit','../AIPlayground/DalbitUnse/dist/'],['#openMaeum','../AIPlayground/MaeumDogam/'],['#openShelf','../NaverNovelShelf/site/'],['#openWebtoon','../AIPlayground/WebtoonStudio/'],['#openMusic','../AIPlayground/GomFoxMusic/']])await expect(page.locator(id)).toHaveAttribute('href',href);
  for(const width of [320,360,390,600,768,1024,1280]){
   await page.setViewportSize({width,height:900});
-  for(const id of ['#openMastering','#openSorion','#openRanipang'])await expect(page.locator(id)).toBeVisible();
-  const layout=await page.evaluate(()=>({tabs:[...document.querySelectorAll('.toolnav .studioCard')].map(x=>x.getBoundingClientRect()),audio:document.querySelector('#audioStudioLabel').getBoundingClientRect(),game:document.querySelector('#gameStudioLabel').getBoundingClientRect(),scrollWidth:document.documentElement.scrollWidth,viewport:innerWidth,header:document.querySelector('.top').getBoundingClientRect().height}));
+  const summary=page.locator('#studioPicker > summary');await expect(summary).toBeVisible();await summary.click();
+  for(const id of ['#openDalbit','#openMaeum','#openShelf','#openWebtoon','#openMusic','#openMastering','#openSorion','#openRanipang'])await expect(page.locator(id)).toBeVisible();
+  const layout=await page.evaluate(()=>({tabs:[...document.querySelectorAll('.toolnav .studioCard')].map(x=>x.getBoundingClientRect()),panel:document.querySelector('.studioPickerPanel').getBoundingClientRect(),scrollWidth:document.documentElement.scrollWidth,viewport:innerWidth,header:document.querySelector('.top').getBoundingClientRect().height}));
   expect(layout.scrollWidth).toBeLessThanOrEqual(layout.viewport+1);
   expect(Math.max(...layout.tabs.map(x=>x.top))-Math.min(...layout.tabs.map(x=>x.top))).toBeLessThan(2);
-  expect(Math.abs(layout.audio.top-layout.game.top)).toBeLessThan(2);
-  if(width<=600){expect(layout.header).toBeLessThan(190);expect(await page.locator('#input').evaluate(el=>el.getBoundingClientRect().height)).toBeLessThanOrEqual(280);}
+  expect(layout.panel.left).toBeGreaterThanOrEqual(0);expect(layout.panel.right).toBeLessThanOrEqual(width+1);
+  if(width<=600)expect(layout.header).toBeLessThan(170);
+  await page.keyboard.press('Escape');await expect(page.locator('#studioPicker')).not.toHaveAttribute('open','');
  }
 });
 

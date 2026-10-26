@@ -16,11 +16,12 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; frame-src https://open.spotify.com; connect-src 'self' https://r.jina.ai; worker-src 'self' blob:; font-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1365">
+<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1366">
 <style id="bootCritical">html:not(.boot-ready) body{visibility:hidden}html{background:#fff8f0}html.app-booting{overflow-anchor:none}html.app-booting body{cursor:progress}html.app-booting body *{cursor:progress!important}</style>
 <script src="js/hosting-redirect.js"></script>
 <script src="js/boot.js" defer></script>
 <script src="js/home-music-dock.js" defer></script>
+<script src="js/studio-picker.js" defer></script>
 </head>
 <body>
 <div class="wrap">
@@ -42,25 +43,26 @@
       <button class="studioCard" id="toolTabReach" type="button" role="tab" aria-label="GomFox Reach" aria-selected="false" aria-controls="reachTool" tabindex="-1" data-tool="reach" title="GomFox Reach · 자료 수집 · 출처 비교"><b>Reach</b></button>
     </div>
   </div>
-  <div class="studioExternalRow" id="studioExternalRow">
-    <nav class="studioGroup" aria-labelledby="audioStudioLabel">
-      <div class="studioGroupLabel" id="audioStudioLabel">오디오 스튜디오</div>
-      <div class="audioStudios">
-        <a class="studioCard" id="openMastering" href="https://junl-im.github.io/foxbear-mastering-studio/" target="_blank" rel="noopener noreferrer" aria-label="마스터링 · 새창 열기" title="음질 정리 · 마스터링"><b>마스터링 ↗</b></a>
-        <a class="studioCard" id="openSorion" href="https://junl-im.github.io/AI-/" target="_blank" rel="noopener noreferrer" aria-label="소리온 · 새창 열기" title="대본 · 음성 제작"><b>소리온 ↗</b></a>
-      </div>
+  <details class="studioPicker" id="studioPicker">
+    <summary aria-label="다른 놀이터 선택"><span class="studioPickerSpark" aria-hidden="true">✦</span><span>다른 놀이터</span><small>8</small><i aria-hidden="true"></i></summary>
+    <nav class="studioPickerPanel" aria-label="다른 놀이터 서비스">
+      <div class="studioPickerHeading"><strong>이야기가 이어지는 놀이터</strong><span>원하는 곳으로 이동해요</span></div>
+      <div class="studioPickerGroup"><h2>이야기와 창작</h2><div class="studioPickerLinks">
+        <a id="openDalbit" href="../AIPlayground/DalbitUnse/dist/"><img src="assets/home-icon-dalbit.webp" alt="" width="30" height="30"><span>달빛운세<small>운세 · 사주 · 타로</small></span></a>
+        <a id="openMaeum" href="../AIPlayground/MaeumDogam/"><img src="assets/home-icon-maeum.webp" alt="" width="30" height="30"><span>마음도감<small>마음의 이야기</small></span></a>
+        <a id="openShelf" href="../NaverNovelShelf/site/"><img src="assets/home-icon-shelf.webp" alt="" width="30" height="30"><span>곰같은여우의 서재<small>소설 골라 읽기</small></span></a>
+        <a id="openWebtoon" href="../AIPlayground/WebtoonStudio/"><img src="assets/home-icon-webtoon.png" alt="" width="30" height="30"><span>웹툰 스튜디오<small>컷과 말풍선 편집</small></span></a>
+      </div></div>
+      <div class="studioPickerGroup"><h2>소리와 음악</h2><div class="studioPickerLinks">
+        <a id="openSorion" href="https://junl-im.github.io/AI-/" target="_blank" rel="noopener noreferrer"><img src="assets/home-icon-sorion.webp" alt="" width="30" height="30"><span>소리온<small>대본과 음성 제작 ↗</small></span></a>
+        <a id="openMastering" href="https://junl-im.github.io/foxbear-mastering-studio/" target="_blank" rel="noopener noreferrer"><img src="assets/home-icon-mastering.webp" alt="" width="30" height="30"><span>마스터링<small>소리 다듬기 ↗</small></span></a>
+        <a id="openMusic" href="../AIPlayground/GomFoxMusic/"><img src="assets/home-icon-music.webp" alt="" width="30" height="30"><span>곰같은여우 뮤직<small>내 노래 듣기</small></span></a>
+      </div></div>
+      <div class="studioPickerGroup"><h2>게임</h2><div class="studioPickerLinks">
+        <a id="openRanipang" href="https://cardville.web.app/" target="_blank" rel="noopener noreferrer"><img src="assets/home-icon-ranipang.webp" alt="" width="30" height="30"><span>라니팡<small>카드 게임 ↗</small></span></a>
+      </div></div>
     </nav>
-    <nav class="studioGroup" aria-labelledby="gameStudioLabel">
-      <div class="studioGroupLabel" id="gameStudioLabel">게임 스튜디오</div>
-      <div class="audioStudios">
-        <a class="studioCard" id="openRanipang" href="https://cardville.web.app/" target="_blank" rel="noopener noreferrer" aria-label="라니팡 · 새창 열기" title="라니팡 게임 열기"><b>라니팡 ↗</b></a>
-      </div>
-    </nav>
-    <nav class="studioGroup moonStudioGroup" aria-labelledby="moonStudioLabel">
-      <div class="studioGroupLabel" id="moonStudioLabel">운세 스튜디오</div>
-      <div class="audioStudios"><a class="studioCard" id="openDalbit" href="../AIPlayground/DalbitUnse/dist/" title="달빛운세 · 띠운세, 사주, 타로, 궁합, 신년운세"><b>달빛운세</b></a></div>
-    </nav>
-  </div>
+  </details>
 </section>
 </header>
 

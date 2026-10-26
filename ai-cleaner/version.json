@@ -1,7 +1,7 @@
 {
-  "version": "1.36.5",
-  "assetVersion": "1365",
+  "version": "1.36.6",
+  "assetVersion": "1366",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Match Webtoon Studio panel shape preview and PNG output, restore 690px defaults, and expose image flip."
+  "notes": "Group additional playground services in a compact picker and right-align the desktop home music dock."
 }

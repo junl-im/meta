@@ -46,6 +46,18 @@ test('illustrated home opens first and cards, brand and browser back connect the
   await page.locator('#homeButton').click();
   await expect(page.locator('#homeTool')).toBeVisible();
 });
+test('desktop music dock is right aligned and clear of the hero illustration',async({page})=>{
+  for(const width of [1024,1280,1440]){
+    await page.setViewportSize({width,height:900});await gotoReady(page,{home:true});
+    const boxes=await page.evaluate(()=>({hero:document.querySelector('.homeHero').getBoundingClientRect(),dock:document.querySelector('.homeMusicDock').getBoundingClientRect(),scrollWidth:document.documentElement.scrollWidth}));
+    expect(boxes.scrollWidth).toBeLessThanOrEqual(width);
+    expect(boxes.dock.width).toBeLessThanOrEqual(boxes.hero.width*.55);
+    expect(boxes.dock.right).toBeLessThanOrEqual(boxes.hero.right+1);
+    expect(boxes.hero.right-boxes.dock.right).toBeLessThanOrEqual(2);
+    expect(boxes.dock.top).toBeGreaterThanOrEqual(boxes.hero.bottom+7);
+  }
+});
+
 test('home music dock loads only after a gesture and changes to a different owned track', async ({ page }) => {
   await page.setViewportSize({width:320,height:568});
   await gotoReady(page,{home:true});

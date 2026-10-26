@@ -1267,3 +1267,26 @@ body{background:radial-gradient(circle at 8% 7%,#f8dbc6b8 0,transparent 28%),rad
 .homeMusicPlayer{grid-column:1/-1;min-width:0}.homeMusicPlayer[hidden]{display:none}.homeMusicPlayer iframe{display:block;width:100%;max-width:560px;height:152px;border:0;border-radius:12px;background:#f3e8dc}.homeMusicPlayerFoot{display:flex;justify-content:space-between;align-items:center;gap:8px;max-width:560px;padding-top:7px;color:#806a5a;font-size:10.5px}.homeMusicPlayerFoot button{flex-shrink:0;white-space:nowrap;border:0;background:none;color:#95532b;font:inherit;font-weight:850;text-decoration:underline;cursor:pointer}
 @media(max-width:620px){.homeMusicDock{gap:6px;margin:-2px 12px 0;padding:8px 10px;border-radius:0 0 15px 15px}.homeMusicDockIntro{gap:6px}.homeMusicDockIntro strong{font-size:11px}.homeMusicDockIntro small{font-size:9.5px}.homeMusicNote{flex-basis:27px;width:27px;height:27px;font-size:15px}.homeMusicDockActions{gap:6px}.homeMusicDockActions button{min-height:31px;padding:2px 7px 2px 3px;font-size:10px}.homeMusicDockActions button img{width:25px;height:25px}.homeMusicDockActions a{font-size:10px}.homeMusicPlayer{padding-top:8px}.homeMusicPlayerFoot{font-size:10px}}
 @media(max-width:350px){.homeMusicDock{margin-inline:9px;padding-inline:7px}.homeMusicDockIntro strong{font-size:10.5px}.homeMusicDockActions{gap:4px}.homeMusicDockActions button{gap:3px;padding-right:5px}.homeMusicDockActions button img{width:23px;height:23px}.homeMusicDockActions a{font-size:9.5px}}
+
+
+/* Compact service picker shared by all four workspaces. */
+.workspaceNav{position:relative;gap:6px}
+.studioPicker{position:relative;justify-self:end;z-index:20}
+.studioPicker>summary{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:32px;padding:5px 11px;border:1px solid #e3c7aa;border-radius:11px;background:linear-gradient(145deg,#fffdf9,#faeddf);color:#68432f;box-shadow:0 4px 12px #6d442217;list-style:none;font-size:11px;font-weight:850;white-space:nowrap;cursor:pointer}
+.studioPicker>summary::-webkit-details-marker{display:none}
+.studioPicker>summary:hover,.studioPicker[open]>summary{border-color:#cd8b58;background:#fff4e8;color:#9a4d18}
+.studioPicker>summary:focus-visible,.studioPickerPanel a:focus-visible{outline:3px solid #dc792e;outline-offset:2px}
+.studioPickerSpark{color:#c56a29;font-size:14px;line-height:1}
+.studioPicker>summary small{display:grid;place-items:center;min-width:17px;height:17px;padding:0 3px;border-radius:6px;background:#f2dfcb;color:#a25422;font-size:10px}
+.studioPicker>summary i{width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-2px) rotate(45deg);transition:transform .15s}
+.studioPicker[open]>summary i{transform:translateY(2px) rotate(225deg)}
+.studioPickerPanel{position:absolute;top:calc(100% + 8px);right:0;width:min(370px,calc(100vw - 30px));max-height:min(70dvh,580px);overflow:auto;padding:14px;border:1px solid #e8d3bf;border-radius:19px;background:#fffdf9;box-shadow:0 18px 45px #5e3e2a30,0 1px 0 #fff inset;scrollbar-width:thin;scrollbar-color:#d4b69a transparent}
+.studioPickerHeading{display:flex;flex-direction:column;gap:2px;padding:2px 3px 11px;border-bottom:1px solid #f0e2d4}.studioPickerHeading strong{color:#523321;font-size:14px}.studioPickerHeading span{color:#947a66;font-size:10px}
+.studioPickerGroup{padding-top:12px}.studioPickerGroup h2{margin:0 0 7px 3px;color:#9b592d;font-size:10px;font-weight:900;letter-spacing:.025em}.studioPickerLinks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.studioPickerLinks a{display:flex;align-items:center;gap:6px;min-width:0;min-height:53px;padding:7px;border:1px solid #f0e2d5;border-radius:11px;background:#fffbf5;color:#503727;text-decoration:none;transition:background .15s,border-color .15s}
+.studioPickerLinks a:hover{background:#fff0e1;border-color:#dca26c}.studioPickerLinks img{flex:none;width:30px;height:30px;object-fit:contain}.studioPickerLinks a>span{display:grid;gap:2px;min-width:0;font-size:10.5px;font-weight:850;line-height:1.25;word-break:keep-all}.studioPickerLinks small{color:#8f7664;font-size:9.5px;font-weight:600;line-height:1.25}
+@media(max-width:600px){.studioPicker>summary{min-height:31px;font-size:10.5px}.studioPickerPanel{right:0;max-height:min(66dvh,510px)}}
+
+/* Keep the desktop music player close to the illustration without covering it. */
+@media(min-width:621px){.homeMusicDock{width:min(50%,620px);margin:12px 0 0 auto;border:1px solid #ead5bd;border-radius:17px;padding:9px 13px;background:linear-gradient(135deg,#fffaf3ee,#fff1e7f5);box-shadow:0 9px 25px #79533816}.homeMusicDockIntro strong{font-size:12px}.homeMusicDockIntro small{font-size:10.5px}}
+@media(max-width:620px){.homeMusicDock{margin:8px 0 0;border-top:1px solid #eddcc9;border-radius:15px}}
