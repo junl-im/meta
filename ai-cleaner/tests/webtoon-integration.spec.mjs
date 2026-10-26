@@ -17,6 +17,22 @@ function pngPagesFromZip(bytes){
 }
 const firstPngFromZip=bytes=>pngPagesFromZip(bytes).values().next().value;
 
+test('mobile image import creates a panel and the library reuses it',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(studio);
+  const icon=fs.readFileSync(new URL('../assets/music-play.png',import.meta.url));
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.locator('input[type=file][accept="image/*"]').setInputFiles({name:'first.png',mimeType:'image/png',buffer:icon});
+  const panel=page.locator('.web-panel');
+  await expect(panel).toHaveCount(1);
+  await expect(panel.locator('img')).toBeVisible();
+  await expect(page.locator('.web-app')).toHaveAttribute('data-mobile-tab','canvas');
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.locator('.web-assets button').first().click();
+  await expect(panel).toHaveCount(1);
+  await expect(panel.locator('img')).toBeVisible();
+});
+
 test('mobile first-use guide starts a panel and a typed bubble can still be dragged',async({page})=>{
   await page.setViewportSize({width:390,height:844});
   await page.goto(studio);
