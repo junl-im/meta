@@ -93,3 +93,13 @@
 .web-context-menu button{text-align:left;border:0;background:transparent;padding:9px 12px}
 .web-context-menu button:hover{background:#dff2f3}
 @media(max-width:760px){.web-body>.web-side{height:100%;min-height:0}.web-side{padding-bottom:18px}}
+.web-resize-handle{position:absolute;z-index:4;width:20px;height:20px;padding:0;border:2px solid #fff;border-radius:7px;background:#168e9a;box-shadow:0 2px 8px #17445177;touch-action:none;transform:translate(-50%,-50%)}
+.web-resize-handle:hover,.web-resize-handle:focus-visible{background:#0b7180;transform:translate(-50%,-50%) scale(1.12)}
+.web-resize-nw{left:0;top:0;cursor:nwse-resize}.web-resize-n{left:50%;top:0;cursor:ns-resize}.web-resize-ne{left:100%;top:0;cursor:nesw-resize}.web-resize-e{left:100%;top:50%;cursor:ew-resize}
+.web-resize-se{left:100%;top:100%;cursor:nwse-resize}.web-resize-s{left:50%;top:100%;cursor:ns-resize}.web-resize-sw{left:0;top:100%;cursor:nesw-resize}.web-resize-w{left:0;top:50%;cursor:ew-resize}
+@media(max-width:760px){.web-resize-handle{width:24px;height:24px}}
+.web-shortcut-help{position:relative;font-size:11px;color:#41636a}
+.web-shortcut-help summary{padding:6px 9px;border:1px solid #cbd9dd;border-radius:9px;background:#fff;cursor:pointer;font-weight:700;list-style:none;white-space:nowrap}
+.web-shortcut-help summary::-webkit-details-marker{display:none}
+.web-shortcut-help>div{position:absolute;z-index:15;top:calc(100% + 5px);right:0;display:grid;gap:5px;min-width:235px;padding:12px;border:1px solid #b9d4d8;border-radius:12px;background:#fff;box-shadow:0 12px 26px #1b465240;line-height:1.4}
+@media(max-width:760px){.web-shortcut-help{display:none}}

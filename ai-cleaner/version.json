@@ -1,7 +1,7 @@
 {
-  "version": "1.36.7",
-  "assetVersion": "1367",
+  "version": "1.36.8",
+  "assetVersion": "1368",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Improve webtoon bubble editing, context actions, sidebar scrolling, and draft reset."
+  "notes": "Add illustrated menu icons and webtoon canvas resize handles and keyboard controls."
 }

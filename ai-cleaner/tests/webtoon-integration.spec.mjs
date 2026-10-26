@@ -17,6 +17,49 @@ function pngPagesFromZip(bytes){
 }
 const firstPngFromZip=bytes=>pngPagesFromZip(bytes).values().next().value;
 
+test('canvas resize handles and editing shortcuts work without hijacking text input',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  const panel=page.locator('.web-panel');
+  const before=await panel.boundingBox();
+  const handle=panel.getByRole('button',{name:'크기 조절 se'});
+  const point=await handle.boundingBox();
+  await page.mouse.move(point.x+point.width/2,point.y+point.height/2);
+  await page.mouse.down();await page.mouse.move(point.x+point.width/2+60,point.y+point.height/2+40,{steps:5});await page.mouse.up();
+  const after=await panel.boundingBox();
+  expect(after.width).toBeGreaterThan(before.width+30);
+  expect(after.height).toBeGreaterThan(before.height+20);
+  await page.locator('.web-toolbar').click();
+  await page.keyboard.press('Control+d');
+  await expect(page.locator('.web-panel')).toHaveCount(2);
+  await page.keyboard.press('Delete');
+  await expect(page.locator('.web-panel')).toHaveCount(1);
+  await page.locator('.web-panel').click({button:'right'});
+  await expect(page.getByRole('menu')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('menu')).toHaveCount(0);
+  await page.locator('.web-canvas').click({button:'right',position:{x:5,y:5}});
+  await expect(page.getByRole('menu')).toHaveCount(0);
+});
+
+test('bubble size can be changed with a touch-sized handle on mobile',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'◯ 말풍선'}).click();
+  const bubble=page.locator('.web-bubble');
+  const before=await bubble.boundingBox();
+  const handle=bubble.getByRole('button',{name:'크기 조절 se'});
+  const point=await handle.boundingBox();
+  await page.mouse.move(point.x+point.width/2,point.y+point.height/2);
+  await page.mouse.down();await page.mouse.move(point.x+point.width/2+50,point.y+point.height/2+30,{steps:4});await page.mouse.up();
+  const after=await bubble.boundingBox();
+  expect(after.width).toBeGreaterThan(before.width+20);
+  expect(after.height).toBeGreaterThan(before.height+10);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+});
+
 test('bubble variants, inline text, context actions and sidebar scroll work',async({page})=>{
   await page.setViewportSize({width:1280,height:650});
   await page.goto(studio);
@@ -24,7 +67,7 @@ test('bubble variants, inline text, context actions and sidebar scroll work',asy
   await expect(page.locator('.web-bubble')).toHaveCount(1);
   await page.getByRole('textbox',{name:'말풍선에 바로 글쓰기'}).fill('캔버스에서 바로 쓴 대사');
   await expect(page.locator('.web-bubble')).toContainText('캔버스에서 바로 쓴 대사');
-  await page.locator('.web-bubble').click({button:'right'});
+  await page.locator('.web-bubble').click({button:'right',position:{x:5,y:5}});
   await expect(page.getByRole('menu')).toBeVisible();
   await page.getByRole('menuitem',{name:'복제'}).click();
   await expect(page.locator('.web-bubble')).toHaveCount(2);

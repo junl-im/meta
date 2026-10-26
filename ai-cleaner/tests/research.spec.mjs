@@ -113,6 +113,23 @@ test('four tool tabs and the illustrated service picker fit every header width',
  }
 });
 
+test('tool tabs reuse their home illustrations and the more worlds icon fits mobile',async({page})=>{
+  for(const width of [320,360,390,1280]){
+    await page.setViewportSize({width,height:740});
+    await ready(page,false);
+    for(const [id,file] of [['toolTabText','home-icon-text.webp'],['toolTabImage','home-icon-image.webp'],['toolTabWriting','home-icon-writing.webp'],['toolTabReach','home-icon-reach.webp']]){
+      const icon=page.locator(`#${id} .studioToolIcon`);
+      await expect(icon).toHaveAttribute('src',`assets/${file}`);
+      expect(await icon.evaluate(el=>el.naturalWidth)).toBeGreaterThan(0);
+    }
+    const more=page.locator('#studioPicker > summary');
+    await expect(more).toContainText('다른 놀이터 더보기');
+    await expect(more.locator('img')).toHaveJSProperty('naturalWidth',96);
+    const bounds=await page.evaluate(()=>({scrollWidth:document.documentElement.scrollWidth,width:innerWidth}));
+    expect(bounds.scrollWidth).toBeLessThanOrEqual(bounds.width);
+  }
+});
+
 test('mobile long descriptions show two lines and expand without hiding desktop text',async({page})=>{
  await page.setViewportSize({width:390,height:844});await ready(page,false);
  for(const tab of ['#toolTabText','#toolTabImage','#toolTabWriting','#toolTabReach']){
