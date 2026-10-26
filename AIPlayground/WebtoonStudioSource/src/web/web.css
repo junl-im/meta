@@ -98,6 +98,10 @@
 .web-menu-heading{padding:6px 10px 4px;color:#567780;font-size:11px;font-weight:800}
 .web-menu-bubbles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px;padding:3px 0 7px}
 .web-menu-bubbles button{font-size:11px;padding:7px 6px;text-align:center;border:1px solid #d5e5e7;border-radius:7px;background:#f0f8f8}
+.web-selection-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:8px 0 12px}
+.web-selection-actions button{min-height:38px;padding:7px 5px;font-size:11px;font-weight:700}
+.web-selection-actions button:disabled,.web-actions button:disabled{opacity:.45;cursor:not-allowed}
+.web-actions button:last-child:nth-child(odd){grid-column:1/-1;background:#e8f5f3;border-color:#a8ced0}
 .web-context-menu button{text-align:left;border:0;background:transparent;padding:9px 12px}
 .web-context-menu button:hover{background:#dff2f3}
 @media(max-width:760px){.web-body>.web-side{height:100%;min-height:0}.web-side{padding-bottom:18px}}
