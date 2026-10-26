@@ -1,4 +1,4 @@
-/* Public Naver Web Novel work metadata, verified 2026-10-25.
+/* Public Naver Web Novel work metadata, verified 2026-10-26.
    Only titles, author pen names, official cover thumbnail URLs and links.
    No story text or reader data is reproduced. */
 window.NOVEL_CATALOG = [
@@ -12,6 +12,7 @@ window.NOVEL_CATALOG = [
   ["헌터들이 집착하는 공간 설계자가 되었다","[곰같은여우]","1244202","best","https://novel-phinf.pstatic.net/20260908_117/novel_1788844952226cLO2T_PNG/2.png?type=f280_224_2","판타지"],
   ["격수들이 집착하는 힐러가 되었다","[곰같은여우]","1244489","best","https://novel-phinf.pstatic.net/20260915_67/novel_1789450514766ltWaR_JPEG/111.jpg?type=f280_224_2","판타지"],
   ["《천하제일 호랑이》","[곰같은여우]","1249473","challenge","https://novel-phinf.pstatic.net/20221231_129/novel_1672413772682DpyJj_PNG/moohyup_320_2.png?type=f280_224_2","무협"],
+  ["《나의 SP파트너》","닥터X","1250566","challenge","https://novel-phinf.pstatic.net/20221231_194/novel_1672413226738B6sKY_PNG/romance_320_16.png?type=f280_224_2","로맨스"],
   ["《악녀는 고용직입니다》","닥터X","1248545","challenge","https://novel-phinf.pstatic.net/20221231_150/novel_16724131363820elHi_PNG/romance_320_4.png?type=f280_224_2","로맨스"],
   ["《잿빛 복원사》","[곰같은여우]","1247798","challenge","https://novel-phinf.pstatic.net/20221231_3/novel_1672413559639liBqM_PNG/fantasy_320_7.png?type=f280_224_2","판타지"],
   ["사무라이 코코","[곰같은여우]","1247361","challenge","https://novel-phinf.pstatic.net/20221231_166/novel_1672413105791DV8AY_PNG/romance_320_2.png?type=f280_224_2","로맨스"],

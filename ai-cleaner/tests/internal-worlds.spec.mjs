@@ -30,6 +30,7 @@ test('shelf hero illustration loads and Doctor X stays in the verified catalog',
   expect(asset.status()).toBe(200);
   expect((await asset.body()).length).toBeGreaterThan(1000);
   const catalog=await page.evaluate(()=>window.NOVEL_CATALOG);
-  expect(catalog).toHaveLength(27);
-  expect(catalog.filter(work=>work.author==='닥터X').map(work=>work.id).sort()).toEqual(['1245900','1248545']);
+  expect(catalog).toHaveLength(28);
+  expect(catalog.filter(work=>work.author==='닥터X').map(work=>work.id).sort()).toEqual(['1245900','1248545','1250566']);
+  await expect(page.locator('.novel-card[data-open-novel="1250566"]')).toBeVisible();
 });
