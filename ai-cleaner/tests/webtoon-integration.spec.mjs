@@ -339,6 +339,26 @@ test('copying an illustrated panel preserves its image and undo history',async({
   await expect(page.locator('.web-panel img')).toHaveCount(1);
 });
 
+test('mobile rotation handle turns a bubble and undo restores its angle',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'◯ 말풍선'}).click();
+  const bubble=page.locator('.web-bubble'),handle=bubble.getByRole('button',{name:'회전 조절'});
+  const before=await handle.boundingBox();
+  await page.mouse.move(before.x+before.width/2,before.y+before.height/2);
+  await page.mouse.down();
+  await page.mouse.move(before.x+before.width/2+85,before.y+before.height/2+70,{steps:6});
+  await page.mouse.up();
+  await expect(bubble).not.toHaveCSS('transform','matrix(1, 0, 0, 1, 0, 0)');
+  await page.getByRole('button',{name:/레이어·속성/}).click();
+  const angle=Number(await page.getByLabel('회전 각도').inputValue());
+  expect(Math.abs(angle)).toBeGreaterThan(5);
+  await page.locator('.web-right h2').filter({hasText:'선택 요소'}).click();
+  await page.keyboard.press('Control+z');
+  await expect(page.getByLabel('회전 각도')).toHaveValue('0');
+});
+
 test('all ten bubble kinds draw distinct outlines in the editor',async({page})=>{
   await page.setViewportSize({width:1280,height:800});
   await page.goto(studio);
