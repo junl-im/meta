@@ -1,11 +1,13 @@
-# WEBTOON STUDIO 웹 소스 보관
+# WEBTOON STUDIO 웹 소스
 
-WEBTOON STUDIO v0.6.105 웹판의 변경 파일을 보관합니다. 배포 파일은 `../WebtoonStudio/`에 있습니다.
+현재 웹 편집기(v0.6.105)의 `src/web/`와 재빌드에 필요한 공용 코어를 보관합니다. 공용 코어는 로컬의 PC판 통합 소스 `WEBTOON_STUDIO_v0.6.99_INTEGRATED.zip`에서 복구했습니다. 웹판 코드가 이 코어와 TypeScript 검사 및 Vite 빌드를 통과했습니다.
 
-이 폴더만으로 재빌드할 수는 없습니다. 웹판은 PC판 원본의 `src/core/` 모듈, React, Vite, fflate에 의존합니다. 전체 PC·웹 통합 소스 ZIP에서 이 파일들을 같은 상대 경로로 사용하세요.
+```
+npm ci --ignore-scripts
+npm run typecheck
+npm run build:web
+```
 
-현재 배포본의 웹 편집 기능은 이 폴더의 `src/web/`와 함께 보관합니다. `scripts/upgrade-deployed-web.mjs`와 `scripts/fix-bubble-contour.mjs`는 각각 해당 변경을 **이전 버전 스냅샷에 한 번 적용**하는 재현용 스크립트입니다. 현재 파일은 이미 적용된 상태이므로 다시 실행하지 마세요. 전체 원본을 확보한 뒤에는 이 변경을 원본 빌드에 반영하고 Vite 산출물로 교체해야 합니다.
+출력은 `dist-web/`에 생성됩니다. 현재 운영 파일은 `../WebtoonStudio/`의 별도 검증 산출물입니다. PC판 코어가 웹판보다 이전 버전이므로, 새 빌드 결과를 운영 경로에 자동 복사하지 않습니다. 교체 전 `.wtoon` 파일 왕복, 말풍선·이미지·PNG 출력, 모바일 조작을 브라우저에서 비교해야 합니다.
 
-원본 저장소에서 `npm run typecheck`, `npm run test:web`, `npm run build:web`을 실행합니다. 웹 검사에는 브라우저에서 저장한 `.wtoon`을 PC판 디코더로 다시 여는 항목과 PNG 초안 ZIP 생성 항목이 있습니다.
-
-웹판은 AI를 호출하지 않고 브라우저 저장소에서 원고를 관리합니다. 최종 연재용 출력은 아직 PC판에서 검증해야 합니다.
+`src/web/`의 파일 저장과 PNG 출력은 브라우저에서 실행합니다. `scripts/upgrade-deployed-web.mjs`와 `scripts/fix-bubble-contour.mjs`는 이전 스냅샷에 한 번만 적용한 패치이며 현재 소스에 다시 실행하지 않습니다. PC 전용 AI 엔진과 최종 연재용 출력은 이 웹 빌드에 포함되지 않습니다.

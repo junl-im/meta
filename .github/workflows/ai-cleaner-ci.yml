@@ -90,6 +90,11 @@ jobs:
           npm ci --prefix AIPlayground/DalbitUnse --no-audit --no-fund
           npm run check --prefix AIPlayground/DalbitUnse
           npm run build --prefix AIPlayground/DalbitUnse
+      - name: Rebuild Webtoon Studio web source
+        run: |
+          npm ci --prefix AIPlayground/WebtoonStudioSource --ignore-scripts --no-audit --no-fund
+          npm run typecheck --prefix AIPlayground/WebtoonStudioSource
+          npm run build:web --prefix AIPlayground/WebtoonStudioSource
       - name: Modular core unit checks
         run: node ai-cleaner/tests/module-check.mjs
       - name: Static checks
