@@ -1,6 +1,6 @@
 (() => {
   "use strict";
-  const AUTHORS = ["[곰같은여우]","[여우같은곰]","고양이와사비","[ZERO]"];
+  const AUTHORS = ["[곰같은여우]","[여우같은곰]","고양이와사비","[ZERO]","닥터X"];
   const LAST_KEY = "gomfox_recent_naver_novel_v2";
   const escapeHTML = value => String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const byId = id => document.getElementById(id);
