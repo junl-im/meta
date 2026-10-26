@@ -17,6 +17,22 @@ function pngPagesFromZip(bytes){
 }
 const firstPngFromZip=bytes=>pngPagesFromZip(bytes).values().next().value;
 
+test('canvas alignment controls center and edge-place a panel without moving a locked one',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.getByRole('button',{name:/레이어·속성/}).click();
+  await page.getByRole('button',{name:'가로 가운데'}).click();
+  await page.getByRole('button',{name:'위쪽'}).click();
+  await expect(page.getByLabel('왼쪽', {exact:true})).toHaveValue('55');
+  await expect(page.getByLabel('위쪽',{exact:true})).toHaveValue('0');
+  await page.getByRole('button',{name:'오른쪽',exact:true}).click();
+  await expect(page.getByLabel('왼쪽',{exact:true})).toHaveValue('110');
+  await page.locator('.web-layers .active button[title="잠금 전환"]').click();
+  await expect(page.getByRole('button',{name:'왼쪽',exact:true})).toBeDisabled();
+});
+
 test('web editor reorders layers and keeps rotation, image filter and text alignment through save',async({page})=>{
   await page.setViewportSize({width:1280,height:800});
   await page.goto(studio);

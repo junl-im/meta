@@ -1,7 +1,7 @@
 {
-  "version": "1.37.0",
-  "assetVersion": "1370",
+  "version": "1.37.1",
+  "assetVersion": "1371",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Add webtoon layer ordering, rotation, image filters, and text alignment with PNG parity."
+  "notes": "Add webtoon canvas alignment controls for selected unlocked elements."
 }

@@ -103,3 +103,6 @@
 .web-shortcut-help summary::-webkit-details-marker{display:none}
 .web-shortcut-help>div{position:absolute;z-index:15;top:calc(100% + 5px);right:0;display:grid;gap:5px;min-width:235px;padding:12px;border:1px solid #b9d4d8;border-radius:12px;background:#fff;box-shadow:0 12px 26px #1b465240;line-height:1.4}
 @media(max-width:760px){.web-shortcut-help{display:none}}
+.web-align-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:12px 0}
+.web-align-controls span{grid-column:1/-1;color:#55717c;font-size:12px;font-weight:700}
+.web-align-controls button{min-width:0;padding:6px 2px;font-size:11px}
