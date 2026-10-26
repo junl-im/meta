@@ -33,6 +33,7 @@ const assetFiles = [
   'home-icon-shelf.webp',
   'home-icon-music.webp',
   'home-icon-webtoon.png',
+  'studio-picker-worlds.png',
   'icon-v66-192.png',
   'icon-v66-512.png'
 ];
