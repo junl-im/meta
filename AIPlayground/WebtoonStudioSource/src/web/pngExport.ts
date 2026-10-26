@@ -1,5 +1,6 @@
 import {zipSync} from 'fflate'
 import type {EditorElement,ProjectV4} from '@core/types'
+import {imageFilterCss} from './imageFilter'
 
 const loadImage=(src:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(Error('이미지를 읽지 못했습니다.'));image.src=src})
 const canvasBlob=(canvas:HTMLCanvasElement)=>new Promise<Uint8Array>((resolve,reject)=>canvas.toBlob(async blob=>blob?resolve(new Uint8Array(await blob.arrayBuffer())):reject(Error('PNG를 만들지 못했습니다.')),'image/png'))
@@ -28,14 +29,14 @@ function drawElement(ctx:CanvasRenderingContext2D,e:EditorElement,images:Map<str
   if(e.type==='panel'){
     ctx.fillStyle=e.fill||'#fff';panelPath(ctx,e);ctx.fill()
     const image=e.image?images.get(e.image):null
-    if(image){ctx.save();panelPath(ctx,e);ctx.clip();const fit=e.imageFit==='contain'?Math.min(e.w/image.width,e.h/image.height):Math.max(e.w/image.width,e.h/image.height),zoom=e.imageTransform?.zoom||1,w=image.width*fit*zoom,h=image.height*fit*zoom;ctx.translate(e.w/2+(e.imageTransform?.offsetX||0),e.h/2+(e.imageTransform?.offsetY||0));if(e.imageTransform?.flipX)ctx.scale(-1,1);ctx.drawImage(image,-w/2,-h/2,w,h);ctx.restore()}
+    if(image){ctx.save();panelPath(ctx,e);ctx.clip();const fit=e.imageFit==='contain'?Math.min(e.w/image.width,e.h/image.height):Math.max(e.w/image.width,e.h/image.height),zoom=e.imageTransform?.zoom||1,w=image.width*fit*zoom,h=image.height*fit*zoom;ctx.translate(e.w/2+(e.imageTransform?.offsetX||0),e.h/2+(e.imageTransform?.offsetY||0));if(e.imageTransform?.flipX)ctx.scale(-1,1);ctx.filter=imageFilterCss(e.imageFilter);ctx.drawImage(image,-w/2,-h/2,w,h);ctx.restore()}
     ctx.strokeStyle=e.stroke||'#262b36';ctx.lineWidth=e.strokeWidth??3;panelPath(ctx,e);ctx.stroke()
   }else if(e.type==='bubble'){
     ctx.fillStyle=e.fill||'#fff';ctx.strokeStyle=e.stroke||'#262b36';ctx.lineWidth=e.strokeWidth??3
 
     drawUnifiedBubblePath(ctx,e);ctx.fill();ctx.stroke()
-    ctx.fillStyle=e.color||'#1a2331';ctx.font=`${e.fontWeight||'600'} ${e.fontSize||24}px ${e.fontFamily||'sans-serif'}`;ctx.textBaseline='top';wrap(ctx,e.text,14,12,e.w-28,(e.fontSize||24)*1.3)
-  }else if(e.type==='text'){ctx.fillStyle=e.color||'#1a2331';ctx.font=`${e.fontWeight||'700'} ${e.fontSize||36}px ${e.fontFamily||'sans-serif'}`;ctx.textBaseline='top';wrap(ctx,e.text,4,4,e.w-8,(e.fontSize||36)*1.3)}
+    ctx.fillStyle=e.color||'#1a2331';ctx.font=`${e.fontWeight||'600'} ${e.fontSize||24}px ${e.fontFamily||'sans-serif'}`;ctx.textBaseline='top';ctx.textAlign=e.align||'center';wrap(ctx,e.text,e.align==='left'?14:e.align==='right'?e.w-14:e.w/2,12,e.w-28,(e.fontSize||24)*1.3)
+  }else if(e.type==='text'){ctx.fillStyle=e.color||'#1a2331';ctx.font=`${e.fontWeight||'700'} ${e.fontSize||36}px ${e.fontFamily||'sans-serif'}`;ctx.textBaseline='top';ctx.textAlign=e.align||'left';wrap(ctx,e.text,e.align==='center'?e.w/2:e.align==='right'?e.w-4:4,4,e.w-8,(e.fontSize||36)*1.3)}
   else if(e.type==='drawing'){ctx.strokeStyle=e.stroke;ctx.lineWidth=e.strokeWidth;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();e.points.forEach((point,index)=>index?ctx.lineTo(point.x,point.y):ctx.moveTo(point.x,point.y));ctx.stroke()}
   ctx.restore()
 }

@@ -1,7 +1,7 @@
 {
-  "version": "1.36.9",
-  "assetVersion": "1369",
+  "version": "1.37.0",
+  "assetVersion": "1370",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Publish the more-worlds illustration in the Pages and Firebase runtime."
+  "notes": "Add webtoon layer ordering, rotation, image filters, and text alignment with PNG parity."
 }
