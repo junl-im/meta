@@ -17,6 +17,39 @@ function pngPagesFromZip(bytes){
 }
 const firstPngFromZip=bytes=>pngPagesFromZip(bytes).values().next().value;
 
+test('web editor reorders layers and keeps rotation, image filter and text alignment through save',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.locator('.web-layers>div').last().locator('button').first().click();
+  const first=page.locator('.web-panel.is-selected');
+  const before=Number(await first.evaluate(el=>getComputedStyle(el).zIndex));
+  await page.locator('.web-layers .active').getByRole('button',{name:'레이어 앞으로'}).click();
+  expect(Number(await first.evaluate(el=>getComputedStyle(el).zIndex))).toBeGreaterThan(before);
+  await page.getByLabel('회전 각도').fill('18');
+  await expect(first).toHaveCSS('transform',/matrix/);
+  const icon=fs.readFileSync(new URL('../assets/music-play.png',import.meta.url));
+  await page.locator('input[type=file][accept="image/*"]').setInputFiles({name:'color.png',mimeType:'image/png',buffer:icon});
+  await page.getByLabel('이미지 필터').selectOption('bw');
+  await expect(first.locator('img')).toHaveCSS('filter','grayscale(1)');
+  await page.getByRole('button',{name:'T 텍스트'}).click();
+  await page.locator('.web-right textarea').fill('정렬 검사');
+  await page.getByLabel('글 정렬').selectOption('right');
+  await expect(page.locator('.web-text-content')).toHaveCSS('text-align','right');
+  const savePromise=page.waitForEvent('download');
+  await page.getByRole('button',{name:'.wtoon 저장'}).click();
+  const saved=await savePromise;
+  const bytes=await saved.createReadStream().then(async stream=>{const chunks=[];for await(const chunk of stream)chunks.push(chunk);return Buffer.concat(chunks)});
+  await page.locator('input[type=file][accept=".wtoon,.json"]').setInputFiles({name:'styles.wtoon',mimeType:'application/octet-stream',buffer:bytes});
+  await expect(page.locator('.web-text-content')).toHaveCSS('text-align','right');
+  await expect(page.locator('.web-panel img')).toHaveCSS('filter','grayscale(1)');
+  const pngPromise=page.waitForEvent('download');
+  await page.getByRole('button',{name:'PNG 초안'}).click();
+  const png=await pngPromise;
+  expect(png.suggestedFilename()).toMatch(/\.zip$/);
+});
+
 test('canvas resize handles and editing shortcuts work without hijacking text input',async({page})=>{
   await page.setViewportSize({width:1280,height:800});
   await page.goto(studio);
