@@ -3,11 +3,11 @@
    Source: https://m.novel.naver.com/best/ranking
    The source page explicitly states its basis date. */
 window.NOVEL_RANKING_SNAPSHOT = {
-  date: "2026-10-24",
+  date: "2026-10-25",
   source: "https://m.novel.naver.com/best/ranking",
   league: "best",
   period: "daily",
   entries: [
-    { id: "1244916", league: "best", rank: 41 }
+    { id: "1243882", league: "best", rank: 58 }
   ]
 };
