@@ -60,6 +60,20 @@ test('desktop music dock is right aligned and clear of the hero illustration',as
   }
 });
 
+test('desktop linked worlds fill two even rows without empty columns',async({page})=>{
+  for(const width of [1000,1280]){
+    await page.setViewportSize({width,height:900});await gotoReady(page,{home:true});
+    const layout=await page.evaluate(()=>({scrollWidth:document.documentElement.scrollWidth,cards:[...document.querySelectorAll('.homeWorldGrid a')].map(el=>{const box=el.getBoundingClientRect();return{x:box.x,y:box.y,width:box.width}})}));
+    expect(layout.scrollWidth).toBeLessThanOrEqual(width);
+    expect(layout.cards).toHaveLength(8);
+    for(const row of [layout.cards.slice(0,4),layout.cards.slice(4,8)]){
+      expect(Math.max(...row.map(card=>card.y))-Math.min(...row.map(card=>card.y))).toBeLessThan(2);
+      expect(Math.max(...row.map(card=>card.width))-Math.min(...row.map(card=>card.width))).toBeLessThan(2);
+      expect(row.every((card,index)=>index===0||card.x>row[index-1].x)).toBe(true);
+    }
+  }
+});
+
 test('home music dock loads only after a gesture and changes to a different owned track', async ({ page }) => {
   await page.setViewportSize({width:320,height:568});
   await gotoReady(page,{home:true});
