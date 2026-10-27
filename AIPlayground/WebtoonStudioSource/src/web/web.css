@@ -165,3 +165,6 @@
 .web-pen-preview{position:absolute;pointer-events:none}
 
 .web-panel-outline{position:absolute;inset:0;pointer-events:none}
+
+.web-panel-split>div button:last-child{grid-column:1/-1}
+.web-panel-split label{margin:7px 0}
