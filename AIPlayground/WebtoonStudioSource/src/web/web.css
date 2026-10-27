@@ -163,3 +163,5 @@
 .web-drawing-canvas{display:block;pointer-events:none}
 
 .web-pen-preview{position:absolute;pointer-events:none}
+
+.web-panel-outline{position:absolute;inset:0;pointer-events:none}

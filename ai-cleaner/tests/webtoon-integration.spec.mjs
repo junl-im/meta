@@ -1360,3 +1360,26 @@ test('mobile touch creates a stroke with the chosen brush and opacity',async({br
  expect(stroke.brush).toBe('marker');expect(stroke.opacity).toBeCloseTo(.4);
  }finally{await context.close()}
 });
+
+
+test('PC polygon panels clip artwork consistently in editor and PNG and survive saving',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});await page.goto(studio);
+  const red=await page.evaluate(()=>{const c=document.createElement('canvas');c.width=10;c.height=10;const x=c.getContext('2d');x.fillStyle='#ff0000';x.fillRect(0,0,10,10);return c.toDataURL()});
+  const project={schemaVersion:4,title:'컷 모양',episode:'1',canvas:{width:690,height:700,background:'#ffffff'},scenes:[{id:'scene_root',name:'장면',startY:0,collapsed:false}],elements:[{id:'panel',type:'panel',x:100,y:100,w:200,h:150,z:1,fill:'#ffffff',stroke:'#000000',strokeWidth:4,shape:'slant-left',image:red,imageFit:'cover'}],assets:[],settings:{snap:false,guides:true,gridSize:10,smartSnapDistance:8}};
+  await page.locator('input[type=file][accept=".wtoon,.json"]').setInputFiles({name:'pc-panel.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project))});
+  const panel=page.locator('[data-element-id="panel"]');await expect(panel.locator('.web-panel-outline')).toHaveCount(1);
+  await page.addStyleTag({content:'.web-resize-handle,.web-rotate-handle{visibility:hidden!important}'});
+  const sample=async(buffer,points)=>page.evaluate(async({data,points})=>{const i=new Image();i.src='data:image/png;base64,'+data;await i.decode();const c=document.createElement('canvas');c.width=i.width;c.height=i.height;const x=c.getContext('2d');x.drawImage(i,0,0);return points.map(([a,b])=>Array.from(x.getImageData(Math.round(a),Math.round(b),1,1).data))},{data:buffer.toString('base64'),points});
+  const verify=async()=>{const b=await panel.boundingBox(),scale=b.width/200,shot=await panel.screenshot();const [outside,inside]=await sample(shot,[[4*scale,4*scale],[100*scale,75*scale]]);expect(outside[0]).toBeGreaterThan(220);expect(outside[1]).toBeGreaterThan(220);expect(inside[0]).toBeGreaterThan(200);expect(inside[1]).toBeLessThan(40);const download=page.waitForEvent('download');await page.getByRole('button',{name:'PNG 초안'}).click();const png=firstPngFromZip(fs.readFileSync(await (await download).path()));const [out,inset]=await sample(png,[[104,104],[200,175]]);expect(out[1]).toBeGreaterThan(220);expect(inset[0]).toBeGreaterThan(200);expect(inset[1]).toBeLessThan(40)};
+  await verify();await panel.click({position:{x:100,y:70}});await expect(page.getByLabel('컷 모양')).toHaveValue('slant-left');
+  await page.getByLabel('컷 모양').selectOption('diamond');await verify();
+  await page.getByLabel('컷 모양').selectOption('polygon');await page.getByLabel('컷 다각형 꼭짓점').fill('50,0 100,100 0,100');await page.getByLabel('컷 다각형 꼭짓점').blur();await verify();
+  const save=page.waitForEvent('download');await page.getByRole('button',{name:'.wtoon 저장'}).click();const bytes=fs.readFileSync(await (await save).path());
+  await page.locator('input[type=file][accept=".wtoon,.json"]').setInputFiles({name:'polygon.wtoon',mimeType:'application/octet-stream',buffer:bytes});
+  await panel.click({position:{x:100,y:70}});await expect(page.getByLabel('컷 모양')).toHaveValue('polygon');await expect(page.getByLabel('컷 다각형 꼭짓점')).toHaveValue('50,0 100,100 0,100');await verify();
+});
+
+test('mobile lets a user choose a hexagonal panel shape',async({browser})=>{
+ const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+ try{const page=await context.newPage();await page.goto(studio);await page.getByRole('button',{name:'도구',exact:true}).click();await page.getByRole('button',{name:'▣ 컷'}).click();await page.getByRole('button',{name:/레이어·속성/}).click();await page.getByLabel('컷 모양').selectOption('hexagon');await page.getByRole('button',{name:'캔버스',exact:true}).click();await expect(page.locator('.web-panel-outline')).toHaveCount(1);await expect(page.locator('.web-panel-content')).toHaveCSS('clip-path',/polygon/)}finally{await context.close()}
+});
