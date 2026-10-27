@@ -1,11 +1,13 @@
 import type {BubbleElement} from '@core/types'
+import {bubbleTailPoint} from './bubbleGeometry'
 
 function rounded(ctx:CanvasRenderingContext2D,w:number,h:number,r:number,tail?:{x:number;y:number}){
-  r=Math.min(r,w/2,h/2)
-  const base=tail?Math.max(r+24,Math.min(w-r-24,tail.x)):0
+  r=Math.max(0,Math.min(r,tail?(w-16)/2:w/2,h/2))
+  const half=tail?Math.max(0,Math.min(24,(w-2*r)/2)):0
+  const base=tail?Math.max(r+half,Math.min(w-r-half,tail.x)):0
   ctx.beginPath();ctx.moveTo(r,0);ctx.lineTo(w-r,0);ctx.quadraticCurveTo(w,0,w,r)
   ctx.lineTo(w,h-r);ctx.quadraticCurveTo(w,h,w-r,h)
-  if(tail){ctx.lineTo(base+24,h);ctx.lineTo(tail.x,tail.y);ctx.lineTo(base-24,h)}
+  if(tail){ctx.lineTo(base+half,h);ctx.lineTo(tail.x,tail.y);ctx.lineTo(base-half,h)}
   ctx.lineTo(r,h);ctx.quadraticCurveTo(0,h,0,h-r);ctx.lineTo(0,r);ctx.quadraticCurveTo(0,0,r,0);ctx.closePath()
 }
 
@@ -45,15 +47,15 @@ function outlinedTail(ctx:CanvasRenderingContext2D,points:Point[],tail:Point,w:n
 }
 
 function radio(ctx:CanvasRenderingContext2D,w:number,h:number,tail:{x:number;y:number}){
-  const cut=Math.min(18,w/9,h/5),base=Math.max(cut+24,Math.min(w-cut-24,tail.x))
+  const cut=Math.min(18,w/9,h/5),half=Math.min(24,(w-2*cut)/2),base=Math.max(cut+half,Math.min(w-cut-half,tail.x))
   ctx.beginPath();ctx.moveTo(cut,0);ctx.lineTo(w-cut,0);ctx.lineTo(w,cut);ctx.lineTo(w,h-cut)
-  ctx.lineTo(w-cut,h);ctx.lineTo(base+24,h);ctx.lineTo(tail.x,tail.y);ctx.lineTo(base-24,h)
+  ctx.lineTo(w-cut,h);ctx.lineTo(base+half,h);ctx.lineTo(tail.x,tail.y);ctx.lineTo(base-half,h)
   ctx.lineTo(cut,h);ctx.lineTo(0,h-cut);ctx.lineTo(0,cut);ctx.closePath()
 }
 
 /** One canvas renderer for the editor preview and the exported PNG. */
 export function drawBubbleShape(ctx:CanvasRenderingContext2D,e:BubbleElement,tailX=e.tailX??e.w*.65,tailY=e.tailY??e.h+35){
-  const w=e.w,h=e.h,tail={x:Math.max(0,Math.min(w,tailX)),y:Math.max(h+12,tailY)}
+  const w=e.w,h=e.h,tail=bubbleTailPoint({...e,tailX,tailY})
   ctx.save()
   ctx.fillStyle=e.fill||'#fff';ctx.strokeStyle=e.stroke||'#263b47';ctx.lineWidth=e.strokeWidth??3
   ctx.globalAlpha=e.fillOpacity??1
