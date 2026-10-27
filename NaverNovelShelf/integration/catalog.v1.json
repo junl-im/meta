@@ -2,7 +2,7 @@
   "schema_version": 1,
   "app_id": "gomfox-naver-novel-shelf",
   "source_site": "https://gomfox-naver-novels.glassyroot13.chatgpt.site",
-  "catalog_last_verified": "2026-10-26",
+  "catalog_last_verified": "2026-10-27",
   "copyright_policy": "metadata-and-links-only",
   "navigation_mode": "open-official-naver-novel-url",
   "works": [
@@ -91,9 +91,9 @@
       "id": "1249473",
       "title": "《천하제일 호랑이》",
       "author_search_identity": "[곰같은여우]",
-      "league": "challenge",
+      "league": "best",
       "genre": "무협",
-      "official_url": "https://m.novel.naver.com/challenge/list?novelId=1249473",
+      "official_url": "https://m.novel.naver.com/best/list?novelId=1249473",
       "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20221231_129/novel_1672413772682DpyJj_PNG/moohyup_320_2.png?type=f280_224_2"
     },
     {
@@ -235,9 +235,9 @@
       "id": "1249457",
       "title": "폐급 능력 밀도 조절로 이세계 최강",
       "author_search_identity": "[ZERO]",
-      "league": "challenge",
+      "league": "best",
       "genre": "판타지",
-      "official_url": "https://m.novel.naver.com/challenge/list?novelId=1249457",
+      "official_url": "https://m.novel.naver.com/best/list?novelId=1249457",
       "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20221231_188/novel_1672413545996l4AvH_PNG/fantasy_320_5.png?type=f280_224_2"
     },
     {

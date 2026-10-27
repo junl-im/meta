@@ -1,4 +1,4 @@
-/* Public Naver Web Novel work metadata, verified 2026-10-26.
+/* Public Naver Web Novel work metadata, verified 2026-10-27.
    Only titles, author pen names, official cover thumbnail URLs and links.
    No story text or reader data is reproduced. */
 window.NOVEL_CATALOG = [
@@ -11,7 +11,7 @@ window.NOVEL_CATALOG = [
   ["AI ZERO: AI가 사라진 날","[곰같은여우]","1242457","best","https://novel-phinf.pstatic.net/20261006_202/novel_1791265473356qvdyV_JPEG/400.jpg?type=f280_224_2","미스터리"],
   ["헌터들이 집착하는 공간 설계자가 되었다","[곰같은여우]","1244202","best","https://novel-phinf.pstatic.net/20260908_117/novel_1788844952226cLO2T_PNG/2.png?type=f280_224_2","판타지"],
   ["격수들이 집착하는 힐러가 되었다","[곰같은여우]","1244489","best","https://novel-phinf.pstatic.net/20260915_67/novel_1789450514766ltWaR_JPEG/111.jpg?type=f280_224_2","판타지"],
-  ["《천하제일 호랑이》","[곰같은여우]","1249473","challenge","https://novel-phinf.pstatic.net/20221231_129/novel_1672413772682DpyJj_PNG/moohyup_320_2.png?type=f280_224_2","무협"],
+  ["《천하제일 호랑이》","[곰같은여우]","1249473","best","https://novel-phinf.pstatic.net/20221231_129/novel_1672413772682DpyJj_PNG/moohyup_320_2.png?type=f280_224_2","무협"],
   ["《나의 SP파트너》","닥터X","1250566","challenge","https://novel-phinf.pstatic.net/20221231_194/novel_1672413226738B6sKY_PNG/romance_320_16.png?type=f280_224_2","로맨스"],
   ["《악녀는 고용직입니다》","닥터X","1248545","challenge","https://novel-phinf.pstatic.net/20221231_150/novel_16724131363820elHi_PNG/romance_320_4.png?type=f280_224_2","로맨스"],
   ["《잿빛 복원사》","[곰같은여우]","1247798","challenge","https://novel-phinf.pstatic.net/20221231_3/novel_1672413559639liBqM_PNG/fantasy_320_7.png?type=f280_224_2","판타지"],
@@ -27,11 +27,11 @@ window.NOVEL_CATALOG = [
   ["GOAT : 내 이름으로","고양이와사비","1246406","challenge","https://novel-phinf.pstatic.net/20221231_191/novel_1672413166837cBwDh_PNG/romance_320_8.png?type=f280_224_2","로맨스"],
   ["《캡슐》","고양이와사비","1245097","challenge","https://novel-phinf.pstatic.net/20221231_48/novel_1672413526425ovYHx_PNG/fantasy_320_2.png?type=f280_224_2","판타지"],
   ["《FC온라인 : 나 혼자 뛴다》","고양이와사비","1243383","challenge","https://novel-phinf.pstatic.net/20221231_179/novel_1672414893885IEnNO_PNG/mof_320_6.png?type=f280_224_2","현판"],
-  ["폐급 능력 밀도 조절로 이세계 최강","[ZERO]","1249457","challenge","https://novel-phinf.pstatic.net/20221231_188/novel_1672413545996l4AvH_PNG/fantasy_320_5.png?type=f280_224_2","판타지"],
+  ["폐급 능력 밀도 조절로 이세계 최강","[ZERO]","1249457","best","https://novel-phinf.pstatic.net/20221231_188/novel_1672413545996l4AvH_PNG/fantasy_320_5.png?type=f280_224_2","판타지"],
   ["눈 떠보니 박보검","[ZERO]","1248550","challenge","https://novel-phinf.pstatic.net/20221231_33/novel_1672413126990maFR1_PNG/romance_320_3.png?type=f280_224_2","로맨스"],
   ["검은 나를 기억한다","[ZERO]","1242932","challenge","https://novel-phinf.pstatic.net/20221231_133/novel_1672413518094fk60i_PNG/fantasy_320_1.png?type=f280_224_2","판타지"]
 ].map(([title,author,id,league,image,genre])=>({
   title, author, id, league, image, genre,
   url: `https://m.novel.naver.com/${league}/list?novelId=${id}`
 }));
-window.NOVEL_CATALOG_LAST_CHECK = "2026-10-26";
+window.NOVEL_CATALOG_LAST_CHECK = "2026-10-27";
