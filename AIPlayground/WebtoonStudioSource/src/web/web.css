@@ -155,3 +155,11 @@
 .web-snap-guide.vertical{top:0;bottom:0;width:1px}.web-snap-guide.horizontal{left:0;right:0;height:1px}
 @media(max-width:760px){.web-layer-select-mode{display:block;width:100%;margin:-4px 0 9px;font-size:12px;font-weight:750}.web-layer-select-mode[aria-pressed="true"]{background:#d8f1ee;border-color:#379ca5;color:#115f69}}
 @media(max-width:760px){.web-empty-guide{top:18px;width:min(86%,315px);padding:18px 12px}.web-empty-guide strong{font-size:15px}.web-empty-guide p{font-size:11px}.web-empty-guide button{font-size:12px;padding:7px}.web-move-handle{min-width:74px;height:32px}}
+
+.web-pen-toggle[aria-pressed="true"]{background:#d8f3f0;border-color:#28a3aa;color:#116873;font-weight:800}
+.web-pen-settings{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px;padding:10px;border:1px solid #b5dadd;border-radius:12px;background:#f0faf9}
+.web-pen-settings label{margin:0;min-width:0}
+.web-pen-surface{position:absolute;inset:0;z-index:12;touch-action:none;cursor:crosshair}
+.web-drawing-canvas{display:block;pointer-events:none}
+
+.web-pen-preview{position:absolute;pointer-events:none}
