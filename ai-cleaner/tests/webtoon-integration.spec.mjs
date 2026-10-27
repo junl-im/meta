@@ -1293,3 +1293,42 @@ test('mobile eraser respects selected scope and locked layers',async({browser})=
  await page.getByRole('button',{name:'지우개 종료'}).click();await expect(surface).toHaveCount(0);
  }finally{await context.close()}
 });
+
+
+test('soft eraser and restore brush preserve a panel through PNG and file round trip',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});await page.goto(studio);
+  const project={schemaVersion:4,title:'부분 복원',episode:'1',canvas:{width:690,height:700,background:'#ffffff'},scenes:[{id:'scene_root',name:'장면',startY:0,collapsed:false}],elements:[{id:'target',type:'panel',x:80,y:80,w:300,h:250,z:1,fill:'#ff0000',strokeWidth:0}],assets:[],settings:{snap:false,guides:true,gridSize:10,smartSnapDistance:8}};
+  await page.locator('input[type=file][accept=".wtoon,.json"]').setInputFiles({name:'restore.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project))});
+  await page.locator('[data-element-id="target"]').click();
+  await page.getByRole('button',{name:'부드러운 지우개',exact:true}).click();
+  await page.getByLabel('지우기 대상').selectOption('selected');
+  const surface=page.getByLabel('부드러운 지우개 영역'),box=await surface.boundingBox(),scale=box.width/690;
+  await page.mouse.move(box.x+200*scale,box.y+120*scale);await page.mouse.down();await page.mouse.move(box.x+200*scale,box.y+190*scale,{steps:6});await page.mouse.up();
+  await expect(page.locator('.web-erased-artwork')).toHaveCount(1);
+  const pixel=async()=>{const d=page.waitForEvent('download');await page.getByRole('button',{name:'PNG 초안'}).click();const png=firstPngFromZip(fs.readFileSync(await (await d).path()));return page.evaluate(async data=>{const i=new Image();i.src='data:image/png;base64,'+data;await i.decode();const c=document.createElement('canvas');c.width=i.width;c.height=i.height;const ctx=c.getContext('2d');ctx.drawImage(i,0,0);return Array.from(ctx.getImageData(200,150,1,1).data)},png.toString('base64'))};
+  const erased=await pixel();expect(erased[1]).toBeGreaterThan(100);
+  await page.getByRole('button',{name:'복원 붓',exact:true}).click();
+  const restore=page.getByLabel('복원 붓 영역'),b=await restore.boundingBox();
+  await page.mouse.move(b.x+180*scale,b.y+150*scale);await page.mouse.down();await page.mouse.move(b.x+220*scale,b.y+150*scale,{steps:5});await page.mouse.up();
+  const restored=await pixel();expect(restored[0]).toBeGreaterThan(200);expect(restored[1]).toBeLessThan(erased[1]-50);
+  await page.getByRole('button',{name:'↶ 되돌리기'}).click();const undone=await pixel();expect(undone[1]).toBeGreaterThan(100);
+  await page.getByRole('button',{name:'↷ 다시'}).click();
+  const save=page.waitForEvent('download');await page.getByRole('button',{name:'.wtoon 저장'}).click();const bytes=fs.readFileSync(await (await save).path());
+  await page.locator('input[type=file][accept=".wtoon,.json"]').setInputFiles({name:'restore.wtoon',mimeType:'application/octet-stream',buffer:bytes});
+  const reopened=await pixel();expect(reopened[1]).toBeLessThan(erased[1]-50);
+});
+
+test('mobile restore brush responds to touch and preserves locked overlapping elements',async({browser})=>{
+ const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+ try{const page=await context.newPage();await page.goto(studio);
+ const project={schemaVersion:4,title:'모바일 복원',episode:'1',canvas:{width:690,height:700,background:'#ffffff'},scenes:[{id:'scene_root',name:'장면',startY:0,collapsed:false}],elements:[{id:'target',type:'panel',x:80,y:80,w:300,h:250,z:2,fill:'#ff0000',strokeWidth:0,erasures:[{points:[{x:100,y:20},{x:100,y:200}],width:60,soft:false}]},{id:'locked',type:'panel',x:80,y:80,w:300,h:250,z:1,fill:'#0000ff',strokeWidth:0,locked:true,erasures:[{points:[{x:100,y:20},{x:100,y:200}],width:60,soft:false}]}],assets:[],settings:{snap:false,guides:true,gridSize:10,smartSnapDistance:8}};
+ await page.locator('input[type=file][accept=".wtoon,.json"]').setInputFiles({name:'touch-restore.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project))});
+ await page.locator('[data-element-id="target"]').click();await page.getByRole('button',{name:'도구',exact:true}).click();await page.getByRole('button',{name:'복원 붓',exact:true}).click();
+ await page.getByRole('button',{name:'도구',exact:true}).click();await page.getByLabel('복원 대상').selectOption('selected');await page.getByRole('button',{name:'캔버스',exact:true}).click();
+ const surface=page.getByLabel('복원 붓 영역'),box=await surface.boundingBox(),scale=box.width/690,x=box.x+180*scale,y=box.y+150*scale,cdp=await context.newCDPSession(page);
+ await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x+25,y}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+ await expect(page.locator('.web-status')).toContainText('요소의 지운 부분을 복원');
+ await expect(page.locator('[data-element-id="locked"] .web-erased-artwork')).toHaveCount(1);
+ await page.getByRole('button',{name:'복원 붓 종료'}).click();await expect(surface).toHaveCount(0);
+ }finally{await context.close()}
+});
