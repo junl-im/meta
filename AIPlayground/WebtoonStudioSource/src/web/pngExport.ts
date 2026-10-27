@@ -2,6 +2,7 @@ import {zipSync} from 'fflate'
 import type {EditorElement,ProjectV4,TextEffect} from '@core/types'
 import {imageFilterCss} from './imageFilter'
 import {drawBubbleShape} from './bubbleShape'
+import {tracePolygon} from './panelShapes'
 import {paintDrawing} from './drawingPaint'
 import {paintErasures} from './erasureMask'
 
@@ -19,6 +20,7 @@ function drawTextLine(ctx:CanvasRenderingContext2D,text:string,x:number,y:number
 function wrap(ctx:CanvasRenderingContext2D,text:string,x:number,y:number,width:number,lineHeight:number,effect?:TextEffect){ctx.save();if(effect?.letterSpacing&&'letterSpacing'in ctx)ctx.letterSpacing=`${effect.letterSpacing}px`;let line='';for(const paragraph of text.split('\n')){for(const char of paragraph){if(ctx.measureText(line+char).width>width&&line){drawTextLine(ctx,line,x,y,effect);y+=lineHeight;line=''}line+=char}drawTextLine(ctx,line,x,y,effect);y+=lineHeight;line=''}ctx.restore()}
 function panelPath(ctx:CanvasRenderingContext2D,e:Extract<EditorElement,{type:'panel'}>){
   const w=e.w,h=e.h
+  if(tracePolygon(ctx,e,Math.max(0,e.strokeWidth??3)/2))return
   ctx.beginPath()
   if(e.shape==='ellipse'){ctx.ellipse(w/2,h/2,w/2,h/2,0,0,Math.PI*2);ctx.closePath();return}
   if(e.shape==='rounded'){
@@ -36,7 +38,7 @@ function drawElement(ctx:CanvasRenderingContext2D,e:EditorElement,images:Map<str
     ctx.fillStyle=e.fill||'#fff';panelPath(ctx,e);ctx.fill()
     const image=e.image?images.get(e.image):null
     if(image){ctx.save();panelPath(ctx,e);ctx.clip();const fit=e.imageFit==='contain'?Math.min(e.w/image.width,e.h/image.height):Math.max(e.w/image.width,e.h/image.height),zoom=e.imageTransform?.zoom||1,w=image.width*fit*zoom,h=image.height*fit*zoom;ctx.translate(e.w/2+(e.imageTransform?.offsetX||0),e.h/2+(e.imageTransform?.offsetY||0));if(e.imageTransform?.flipX)ctx.scale(-1,1);ctx.filter=imageFilterCss(e.imageFilter);ctx.drawImage(image,-w/2,-h/2,w,h);ctx.restore()}
-    ctx.strokeStyle=e.stroke||'#262b36';ctx.lineWidth=e.strokeWidth??3;panelPath(ctx,e);ctx.stroke()
+    if((e.strokeWidth??3)>0){ctx.strokeStyle=e.stroke||'#262b36';ctx.lineWidth=e.strokeWidth??3;ctx.globalAlpha=e.strokeOpacity??1;ctx.lineJoin='round';panelPath(ctx,e);ctx.stroke()}
   }else if(e.type==='bubble'){
     drawBubbleShape(ctx,e)
     ctx.fillStyle=e.color||'#1a2331';ctx.font=`${e.fontWeight||'600'} ${e.fontSize||24}px ${e.fontFamily||'sans-serif'}`;ctx.textBaseline='top';ctx.textAlign=e.align||'center';wrap(ctx,e.text,e.align==='left'?14:e.align==='right'?e.w-14:e.w/2,12,e.w-28,(e.fontSize||24)*(e.textEffect?.lineHeight??1.3),e.textEffect)
