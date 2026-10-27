@@ -1414,3 +1414,20 @@ test('mobile diagonal split keeps both parts and exports the gap',async({browser
  await page.getByRole('button',{name:'↶ 되돌리기'}).click();await expect(page.locator('.web-panel')).toHaveCount(1);
  }finally{await context.close()}
 });
+
+
+test('PNG pages keep rotated cuts, erased portions and brush strokes across page boundaries',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});await page.goto(studio);
+  const project={schemaVersion:4,title:'회전 경계',episode:'1',canvas:{width:690,height:2400,background:'#ffffff'},scenes:[{id:'scene_root',name:'장면',startY:0,collapsed:false}],elements:[
+    {id:'masked',type:'panel',x:100,y:2020,w:200,h:30,rotation:90,z:1,fill:'#ff0000',strokeWidth:0,erasures:[{points:[{x:45,y:0},{x:45,y:30}],width:20,soft:false}]},
+    {id:'lower',type:'panel',x:350,y:1950,w:200,h:30,rotation:90,z:2,fill:'#00aa00',strokeWidth:0},
+    {id:'stroke',type:'drawing',x:570,y:2010,w:80,h:20,rotation:90,z:3,stroke:'#0000ff',strokeWidth:8,points:[{x:0,y:10},{x:80,y:10}]}
+  ],assets:[],settings:{snap:false,guides:true,gridSize:10,smartSnapDistance:8}};
+  await page.locator('input[type=file][accept=".wtoon,.json"]').setInputFiles({name:'rotated.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project))});
+  const download=page.waitForEvent('download');await page.getByRole('button',{name:'PNG 초안'}).click();const pages=pngPagesFromZip(fs.readFileSync(await (await download).path()));
+  const sample=async(buffer,points)=>page.evaluate(async({data,points})=>{const i=new Image();i.src='data:image/png;base64,'+data;await i.decode();const c=document.createElement('canvas');c.width=i.width;c.height=i.height;const x=c.getContext('2d');x.drawImage(i,0,0);return points.map(([a,b])=>Array.from(x.getImageData(a,b,1,1).data))},{data:buffer.toString('base64'),points});
+  const [red,erased,blue]=await sample(pages.get('001.png'),[[200,1955],[200,1980],[610,1990]]);
+  expect(red[0]).toBeGreaterThan(200);expect(red[1]).toBeLessThan(50);expect(erased[1]).toBeGreaterThan(220);expect(blue[2]).toBeGreaterThan(200);expect(blue[0]).toBeLessThan(50);
+  const [redNext,greenNext]=await sample(pages.get('002.png'),[[200,30],[450,30]]);
+  expect(redNext[0]).toBeGreaterThan(200);expect(redNext[1]).toBeLessThan(50);expect(greenNext[1]).toBeGreaterThan(100);expect(greenNext[0]).toBeLessThan(50);
+});
