@@ -1383,3 +1383,34 @@ test('mobile lets a user choose a hexagonal panel shape',async({browser})=>{
  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
  try{const page=await context.newPage();await page.goto(studio);await page.getByRole('button',{name:'도구',exact:true}).click();await page.getByRole('button',{name:'▣ 컷'}).click();await page.getByRole('button',{name:/레이어·속성/}).click();await page.getByLabel('컷 모양').selectOption('hexagon');await page.getByRole('button',{name:'캔버스',exact:true}).click();await expect(page.locator('.web-panel-outline')).toHaveCount(1);await expect(page.locator('.web-panel-content')).toHaveCSS('clip-path',/polygon/)}finally{await context.close()}
 });
+
+
+test('asymmetric split preserves image composition and erasure positions',async({page})=>{
+ await page.setViewportSize({width:1280,height:800});await page.goto(studio);
+ const red=await page.evaluate(()=>{const c=document.createElement('canvas');c.width=10;c.height=10;const x=c.getContext('2d');x.fillStyle='#ff0000';x.fillRect(0,0,10,10);return c.toDataURL()});
+ const project={schemaVersion:4,title:'분할 보존',episode:'1',canvas:{width:690,height:700,background:'#ffffff'},scenes:[{id:'scene_root',name:'장면',startY:0,collapsed:false}],elements:[{id:'original',type:'panel',x:80,y:80,w:300,h:250,z:1,fill:'#ffffff',strokeWidth:0,image:red,imageFit:'cover',erasures:[{points:[{x:240,y:20},{x:240,y:180}],width:30,soft:false}]}],assets:[],settings:{snap:false,guides:true,gridSize:10,smartSnapDistance:8}};
+ await page.locator('input[type=file][accept=".wtoon,.json"]').setInputFiles({name:'split.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project))});
+ const original=page.locator('[data-element-id="original"]');await original.click({position:{x:50,y:50}});
+ await page.getByLabel('컷 분할 위치').fill('0.3');await page.getByLabel('컷 사이 간격').fill('20');await page.getByRole('button',{name:'좌우로 나누기'}).click();
+ await expect(page.locator('.web-panel')).toHaveCount(2);await expect(page.locator('.web-status')).toContainText('컷을 좌우로 나눴습니다');
+ const data=await page.locator('.web-panel').evaluateAll(nodes=>nodes.map(n=>({left:parseFloat(n.style.left),width:parseFloat(n.style.width)})));const zoom=await page.locator('.web-canvas').evaluate(n=>parseFloat(n.style.width)/690);
+ expect(data[0].width/zoom).toBeCloseTo(80,0);expect((data[1].left-data[0].left-data[0].width)/zoom).toBeCloseTo(20,0);expect(data[1].width/zoom).toBeCloseTo(200,0);
+ const out=page.waitForEvent('download');await page.getByRole('button',{name:'PNG 초안'}).click();const png=firstPngFromZip(fs.readFileSync(await (await out).path()));
+ const colors=await page.evaluate(async data=>{const i=new Image();i.src='data:image/png;base64,'+data;await i.decode();const c=document.createElement('canvas');c.width=i.width;c.height=i.height;const x=c.getContext('2d');x.drawImage(i,0,0);return [[320,160],[290,160],[170,160]].map(([a,b])=>Array.from(x.getImageData(a,b,1,1).data))},png.toString('base64'));
+ expect(colors[0][1]).toBeGreaterThan(220);expect(colors[1][0]).toBeGreaterThan(220);expect(colors[1][1]).toBeLessThan(40);expect(colors[2][1]).toBeGreaterThan(220);
+ await page.getByRole('button',{name:'↶ 되돌리기'}).click();await expect(page.locator('.web-panel')).toHaveCount(1);
+});
+
+test('mobile diagonal split keeps both parts and exports the gap',async({browser})=>{
+ const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+ try{const page=await context.newPage();await page.goto(studio);
+ const project={schemaVersion:4,title:'사선 분할',episode:'1',canvas:{width:690,height:700,background:'#ffffff'},scenes:[{id:'scene_root',name:'장면',startY:0,collapsed:false}],elements:[{id:'original',type:'panel',x:80,y:80,w:300,h:250,z:1,fill:'#ff0000',strokeWidth:0}],assets:[],settings:{snap:false,guides:true,gridSize:10,smartSnapDistance:8}};
+ await page.locator('input[type=file][accept=".wtoon,.json"]').setInputFiles({name:'diagonal.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project))});
+ await page.locator('[data-element-id="original"]').click();await page.getByRole('button',{name:/레이어·속성/}).click();await page.getByLabel('컷 사이 간격').fill('20');await page.getByRole('button',{name:'사선으로 나누기'}).click();
+ await expect(page.locator('.web-panel')).toHaveCount(2);await expect(page.locator('.web-panel-outline')).toHaveCount(2);
+ const out=page.waitForEvent('download');await page.getByRole('button',{name:'PNG 초안'}).click();const png=firstPngFromZip(fs.readFileSync(await (await out).path()));
+ const colors=await page.evaluate(async data=>{const i=new Image();i.src='data:image/png;base64,'+data;await i.decode();const c=document.createElement('canvas');c.width=i.width;c.height=i.height;const x=c.getContext('2d');x.drawImage(i,0,0);return [[120,100],[350,300],[230,205]].map(([a,b])=>Array.from(x.getImageData(a,b,1,1).data))},png.toString('base64'));
+ expect(colors[0][1]).toBeLessThan(40);expect(colors[1][1]).toBeLessThan(40);expect(colors[2][1]).toBeGreaterThan(220);
+ await page.getByRole('button',{name:'↶ 되돌리기'}).click();await expect(page.locator('.web-panel')).toHaveCount(1);
+ }finally{await context.close()}
+});
