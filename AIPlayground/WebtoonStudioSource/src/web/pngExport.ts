@@ -1,5 +1,6 @@
 import {zipSync} from 'fflate'
 import type {EditorElement,ProjectV4,TextEffect} from '@core/types'
+import {artworkBounds} from '@core/artworkBounds'
 import {imageFilterCss} from './imageFilter'
 import {drawBubbleShape} from './bubbleShape'
 import {tracePolygon} from './panelShapes'
@@ -49,9 +50,9 @@ function drawElement(ctx:CanvasRenderingContext2D,e:EditorElement,images:Map<str
 export async function exportDraftPng(project:ProjectV4){
   const images=new Map<string,HTMLImageElement>()
   for(const src of new Set(project.elements.filter(e=>e.type==='panel'&&e.image).map(e=>(e as {image:string}).image)))images.set(src,await loadImage(src))
-  const files:Record<string,Uint8Array>={},scale=690/project.canvas.width,sourceHeight=Math.max(1,Math.floor(2000/scale)),elements=project.elements.filter(e=>e.visible!==false&&e.type!=='scene').sort((a,b)=>a.z-b.z)
+  const files:Record<string,Uint8Array>={},scale=690/project.canvas.width,sourceHeight=Math.max(1,Math.floor(2000/scale)),elements=project.elements.filter(e=>e.visible!==false&&e.type!=='scene').sort((a,b)=>a.z-b.z).map(element=>{const bounds=artworkBounds(element),stroke=element.type==='drawing'?element.strokeWidth:element.type==='panel'||element.type==='bubble'?(element.strokeWidth??3):0,pad=Math.max(2,Number.isFinite(stroke)?Math.max(0,stroke)/2:0)+(element.type==='drawing'&&element.brush==='watercolor'?4:0);return{element,top:bounds.top-pad,bottom:bounds.bottom+pad}})
   let part=0
-  for(let start=0;start<project.canvas.height;start+=sourceHeight){const end=Math.min(project.canvas.height,start+sourceHeight),canvas=document.createElement('canvas');canvas.width=690;canvas.height=Math.ceil((end-start)*scale);const ctx=canvas.getContext('2d');if(!ctx)throw Error('브라우저 캔버스를 사용할 수 없습니다.');ctx.fillStyle=project.canvas.background;ctx.fillRect(0,0,canvas.width,canvas.height);ctx.setTransform(scale,0,0,scale,0,-start*scale);for(const e of elements){const tail=e.type==='bubble'&&e.kind!=='narration'?(e.tailY??e.h+35):e.h;if(e.y+Math.max(e.h,tail)<start||e.y+Math.min(0,tail)>end)continue
+  for(let start=0;start<project.canvas.height;start+=sourceHeight){const end=Math.min(project.canvas.height,start+sourceHeight),canvas=document.createElement('canvas');canvas.width=690;canvas.height=Math.ceil((end-start)*scale);const ctx=canvas.getContext('2d');if(!ctx)throw Error('브라우저 캔버스를 사용할 수 없습니다.');ctx.fillStyle=project.canvas.background;ctx.fillRect(0,0,canvas.width,canvas.height);ctx.setTransform(scale,0,0,scale,0,-start*scale);for(const item of elements){if(item.bottom<start||item.top>end)continue;const e=item.element
     if(!e.erasures?.length){drawElement(ctx,e,images);continue}
     // Render this element separately so erasing never affects the background or another layer.
     const isolated=document.createElement('canvas');isolated.width=canvas.width;isolated.height=canvas.height
