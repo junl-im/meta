@@ -7,6 +7,8 @@ on:
       - 'AIPlayground/DalbitUnse/**'
       - 'AIPlayground/WebtoonStudio/**'
       - 'AIPlayground/WebtoonStudioSource/**'
+      - 'NaverNovelShelf/site/**'
+      - 'NaverNovelShelf/integration/**'
       - 'index.html'
       - 'package.json'
       - 'package-lock.json'
@@ -21,6 +23,8 @@ on:
       - 'AIPlayground/DalbitUnse/**'
       - 'AIPlayground/WebtoonStudio/**'
       - 'AIPlayground/WebtoonStudioSource/**'
+      - 'NaverNovelShelf/site/**'
+      - 'NaverNovelShelf/integration/**'
       - 'index.html'
       - 'OPTION/SS_OPTION.txt'
       - 'package.json'
@@ -83,6 +87,8 @@ jobs:
           node --check AIPlayground/WebtoonStudio/assets/index-GomFoxWebtoon-v1.js
           node --check AIPlayground/WebtoonStudioSource/scripts/upgrade-deployed-web.mjs
           node --check AIPlayground/WebtoonStudioSource/scripts/fix-bubble-contour.mjs
+          node --check NaverNovelShelf/site/catalog.js
+          node --check NaverNovelShelf/site/popularity.js
           node --check .github/scripts/build-pages-artifact.mjs
           node --check .github/scripts/build-runtime-vendor.mjs
           node --check ai-cleaner/sw.js
