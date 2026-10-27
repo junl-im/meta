@@ -489,6 +489,32 @@ test('mobile bubble typography edits the canvas and exports a PNG draft',async({
   expect(firstPngFromZip(second).equals(widePng)).toBe(false);
 });
 
+test('text effect presets survive save and change the PNG artwork',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'T 텍스트'}).click();
+  await page.locator('.web-right textarea').fill('효과 검사');
+  await page.getByRole('combobox',{name:'글자 효과'}).selectOption('ink');
+  await expect(page.locator('.web-text-content')).toHaveCSS('-webkit-text-stroke-color','rgb(17, 17, 17)');
+  const savedDownload=page.waitForEvent('download');
+  await page.getByRole('button',{name:'.wtoon 저장'}).click();
+  const saved=await (await savedDownload).createReadStream().then(async stream=>{const chunks=[];for await(const chunk of stream)chunks.push(chunk);return Buffer.concat(chunks)});
+  await page.locator('input[type=file][accept=".wtoon,.json"]').setInputFiles({name:'effects.wtoon',mimeType:'application/octet-stream',buffer:saved});
+  await page.locator('.web-text').click();
+  await expect(page.getByRole('combobox',{name:'글자 효과'})).toHaveValue('ink');
+  const inkDownload=page.waitForEvent('download');
+  await page.getByRole('button',{name:'PNG 초안'}).click();
+  const ink=await (await inkDownload).createReadStream().then(async stream=>{const chunks=[];for await(const chunk of stream)chunks.push(chunk);return Buffer.concat(chunks)});
+  await page.getByRole('combobox',{name:'글자 효과'}).selectOption('plain');
+  const plainDownload=page.waitForEvent('download');
+  await page.getByRole('button',{name:'PNG 초안'}).click();
+  const plain=await (await plainDownload).createReadStream().then(async stream=>{const chunks=[];for await(const chunk of stream)chunks.push(chunk);return Buffer.concat(chunks)});
+  expect(firstPngFromZip(ink).equals(firstPngFromZip(plain))).toBe(false);
+  await page.getByRole('button',{name:'◯ 말풍선'}).click();
+  await page.getByRole('combobox',{name:'글자 효과'}).selectOption('neon');
+  await expect(page.locator('.web-bubble-content')).not.toHaveCSS('text-shadow','none');
+});
+
 test('canvas resize handles and editing shortcuts work without hijacking text input',async({page})=>{
   await page.setViewportSize({width:1280,height:800});
   await page.goto(studio);
