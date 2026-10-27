@@ -1028,7 +1028,6 @@ function syncMobileBriefs(){
 requestAnimationFrame(syncMobileBriefs);
 window.addEventListener('resize',syncMobileBriefs,{passive:true});
 $('#homeButton').addEventListener('click',()=>showHome());
-$('#homeExploreButton').addEventListener('click',()=>$('#homeTools').scrollIntoView({behavior:'smooth',block:'start'}));
 $$('[data-open-tool]').forEach(button=>button.addEventListener('click',()=>activateToolTab(document.querySelector(`[data-tool="${button.dataset.openTool}"]`))));
 $('#exitStay').addEventListener('click',()=>exitDialog.close());
 $('#exitLeave').addEventListener('click',leavePlayground);

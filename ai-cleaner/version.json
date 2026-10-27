@@ -1,7 +1,7 @@
 {
-  "version": "1.37.3",
-  "assetVersion": "1373",
+  "version": "1.37.4",
+  "assetVersion": "1374",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Bring the four core tools into the illustrated home hero as a responsive floating selector."
+  "notes": "Remove duplicate home shortcuts so the illustrated tool selector is the single navigation point."
 }

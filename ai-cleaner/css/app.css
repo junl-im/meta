@@ -1141,13 +1141,6 @@ body{background:linear-gradient(180deg,#f9f4ed 0,#fcfaf6 280px,#f9f8f5 100%)}
 .homeHero h1{margin:14px 0 16px;color:#3f291c;font-size:clamp(30px,4.5vw,64px);font-weight:950;line-height:1.12;letter-spacing:-.055em;word-break:keep-all}
 .homeHero h1 em{color:#d1641a;font-style:normal}
 .homeHero p{max-width:42ch;margin:0;color:#6f5542;font-size:clamp(13px,1.18vw,17px);line-height:1.7;word-break:keep-all}
-.homeHeroActions{display:flex;flex-wrap:wrap;gap:9px;margin-top:25px}
-.homeHeroActions button{min-height:43px;border-radius:13px;padding:9px 16px;font-size:13px;font-weight:850}
-.homePrimary{border:1px solid #b45218;background:#c45b19;color:#fffaf5;box-shadow:0 7px 17px #a54a1a31}
-.homePrimary:hover{background:#a94a12;transform:translateY(-2px)}
-.homePrimary span{margin-left:8px}
-.homeSecondary{border:1px solid #dbbda0;background:#fffaf3;color:#74472c}
-.homeSecondary:hover{border-color:#c76b2b;background:#fff5e7}
 .homeHeroArt{height:100%;min-height:360px;overflow:hidden;mask-image:linear-gradient(90deg,transparent 0%,#000 11%)}
 .homeHeroArt img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
 .homeExplore,.homeWorlds{display:grid;gap:16px}
@@ -1164,10 +1157,10 @@ body{background:linear-gradient(180deg,#f9f4ed 0,#fcfaf6 280px,#f9f8f5 100%)}
 .homeWorldGrid a:hover{border-color:#ce8653;background:#fff4e7}
 .homeWorldGrid a>span{grid-row:1/3;display:grid;place-items:center;width:36px;height:36px;border-radius:11px;background:#f7e8db;color:#aa6131;font-size:19px}
 .homeWorldGrid strong{font-size:13px;font-weight:900}.homeWorldGrid small{color:#816b5a;font-size:11px}.homeWorldGrid b{position:absolute;right:13px;top:13px;color:#a76338;font-size:13px}
-.homeHeroActions button:focus-visible,.homeToolCard:focus-visible,.homeWorldGrid a:focus-visible{outline:3px solid #c65b19;outline-offset:3px}
+.homeToolCard:focus-visible,.homeWorldGrid a:focus-visible{outline:3px solid #c65b19;outline-offset:3px}
 @media(max-width:980px){.homeHero{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.homeHeroArt{min-height:300px}.homeToolGrid,.homeWorldGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:620px){.playgroundHome{gap:27px;padding-top:12px}.homeHero{display:flex;flex-direction:column;border-radius:22px}.homeHeroArt{order:-1;width:100%;height:auto;min-height:0;aspect-ratio:16/9;mask-image:none}.homeHeroArt img{object-position:center 47%}.homeHeroCopy{width:100%;padding:18px 19px 22px}.homeHero h1{margin:8px 0 10px;font-size:clamp(28px,8vw,38px)}.homeHero p{font-size:12px;line-height:1.55}.homeHeroActions{margin-top:16px}.homeHeroActions button{min-height:40px;font-size:12px}.homeToolGrid,.homeWorldGrid{gap:8px}.homeToolCard{min-height:148px;padding:14px;gap:6px;border-radius:16px}.homeToolCard strong{font-size:14px}.homeToolCard small{font-size:10.5px}.homeCardArrow{right:12px;top:10px}.homeWorldGrid a{min-height:74px;padding:10px;grid-template-columns:30px 1fr;gap:7px}.homeWorldGrid a>span{width:30px;height:30px;font-size:16px}.homeWorldGrid strong{font-size:11.5px}.homeWorldGrid small{font-size:10px}}
-@media(max-width:350px){.homeHeroCopy{padding:15px}.homeHeroActions{gap:6px}.homeHeroActions button{padding:8px 10px}.homeToolCard{min-height:154px;padding:11px}.homeToolCard strong{font-size:12.5px}}
+@media(max-width:620px){.playgroundHome{gap:27px;padding-top:12px}.homeHero{display:flex;flex-direction:column;border-radius:22px}.homeHeroArt{order:-1;width:100%;height:auto;min-height:0;aspect-ratio:16/9;mask-image:none}.homeHeroArt img{object-position:center 47%}.homeHeroCopy{width:100%;padding:18px 19px 22px}.homeHero h1{margin:8px 0 10px;font-size:clamp(28px,8vw,38px)}.homeHero p{font-size:12px;line-height:1.55}.homeToolGrid,.homeWorldGrid{gap:8px}.homeToolCard{min-height:148px;padding:14px;gap:6px;border-radius:16px}.homeToolCard strong{font-size:14px}.homeToolCard small{font-size:10.5px}.homeCardArrow{right:12px;top:10px}.homeWorldGrid a{min-height:74px;padding:10px;grid-template-columns:30px 1fr;gap:7px}.homeWorldGrid a>span{width:30px;height:30px;font-size:16px}.homeWorldGrid strong{font-size:11.5px}.homeWorldGrid small{font-size:10px}}
+@media(max-width:350px){.homeHeroCopy{padding:15px}.homeToolCard{min-height:154px;padding:11px}.homeToolCard strong{font-size:12.5px}}
 
 /* 1.25 · illustration-led glass surfaces and quiet home header. */
 body{background:radial-gradient(circle at 8% 7%,#f8dbc6b8 0,transparent 28%),radial-gradient(circle at 91% 32%,#e9d7ef8c 0,transparent 34%),radial-gradient(circle at 22% 86%,#f7e6cf91 0,transparent 30%),linear-gradient(180deg,#fffaf3,#fbfaf7 55%,#fff8f0)}
@@ -1180,8 +1173,6 @@ body{background:radial-gradient(circle at 8% 7%,#f8dbc6b8 0,transparent 28%),rad
 .playgroundHome{gap:0;padding-top:8px}
 .homeHero{border:0;background:linear-gradient(138deg,#fffdf8d9,#fff0dfcb 58%,#f4e3dac9);box-shadow:0 23px 58px #65402420,0 2px 0 #ffffffb0 inset;backdrop-filter:blur(16px)}
 .homeHeroArt{mask-image:linear-gradient(90deg,transparent 0%,#000 15%)}
-.homeHeroActions .homePrimary{border:0;background:linear-gradient(135deg,#c55c1a,#e78a3f);box-shadow:0 11px 24px #aa551d3b,0 1px 0 #ffffff71 inset}
-.homeHeroActions .homeSecondary{border:0;background:#ffffffb3;box-shadow:0 5px 17px #8b5c351c,0 1px 0 #fff inset;backdrop-filter:blur(12px)}
 .homeExplore,.homeWorlds{position:relative;padding-top:52px}
 .homeExplore::before,.homeWorlds::before{content:'';position:absolute;top:4px;left:50%;width:min(100%,650px);height:46px;transform:translateX(-50%);background:url('../assets/home-divider-v1.webp') center/contain no-repeat;opacity:.56;pointer-events:none}
 .homeToolGrid,.homeWorldGrid{gap:14px}
@@ -1250,7 +1241,7 @@ body{background:radial-gradient(circle at 8% 7%,#f8dbc6b8 0,transparent 28%),rad
 @media(max-width:600px){.mobileBriefToggle:not([hidden]){display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:34px;margin-top:8px;padding:5px 13px;border:1px solid #e8c7a8;border-radius:999px;background:#fff9f1;color:#98450c;font-size:11.5px;font-weight:850;text-decoration:none;box-shadow:0 2px 8px #7d492018}.mobileBriefToggle:not([hidden])::after{content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:translateY(-2px) rotate(45deg)}.mobileBriefToggle[aria-expanded="true"]::after{transform:translateY(2px) rotate(225deg)}.mobileBriefToggle:not([hidden]):hover{background:#fff2df}}
 @media(max-width:620px){.homeWorldCollection h3 small{font-size:11.5px;line-height:1.4}.homeWorldGrid small{font-size:12px}.homeWorldGrid a{min-height:130px}}
 @media(max-width:760px) and (pointer:coarse){
-  .top,.workspaceNav .toolnav,.homeHero,.homeHeroActions .homeSecondary,.homeToolCard,.homeWorldGrid a{backdrop-filter:none;-webkit-backdrop-filter:none}
+  .top,.workspaceNav .toolnav,.homeHero,.homeToolCard,.homeWorldGrid a{backdrop-filter:none;-webkit-backdrop-filter:none}
   .workspaceNav .toolnav{background:#f3e7d9}
   .homeHero{background:linear-gradient(138deg,#fffdf8,#fff0df 58%,#f4e3da)}
   .homeToolCard{background:linear-gradient(142deg,#fffefa,#fff7ed 72%,#f7e9e0)}
@@ -1297,7 +1288,7 @@ body{background:radial-gradient(circle at 8% 7%,#f8dbc6b8 0,transparent 28%),rad
 @media(max-width:620px){.homeMusicDock{margin:8px 0 0;border-top:1px solid #eddcc9;border-radius:15px}}
 
 /* Keep the illustrated welcome generous while bringing the four core tools into view. */
-.homeHero{grid-template-rows:minmax(330px,1fr) auto;min-height:520px;align-items:start}
+.homeHero{grid-template-rows:minmax(300px,1fr) auto;min-height:480px;align-items:start}
 .homeHeroCopy{grid-column:1;grid-row:1;align-self:start;padding-top:clamp(32px,4vw,58px)}
 .homeHeroArt{grid-column:2;grid-row:1/3;align-self:stretch;min-height:0}
 .homeHero>.homeExplore{grid-column:1/3;grid-row:2;z-index:2;display:grid;grid-template-columns:minmax(155px,.17fr) minmax(0,1fr);align-items:center;gap:18px;margin:0 18px 18px;padding:13px 17px;border:1px solid #ffffffcf;border-radius:23px;background:linear-gradient(120deg,#fffdf4e9,#ffffffc7 54%,#ffefd9d6);box-shadow:0 13px 34px #4b2b2052,0 1px 0 #fff inset;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);scroll-margin-top:20px}
