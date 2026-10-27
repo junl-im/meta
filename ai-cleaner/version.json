@@ -1,7 +1,7 @@
 {
-  "version": "1.37.4",
-  "assetVersion": "1374",
+  "version": "1.37.5",
+  "assetVersion": "1375",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Remove duplicate home shortcuts so the illustrated tool selector is the single navigation point."
+  "notes": "Fill desktop linked-world rows with four evenly sized cards while preserving the mobile groups."
 }

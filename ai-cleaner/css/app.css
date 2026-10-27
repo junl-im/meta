@@ -1305,3 +1305,19 @@ body{background:radial-gradient(circle at 8% 7%,#f8dbc6b8 0,transparent 28%),rad
 @media(max-width:980px){.homeHero>.homeExplore{grid-template-columns:1fr;gap:9px}.homeHero .homeSectionHeading{display:flex;align-items:baseline;gap:10px}.homeHero .homeSectionHeading h2{margin:0}.homeHero .homeToolGrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:620px){.homeHero{min-height:0}.homeHeroCopy{order:0;padding:20px 20px 18px}.homeHeroArt{order:1;aspect-ratio:16/9}.homeHero>.homeExplore{order:2;width:calc(100% - 22px);grid-template-columns:1fr;gap:9px;margin:-22px 11px 11px;padding:11px;border-radius:19px}.homeHero .homeToolGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.homeHero .homeToolCard{min-height:56px;grid-template-columns:39px minmax(0,1fr);padding:6px 8px;border-radius:12px}.homeHero .homeCardIcon{width:39px;height:39px}.homeHero .homeToolCard strong{font-size:12px}.homeHero .homeSectionHeading{padding-inline:3px}.homeHero .homeSectionHeading h2{font-size:17px}}
 @media(max-width:350px){.homeHeroCopy{padding:17px 15px}.homeHero .homeSectionHeading{display:block}.homeHero .homeSectionHeading h2{margin-top:3px;font-size:16px}.homeHero .homeToolCard strong{font-size:11px}}
+
+/* Eight linked worlds fill two even desktop rows while retaining their group headings. */
+@media(min-width:1000px){
+  .homeWorlds{grid-template-columns:repeat(4,minmax(0,1fr));column-gap:14px;row-gap:18px}
+  .homeWorlds>.homeSectionHeading,.homeWorldCollection--stories{grid-column:1/-1}
+  .homeWorldCollection--audio{grid-column:1/span 3}
+  .homeWorldCollection--games{grid-column:4}
+  .homeWorldCollection{min-width:0}
+  .homeWorldCollection--stories .homeWorldGrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .homeWorldCollection--audio .homeWorldGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .homeWorldCollection--games .homeWorldGrid{grid-template-columns:minmax(0,1fr)}
+}
+@media(min-width:621px) and (max-width:999px){
+  .homeWorldCollection .homeWorldGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .homeWorldCollection .homeWorldGrid>a:last-child:nth-child(odd){grid-column:1/-1}
+}
