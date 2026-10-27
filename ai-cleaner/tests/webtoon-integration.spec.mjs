@@ -729,6 +729,33 @@ test('narrow bubble variants keep their tails attached after resizing and reopen
   expect(movedTip.x+movedTip.width/2).toBeLessThanOrEqual(grown.x+grown.width);
 });
 
+test('bubble tail width and bend survive save and change preview and PNG',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'◯ 말풍선'}).click();
+  await page.getByLabel('말풍선 유형').selectOption('radio');
+  const before=await page.locator('.web-bubble-canvas').evaluate(canvas=>canvas.toDataURL());
+  const baselineDownload=page.waitForEvent('download');
+  await page.getByRole('button',{name:'PNG 초안'}).click();
+  const baseline=await (await baselineDownload).createReadStream().then(async stream=>{const chunks=[];for await(const chunk of stream)chunks.push(chunk);return Buffer.concat(chunks)});
+  await page.getByRole('slider',{name:'꼬리 폭'}).fill('110');
+  await page.getByRole('slider',{name:'꼬리 휘어짐'}).fill('36');
+  await expect(page.getByRole('slider',{name:'꼬리 폭'})).toHaveValue('110');
+  await expect(page.getByRole('slider',{name:'꼬리 휘어짐'})).toHaveValue('36');
+  expect(await page.locator('.web-bubble-canvas').evaluate(canvas=>canvas.toDataURL())).not.toBe(before);
+  const changedDownload=page.waitForEvent('download');
+  await page.getByRole('button',{name:'PNG 초안'}).click();
+  const changed=await (await changedDownload).createReadStream().then(async stream=>{const chunks=[];for await(const chunk of stream)chunks.push(chunk);return Buffer.concat(chunks)});
+  expect(firstPngFromZip(changed).equals(firstPngFromZip(baseline))).toBe(false);
+  const savedDownload=page.waitForEvent('download');
+  await page.getByRole('button',{name:'.wtoon 저장'}).click();
+  const saved=await (await savedDownload).createReadStream().then(async stream=>{const chunks=[];for await(const chunk of stream)chunks.push(chunk);return Buffer.concat(chunks)});
+  await page.locator('input[type=file][accept=".wtoon,.json"]').setInputFiles({name:'tail-shape.wtoon',mimeType:'application/octet-stream',buffer:saved});
+  await page.locator('.web-bubble').click();
+  await expect(page.getByRole('slider',{name:'꼬리 폭'})).toHaveValue('110');
+  await expect(page.getByRole('slider',{name:'꼬리 휘어짐'})).toHaveValue('36');
+});
+
 test('new project clears the restored draft',async({page})=>{
   await page.goto(studio);
   await page.getByRole('button',{name:'▣ 컷'}).click();
