@@ -1431,3 +1431,57 @@ test('PNG pages keep rotated cuts, erased portions and brush strokes across page
   const [redNext,greenNext]=await sample(pages.get('002.png'),[[200,30],[450,30]]);
   expect(redNext[0]).toBeGreaterThan(200);expect(redNext[1]).toBeLessThan(50);expect(greenNext[1]).toBeGreaterThan(100);expect(greenNext[0]).toBeLessThan(50);
 });
+
+
+test('opening a slow file never overwrites edits made during loading',async({page})=>{
+ await page.addInitScript(()=>{const original=File.prototype.arrayBuffer;File.prototype.arrayBuffer=function(){return this.name==='slow.json'?new Promise((resolve,reject)=>setTimeout(()=>original.call(this).then(resolve,reject),1000)):original.call(this)}});
+ await page.setViewportSize({width:1280,height:800});await page.goto(studio);
+ await expect(page.getByRole('textbox',{name:'작품명'})).toBeVisible();
+ const project={schemaVersion:4,title:'불러온 이전 원고',canvas:{width:690,height:700,background:'#ffffff'},elements:[],assets:[]};
+ await page.locator('input[type=file][accept=".wtoon,.json"]').setInputFiles({name:'slow.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project))});
+ await page.getByRole('textbox',{name:'작품명'}).fill('읽는 중 새로 수정한 원고');
+ await expect(page.locator('.web-status')).toContainText('여는 동안 편집 내용이 바뀌어 현재 원고를 유지했습니다');
+ await expect(page.getByRole('textbox',{name:'작품명'})).toHaveValue('읽는 중 새로 수정한 원고');
+ await page.getByRole('textbox',{name:'작품명'}).fill('읽는 중 새로 수정한 원고!');
+ await expect(page.locator('.web-status')).toContainText('브라우저 임시 원고 저장됨');await page.reload();
+ await expect(page.getByRole('textbox',{name:'작품명'})).toHaveValue('읽는 중 새로 수정한 원고!');
+});
+
+test('oversized declared ZIP entry is rejected while keeping the current draft',async({page})=>{
+ await page.setViewportSize({width:1280,height:800});await page.goto(studio);await page.getByRole('textbox',{name:'작품명'}).fill('안전하게 유지');
+ const saved=page.waitForEvent('download');await page.getByRole('button',{name:'.wtoon 저장'}).click();const bytes=fs.readFileSync(await (await saved).path());
+ const central=bytes.indexOf(Buffer.from([0x50,0x4b,0x01,0x02]));expect(central).toBeGreaterThan(0);bytes.writeUInt32LE(301*1024*1024,central+24);
+ await page.locator('input[type=file][accept=".wtoon,.json"]').setInputFiles({name:'large.wtoon',mimeType:'application/octet-stream',buffer:bytes});
+ await expect(page.locator('.web-status')).toContainText('압축을 푼 작품이 300MB를 넘습니다');
+ await expect(page.getByRole('textbox',{name:'작품명'})).toHaveValue('안전하게 유지');
+});
+
+test('new project waits for an earlier slow autosave before clearing the draft',async({page})=>{
+ await page.addInitScript(()=>{const open=indexedDB.open.bind(indexedDB);let calls=0;window.__webtoonDraftOpenCalls=0;indexedDB.open=(...args)=>{const native=open(...args),number=++calls;window.__webtoonDraftOpenCalls=calls;const fake={get result(){return native.result},get error(){return native.error},onupgradeneeded:null,onsuccess:null,onerror:null};native.onupgradeneeded=e=>fake.onupgradeneeded?.(e);native.onerror=e=>fake.onerror?.(e);native.onsuccess=e=>setTimeout(()=>fake.onsuccess?.(e),number===2?1800:0);return fake}});
+ await page.setViewportSize({width:1280,height:800});await page.goto(studio);
+ await page.getByRole('textbox',{name:'작품명'}).fill('이전 원고');await page.getByRole('button',{name:'▣ 컷'}).click();
+ await page.waitForFunction(()=>window.__webtoonDraftOpenCalls>=2);
+ page.once('dialog',dialog=>dialog.accept());await page.getByRole('button',{name:'새 원고'}).click();
+ await expect(page.locator('.web-panel')).toHaveCount(0);await expect(page.getByRole('textbox',{name:'작품명'})).not.toHaveValue('이전 원고');
+ await page.reload();await expect(page.locator('.web-panel')).toHaveCount(0);await expect(page.getByRole('textbox',{name:'작품명'})).not.toHaveValue('이전 원고');
+});
+
+
+test('initial draft restore does not replace edits made while loading',async({page})=>{
+ await page.setViewportSize({width:1280,height:800});await page.goto(studio);
+ await page.getByRole('textbox',{name:'작품명'}).fill('복원 전 원고');await expect(page.locator('.web-status')).toContainText('브라우저 임시 원고 저장됨');
+ await page.addInitScript(()=>{const open=indexedDB.open.bind(indexedDB);let count=0;indexedDB.open=(...args)=>{const native=open(...args),number=++count;const fake={get result(){return native.result},get error(){return native.error},onupgradeneeded:null,onsuccess:null,onerror:null};native.onupgradeneeded=e=>fake.onupgradeneeded?.(e);native.onerror=e=>fake.onerror?.(e);native.onsuccess=e=>setTimeout(()=>fake.onsuccess?.(e),number===1?1200:0);return fake}});
+ await page.reload();await page.getByRole('textbox',{name:'작품명'}).fill('복원 도중 새 편집');
+ await expect(page.locator('.web-status')).toContainText('현재 편집 내용을 유지했습니다');await expect(page.getByRole('textbox',{name:'작품명'})).toHaveValue('복원 도중 새 편집');
+ await expect(page.locator('.web-status')).toContainText('브라우저 임시 원고 저장됨');await page.reload();await expect(page.getByRole('textbox',{name:'작품명'})).toHaveValue('복원 도중 새 편집');
+});
+
+test('new project keeps edits made while its draft clear is pending',async({page})=>{
+ await page.addInitScript(()=>{const open=indexedDB.open.bind(indexedDB);let count=0;indexedDB.open=(...args)=>{const native=open(...args),number=++count;const fake={get result(){return native.result},get error(){return native.error},onupgradeneeded:null,onsuccess:null,onerror:null};native.onupgradeneeded=e=>fake.onupgradeneeded?.(e);native.onerror=e=>fake.onerror?.(e);native.onsuccess=e=>setTimeout(()=>fake.onsuccess?.(e),number===3?1300:0);return fake}});
+ await page.setViewportSize({width:1280,height:800});await page.goto(studio);await page.getByRole('textbox',{name:'작품명'}).fill('기존 원고');await expect(page.locator('.web-status')).toContainText('브라우저 임시 원고 저장됨');
+ page.once('dialog',dialog=>dialog.accept());await page.getByRole('button',{name:'새 원고'}).click();
+ await page.getByRole('textbox',{name:'작품명'}).fill('새 원고 준비 중 편집');
+ await expect(page.locator('.web-status')).toContainText('새 원고 준비 중 편집 내용이 바뀌어 현재 원고를 유지했습니다');
+ await expect(page.getByRole('textbox',{name:'작품명'})).toHaveValue('새 원고 준비 중 편집');await page.reload();
+ await expect(page.getByRole('textbox',{name:'작품명'})).toHaveValue('새 원고 준비 중 편집');
+});
