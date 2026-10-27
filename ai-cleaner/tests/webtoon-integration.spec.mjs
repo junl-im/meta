@@ -117,6 +117,39 @@ test('mobile multi-select mode selects panels without a shift key',async({page})
   await expect(page.locator('.web-panel.is-group-selected')).toHaveCount(2);
 });
 
+test('dragging empty canvas selects intersecting panels in either direction',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  const canvas=page.locator('.web-canvas');
+  const rect=await canvas.boundingBox();
+  const zoom=rect.width/690;
+  const near={x:rect.x+10*zoom,y:rect.y+10*zoom};
+  const far={x:rect.x+660*zoom,y:rect.y+600*zoom};
+  await page.mouse.move(near.x,near.y);await page.mouse.down();
+  await page.mouse.move(far.x,far.y,{steps:7});
+  await expect(page.locator('.web-selection-marquee')).toBeVisible();
+  await page.mouse.up();
+  await expect(page.locator('.web-panel.is-group-selected')).toHaveCount(2);
+  await page.mouse.click(near.x,near.y);
+  await expect(page.locator('.web-panel.is-group-selected')).toHaveCount(0);
+  await page.mouse.move(far.x,far.y);await page.mouse.down();
+  await page.mouse.move(near.x,near.y,{steps:7});await page.mouse.up();
+  await expect(page.locator('.web-panel.is-group-selected')).toHaveCount(2);
+  await page.getByRole('button',{name:'T 텍스트'}).click();
+  await page.locator('.web-right .web-metrics label').filter({hasText:'위쪽'}).locator('input').first().fill('800');
+  await page.keyboard.down('Shift');
+  await page.mouse.move(near.x,near.y);await page.mouse.down();
+  await page.mouse.move(far.x,far.y,{steps:7});await page.mouse.up();
+  await page.keyboard.up('Shift');
+  await expect(page.locator('.web-element.is-group-selected')).toHaveCount(3);
+  await page.mouse.click(near.x,near.y);
+  await expect(page.locator('.web-element.is-group-selected')).toHaveCount(0);
+  await page.keyboard.press('Control+a');
+  await expect(page.locator('.web-element.is-group-selected')).toHaveCount(3);
+});
+
 test('mobile image import creates a panel and the library reuses it',async({page})=>{
   await page.setViewportSize({width:390,height:844});
   await page.goto(studio);
