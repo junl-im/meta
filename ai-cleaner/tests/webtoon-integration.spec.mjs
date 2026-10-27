@@ -1170,3 +1170,44 @@ test('pen strokes render, survive reload, undo and export on desktop and mobile'
     await expect(page.locator('.web-drawing')).toHaveCount(0);
   }
 });
+
+
+test('long pen strokes retain the final segment through draft and PNG export',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'✎ 펜 그리기'}).click();
+  const surface=page.getByLabel('펜 그리기 영역'),box=await surface.boundingBox();
+  await page.mouse.move(box.x+30,box.y+40);await page.mouse.down();
+  await surface.evaluate((node,{x,y})=>{for(let i=0;i<2700;i++)node.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerId:1,pointerType:'mouse',clientX:x+(i%2?100:30),clientY:y+40+(i%80)}))},{x:box.x,y:box.y});
+  await page.mouse.move(box.x+200,box.y+150);await page.mouse.up();
+  await expect(page.locator('.web-drawing')).toHaveCount(1);
+  await expect(page.locator('.web-status')).toContainText('브라우저 임시 원고 저장됨');
+  const drawing=await page.evaluate(()=>new Promise((resolve,reject)=>{const request=indexedDB.open('webtoon-studio-web');request.onerror=()=>reject(request.error);request.onsuccess=()=>{const db=request.result,read=db.transaction('drafts').objectStore('drafts').get('current');read.onsuccess=()=>{resolve(read.result.elements.find(e=>e.type==='drawing'));db.close()};read.onerror=()=>reject(read.error)}}));
+  expect(drawing.points.length).toBeGreaterThan(1200);
+  expect(drawing.points.length).toBeLessThanOrEqual(2500);
+  expect(drawing.x+drawing.points.at(-1).x).toBeGreaterThan(250);
+  expect(drawing.y+drawing.points.at(-1).y).toBeGreaterThan(180);
+  await page.reload();
+  await expect(page.locator('.web-drawing')).toHaveCount(1);
+  const download=page.waitForEvent('download');await page.getByRole('button',{name:'PNG 초안'}).click();
+  const png=firstPngFromZip(fs.readFileSync(await (await download).path()));
+  const visible=await page.evaluate(async ({data,x,y})=>{const image=new Image();image.src='data:image/png;base64,'+data;await image.decode();const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;const ctx=canvas.getContext('2d');ctx.drawImage(image,0,0);const pixels=ctx.getImageData(Math.floor(x)-5,Math.floor(y)-5,10,10).data;let count=0;for(let i=0;i<pixels.length;i+=4)if(pixels[i]<100&&pixels[i+1]<120&&pixels[i+2]<130)count++;return count},{data:png.toString('base64'),x:drawing.x+drawing.points.at(-1).x,y:drawing.y+drawing.points.at(-1).y});
+  expect(visible).toBeGreaterThan(0);
+});
+
+test('pen draws with a real emulated phone touch gesture',async({browser})=>{
+  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+  try{const page=await context.newPage();await page.goto(studio);
+    await page.getByRole('button',{name:'도구',exact:true}).click();
+    await page.getByRole('button',{name:'✎ 펜 그리기'}).click();
+    const box=await page.getByLabel('펜 그리기 영역').boundingBox(),x=box.x+40,y=box.y+55,cdp=await context.newCDPSession(page);
+    await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});
+    await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x+45,y:y+45}]});
+    await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+    await expect(page.locator('.web-drawing')).toHaveCount(1);
+    await page.getByRole('button',{name:'✎ 펜 종료'}).click();
+    await expect(page.getByLabel('펜 그리기 영역')).toHaveCount(0);
+    await expect(page.locator('.web-status')).toContainText('브라우저 임시 원고 저장됨');
+    await page.reload();await expect(page.locator('.web-drawing')).toHaveCount(1);
+  }finally{await context.close()}
+});
