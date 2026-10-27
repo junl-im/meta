@@ -1,7 +1,7 @@
 {
-  "version": "1.37.2",
-  "assetVersion": "1372",
+  "version": "1.37.3",
+  "assetVersion": "1373",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
-  "notes": "Improve webtoon first-use canvas guidance and text-element dragging."
+  "notes": "Bring the four core tools into the illustrated home hero as a responsive floating selector."
 }
