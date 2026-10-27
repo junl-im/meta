@@ -1211,3 +1211,49 @@ test('pen draws with a real emulated phone touch gesture',async({browser})=>{
     await page.reload();await expect(page.locator('.web-drawing')).toHaveCount(1);
   }finally{await context.close()}
 });
+
+
+test('PC erasure and restore records mask only their own layer in editor and PNG',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});await page.goto(studio);
+  const project={schemaVersion:4,title:'마스크 검사',episode:'1화',canvas:{width:690,height:700,background:'#ffffff'},scenes:[{id:'scene_root',name:'장면',startY:0,collapsed:false}],elements:[
+    {id:'under',type:'panel',x:100,y:100,w:200,h:150,z:1,fill:'#0000ff',strokeWidth:0},
+    {id:'above',type:'panel',x:100,y:100,w:200,h:150,z:2,fill:'#ff0000',strokeWidth:0,erasures:[{points:[{x:100,y:30},{x:100,y:120}],width:40,soft:false},{points:[{x:80,y:75},{x:120,y:75}],width:12,soft:false,restore:true}]},
+  ],assets:[],settings:{snap:false,guides:true,gridSize:10,smartSnapDistance:8}};
+  await page.locator('input[type=file][accept=".wtoon,.json"]').setInputFiles({name:'pc-project.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project))});
+  await expect(page.locator('.web-erased-artwork')).toHaveCount(1);
+  const surface=await page.locator('.web-canvas').boundingBox(),scale=surface.width/690;
+  const screenshot=await page.screenshot({clip:{x:Math.round(surface.x+100*scale),y:Math.round(surface.y+100*scale),width:Math.round(200*scale),height:Math.round(150*scale)}});
+  const sample=async(buffer,points)=>page.evaluate(async({data,points})=>{const image=new Image();image.src='data:image/png;base64,'+data;await image.decode();const c=document.createElement('canvas');c.width=image.width;c.height=image.height;const ctx=c.getContext('2d');ctx.drawImage(image,0,0);return points.map(([x,y])=>Array.from(ctx.getImageData(Math.round(x),Math.round(y),1,1).data))},{data:buffer.toString('base64'),points});
+  const [erased,restored,solid]=await sample(screenshot,[[100*scale,55*scale],[100*scale,75*scale],[40*scale,55*scale]]);
+  expect(erased[2]).toBeGreaterThan(200);expect(erased[0]).toBeLessThan(50);
+  expect(restored[0]).toBeGreaterThan(200);expect(restored[2]).toBeLessThan(50);
+  expect(solid[0]).toBeGreaterThan(200);
+  const download=page.waitForEvent('download');await page.getByRole('button',{name:'PNG 초안'}).click();
+  const png=firstPngFromZip(fs.readFileSync(await (await download).path()));
+  const [outErased,outRestored,outSolid]=await sample(png,[[200,155],[200,175],[140,155]]);
+  expect(outErased[2]).toBeGreaterThan(200);expect(outErased[0]).toBeLessThan(50);
+  expect(outRestored[0]).toBeGreaterThan(200);expect(outRestored[2]).toBeLessThan(50);expect(outSolid[0]).toBeGreaterThan(200);
+  await page.locator('[data-element-id=\"above\"]').click();
+  await page.getByRole('button',{name:'이 요소의 지운 영역 복원'}).click();
+  await expect(page.locator('.web-erased-artwork')).toHaveCount(0);
+  await page.getByRole('button',{name:'↶ 되돌리기'}).click();
+  await expect(page.locator('.web-erased-artwork')).toHaveCount(1);
+});
+
+
+test('PC masked bubble and drawing retain controls and survive a project file round trip',async({page})=>{
+  await page.setViewportSize({width:390,height:844});await page.goto(studio);
+  const project={schemaVersion:4,title:'마스크 저장',episode:'1화',canvas:{width:690,height:700,background:'#ffffff'},scenes:[{id:'scene_root',name:'장면',startY:0,collapsed:false}],elements:[
+    {id:'bubble',type:'bubble',kind:'speech',text:'대사',x:100,y:80,w:260,h:120,z:1,fill:'#ffffff',stroke:'#000000',tailX:150,tailY:180,erasures:[{points:[{x:130,y:20},{x:130,y:110}],width:28,soft:true}]},
+    {id:'line',type:'drawing',x:100,y:350,w:250,h:60,z:2,points:[{x:10,y:30},{x:230,y:30}],stroke:'#000000',strokeWidth:12,erasures:[{points:[{x:100,y:0},{x:100,y:60}],width:20,soft:false}]},
+  ],assets:[],settings:{snap:false,guides:true,gridSize:10,smartSnapDistance:8}};
+  await page.locator('input[type=file][accept=".wtoon,.json"]').setInputFiles({name:'desktop.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project))});
+  await expect(page.locator('.web-erased-artwork')).toHaveCount(2);
+  await page.locator('[data-element-id="bubble"]').click();
+  await expect(page.getByRole('button',{name:'말풍선 꼬리 이동'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'크기 조절 se'})).toBeVisible();
+  const save=page.waitForEvent('download');await page.getByRole('button',{name:'.wtoon 저장'}).click();const bytes=fs.readFileSync(await (await save).path());
+  await page.locator('input[type=file][accept=".wtoon,.json"]').setInputFiles({name:'again.wtoon',mimeType:'application/octet-stream',buffer:bytes});
+  await expect(page.locator('.web-erased-artwork')).toHaveCount(2);
+  await page.locator('[data-element-id="bubble"]').click();await expect(page.getByRole('button',{name:'말풍선 꼬리 이동'})).toBeVisible();
+});

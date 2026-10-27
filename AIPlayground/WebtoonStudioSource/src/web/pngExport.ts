@@ -2,6 +2,7 @@ import {zipSync} from 'fflate'
 import type {EditorElement,ProjectV4,TextEffect} from '@core/types'
 import {imageFilterCss} from './imageFilter'
 import {drawBubbleShape} from './bubbleShape'
+import {paintErasures} from './erasureMask'
 
 const loadImage=(src:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(Error('이미지를 읽지 못했습니다.'));image.src=src})
 const canvasBlob=(canvas:HTMLCanvasElement)=>new Promise<Uint8Array>((resolve,reject)=>canvas.toBlob(async blob=>blob?resolve(new Uint8Array(await blob.arrayBuffer())):reject(Error('PNG를 만들지 못했습니다.')),'image/png'))
@@ -47,6 +48,19 @@ export async function exportDraftPng(project:ProjectV4){
   for(const src of new Set(project.elements.filter(e=>e.type==='panel'&&e.image).map(e=>(e as {image:string}).image)))images.set(src,await loadImage(src))
   const files:Record<string,Uint8Array>={},scale=690/project.canvas.width,sourceHeight=Math.max(1,Math.floor(2000/scale)),elements=project.elements.filter(e=>e.visible!==false&&e.type!=='scene').sort((a,b)=>a.z-b.z)
   let part=0
-  for(let start=0;start<project.canvas.height;start+=sourceHeight){const end=Math.min(project.canvas.height,start+sourceHeight),canvas=document.createElement('canvas');canvas.width=690;canvas.height=Math.ceil((end-start)*scale);const ctx=canvas.getContext('2d');if(!ctx)throw Error('브라우저 캔버스를 사용할 수 없습니다.');ctx.fillStyle=project.canvas.background;ctx.fillRect(0,0,canvas.width,canvas.height);ctx.setTransform(scale,0,0,scale,0,-start*scale);for(const e of elements){const tail=e.type==='bubble'&&e.kind!=='narration'?(e.tailY??e.h+35):e.h;if(e.y+Math.max(e.h,tail)>=start&&e.y+Math.min(0,tail)<=end)drawElement(ctx,e,images)}files[`${String(++part).padStart(3,'0')}.png`]=await canvasBlob(canvas)}
+  for(let start=0;start<project.canvas.height;start+=sourceHeight){const end=Math.min(project.canvas.height,start+sourceHeight),canvas=document.createElement('canvas');canvas.width=690;canvas.height=Math.ceil((end-start)*scale);const ctx=canvas.getContext('2d');if(!ctx)throw Error('브라우저 캔버스를 사용할 수 없습니다.');ctx.fillStyle=project.canvas.background;ctx.fillRect(0,0,canvas.width,canvas.height);ctx.setTransform(scale,0,0,scale,0,-start*scale);for(const e of elements){const tail=e.type==='bubble'&&e.kind!=='narration'?(e.tailY??e.h+35):e.h;if(e.y+Math.max(e.h,tail)<start||e.y+Math.min(0,tail)>end)continue
+    if(!e.erasures?.length){drawElement(ctx,e,images);continue}
+    // Render this element separately so erasing never affects the background or another layer.
+    const isolated=document.createElement('canvas');isolated.width=canvas.width;isolated.height=canvas.height
+    const artwork=isolated.getContext('2d');if(!artwork)throw Error('지우개 효과를 적용하지 못했습니다.')
+    artwork.setTransform(scale,0,0,scale,0,-start*scale);drawElement(artwork,e,images)
+    const mask=document.createElement('canvas');mask.width=canvas.width;mask.height=canvas.height
+    const maskCtx=mask.getContext('2d');if(!maskCtx)throw Error('지우개 효과를 적용하지 못했습니다.')
+    maskCtx.fillStyle='#fff';maskCtx.fillRect(0,0,mask.width,mask.height)
+    maskCtx.setTransform(scale,0,0,scale,0,-start*scale);maskCtx.translate(e.x+e.w/2,e.y+e.h/2);maskCtx.rotate((e.rotation||0)*Math.PI/180);maskCtx.translate(-e.w/2,-e.h/2)
+    paintErasures(maskCtx,e,scale)
+    artwork.setTransform(1,0,0,1,0,0);artwork.globalCompositeOperation='destination-in';artwork.drawImage(mask,0,0)
+    ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(isolated,0,0);ctx.restore()
+  }files[`${String(++part).padStart(3,'0')}.png`]=await canvasBlob(canvas)}
   return zipSync(files,{level:6})
 }
