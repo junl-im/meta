@@ -2,17 +2,49 @@
   "use strict";
   const AUTHORS = ["[곰같은여우]","[여우같은곰]","고양이와사비","[ZERO]","닥터X"];
   const LAST_KEY = "gomfox_recent_naver_novel_v2";
+  const REFRESH_MS = 7*60*60*1000;
+  const FEED_URL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname)
+    ? "./catalog-feed.json"
+    : "https://junl-im.github.io/meta/NaverNovelShelf/site/catalog-feed.json";
   const escapeHTML = value => String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const byId = id => document.getElementById(id);
-  const works = (Array.isArray(window.NOVEL_CATALOG)?window.NOVEL_CATALOG:[])
+  let works = (Array.isArray(window.NOVEL_CATALOG)?window.NOVEL_CATALOG:[])
     .filter(w=>AUTHORS.includes(w.author) && /^\d+$/.test(w.id) && ["best","challenge"].includes(w.league))
     .filter(w=>w.url === "https://m.novel.naver.com/"+w.league+"/list?novelId="+w.id)
     .sort((a,b)=>Number(b.id)-Number(a.id));
   let selectedLeague="all";
   let lastReadId=null;
   let toastTimer=null;
+  let lastFeedFetch=0;
   try { lastReadId=localStorage.getItem(LAST_KEY); } catch {}
   const findLast = () => works.find(w=>w.id===lastReadId);
+  async function refreshCatalog() {
+    lastFeedFetch=Date.now();
+    try {
+      const response=await fetch(FEED_URL,{cache:"no-store"});
+      if(!response.ok) return;
+      const feed=await response.json();
+      if(feed.schema_version!==1||!Array.isArray(feed.works)||!/^\d{4}-\d{2}-\d{2}$/.test(feed.catalog_last_verified||""))return;
+      if(feed.catalog_last_verified<(window.NOVEL_CATALOG_LAST_CHECK||""))return;
+      const next=feed.works.map(row=>({
+        title:row.title,author:row.author_search_identity,id:String(row.id),
+        league:row.league,image:row.cover_thumbnail_url,genre:row.genre,url:row.official_url
+      }));
+      const ids=new Set();
+      if(next.some(row=>{
+        const key=row.league+":"+row.id;
+        if(ids.has(key))return true;ids.add(key);
+        return !AUTHORS.includes(row.author)||!/^\d+$/.test(row.id)||
+          !["best","challenge"].includes(row.league)||!row.title||!row.genre||
+          !safeCover(row.image)||row.url!=="https://m.novel.naver.com/"+row.league+"/list?novelId="+row.id;
+      }))return;
+      next.sort((a,b)=>Number(b.id)-Number(a.id));
+      if(JSON.stringify(next)!==JSON.stringify(works)){
+        works=next;
+        renderWorks();renderResumeButtons();
+      }
+    } catch { /* Keep the verified bundled catalog when the feed is unavailable. */ }
+  }
   function toast(message) {
     const el=byId("toast");
     el.textContent=message;
@@ -117,4 +149,9 @@
   byId("reopen-last").addEventListener("click",openLast);
   byId("copy-recent-link").addEventListener("click",copyLast);
   renderWorks();renderResumeButtons();
+  refreshCatalog();
+  setInterval(refreshCatalog,REFRESH_MS);
+  document.addEventListener("visibilitychange",()=>{
+    if(!document.hidden&&Date.now()-lastFeedFetch>=REFRESH_MS)refreshCatalog();
+  });
 })();

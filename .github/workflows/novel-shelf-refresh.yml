@@ -1,0 +1,114 @@
+name: Naver Novel Shelf catalog refresh
+
+on:
+  schedule:
+    # Seven-hour intervals continue across midnight and the weekly boundary.
+    - cron: '0 0,7,14,21 * * 0'
+    - cron: '0 4,11,18 * * 1'
+    - cron: '0 1,8,15,22 * * 2'
+    - cron: '0 5,12,19 * * 3'
+    - cron: '0 2,9,16,23 * * 4'
+    - cron: '0 6,13,20 * * 5'
+    - cron: '0 3,10,17 * * 6'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      changed: ${{ steps.changes.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Check public author searches
+        run: node NaverNovelShelf/scripts/refresh-public-catalog.mjs
+      - name: Check changed catalog
+        id: changes
+        shell: bash
+        run: |
+          node --check NaverNovelShelf/site/catalog.js
+          node --check NaverNovelShelf/site/app.js
+          node --check NaverNovelShelf/scripts/refresh-public-catalog.mjs
+          if ! git diff --quiet -- NaverNovelShelf/site/catalog.js NaverNovelShelf/site/catalog-feed.json NaverNovelShelf/integration/catalog.v1.json; then
+            echo 'changed=true' >> "$GITHUB_OUTPUT"
+          elif curl -fsSL --max-time 15 'https://junl-im.github.io/meta/NaverNovelShelf/site/catalog-feed.json' -o /tmp/published-novel-catalog.json; then
+            if cmp -s NaverNovelShelf/site/catalog-feed.json /tmp/published-novel-catalog.json; then
+              echo 'changed=false' >> "$GITHUB_OUTPUT"
+              echo 'Published catalog is current; deployment is skipped.'
+            else
+              echo 'changed=true' >> "$GITHUB_OUTPUT"
+              echo 'Published catalog is stale; retrying Pages deployment.'
+            fi
+          else
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            echo 'Published catalog could not be checked; bundled catalog stays available.'
+          fi
+      - name: Persist verified metadata
+        if: steps.changes.outputs.changed == 'true'
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add NaverNovelShelf/site/catalog.js NaverNovelShelf/site/catalog-feed.json NaverNovelShelf/integration/catalog.v1.json
+          if git diff --cached --quiet; then
+            echo 'No source commit needed; retrying publication of existing verified data.'
+            exit 0
+          fi
+          git commit -m 'chore: refresh public novel shelf catalog [skip ci]'
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch origin main
+            git rebase origin/main
+          done
+          echo 'Could not push the verified catalog.' >&2
+          exit 1
+      - name: Install runtime build dependencies
+        if: steps.changes.outputs.changed == 'true'
+        run: npm ci --no-audit --no-fund --omit=dev
+      - name: Build runtime vendor
+        if: steps.changes.outputs.changed == 'true'
+        run: npm run build:vendor
+      - name: Check latest main
+        if: steps.changes.outputs.changed == 'true'
+        shell: bash
+        run: |
+          git fetch origin main
+          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
+      - name: Configure GitHub Pages
+        if: steps.changes.outputs.changed == 'true'
+        uses: actions/configure-pages@v5
+      - name: Prepare Pages artifact
+        if: steps.changes.outputs.changed == 'true'
+        run: node .github/scripts/build-pages-artifact.mjs
+      - name: Upload Pages artifact
+        if: steps.changes.outputs.changed == 'true'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: '.pages-site'
+
+  deploy:
+    needs: refresh
+    if: needs.refresh.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: github-pages-deploy
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

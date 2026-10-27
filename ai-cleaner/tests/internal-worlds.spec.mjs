@@ -31,6 +31,24 @@ test('shelf hero illustration loads and Doctor X stays in the verified catalog',
   expect((await asset.body()).length).toBeGreaterThan(1000);
   const catalog=await page.evaluate(()=>window.NOVEL_CATALOG);
   expect(catalog).toHaveLength(28);
-  expect(catalog.filter(work=>work.author==='닥터X').map(work=>work.id).sort()).toEqual(['1245900','1248545','1250566']);
+  expect(catalog.filter(work=>work.author==='닥터X').map(work=>work.id).sort()).toEqual(['1245900','1248545','1249473','1250566']);
+  await expect(page.locator('.novel-card[data-open-novel="1250566"]')).toBeVisible();
+});
+
+test('shelf reads its published feed and updates the visible catalog',async({page})=>{
+  const response=await page.request.get(new URL('../NaverNovelShelf/site/catalog-feed.json',home).href);
+  expect(response.ok()).toBe(true);
+  const feed=await response.json();
+  feed.works.push({id:'9999999',title:'새로 확인된 이야기',author_search_identity:'닥터X',league:'challenge',genre:'판타지',official_url:'https://m.novel.naver.com/challenge/list?novelId=9999999',cover_thumbnail_url:feed.works[0].cover_thumbnail_url});
+  await page.route('**/NaverNovelShelf/site/catalog-feed.json',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(feed)}));
+  await page.goto(new URL('../NaverNovelShelf/site/',home).href);
+  await expect(page.locator('#hero-total')).toHaveText('29');
+  await expect(page.locator('.novel-card[data-open-novel="9999999"]')).toContainText('새로 확인된 이야기');
+});
+
+test('shelf keeps its bundled works when the feed is unavailable',async({page})=>{
+  await page.route('**/NaverNovelShelf/site/catalog-feed.json',route=>route.fulfill({status:503,body:'temporarily unavailable'}));
+  await page.goto(new URL('../NaverNovelShelf/site/',home).href);
+  await expect(page.locator('#hero-total')).toHaveText('28');
   await expect(page.locator('.novel-card[data-open-novel="1250566"]')).toBeVisible();
 });
