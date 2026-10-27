@@ -17,7 +17,7 @@ export function eraseDrawings(project:ProjectV4,points:DrawingPoint[],width:numb
  for(const e of project.elements){if(e.type!=='drawing'||e.locked||e.visible===false||(e.erasures?.length||0)+needed>100||restore&&!e.erasures?.some(r=>!r.restore))continue
  const angle=-(e.rotation||0)*Math.PI/180,cx=e.x+e.w/2,cy=e.y+e.h/2,local=points.map(p=>({x:(p.x-cx)*Math.cos(angle)-(p.y-cy)*Math.sin(angle)+e.w/2,y:(p.x-cx)*Math.sin(angle)+(p.y-cy)*Math.cos(angle)+e.h/2}))
  let hit=false;const radius=width/2+(e.strokeWidth||4)/2
- for(let i=1;i<local.length&&!hit;i++)for(let j=1;j<e.points.length&&!hit;j++)hit=near(local[i-1],local[i],e.points[j-1],e.points[j],radius)
+ for(let i=1;i<local.length&&!hit;i++){if(e.points.length===1)hit=distance(e.points[0],local[i-1],local[i])<=radius;else for(let j=1;j<e.points.length&&!hit;j++)hit=near(local[i-1],local[i],e.points[j-1],e.points[j],radius)}
  if(hit){e.erasures=[...(e.erasures||[]),...strokeChunks(local).map(points=>({points,width,soft,...(restore?{restore:true}:{})}))];count++}
  }
  return count

@@ -1257,3 +1257,39 @@ test('PC masked bubble and drawing retain controls and survive a project file ro
   await expect(page.locator('.web-erased-artwork')).toHaveCount(2);
   await page.locator('[data-element-id="bubble"]').click();await expect(page.getByRole('button',{name:'말풍선 꼬리 이동'})).toBeVisible();
 });
+
+
+test('web eraser removes parts of pen strokes and single dots, with undo and reload',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});await page.goto(studio);
+  await page.getByRole('button',{name:'✎ 펜 그리기'}).click();
+  let surface=page.getByLabel('펜 그리기 영역'),box=await surface.boundingBox();
+  await page.mouse.move(box.x+45,box.y+60);await page.mouse.down();await page.mouse.move(box.x+200,box.y+60,{steps:8});await page.mouse.up();
+  await page.mouse.click(box.x+150,box.y+125);
+  await expect(page.locator('.web-drawing')).toHaveCount(2);
+  await page.getByRole('button',{name:'지우개',exact:true}).click();
+  surface=page.getByLabel('지우개 영역');box=await surface.boundingBox();
+  await page.mouse.move(box.x+90,box.y+35);await page.mouse.down();await page.mouse.move(box.x+90,box.y+85,{steps:5});await page.mouse.up();
+  await expect(page.locator('.web-erased-artwork')).toHaveCount(1);
+  await page.mouse.click(box.x+150,box.y+125);
+  await expect(page.locator('.web-erased-artwork')).toHaveCount(2);
+  await page.getByRole('button',{name:'↶ 되돌리기'}).click();await expect(page.locator('.web-erased-artwork')).toHaveCount(1);
+  await page.getByRole('button',{name:'↷ 다시'}).click();await expect(page.locator('.web-erased-artwork')).toHaveCount(2);
+  await expect(page.locator('.web-status')).toContainText('브라우저 임시 원고 저장됨');
+  await page.reload();await expect(page.locator('.web-erased-artwork')).toHaveCount(2);
+});
+
+test('mobile eraser respects selected scope and locked layers',async({browser})=>{
+ const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+ try{const page=await context.newPage();await page.goto(studio);
+ const project={schemaVersion:4,title:'지우개 범위',episode:'1',canvas:{width:690,height:700,background:'#fff'},scenes:[{id:'scene_root',name:'장면',startY:0,collapsed:false}],elements:[{id:'target',type:'panel',x:80,y:80,w:300,h:250,z:2,fill:'#ff0000',strokeWidth:0},{id:'locked',type:'panel',x:80,y:80,w:300,h:250,z:1,fill:'#0000ff',strokeWidth:0,locked:true}],assets:[],settings:{snap:false,guides:true,gridSize:10,smartSnapDistance:8}};
+ await page.locator('input[type=file][accept=".wtoon,.json"]').setInputFiles({name:'erase.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project))});
+ await page.locator('[data-element-id="target"]').click();
+ await page.getByRole('button',{name:'도구',exact:true}).click();await page.getByRole('button',{name:'지우개',exact:true}).click();
+ await page.getByRole('button',{name:'도구',exact:true}).click();await page.getByLabel('지우기 대상').selectOption('selected');await page.getByRole('button',{name:'캔버스',exact:true}).click();
+ const surface=page.getByLabel('지우개 영역'),box=await surface.boundingBox(),x=box.x+110,y=box.y+90,cdp=await context.newCDPSession(page);
+ await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x+35,y:y+30}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+ await expect(page.locator('[data-element-id="target"] .web-erased-artwork')).toHaveCount(1);
+ await expect(page.locator('[data-element-id="locked"] .web-erased-artwork')).toHaveCount(0);
+ await page.getByRole('button',{name:'지우개 종료'}).click();await expect(surface).toHaveCount(0);
+ }finally{await context.close()}
+});
