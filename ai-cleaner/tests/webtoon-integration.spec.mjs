@@ -689,6 +689,46 @@ test('all ten bubble kinds draw distinct outlines in the editor',async({page})=>
   expect(new Set(images).size).toBe(kinds.length);
 });
 
+test('narrow bubble variants keep their tails attached after resizing and reopening',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'◯ 말풍선'}).click();
+  const metrics=page.locator('.web-right .web-metrics input');
+  await metrics.nth(2).fill('40');
+  await metrics.nth(3).fill('40');
+  await page.getByLabel('꼬리 좌우').fill('999');
+  await expect(page.getByLabel('꼬리 좌우')).toHaveValue('40');
+  await page.getByLabel('꼬리 상하').fill('0');
+  await expect(page.getByLabel('꼬리 상하')).toHaveValue('52');
+  for(const kind of ['speech','whisper','rounded','radio','cloud','burst','shout','tremble','thought']){
+    await page.getByLabel('말풍선 유형').selectOption(kind);
+    const bounds=await page.locator('.web-bubble').boundingBox();
+    const tip=await page.getByRole('button',{name:'말풍선 꼬리 이동'}).boundingBox();
+    expect(tip.x+tip.width/2,kind).toBeGreaterThanOrEqual(bounds.x);
+    expect(tip.x+tip.width/2,kind).toBeLessThanOrEqual(bounds.x+bounds.width);
+    const canvas=await page.locator('.web-bubble-canvas').evaluate(node=>({width:node.width,height:node.height,alpha:node.getContext('2d').getImageData(Math.floor(node.width/2),Math.floor(node.height/2),1,1).data[3]}));
+    expect(canvas.width,kind).toBeGreaterThan(0);
+    expect(canvas.height,kind).toBeGreaterThan(canvas.width);
+    expect(canvas.alpha,kind).toBeGreaterThan(0);
+  }
+  await expect(page.locator('.web-status')).toContainText('임시 원고 저장됨');
+  await page.reload();
+  await expect(page.locator('.web-bubble')).toHaveCount(1);
+  await page.locator('.web-bubble').click();
+  const bounds=await page.locator('.web-bubble').boundingBox();
+  const tip=await page.getByRole('button',{name:'말풍선 꼬리 이동'}).boundingBox();
+  expect(tip.x+tip.width/2).toBeLessThanOrEqual(bounds.x+bounds.width);
+  const handle=await page.getByRole('button',{name:'크기 조절 se'}).boundingBox();
+  await page.mouse.move(handle.x+handle.width/2,handle.y+handle.height/2);
+  await page.mouse.down();
+  await page.mouse.move(handle.x+handle.width/2+60,handle.y+handle.height/2+40,{steps:5});
+  await page.mouse.up();
+  const grown=await page.locator('.web-bubble').boundingBox();
+  const movedTip=await page.getByRole('button',{name:'말풍선 꼬리 이동'}).boundingBox();
+  expect(grown.width).toBeGreaterThan(bounds.width);
+  expect(movedTip.x+movedTip.width/2).toBeLessThanOrEqual(grown.x+grown.width);
+});
+
 test('new project clears the restored draft',async({page})=>{
   await page.goto(studio);
   await page.getByRole('button',{name:'▣ 컷'}).click();
