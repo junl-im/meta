@@ -150,6 +150,59 @@ test('dragging empty canvas selects intersecting panels in either direction',asy
   await expect(page.locator('.web-element.is-group-selected')).toHaveCount(3);
 });
 
+test('smart guides snap dragged panels and Alt temporarily bypasses snapping',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.locator('.web-right .web-metrics label').filter({hasText:'왼쪽'}).locator('input').first().fill('160');
+  const panels=page.locator('.web-panel');
+  const zoom=await panels.first().evaluate(item=>Number.parseFloat(item.style.width)/580);
+  const left=()=>panels.evaluateAll(items=>items.map(item=>Number.parseFloat(item.style.left)));
+  const dragSecond=async(alt=false,expectGuide=true)=>{
+    const box=await panels.nth(1).boundingBox();
+    if(alt)await page.keyboard.down('Alt');
+    await page.mouse.move(box.x+box.width/2,box.y+box.height/2);
+    await page.mouse.down();
+    await page.mouse.move(box.x+box.width/2-101*zoom,box.y+box.height/2,{steps:6});
+    if(expectGuide)await expect(page.locator('.web-snap-guide.vertical')).toBeVisible();
+    await page.mouse.up();
+    if(alt)await page.keyboard.up('Alt');
+  };
+  await dragSecond();
+  await expect.poll(async()=>{const x=await left();return Math.round((x[1]-x[0])/zoom)}).toBe(0);
+  await page.keyboard.press('Control+z');
+  await expect.poll(async()=>{const x=await left();return Math.round((x[1]-x[0])/zoom)}).toBe(105);
+  await dragSecond(true,false);
+  await expect.poll(async()=>{const x=await left();return Math.round((x[1]-x[0])/zoom)}).toBe(4);
+  await page.keyboard.press('Control+z');
+  await page.getByRole('button',{name:'자석 정렬 켜짐'}).click();
+  await expect(page.getByRole('button',{name:'자석 정렬 꺼짐'})).toHaveAttribute('aria-pressed','false');
+  await dragSecond(false,false);
+  await expect.poll(async()=>{const x=await left();return Math.round((x[1]-x[0])/zoom)}).toBe(4);
+});
+
+test('smart snapping keeps a selected group together at the canvas edge',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  const layers=page.locator('.web-layers > div > button:first-child');
+  await layers.first().click();
+  await layers.nth(1).click({modifiers:['Shift']});
+  const panels=page.locator('.web-panel');
+  const zoom=await panels.first().evaluate(item=>Number.parseFloat(item.style.width)/580);
+  const box=await panels.last().boundingBox();
+  await page.mouse.move(box.x+box.width/2,box.y+box.height/2);
+  await page.mouse.down();
+  await page.mouse.move(box.x+box.width/2-51*zoom,box.y+box.height/2,{steps:6});
+  await expect(page.locator('.web-snap-guide.vertical')).toBeVisible();
+  await page.mouse.up();
+  await expect.poll(async()=>panels.evaluateAll(items=>items.map(item=>Number.parseFloat(item.style.left)))).toEqual([0,0]);
+  await page.keyboard.press('Control+z');
+  await expect.poll(async()=>panels.evaluateAll((items,scale)=>items.map(item=>Math.round(Number.parseFloat(item.style.left)/scale)),zoom)).toEqual([55,55]);
+});
+
 test('mobile image import creates a panel and the library reuses it',async({page})=>{
   await page.setViewportSize({width:390,height:844});
   await page.goto(studio);
