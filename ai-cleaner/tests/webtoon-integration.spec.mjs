@@ -436,18 +436,57 @@ test('web editor reorders layers and keeps rotation, image filter and text align
   await page.getByRole('button',{name:'T 텍스트'}).click();
   await page.locator('.web-right textarea').fill('정렬 검사');
   await page.getByLabel('글 정렬').selectOption('right');
+  await page.getByLabel('글꼴').selectOption('serif');
+  await page.getByLabel('굵기').selectOption('900');
+  await page.getByLabel('줄 간격').selectOption('1.8');
   await expect(page.locator('.web-text-content')).toHaveCSS('text-align','right');
+  await expect(page.locator('.web-text-content')).toHaveCSS('font-family','serif');
+  await expect(page.locator('.web-text-content')).toHaveCSS('font-weight','900');
+  expect(await page.locator('.web-text-content').evaluate(node=>node.style.lineHeight)).toBe('1.8');
   const savePromise=page.waitForEvent('download');
   await page.getByRole('button',{name:'.wtoon 저장'}).click();
   const saved=await savePromise;
   const bytes=await saved.createReadStream().then(async stream=>{const chunks=[];for await(const chunk of stream)chunks.push(chunk);return Buffer.concat(chunks)});
   await page.locator('input[type=file][accept=".wtoon,.json"]').setInputFiles({name:'styles.wtoon',mimeType:'application/octet-stream',buffer:bytes});
   await expect(page.locator('.web-text-content')).toHaveCSS('text-align','right');
+  await expect(page.locator('.web-text-content')).toHaveCSS('font-family','serif');
+  await expect(page.locator('.web-text-content')).toHaveCSS('font-weight','900');
+  await page.locator('.web-text').click();
+  await expect(page.getByLabel('줄 간격')).toHaveValue('1.8');
   await expect(page.locator('.web-panel img')).toHaveCSS('filter','grayscale(1)');
   const pngPromise=page.waitForEvent('download');
   await page.getByRole('button',{name:'PNG 초안'}).click();
   const png=await pngPromise;
   expect(png.suggestedFilename()).toMatch(/\.zip$/);
+});
+
+test('mobile bubble typography edits the canvas and exports a PNG draft',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'◯ 말풍선'}).click();
+  await page.getByRole('button',{name:/레이어·속성/}).click();
+  await page.locator('.web-right textarea').fill('첫 줄\n둘째 줄');
+  await page.getByLabel('글꼴').selectOption('monospace');
+  await page.getByLabel('굵기').selectOption('400');
+  await page.getByLabel('줄 간격').selectOption('2');
+  await page.getByRole('button',{name:'캔버스',exact:true}).click();
+  const bubble=page.locator('.web-bubble-content');
+  await expect(bubble).toHaveCSS('font-family','monospace');
+  await expect(bubble).toHaveCSS('font-weight','400');
+  expect(await bubble.evaluate(node=>node.style.lineHeight)).toBe('2');
+  const download=page.waitForEvent('download');
+  await page.getByRole('button',{name:'PNG 초안'}).click();
+  const first=await (await download).createReadStream().then(async stream=>{const chunks=[];for await(const chunk of stream)chunks.push(chunk);return Buffer.concat(chunks)});
+  const widePng=firstPngFromZip(first);
+  expect(widePng.length).toBeGreaterThan(100);
+  await page.getByRole('button',{name:/레이어·속성/}).click();
+  await page.getByLabel('줄 간격').selectOption('1');
+  await page.getByRole('button',{name:'캔버스',exact:true}).click();
+  const nextDownload=page.waitForEvent('download');
+  await page.getByRole('button',{name:'PNG 초안'}).click();
+  const second=await (await nextDownload).createReadStream().then(async stream=>{const chunks=[];for await(const chunk of stream)chunks.push(chunk);return Buffer.concat(chunks)});
+  expect(firstPngFromZip(second).equals(widePng)).toBe(false);
 });
 
 test('canvas resize handles and editing shortcuts work without hijacking text input',async({page})=>{
