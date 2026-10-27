@@ -1295,3 +1295,22 @@ body{background:radial-gradient(circle at 8% 7%,#f8dbc6b8 0,transparent 28%),rad
 /* Keep the desktop music player close to the illustration without covering it. */
 @media(min-width:621px){.homeMusicDock{width:min(50%,620px);margin:12px 0 0 auto;border:1px solid #ead5bd;border-radius:17px;padding:9px 13px;background:linear-gradient(135deg,#fffaf3ee,#fff1e7f5);box-shadow:0 9px 25px #79533816}.homeMusicDockIntro strong{font-size:12px}.homeMusicDockIntro small{font-size:10.5px}}
 @media(max-width:620px){.homeMusicDock{margin:8px 0 0;border-top:1px solid #eddcc9;border-radius:15px}}
+
+/* Keep the illustrated welcome generous while bringing the four core tools into view. */
+.homeHero{grid-template-rows:minmax(330px,1fr) auto;min-height:520px;align-items:start}
+.homeHeroCopy{grid-column:1;grid-row:1;align-self:start;padding-top:clamp(32px,4vw,58px)}
+.homeHeroArt{grid-column:2;grid-row:1/3;align-self:stretch;min-height:0}
+.homeHero>.homeExplore{grid-column:1/3;grid-row:2;z-index:2;display:grid;grid-template-columns:minmax(155px,.17fr) minmax(0,1fr);align-items:center;gap:18px;margin:0 18px 18px;padding:13px 17px;border:1px solid #ffffffcf;border-radius:23px;background:linear-gradient(120deg,#fffdf4e9,#ffffffc7 54%,#ffefd9d6);box-shadow:0 13px 34px #4b2b2052,0 1px 0 #fff inset;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);scroll-margin-top:20px}
+.homeHero>.homeExplore::before{display:none}
+.homeHero .homeSectionHeading>span{font-size:9.5px;letter-spacing:.12em}
+.homeHero .homeSectionHeading h2{margin-top:5px;font-size:clamp(17px,1.6vw,23px);line-height:1.2;word-break:keep-all}
+.homeHero .homeToolGrid{gap:8px}
+.homeHero .homeToolCard{display:grid;grid-template-columns:43px minmax(0,1fr);align-items:center;gap:7px;min-height:66px;padding:8px 10px;border:1px solid #fff9;border-radius:15px;background:#fffaf0a8;box-shadow:0 3px 12px #6640221c,0 1px 0 #fff9 inset;backdrop-filter:none;-webkit-backdrop-filter:none}
+.homeHero .homeToolCard:nth-child(n){background:#fffaf0a8}
+.homeHero .homeToolCard:hover{transform:translateY(-2px);background:#fffdf7ed;box-shadow:0 7px 17px #6640222e}
+.homeHero .homeCardIcon{width:43px;height:43px;margin:0;filter:drop-shadow(0 3px 4px #6d462d22)}
+.homeHero .homeToolCard strong{margin:0;font-size:clamp(11px,1vw,14px);line-height:1.25;word-break:keep-all}
+.homeHero .homeToolCard small{display:none}
+@media(max-width:980px){.homeHero>.homeExplore{grid-template-columns:1fr;gap:9px}.homeHero .homeSectionHeading{display:flex;align-items:baseline;gap:10px}.homeHero .homeSectionHeading h2{margin:0}.homeHero .homeToolGrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:620px){.homeHero{min-height:0}.homeHeroCopy{order:0;padding:20px 20px 18px}.homeHeroArt{order:1;aspect-ratio:16/9}.homeHero>.homeExplore{order:2;width:calc(100% - 22px);grid-template-columns:1fr;gap:9px;margin:-22px 11px 11px;padding:11px;border-radius:19px}.homeHero .homeToolGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.homeHero .homeToolCard{min-height:56px;grid-template-columns:39px minmax(0,1fr);padding:6px 8px;border-radius:12px}.homeHero .homeCardIcon{width:39px;height:39px}.homeHero .homeToolCard strong{font-size:12px}.homeHero .homeSectionHeading{padding-inline:3px}.homeHero .homeSectionHeading h2{font-size:17px}}
+@media(max-width:350px){.homeHeroCopy{padding:17px 15px}.homeHero .homeSectionHeading{display:block}.homeHero .homeSectionHeading h2{margin-top:3px;font-size:16px}.homeHero .homeToolCard strong{font-size:11px}}

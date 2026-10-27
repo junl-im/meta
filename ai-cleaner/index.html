@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; frame-src https://open.spotify.com; connect-src 'self' https://r.jina.ai; worker-src 'self' blob:; font-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1372">
+<link id="appStylesheet" rel="stylesheet" href="css/app.css?v=1373">
 <style id="bootCritical">html:not(.boot-ready) body{visibility:hidden}html{background:#fff8f0}html.app-booting{overflow-anchor:none}html.app-booting body{cursor:progress}html.app-booting body *{cursor:progress!important}</style>
 <script src="js/hosting-redirect.js"></script>
 <script src="js/boot.js" defer></script>
@@ -77,20 +77,20 @@
       </div>
     </div>
     <div class="homeHeroArt"><img src="assets/playground-home-v1.webp" alt="따뜻한 창작 작업실에서 돋보기를 든 여우가 글, 이미지, 음악과 달빛을 살펴보는 일러스트" width="1440" height="810" fetchpriority="high"></div>
+    <section class="homeExplore" id="homeTools" aria-labelledby="homeToolsTitle">
+      <div class="homeSectionHeading"><span>CREATE &amp; DISCOVER</span><h2 id="homeToolsTitle">무엇부터 해볼까요?</h2></div>
+      <div class="homeToolGrid">
+        <button class="homeToolCard" type="button" data-open-tool="text"><img class="homeCardIcon" src="assets/home-icon-text.webp" alt="" width="80" height="80" loading="lazy"><strong>AI 글 다듬기</strong><small>숨은 문자와 특수 공백을 정리하고 결과를 확인해요.</small></button>
+        <button class="homeToolCard" type="button" data-open-tool="image"><img class="homeCardIcon" src="assets/home-icon-image.webp" alt="" width="80" height="80" loading="lazy"><strong>AI 이미지 검사</strong><small>이미지에 남은 출처와 편집 신호를 살펴봐요.</small></button>
+        <button class="homeToolCard" type="button" data-open-tool="writing"><img class="homeCardIcon" src="assets/home-icon-writing.webp" alt="" width="80" height="80" loading="lazy"><strong>블로그 팩토리</strong><small>아이디어를 정리하고 글쓰기 프롬프트를 만들어요.</small></button>
+        <button class="homeToolCard" type="button" data-open-tool="reach"><img class="homeCardIcon" src="assets/home-icon-reach.webp" alt="" width="80" height="80" loading="lazy"><strong>GomFox Reach</strong><small>여러 자료의 출처와 서로 다른 주장을 비교해요.</small></button>
+      </div>
+    </section>
   </section>
   <section class="homeMusicDock" id="homeMusicDock" aria-label="곰같은여우의 음악 무작위 듣기">
     <div class="homeMusicDockIntro"><span class="homeMusicNote" aria-hidden="true">♫</span><div><strong>곰같은여우 뮤직</strong><small id="homeMusicStatus" role="status" aria-live="polite">노래 한 곡, 쉬어 가기</small></div></div>
     <div class="homeMusicDockActions"><button id="homeMusicShuffle" type="button" aria-controls="homeMusicPlayer" aria-expanded="false" aria-label="곰같은여우 무작위 곡 고르기"><img src="assets/music-play.png" alt="" width="32" height="32"><span class="homeMusicShuffleLabel">랜덤 듣기</span></button><a href="../AIPlayground/GomFoxMusic/">음악방 ↗</a></div>
     <div class="homeMusicPlayer" id="homeMusicPlayer" hidden><iframe id="homeMusicFrame" title="Spotify 곰같은여우 음악 플레이어" width="100%" height="152" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe><div class="homeMusicPlayerFoot"><span>재생은 Spotify 플레이어에서 눌러 주세요.</span><button id="homeMusicClose" type="button">플레이어 닫기</button></div></div>
-  </section>
-  <section class="homeExplore" id="homeTools" aria-labelledby="homeToolsTitle">
-    <div class="homeSectionHeading"><span>CREATE &amp; DISCOVER</span><h2 id="homeToolsTitle">무엇부터 해볼까요?</h2></div>
-    <div class="homeToolGrid">
-      <button class="homeToolCard" type="button" data-open-tool="text"><img class="homeCardIcon" src="assets/home-icon-text.webp" alt="" width="80" height="80" loading="lazy"><strong>AI 글 다듬기</strong><small>숨은 문자와 특수 공백을 정리하고 결과를 확인해요.</small></button>
-      <button class="homeToolCard" type="button" data-open-tool="image"><img class="homeCardIcon" src="assets/home-icon-image.webp" alt="" width="80" height="80" loading="lazy"><strong>AI 이미지 검사</strong><small>이미지에 남은 출처와 편집 신호를 살펴봐요.</small></button>
-      <button class="homeToolCard" type="button" data-open-tool="writing"><img class="homeCardIcon" src="assets/home-icon-writing.webp" alt="" width="80" height="80" loading="lazy"><strong>블로그 팩토리</strong><small>아이디어를 정리하고 글쓰기 프롬프트를 만들어요.</small></button>
-      <button class="homeToolCard" type="button" data-open-tool="reach"><img class="homeCardIcon" src="assets/home-icon-reach.webp" alt="" width="80" height="80" loading="lazy"><strong>GomFox Reach</strong><small>여러 자료의 출처와 서로 다른 주장을 비교해요.</small></button>
-    </div>
   </section>
   <section class="homeWorlds" aria-labelledby="homeWorldsTitle">
     <div class="homeSectionHeading"><span>MORE WORLDS</span><h2 id="homeWorldsTitle">이야기가 이어지는 놀이터</h2></div>
