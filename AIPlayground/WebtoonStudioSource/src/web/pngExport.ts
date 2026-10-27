@@ -39,7 +39,7 @@ function drawElement(ctx:CanvasRenderingContext2D,e:EditorElement,images:Map<str
     drawBubbleShape(ctx,e)
     ctx.fillStyle=e.color||'#1a2331';ctx.font=`${e.fontWeight||'600'} ${e.fontSize||24}px ${e.fontFamily||'sans-serif'}`;ctx.textBaseline='top';ctx.textAlign=e.align||'center';wrap(ctx,e.text,e.align==='left'?14:e.align==='right'?e.w-14:e.w/2,12,e.w-28,(e.fontSize||24)*(e.textEffect?.lineHeight??1.3),e.textEffect)
   }else if(e.type==='text'){ctx.fillStyle=e.color||'#1a2331';ctx.font=`${e.fontWeight||'700'} ${e.fontSize||36}px ${e.fontFamily||'sans-serif'}`;ctx.textBaseline='top';ctx.textAlign=e.align||'left';wrap(ctx,e.text,e.align==='center'?e.w/2:e.align==='right'?e.w-4:4,4,e.w-8,(e.fontSize||36)*(e.textEffect?.lineHeight??1.3),e.textEffect)}
-  else if(e.type==='drawing'){ctx.strokeStyle=e.stroke;ctx.lineWidth=e.strokeWidth;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();e.points.forEach((point,index)=>index?ctx.lineTo(point.x,point.y):ctx.moveTo(point.x,point.y));ctx.stroke()}
+  else if(e.type==='drawing'){ctx.strokeStyle=e.stroke;ctx.fillStyle=e.stroke;ctx.lineWidth=e.strokeWidth;ctx.lineCap='round';ctx.lineJoin='round';if(e.points.length===1){ctx.beginPath();ctx.arc(e.points[0].x,e.points[0].y,e.strokeWidth/2,0,Math.PI*2);ctx.fill()}else{ctx.beginPath();e.points.forEach((point,index)=>index?ctx.lineTo(point.x,point.y):ctx.moveTo(point.x,point.y));ctx.stroke()}}
   ctx.restore()
 }
 export async function exportDraftPng(project:ProjectV4){

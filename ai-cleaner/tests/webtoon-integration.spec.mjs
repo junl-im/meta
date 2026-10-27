@@ -1136,3 +1136,37 @@ test('panel image flip is editable and survives file round trip',async({page})=>
   expect(colors.left[2]).toBeGreaterThan(colors.left[0]);
   expect(colors.right[0]).toBeGreaterThan(colors.right[2]);
 });
+
+
+test('pen strokes render, survive reload, undo and export on desktop and mobile',async({page})=>{
+  for(const width of [1280,390]){
+    await page.setViewportSize({width,height:800});
+    await page.goto(studio);
+    if(width<760)await page.getByRole('button',{name:'도구',exact:true}).click();
+    await page.getByRole('button',{name:'✎ 펜 그리기'}).click();
+    const surface=page.getByLabel('펜 그리기 영역'),box=await surface.boundingBox();
+    expect(box).toBeTruthy();
+    await page.mouse.move(box.x+35,box.y+45);
+    await page.mouse.down();
+    await page.mouse.move(box.x+75,box.y+85,{steps:5});
+    await page.mouse.up();
+    await expect(page.locator('.web-drawing')).toHaveCount(1);
+    await expect(page.locator('.web-drawing-canvas')).toHaveCount(1);
+    await page.getByRole('button',{name:'↶ 되돌리기'}).click();
+    await expect(page.locator('.web-drawing')).toHaveCount(0);
+    await page.getByRole('button',{name:'↷ 다시'}).click();
+    await expect(page.locator('.web-drawing')).toHaveCount(1);
+    await expect(page.locator('.web-status')).toContainText('브라우저 임시 원고 저장됨');
+    await page.reload();
+    await expect(page.locator('.web-drawing')).toHaveCount(1);
+    if(width===1280){
+      const download=page.waitForEvent('download');
+      await page.getByRole('button',{name:'PNG 초안'}).click();
+      expect((await download).suggestedFilename()).toMatch(/\.zip$/);
+    }
+    if(width<760)await page.getByRole('button',{name:'도구',exact:true}).click();
+    page.once('dialog',dialog=>dialog.accept());
+    await page.getByRole('button',{name:'새 원고'}).click();
+    await expect(page.locator('.web-drawing')).toHaveCount(0);
+  }
+});
