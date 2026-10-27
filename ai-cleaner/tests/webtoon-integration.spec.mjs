@@ -1332,3 +1332,31 @@ test('mobile restore brush responds to touch and preserves locked overlapping el
  await page.getByRole('button',{name:'복원 붓 종료'}).click();await expect(surface).toHaveCount(0);
  }finally{await context.close()}
 });
+
+
+test('PC brush opacity survives web preview, PNG and project round trip',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});await page.goto(studio);
+  const project={schemaVersion:4,title:'브러시 원고',episode:'1',canvas:{width:690,height:700,background:'#ffffff'},scenes:[{id:'scene_root',name:'장면',startY:0,collapsed:false}],elements:[{id:'line',type:'drawing',x:100,y:100,w:200,h:50,z:1,brush:'watercolor',opacity:.25,points:[{x:20,y:25},{x:180,y:25}],stroke:'#000000',strokeWidth:12}],assets:[],settings:{snap:false,guides:true,gridSize:10,smartSnapDistance:8}};
+  await page.locator('input[type=file][accept=".wtoon,.json"]').setInputFiles({name:'pc-brush.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project))});
+  const canvas=page.locator('.web-drawing-canvas');await expect(canvas).toHaveCount(1);
+  const alpha=await canvas.evaluate(c=>c.getContext('2d').getImageData(Math.floor(c.width/2),Math.floor(c.height/2),1,1).data[3]);expect(alpha).toBeGreaterThan(35);expect(alpha).toBeLessThan(85);
+  const out=page.waitForEvent('download');await page.getByRole('button',{name:'PNG 초안'}).click();const png=firstPngFromZip(fs.readFileSync(await (await out).path()));
+  const shade=await page.evaluate(async data=>{const i=new Image();i.src='data:image/png;base64,'+data;await i.decode();const c=document.createElement('canvas');c.width=i.width;c.height=i.height;const x=c.getContext('2d');x.drawImage(i,0,0);return x.getImageData(200,125,1,1).data[0]},png.toString('base64'));expect(shade).toBeGreaterThan(165);expect(shade).toBeLessThan(220);
+  await page.locator('[data-element-id="line"]').click();await expect(page.getByLabel('선 브러시 종류')).toHaveValue('watercolor');await expect(page.getByLabel('선 불투명도')).toHaveValue('0.25');
+  await page.getByLabel('선 브러시 종류').selectOption('pencil');await page.getByLabel('선 불투명도').fill('0.5');
+  const save=page.waitForEvent('download');await page.getByRole('button',{name:'.wtoon 저장'}).click();const bytes=fs.readFileSync(await (await save).path());
+  await page.locator('input[type=file][accept=".wtoon,.json"]').setInputFiles({name:'brush.wtoon',mimeType:'application/octet-stream',buffer:bytes});
+  await page.locator('[data-element-id="line"]').click();await expect(page.getByLabel('선 브러시 종류')).toHaveValue('pencil');await expect(page.getByLabel('선 불투명도')).toHaveValue('0.5');
+});
+
+test('mobile touch creates a stroke with the chosen brush and opacity',async({browser})=>{
+ const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+ try{const page=await context.newPage();await page.goto(studio);await page.getByRole('button',{name:'도구',exact:true}).click();await page.getByRole('button',{name:'✎ 펜 그리기'}).click();
+ await page.getByRole('button',{name:'도구',exact:true}).click();await page.getByLabel('브러시 종류').selectOption('marker');await page.getByLabel('펜 불투명도').fill('0.4');await page.getByRole('button',{name:'캔버스',exact:true}).click();
+ const box=await page.getByLabel('펜 그리기 영역').boundingBox(),x=box.x+45,y=box.y+55,cdp=await context.newCDPSession(page);
+ await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x+45,y:y+35}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+ await expect(page.locator('.web-drawing')).toHaveCount(1);await expect(page.locator('.web-status')).toContainText('브라우저 임시 원고 저장됨');
+ const stroke=await page.evaluate(()=>new Promise((resolve,reject)=>{const req=indexedDB.open('webtoon-studio-web');req.onerror=()=>reject(req.error);req.onsuccess=()=>{const db=req.result,read=db.transaction('drafts').objectStore('drafts').get('current');read.onsuccess=()=>{resolve(read.result.elements.find(e=>e.type==='drawing'));db.close()};read.onerror=()=>reject(read.error)}}));
+ expect(stroke.brush).toBe('marker');expect(stroke.opacity).toBeCloseTo(.4);
+ }finally{await context.close()}
+});
