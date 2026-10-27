@@ -2,7 +2,7 @@ import {strFromU8,strToU8,unzipSync,zipSync} from 'fflate'
 import {migrateProject} from '@core/migrate'
 import type {ProjectV4} from '@core/types'
 
-const MAX_PACKAGE=100*1024*1024
+export const MAX_PACKAGE=100*1024*1024
 const MAX_ASSETS=300*1024*1024
 const imageMimes:Record<string,string>={png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',gif:'image/gif'}
 const extension:Record<string,string>={'image/png':'png','image/jpeg':'jpg','image/webp':'webp','image/gif':'gif'}
@@ -33,7 +33,9 @@ export async function encodeBrowserProject(input:ProjectV4):Promise<Uint8Array>{
 export async function decodeBrowserProject(bytes:Uint8Array):Promise<ProjectV4>{
   if(bytes.byteLength>MAX_PACKAGE)throw Error('작품 파일이 100MB를 넘습니다. 데스크톱 편집기에서 열어 주세요.')
   if(bytes[0]!==0x50||bytes[1]!==0x4b)return migrateProject(JSON.parse(strFromU8(bytes)))
-  const files=unzipSync(bytes),body=files['project.json']
+  let declaredSize=0
+  // Check each ZIP entry before its output buffer is allocated or inflated.
+  const files=unzipSync(bytes,{filter:entry=>{if(!Number.isSafeInteger(entry.originalSize)||entry.originalSize<0||(declaredSize+=entry.originalSize)>MAX_ASSETS)throw Error('압축을 푼 작품이 300MB를 넘습니다.');return true}}),body=files['project.json']
   if(!body)throw Error('project.json이 없는 .wtoon 파일입니다.')
   if(Object.values(files).reduce((size,file)=>size+file.byteLength,0)>MAX_ASSETS)throw Error('압축을 푼 작품이 300MB를 넘습니다.')
   const manifest=files['manifest.json']?JSON.parse(strFromU8(files['manifest.json'])):null
