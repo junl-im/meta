@@ -19,7 +19,7 @@ re-host chapter text. Never add SVG assets or inline vector markup.
 
 ## Update procedure
 
-1. Read `dist/catalog.js`, `dist/app.js`, `dist/index.html`, and the current hosting manifest.
+1. Read `site/catalog.js`, `site/app.js`, `site/index.html`, and the current hosting manifest.
 2. Re-check all five pen names and both leagues from the official public search pages.
 3. Compare with `window.NOVEL_CATALOG`. If there are additions, removals, title changes, cover changes, or league changes, update only the catalog records, preserving the 6-field tuple format and existing site design.
 4. When catalog records change, update `window.NOVEL_CATALOG_LAST_CHECK` with the date of successful verification. If nothing changed, do not modify source just to record the check date. Retain records if any source check was incomplete.
@@ -27,12 +27,19 @@ re-host chapter text. Never add SVG assets or inline vector markup.
 6. Preserve public site access, all hand-painted WebP assets, SVG prohibition, and the distinct Best League and Challenge League presentation. The visible Korean labels are `베스트리그` and `챌린지리그`; never relabel Challenge League as General League. Mobile cards must remain in 3 columns.
    Preserve full-bleed official 5:4 thumbnails (no oversized dark mat around
    a smaller image) and keep each work's genre visibly labeled on desktop and mobile.
-7. Push the verified source and deploy a new Site version only when verified catalog records changed. Do not redeploy daily solely to update a successful-check date.
-8. Do not invent results. On lookup failure, report the affected author(s), retain the prior published data, and try again on the next scheduled run.
+7. Push the verified source and deploy GitHub Pages only when verified catalog records changed. Do not redeploy solely to update a successful-check date.
+8. Do not invent results. On lookup failure, retain the prior published data and try again on the next scheduled run.
+
+## Site refresh architecture
+
+- `.github/workflows/novel-shelf-refresh.yml` schedules the public search collector at seven-hour intervals across the week. GitHub may start a scheduled run late. This is a GitHub Actions site job, not a Codex automation.
+- The collector updates `site/catalog.js`, `site/catalog-feed.json`, and `integration/catalog.v1.json` together only when verified records change. A failed or incomplete search leaves all three untouched.
+- GitHub Pages is rebuilt and deployed only after a changed catalog is committed. The static Firebase and GitHub Pages sites request the public GitHub Pages `catalog-feed.json` on entry and every seven hours while open. If that request fails, the bundled catalog remains visible.
+- Direct browser requests to Naver's search pages are blocked by cross-origin policy. The site reads its own published metadata feed; it never stores chapter text.
 
 ## Popularity spotlight
 
-- `dist/popularity.js` stores a *dated* verified snapshot of works appearing in
+- `site/popularity.js` stores a *dated* verified snapshot of works appearing in
   Naver's public Best League daily Top 100, not a fabricated ranking of all works.
 - The public website intentionally does **not** show a ranking spotlight or
   a "랭킹에 올랐던 이야기" section. Keep this metadata internal only. Do not
