@@ -1,11 +1,20 @@
 import {zipSync} from 'fflate'
-import type {EditorElement,ProjectV4} from '@core/types'
+import type {EditorElement,ProjectV4,TextEffect} from '@core/types'
 import {imageFilterCss} from './imageFilter'
 import {drawBubbleShape} from './bubbleShape'
 
 const loadImage=(src:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(Error('이미지를 읽지 못했습니다.'));image.src=src})
 const canvasBlob=(canvas:HTMLCanvasElement)=>new Promise<Uint8Array>((resolve,reject)=>canvas.toBlob(async blob=>blob?resolve(new Uint8Array(await blob.arrayBuffer())):reject(Error('PNG를 만들지 못했습니다.')),'image/png'))
-function wrap(ctx:CanvasRenderingContext2D,text:string,x:number,y:number,width:number,lineHeight:number){let line='';for(const paragraph of text.split('\n')){for(const char of paragraph){if(ctx.measureText(line+char).width>width&&line){ctx.fillText(line,x,y);y+=lineHeight;line=''}line+=char}ctx.fillText(line,x,y);y+=lineHeight;line=''}}
+function drawTextLine(ctx:CanvasRenderingContext2D,text:string,x:number,y:number,effect?:TextEffect){
+  ctx.save()
+  const outline=Math.min(12,Math.max(0,effect?.outlineWidth||0)),shadow=Math.min(24,Math.max(0,effect?.shadowSize||0))
+  if(effect?.letterSpacing&&'letterSpacing'in ctx)ctx.letterSpacing=`${effect.letterSpacing}px`
+  if(outline){ctx.lineJoin='round';ctx.lineWidth=outline;ctx.strokeStyle=effect?.outlineColor||'#111111';ctx.strokeText(text,x,y)}
+  if(shadow){ctx.shadowColor=effect?.shadowColor||'#222222';ctx.shadowBlur=shadow;ctx.shadowOffsetY=effect?.glow?0:Math.max(1,shadow*.25)}
+  ctx.fillText(text,x,y)
+  ctx.restore()
+}
+function wrap(ctx:CanvasRenderingContext2D,text:string,x:number,y:number,width:number,lineHeight:number,effect?:TextEffect){ctx.save();if(effect?.letterSpacing&&'letterSpacing'in ctx)ctx.letterSpacing=`${effect.letterSpacing}px`;let line='';for(const paragraph of text.split('\n')){for(const char of paragraph){if(ctx.measureText(line+char).width>width&&line){drawTextLine(ctx,line,x,y,effect);y+=lineHeight;line=''}line+=char}drawTextLine(ctx,line,x,y,effect);y+=lineHeight;line=''}ctx.restore()}
 function panelPath(ctx:CanvasRenderingContext2D,e:Extract<EditorElement,{type:'panel'}>){
   const w=e.w,h=e.h
   ctx.beginPath()
@@ -28,8 +37,8 @@ function drawElement(ctx:CanvasRenderingContext2D,e:EditorElement,images:Map<str
     ctx.strokeStyle=e.stroke||'#262b36';ctx.lineWidth=e.strokeWidth??3;panelPath(ctx,e);ctx.stroke()
   }else if(e.type==='bubble'){
     drawBubbleShape(ctx,e)
-    ctx.fillStyle=e.color||'#1a2331';ctx.font=`${e.fontWeight||'600'} ${e.fontSize||24}px ${e.fontFamily||'sans-serif'}`;ctx.textBaseline='top';ctx.textAlign=e.align||'center';wrap(ctx,e.text,e.align==='left'?14:e.align==='right'?e.w-14:e.w/2,12,e.w-28,(e.fontSize||24)*(e.textEffect?.lineHeight??1.3))
-  }else if(e.type==='text'){ctx.fillStyle=e.color||'#1a2331';ctx.font=`${e.fontWeight||'700'} ${e.fontSize||36}px ${e.fontFamily||'sans-serif'}`;ctx.textBaseline='top';ctx.textAlign=e.align||'left';wrap(ctx,e.text,e.align==='center'?e.w/2:e.align==='right'?e.w-4:4,4,e.w-8,(e.fontSize||36)*(e.textEffect?.lineHeight??1.3))}
+    ctx.fillStyle=e.color||'#1a2331';ctx.font=`${e.fontWeight||'600'} ${e.fontSize||24}px ${e.fontFamily||'sans-serif'}`;ctx.textBaseline='top';ctx.textAlign=e.align||'center';wrap(ctx,e.text,e.align==='left'?14:e.align==='right'?e.w-14:e.w/2,12,e.w-28,(e.fontSize||24)*(e.textEffect?.lineHeight??1.3),e.textEffect)
+  }else if(e.type==='text'){ctx.fillStyle=e.color||'#1a2331';ctx.font=`${e.fontWeight||'700'} ${e.fontSize||36}px ${e.fontFamily||'sans-serif'}`;ctx.textBaseline='top';ctx.textAlign=e.align||'left';wrap(ctx,e.text,e.align==='center'?e.w/2:e.align==='right'?e.w-4:4,4,e.w-8,(e.fontSize||36)*(e.textEffect?.lineHeight??1.3),e.textEffect)}
   else if(e.type==='drawing'){ctx.strokeStyle=e.stroke;ctx.lineWidth=e.strokeWidth;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();e.points.forEach((point,index)=>index?ctx.lineTo(point.x,point.y):ctx.moveTo(point.x,point.y));ctx.stroke()}
   ctx.restore()
 }
