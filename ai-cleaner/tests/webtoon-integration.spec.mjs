@@ -211,12 +211,76 @@ test('mobile image import creates a panel and the library reuses it',async({page
   await page.locator('input[type=file][accept="image/*"]').setInputFiles({name:'first.png',mimeType:'image/png',buffer:icon});
   const panel=page.locator('.web-panel');
   await expect(panel).toHaveCount(1);
-  await expect(panel.locator('img')).toBeVisible();
+  await expect(panel.locator('.web-panel-content img')).toBeVisible();
   await expect(page.locator('.web-app')).toHaveAttribute('data-mobile-tab','canvas');
   await page.getByRole('button',{name:'도구',exact:true}).click();
   await page.locator('.web-assets button').first().click();
   await expect(panel).toHaveCount(1);
-  await expect(panel.locator('img')).toBeVisible();
+  await expect(panel.locator('.web-panel-content img')).toBeVisible();
+});
+
+test('imported portrait stays complete in its panel and PNG export',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  const imageData=await page.evaluate(()=>{
+    const canvas=document.createElement('canvas');canvas.width=40;canvas.height=100;
+    const ctx=canvas.getContext('2d');
+    for(const [y,h,color] of [[0,34,'#ff0000'],[34,33,'#00ff00'],[67,33,'#0000ff']]){ctx.fillStyle=color;ctx.fillRect(0,y,40,h)}
+    return canvas.toDataURL('image/png');
+  });
+  const portrait=Buffer.from(imageData.split(',')[1],'base64');
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  const upload=()=>page.locator('input[type=file][accept="image/*"]').setInputFiles({name:'portrait.png',mimeType:'image/png',buffer:portrait});
+  await upload();
+  const panel=page.locator('.web-panel');
+  const image=panel.locator('.web-panel-content img');
+  await expect(image).toHaveCSS('object-fit','contain');
+  await expect(page.getByRole('button',{name:'원본 전체 보이기'})).toHaveAttribute('aria-pressed','true');
+  const download=page.waitForEvent('download');
+  await page.getByRole('button',{name:'PNG 초안'}).click();
+  const zip=await (await download).createReadStream().then(async stream=>{const chunks=[];for await(const chunk of stream)chunks.push(chunk);return Buffer.concat(chunks)});
+  const png=firstPngFromZip(zip);
+  const colors=await page.evaluate(async base64=>{
+    const image=new Image();image.src=`data:image/png;base64,${base64}`;await image.decode();
+    const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;
+    const ctx=canvas.getContext('2d');ctx.drawImage(image,0,0);
+    return{top:[...ctx.getImageData(345,120,1,1).data],bottom:[...ctx.getImageData(345,520,1,1).data]};
+  },png.toString('base64'));
+  expect(colors.top[0]).toBeGreaterThan(200);
+  expect(colors.bottom[2]).toBeGreaterThan(200);
+  await page.getByRole('button',{name:'컷 채우기',exact:true}).click();
+  await expect(image).toHaveCSS('object-fit','cover');
+  await panel.getByRole('button',{name:'이미지 위치 조절'}).click();
+  const guide=page.locator('.web-image-composition-guide');
+  await expect(guide).toBeVisible();
+  const guideBox=await guide.boundingBox(),panelBox=await panel.boundingBox();
+  expect(guideBox.height).toBeGreaterThan(panelBox.height);
+  await panel.getByRole('button',{name:'위치 조절 끝'}).click();
+  await expect(guide).toHaveCount(0);
+  await page.locator('.web-right .web-metrics label').filter({hasText:'이미지 좌우'}).locator('input').first().fill('55');
+  await page.getByRole('button',{name:'원본 전체 보이기'}).click();
+  await expect(image).toHaveCSS('object-fit','contain');
+  await expect(image).toHaveCSS('transform','matrix(1, 0, 0, 1, 0, 0)');
+  await page.getByRole('button',{name:'컷 채우기',exact:true}).click();
+  await upload();
+  await expect(image).toHaveCSS('object-fit','contain');
+});
+
+test('mobile image properties expose full-image and fill choices',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  const icon=fs.readFileSync(new URL('../assets/music-play.png',import.meta.url));
+  await page.locator('input[type=file][accept="image/*"]').setInputFiles({name:'mobile.png',mimeType:'image/png',buffer:icon});
+  await page.getByRole('button',{name:'레이어·속성'}).click();
+  await expect(page.getByRole('button',{name:'원본 전체 보이기'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'컷 채우기',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'원본 전체 보이기'})).toHaveAttribute('aria-pressed','true');
+  await page.getByRole('button',{name:'컷 채우기',exact:true}).click();
+  await expect(page.getByRole('button',{name:'컷 채우기',exact:true})).toHaveAttribute('aria-pressed','true');
+  await page.getByRole('button',{name:'원본 전체 보이기'}).click();
+  await expect(page.locator('.web-panel img')).toHaveCSS('object-fit','contain');
 });
 
 test('several images become separate panels and extend the canvas',async({page})=>{
@@ -287,7 +351,7 @@ test('touch-sized image adjustment moves artwork inside a panel without moving t
   const after=await panel.boundingBox();
   expect(after.x).toBeCloseTo(before.x,0);
   expect(after.y).toBeCloseTo(before.y,0);
-  const transform=await panel.locator('img').evaluate(node=>getComputedStyle(node).transform);
+  const transform=await panel.locator('.web-panel-content img').evaluate(node=>getComputedStyle(node).transform);
   const [,x,y]=transform.match(/matrix\(1, 0, 0, 1, ([\d.]+), ([\d.]+)\)/)||[];
   expect(Number(x)).toBeGreaterThan(30);
   expect(Number(y)).toBeGreaterThan(15);
@@ -307,7 +371,7 @@ test('image adjustment responds to a phone touch gesture',async({browser})=>{
     await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});
     await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x+32,y:y+24}]});
     await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
-    const transform=await panel.locator('img').evaluate(node=>getComputedStyle(node).transform);
+    const transform=await panel.locator('.web-panel-content img').evaluate(node=>getComputedStyle(node).transform);
     expect(Number(transform.match(/matrix\(1, 0, 0, 1, ([\d.]+),/)?.[1])).toBeGreaterThan(20);
     expect((await panel.boundingBox()).x).toBeCloseTo(before.x,0);
   }finally{await context.close()}
