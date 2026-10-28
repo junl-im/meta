@@ -1835,3 +1835,16 @@ for(const viewport of [{width:1280,height:800},{width:390,height:844}])test(`qua
   expect(rects.top).toBeGreaterThanOrEqual(rects.viewTop-5);
   expect(rects.top).toBeLessThan(rects.viewBottom);
 });
+test('quality checks reveal warnings beyond the first thirty',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  const add=page.getByRole('button',{name:'◯ 말풍선'});
+  for(let i=0;i<31;i++)await add.click();
+  const warnings=page.locator('.web-issues button').filter({hasText:'대사가 비어 있습니다'});
+  await expect(warnings).toHaveCount(30);
+  await page.getByRole('button',{name:/경고 더 보기/}).click();
+  await expect(warnings).toHaveCount(31);
+  await expect(page.getByRole('button',{name:/경고 더 보기/})).toHaveCount(0);
+  await warnings.last().click();
+  await expect(page.locator('.web-bubble.is-selected')).toHaveAttribute('data-element-id',await page.locator('.web-bubble').last().getAttribute('data-element-id'));
+});
