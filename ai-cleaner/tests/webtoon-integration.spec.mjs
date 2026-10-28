@@ -1528,3 +1528,25 @@ test('slow image import cannot overwrite a newer image in the same panel',async(
   await expect(page.getByRole('button',{name:'새 원고'})).toBeEnabled();
   await expect(page.getByRole('button',{name:'.wtoon 저장'})).toBeEnabled();
 });
+test('multiple selected elements copy and cut together with relative positions and undo',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.getByRole('button',{name:'◯ 말풍선'}).click();
+  const layers=page.locator('.web-layers > div > button:first-child');
+  await layers.first().click();
+  await layers.nth(1).click({modifiers:['Shift']});
+  await expect(page.locator('.web-element.is-group-selected')).toHaveCount(2);
+  const originals=await page.locator('.web-element').evaluateAll(items=>items.map(e=>({x:parseFloat(e.style.left),y:parseFloat(e.style.top)})));
+  await page.keyboard.press('Control+c');
+  await page.keyboard.press('Control+v');
+  await expect(page.locator('.web-element')).toHaveCount(4);
+  await expect(page.locator('.web-element.is-group-selected')).toHaveCount(2);
+  const copies=await page.locator('.web-element.is-group-selected').evaluateAll(items=>items.map(e=>({x:parseFloat(e.style.left),y:parseFloat(e.style.top)})));
+  expect(Math.abs((copies[1].x-copies[0].x)-(originals[1].x-originals[0].x))).toBeLessThan(.1);
+  expect(Math.abs((copies[1].y-copies[0].y)-(originals[1].y-originals[0].y))).toBeLessThan(.1);
+  await page.keyboard.press('Control+x');
+  await expect(page.locator('.web-element')).toHaveCount(2);
+  await page.keyboard.press('Control+z');
+  await expect(page.locator('.web-element')).toHaveCount(4);
+});
