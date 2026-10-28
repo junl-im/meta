@@ -1775,3 +1775,25 @@ for(const viewport of [{width:1280,height:800},{width:390,height:844}])test(`rea
   await expect(dialog.getByText('1 / 2 컷')).toBeVisible();
   await expect.poll(()=>scroll.evaluate(e=>e.scrollTop)).toBeLessThan(200);
 });
+test('reader navigation retains the chosen cut for shared rows and the page end',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  await page.getByLabel('캔버스 높이').fill('4000');
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.getByLabel('위쪽',{exact:true}).fill('100');
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.getByLabel('위쪽',{exact:true}).fill('3900');
+  await page.getByRole('button',{name:'독자 미리보기'}).click();
+  const dialog=page.getByRole('dialog',{name:'독자 미리보기'}),next=dialog.getByRole('button',{name:'다음 컷'}),previous=dialog.getByRole('button',{name:'이전 컷'});
+  await expect(next).toBeEnabled();
+  await next.click();
+  await expect(dialog.getByText('2 / 3 컷')).toBeVisible();
+  await next.click();
+  await expect(dialog.getByText('3 / 3 컷')).toBeVisible();
+  await expect(next).toBeDisabled();
+  await previous.click();
+  await expect(dialog.getByText('2 / 3 컷')).toBeVisible();
+  await previous.click();
+  await expect(dialog.getByText('1 / 3 컷')).toBeVisible();
+});
