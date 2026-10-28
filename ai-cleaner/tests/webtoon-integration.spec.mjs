@@ -1820,3 +1820,18 @@ for(const viewport of [{width:1280,height:800},{width:390,height:844}])test(`rea
   expect(rects.top).toBeGreaterThanOrEqual(rects.viewTop-5);
   expect(rects.top).toBeLessThan(rects.viewBottom);
 });
+for(const viewport of [{width:1280,height:800},{width:390,height:844}])test(`quality warning reveals its element on canvas at ${viewport.width}px`,async({page})=>{
+  await page.setViewportSize(viewport);
+  await page.goto(studio);
+  if(viewport.width<760)await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'◯ 말풍선'}).click();
+  if(viewport.width<760)await page.getByRole('button',{name:/레이어·속성/}).click();
+  await page.getByLabel('위쪽',{exact:true}).fill('2500');
+  const id=await page.locator('.web-bubble').getAttribute('data-element-id');
+  await page.locator('.web-issues button').filter({hasText:'대사가 비어 있습니다'}).click();
+  await expect(page.locator('.web-bubble.is-selected')).toHaveAttribute('data-element-id',id);
+  await expect.poll(()=>page.locator('.web-canvas-scroll').evaluate(e=>e.scrollTop)).toBeGreaterThan(500);
+  const rects=await page.locator('.web-bubble.is-selected').evaluate(e=>{const r=e.getBoundingClientRect(),v=e.closest('.web-canvas-scroll').getBoundingClientRect();return {top:r.top,viewTop:v.top,viewBottom:v.bottom}});
+  expect(rects.top).toBeGreaterThanOrEqual(rects.viewTop-5);
+  expect(rects.top).toBeLessThan(rects.viewBottom);
+});
