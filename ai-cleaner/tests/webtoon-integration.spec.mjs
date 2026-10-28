@@ -1697,3 +1697,20 @@ test('custom panel spacing validates input and preserves web canvas height limit
   await expect(page.getByText(/400px 이상 유지/)).toBeVisible();
   expect(await height.inputValue()).toBe('500');
 });
+for(const viewport of [{width:1280,height:800},{width:390,height:844}])test(`reader preview renders and returns to editor at ${viewport.width}px`,async({page})=>{
+  await page.setViewportSize(viewport);
+  await page.goto(studio);
+  if(viewport.width<760)await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.getByRole('button',{name:'독자 미리보기'}).click();
+  const dialog=page.getByRole('dialog',{name:'독자 미리보기'});
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole('img',{name:'원고 1페이지'})).toBeVisible();
+  await expect.poll(()=>dialog.getByRole('img',{name:'원고 1페이지'}).evaluate(img=>img.complete&&img.naturalWidth)).toBe(690);
+  await expect(dialog.getByRole('button',{name:'편집으로 돌아가기'})).toBeFocused();
+  await page.keyboard.press('Delete');
+  await expect(page.locator('.web-panel')).toHaveCount(1);
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(page.locator('.web-panel')).toHaveCount(1);
+});
