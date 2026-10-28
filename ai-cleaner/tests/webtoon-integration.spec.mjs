@@ -1485,3 +1485,22 @@ test('new project keeps edits made while its draft clear is pending',async({page
  await expect(page.getByRole('textbox',{name:'작품명'})).toHaveValue('새 원고 준비 중 편집');await page.reload();
  await expect(page.getByRole('textbox',{name:'작품명'})).toHaveValue('새 원고 준비 중 편집');
 });
+
+test('saving keeps the starting title and episode when edits happen during packaging',async({page})=>{
+  await page.goto(studio);
+  await page.getByLabel('작품명').fill('저장 전 제목');
+  await page.getByLabel('회차').fill('1화');
+  await page.evaluate(()=>{
+    const original=crypto.subtle.digest.bind(crypto.subtle);
+    crypto.subtle.digest=async(...args)=>{crypto.subtle.digest=original;await new Promise(resolve=>{window.releaseDigest=resolve});return original(...args)};
+  });
+  const download=page.waitForEvent('download');
+  await page.getByRole('button',{name:'.wtoon 저장'}).click();
+  await expect.poll(()=>page.evaluate(()=>typeof window.releaseDigest)).toBe('function');
+  await page.getByLabel('작품명').fill('바뀐 제목');
+  await page.getByLabel('회차').fill('2화');
+  await page.evaluate(()=>window.releaseDigest());
+  const file=await download;
+  expect(file.suggestedFilename()).toBe('저장 전 제목_1화.wtoon');
+  expect(await page.getByLabel('작품명').inputValue()).toBe('바뀐 제목');
+});
