@@ -265,6 +265,7 @@ if(!failures.length){
   ['mobile panel expand logic exists',app.includes('setMobilePanelExpanded')&&app.includes("$$('[data-panel-size]')")],
   ['mobile compact mode hides secondary text',css.includes('.floatPanel:not(.mobileExpanded) .floatHead .sub')],
   ['floating dock stays switchable above panels',css.includes('floatingDock{position:fixed')&&css.includes('z-index:520')],
+  ['upcoming game artwork is published', ['garden','sixty','matgo','physics'].every(name=>html.includes(`assets/game-${name}.webp`)&&pagesBuilder.includes(`'game-${name}.webp'`)&&serviceWorker.includes(`./assets/game-${name}.webp`)&&fs.existsSync(path.join(root,'assets',`game-${name}.webp`)))],
   ['music play icon is published',html.includes('assets/music-play.png')&&pagesBuilder.includes("'music-play.png'")&&fs.existsSync(path.join(root,'assets','music-play.png'))],
   ['webtoon studio and artwork are published',html.includes('../AIPlayground/WebtoonStudio/')&&html.includes('assets/home-icon-webtoon.png')&&pagesBuilder.includes("'AIPlayground/WebtoonStudio'")&&pagesBuilder.includes("'home-icon-webtoon.png'")&&fs.existsSync(path.join(repo,'AIPlayground','WebtoonStudio','index.html'))],
   ['studio picker artwork is published',html.includes('assets/studio-picker-worlds.png')&&pagesBuilder.includes("'studio-picker-worlds.png'")&&fs.existsSync(path.join(root,'assets','studio-picker-worlds.png'))],
