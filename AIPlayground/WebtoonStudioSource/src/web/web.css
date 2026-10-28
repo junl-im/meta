@@ -178,3 +178,5 @@
 .web-reader-device{display:flex;align-items:center;justify-content:center;gap:8px;padding:7px 12px;color:#58757e;font-size:12px;font-weight:700}.web-reader-device select{max-width:100%;padding:5px 9px;border:1px solid #cbdde0;border-radius:9px;background:#fff;color:#26404b;font:inherit}.web-reader-scroll{width:100%}
 .web-reader-cuts{display:flex;align-items:center;justify-content:center;gap:12px;padding:0 12px 7px;color:#55737d;font-size:12px}.web-reader-cuts span{min-width:72px;text-align:center;font-weight:700}.web-reader-cuts button{padding:5px 10px;font-size:12px}
 .web-reader-cuts{gap:6px;flex-wrap:wrap}.web-reader-cuts button{white-space:nowrap}
+
+.web-issues .web-issues-more{justify-content:center;align-items:center;color:#087f8a;background:#eaf8f8;font-weight:700}
