@@ -1714,3 +1714,20 @@ for(const viewport of [{width:1280,height:800},{width:390,height:844}])test(`rea
   await expect(dialog).toHaveCount(0);
   await expect(page.locator('.web-panel')).toHaveCount(1);
 });
+test('reader preview shows first page while later pages render and stops after close',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByLabel('캔버스 높이').fill('6000');
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.evaluate(()=>{const original=HTMLCanvasElement.prototype.toBlob;window.previewBlobCalls=0;HTMLCanvasElement.prototype.toBlob=function(...args){window.previewBlobCalls++;if(window.previewBlobCalls===2){window.releasePreviewBlob=()=>original.apply(this,args);return}return original.apply(this,args)}});
+  await page.getByRole('button',{name:'독자 미리보기'}).click();
+  const dialog=page.getByRole('dialog',{name:'독자 미리보기'});
+  await expect(dialog.getByRole('img',{name:'원고 1페이지'})).toBeVisible();
+  await expect(dialog.getByRole('status')).toBeVisible();
+  await expect.poll(()=>page.evaluate(()=>typeof window.releasePreviewBlob)).toBe('function');
+  await dialog.getByRole('button',{name:'편집으로 돌아가기'}).click();
+  await page.evaluate(()=>window.releasePreviewBlob());
+  await expect(dialog).toHaveCount(0);
+  await expect.poll(()=>page.evaluate(()=>window.previewBlobCalls)).toBe(2);
+});
