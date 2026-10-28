@@ -1731,3 +1731,26 @@ test('reader preview shows first page while later pages render and stops after c
   await expect(dialog).toHaveCount(0);
   await expect.poll(()=>page.evaluate(()=>window.previewBlobCalls)).toBe(2);
 });
+test('reader preview switches phone widths and keeps keyboard focus inside',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  const open=page.getByRole('button',{name:'독자 미리보기'});
+  await open.click();
+  const dialog=page.getByRole('dialog',{name:'독자 미리보기'});
+  const scroll=dialog.getByLabel('원고 미리보기 스크롤');
+  await expect(dialog.getByRole('img',{name:'원고 1페이지'})).toBeVisible();
+  const size=dialog.getByLabel('독자 화면 너비');
+  await size.selectOption('compact');
+  await expect.poll(()=>scroll.evaluate(e=>Math.round(e.getBoundingClientRect().width))).toBe(360);
+  await size.selectOption('large');
+  await expect.poll(()=>scroll.evaluate(e=>Math.round(e.getBoundingClientRect().width))).toBe(430);
+  await scroll.focus();
+  await page.keyboard.press('Tab');
+  await expect(dialog.getByRole('button',{name:'편집으로 돌아가기'})).toBeFocused();
+  await page.keyboard.press('Shift+Tab');
+  await expect(scroll).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(open).toBeFocused();
+});
