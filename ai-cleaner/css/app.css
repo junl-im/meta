@@ -1321,3 +1321,9 @@ body{background:radial-gradient(circle at 8% 7%,#f8dbc6b8 0,transparent 28%),rad
   .homeWorldCollection .homeWorldGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .homeWorldCollection .homeWorldGrid>a:last-child:nth-child(odd){grid-column:1/-1}
 }
+
+/* Game worlds awaiting their future launch. */
+.gameComingSoon{position:relative;display:grid;grid-template-columns:64px minmax(0,1fr);align-items:center;gap:12px;min-height:105px;padding:14px 17px;border-radius:17px;background:linear-gradient(135deg,#ffffffd9,#fff6edac);box-shadow:0 12px 28px #76512f14,0 1px 0 #fff inset;color:#3d2a20}
+.gameComingSoon .homeWorldIcon,.gameComingSoon .homeWorldIcon img{width:64px;height:64px}.gameComingSoon>div{display:grid;gap:5px;min-width:0;padding-top:12px}.gameComingSoon strong{font-size:14px;line-height:1.35;overflow-wrap:anywhere}.gameComingSoon small{font-size:11px;line-height:1.4;color:#816b5a;word-break:keep-all}.gameComingBadge{position:absolute;right:12px;top:10px;color:#9a6848;background:#f5e7d9;border-radius:999px;padding:3px 7px;font-size:10px;font-weight:700}
+@media(min-width:981px){.homeWorldCollection--games{grid-column:1/-1!important}.homeWorldCollection--games .homeWorldGrid{grid-template-columns:repeat(5,minmax(0,1fr))!important}.homeWorldCollection--audio{grid-column:1/-1!important}}
+@media(max-width:620px){.gameComingSoon{min-height:128px;grid-template-columns:minmax(0,1fr);align-content:start;gap:2px;padding:9px 11px}.gameComingSoon .homeWorldIcon,.gameComingSoon .homeWorldIcon img{width:45px;height:45px}.gameComingSoon>div{padding-top:2px;gap:2px}.gameComingSoon strong{font-size:13px}.gameComingSoon small{font-size:11.5px}.gameComingBadge{top:9px;right:9px}}

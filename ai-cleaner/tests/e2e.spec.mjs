@@ -32,7 +32,9 @@ test('illustrated home opens first and cards, brand and browser back connect the
   await expect(page.locator('.workspaceNav')).toBeHidden();
   await expect(page.locator('.homeHero > .homeExplore .homeToolCard')).toHaveCount(4);
   await expect(page.locator('.homeHeroCopy button')).toHaveCount(0);
-  await expect(page.locator('#homeTool img')).toHaveCount(14);
+  await expect(page.locator('#homeTool img')).toHaveCount(18);
+  await expect(page.locator('.gameComingSoon')).toHaveCount(4);
+  await expect(page.locator('.gameComingSoon a, .gameComingSoon button')).toHaveCount(0);
   for(const icon of await page.locator('#homeTool img').all()){await icon.scrollIntoViewIfNeeded();await expect.poll(()=>icon.evaluate(img=>img.naturalWidth)).toBeGreaterThan(0);}
   await expect(page).toHaveTitle(/곰같은여우의 AI 놀이터/);
   await page.locator('.homeToolCard[data-open-tool="text"]').click();
@@ -60,16 +62,16 @@ test('desktop music dock is right aligned and clear of the hero illustration',as
   }
 });
 
-test('desktop linked worlds fill two even rows without empty columns',async({page})=>{
+test('desktop worlds and upcoming games align without overflow',async({page})=>{
   for(const width of [1000,1280]){
     await page.setViewportSize({width,height:900});await gotoReady(page,{home:true});
-    const layout=await page.evaluate(()=>({scrollWidth:document.documentElement.scrollWidth,cards:[...document.querySelectorAll('.homeWorldGrid a')].map(el=>{const box=el.getBoundingClientRect();return{x:box.x,y:box.y,width:box.width}})}));
+    const layout=await page.evaluate(()=>({scrollWidth:document.documentElement.scrollWidth,groups:[...document.querySelectorAll('.homeWorldCollection')].map(group=>[...group.querySelectorAll('.homeWorldGrid > *')].map(el=>{const box=el.getBoundingClientRect();return{x:box.x,y:box.y,width:box.width,right:box.right}}))}));
     expect(layout.scrollWidth).toBeLessThanOrEqual(width);
-    expect(layout.cards).toHaveLength(8);
-    for(const row of [layout.cards.slice(0,4),layout.cards.slice(4,8)]){
+    expect(layout.groups.map(group=>group.length)).toEqual([4,3,5]);
+    for(const row of layout.groups){
       expect(Math.max(...row.map(card=>card.y))-Math.min(...row.map(card=>card.y))).toBeLessThan(2);
-      expect(Math.max(...row.map(card=>card.width))-Math.min(...row.map(card=>card.width))).toBeLessThan(2);
-      expect(row.every((card,index)=>index===0||card.x>row[index-1].x)).toBe(true);
+      expect(row.every((card,index)=>index===0||card.x>=row[index-1].right)).toBe(true);
+      expect(row.every(card=>card.width>0&&card.right<=width)).toBe(true);
     }
   }
 });
