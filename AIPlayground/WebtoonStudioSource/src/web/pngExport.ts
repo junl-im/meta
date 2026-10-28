@@ -47,12 +47,12 @@ function drawElement(ctx:CanvasRenderingContext2D,e:EditorElement,images:Map<str
   else if(e.type==='drawing'){const transform=ctx.getTransform();paintDrawing(ctx,e.points,e.stroke,e.strokeWidth,e.brush||'pen',e.opacity??1,Math.hypot(transform.a,transform.b))}
   ctx.restore()
 }
-export async function exportDraftPng(project:ProjectV4){
+export async function* renderDraftPages(project:ProjectV4,signal?:AbortSignal){
   const images=new Map<string,HTMLImageElement>()
   for(const src of new Set(project.elements.filter(e=>e.type==='panel'&&e.image).map(e=>(e as {image:string}).image)))images.set(src,await loadImage(src))
-  const files:Record<string,Uint8Array>={},scale=690/project.canvas.width,sourceHeight=Math.max(1,Math.floor(2000/scale)),elements=project.elements.filter(e=>e.visible!==false&&e.type!=='scene').sort((a,b)=>a.z-b.z).map(element=>{const bounds=artworkBounds(element),stroke=element.type==='drawing'?element.strokeWidth:element.type==='panel'||element.type==='bubble'?(element.strokeWidth??3):0,pad=Math.max(2,Number.isFinite(stroke)?Math.max(0,stroke)/2:0)+(element.type==='drawing'&&element.brush==='watercolor'?4:0);return{element,top:bounds.top-pad,bottom:bounds.bottom+pad}})
+  const scale=690/project.canvas.width,sourceHeight=Math.max(1,Math.floor(2000/scale)),elements=project.elements.filter(e=>e.visible!==false&&e.type!=='scene').sort((a,b)=>a.z-b.z).map(element=>{const bounds=artworkBounds(element),stroke=element.type==='drawing'?element.strokeWidth:element.type==='panel'||element.type==='bubble'?(element.strokeWidth??3):0,pad=Math.max(2,Number.isFinite(stroke)?Math.max(0,stroke)/2:0)+(element.type==='drawing'&&element.brush==='watercolor'?4:0);return{element,top:bounds.top-pad,bottom:bounds.bottom+pad}})
   let part=0
-  for(let start=0;start<project.canvas.height;start+=sourceHeight){const end=Math.min(project.canvas.height,start+sourceHeight),canvas=document.createElement('canvas');canvas.width=690;canvas.height=Math.ceil((end-start)*scale);const ctx=canvas.getContext('2d');if(!ctx)throw Error('브라우저 캔버스를 사용할 수 없습니다.');ctx.fillStyle=project.canvas.background;ctx.fillRect(0,0,canvas.width,canvas.height);ctx.setTransform(scale,0,0,scale,0,-start*scale);for(const item of elements){if(item.bottom<start||item.top>end)continue;const e=item.element
+  for(let start=0;start<project.canvas.height;start+=sourceHeight){if(signal?.aborted)return;const end=Math.min(project.canvas.height,start+sourceHeight),canvas=document.createElement('canvas');canvas.width=690;canvas.height=Math.ceil((end-start)*scale);const ctx=canvas.getContext('2d');if(!ctx)throw Error('브라우저 캔버스를 사용할 수 없습니다.');ctx.fillStyle=project.canvas.background;ctx.fillRect(0,0,canvas.width,canvas.height);ctx.setTransform(scale,0,0,scale,0,-start*scale);for(const item of elements){if(item.bottom<start||item.top>end)continue;const e=item.element
     if(!e.erasures?.length){drawElement(ctx,e,images);continue}
     // Render this element separately so erasing never affects the background or another layer.
     const isolated=document.createElement('canvas');isolated.width=canvas.width;isolated.height=canvas.height
@@ -65,6 +65,10 @@ export async function exportDraftPng(project:ProjectV4){
     paintErasures(maskCtx,e,scale)
     artwork.setTransform(1,0,0,1,0,0);artwork.globalCompositeOperation='destination-in';artwork.drawImage(mask,0,0)
     ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(isolated,0,0);ctx.restore()
-  }files[`${String(++part).padStart(3,'0')}.png`]=await canvasBlob(canvas)}
+  }const bytes=await canvasBlob(canvas);if(signal?.aborted)return;yield {name:`${String(++part).padStart(3,'0')}.png`,bytes}}
+}
+
+export async function exportDraftPng(project:ProjectV4){
+  const files:Record<string,Uint8Array>={};for await(const page of renderDraftPages(project))files[page.name]=page.bytes
   return zipSync(files,{level:6})
 }
