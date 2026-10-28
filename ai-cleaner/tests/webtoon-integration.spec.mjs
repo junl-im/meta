@@ -1504,3 +1504,23 @@ test('saving keeps the starting title and episode when edits happen during packa
   expect(file.suggestedFilename()).toBe('저장 전 제목_1화.wtoon');
   expect(await page.getByLabel('작품명').inputValue()).toBe('바뀐 제목');
 });
+test('slow image import cannot overwrite a newer image in the same panel',async({page})=>{
+  await page.goto(studio);
+  const first=fs.readFileSync(new URL('../assets/music-play.png',import.meta.url));
+  const second=fs.readFileSync(new URL('../../AIPlayground/WebtoonStudioSource/src/web/assets/home-icon-webtoon.png',import.meta.url));
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.evaluate(()=>{
+    const original=FileReader.prototype.readAsDataURL;
+    FileReader.prototype.readAsDataURL=function(file){FileReader.prototype.readAsDataURL=original;window.releaseImageRead=()=>original.call(this,file)};
+  });
+  const input=page.locator('input[type=file][accept="image/*"]');
+  await input.setInputFiles({name:'slow.png',mimeType:'image/png',buffer:first});
+  await expect.poll(()=>page.evaluate(()=>typeof window.releaseImageRead)).toBe('function');
+  await input.setInputFiles({name:'new.png',mimeType:'image/png',buffer:second});
+  await expect(page.locator('.web-panel img')).toHaveCount(1);
+  const newer=await page.locator('.web-panel img').getAttribute('src');
+  await page.evaluate(()=>window.releaseImageRead());
+  await expect(page.getByText('이미지를 읽는 동안 컷이 바뀌어 기존 이미지를 유지했습니다.')).toBeVisible();
+  await expect(page.locator('.web-panel img')).toHaveAttribute('src',newer);
+  await expect(page.locator('.web-assets button')).toHaveCount(1);
+});
