@@ -1550,3 +1550,41 @@ test('multiple selected elements copy and cut together with relative positions a
   await page.keyboard.press('Control+z');
   await expect(page.locator('.web-element')).toHaveCount(4);
 });
+test('right-click preserves multi-selection and group menu copies and deletes together',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  const layers=page.locator('.web-layers > div > button:first-child');
+  await layers.first().click();
+  await layers.nth(1).click({modifiers:['Shift']});
+  const panels=page.locator('.web-panel');
+  await panels.last().click({button:'right',position:{x:5,y:5}});
+  await expect(page.locator('.web-panel.is-group-selected')).toHaveCount(2);
+  await page.getByRole('menuitem',{name:'선택 요소 복사'}).click();
+  await page.locator('.web-canvas').click({button:'right',position:{x:5,y:5}});
+  await page.getByRole('menuitem',{name:'여기에 붙여넣기'}).click();
+  await expect(panels).toHaveCount(4);
+  await panels.last().click({button:'right',position:{x:5,y:5}});
+  await page.getByRole('menuitem',{name:'선택 요소 삭제'}).click();
+  await expect(panels).toHaveCount(2);
+  await page.keyboard.press('Control+z');
+  await expect(panels).toHaveCount(4);
+});
+
+test('mobile multi-selection can copy several elements from the properties panel',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.getByRole('button',{name:/레이어·속성/}).click();
+  await page.locator('.web-layer-select-mode').click();
+  const layers=page.locator('.web-layers > div > button:first-child');
+  await layers.nth(1).click();
+  await page.getByRole('button',{name:'요소 복사'}).click();
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'▤ 붙여넣기'}).click();
+  await expect(page.locator('.web-panel')).toHaveCount(4);
+});
