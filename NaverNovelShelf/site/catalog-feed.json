@@ -2,7 +2,7 @@
   "schema_version": 1,
   "app_id": "gomfox-naver-novel-shelf",
   "source_site": "https://gomfox-naver-novels.glassyroot13.chatgpt.site",
-  "catalog_last_verified": "2026-10-27",
+  "catalog_last_verified": "2026-10-28",
   "copyright_policy": "metadata-and-links-only",
   "navigation_mode": "open-official-naver-novel-url",
   "works": [
@@ -257,6 +257,15 @@
       "genre": "판타지",
       "official_url": "https://m.novel.naver.com/challenge/list?novelId=1242932",
       "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20221231_133/novel_1672413518094fk60i_PNG/fantasy_320_1.png?type=f280_224_2"
+    },
+    {
+      "id": "1250781",
+      "title": "무림까지 집착하는 힐러가 되었다",
+      "author_search_identity": "[곰같은여우]",
+      "league": "challenge",
+      "genre": "판타지",
+      "official_url": "https://m.novel.naver.com/challenge/list?novelId=1250781",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20221231_95/novel_1672413539316vuaf9_PNG/fantasy_320_4.png?type=f280_224_2"
     }
   ]
 }

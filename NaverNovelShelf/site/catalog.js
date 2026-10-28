@@ -1,4 +1,4 @@
-/* Public Naver Web Novel work metadata, verified 2026-10-27.
+/* Public Naver Web Novel work metadata, verified 2026-10-28.
    Only titles, author pen names, official cover thumbnail URLs and links.
    No story text or reader data is reproduced. */
 window.NOVEL_CATALOG = [
@@ -29,9 +29,10 @@ window.NOVEL_CATALOG = [
   ["《FC온라인 : 나 혼자 뛴다》","고양이와사비","1243383","challenge","https://novel-phinf.pstatic.net/20221231_179/novel_1672414893885IEnNO_PNG/mof_320_6.png?type=f280_224_2","현판"],
   ["폐급 능력 밀도 조절로 이세계 최강","[ZERO]","1249457","best","https://novel-phinf.pstatic.net/20261027_59/novel_1793082366438eUial_PNG/400.png?type=f280_224_2","판타지"],
   ["눈 떠보니 박보검","[ZERO]","1248550","challenge","https://novel-phinf.pstatic.net/20221231_33/novel_1672413126990maFR1_PNG/romance_320_3.png?type=f280_224_2","로맨스"],
-  ["검은 나를 기억한다","[ZERO]","1242932","challenge","https://novel-phinf.pstatic.net/20221231_133/novel_1672413518094fk60i_PNG/fantasy_320_1.png?type=f280_224_2","판타지"]
+  ["검은 나를 기억한다","[ZERO]","1242932","challenge","https://novel-phinf.pstatic.net/20221231_133/novel_1672413518094fk60i_PNG/fantasy_320_1.png?type=f280_224_2","판타지"],
+  ["무림까지 집착하는 힐러가 되었다","[곰같은여우]","1250781","challenge","https://novel-phinf.pstatic.net/20221231_95/novel_1672413539316vuaf9_PNG/fantasy_320_4.png?type=f280_224_2","판타지"]
 ].map(([title,author,id,league,image,genre])=>({
   title, author, id, league, image, genre,
   url: `https://m.novel.naver.com/${league}/list?novelId=${id}`
 }));
-window.NOVEL_CATALOG_LAST_CHECK = "2026-10-27";
+window.NOVEL_CATALOG_LAST_CHECK = "2026-10-28";
