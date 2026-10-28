@@ -1754,3 +1754,24 @@ test('reader preview switches phone widths and keeps keyboard focus inside',asyn
   await expect(dialog).toHaveCount(0);
   await expect(open).toBeFocused();
 });
+for(const viewport of [{width:1280,height:800},{width:390,height:844}])test(`reader cut navigation follows the selected cut at ${viewport.width}px`,async({page})=>{
+  await page.setViewportSize(viewport);
+  await page.goto(studio);
+  if(viewport.width<760)await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  if(viewport.width<760)await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  if(viewport.width<760)await page.getByRole('button',{name:/레이어·속성/}).click();
+  await page.getByLabel('위쪽',{exact:true}).fill('2500');
+  if(viewport.width<760)await page.getByRole('button',{name:'캔버스',exact:true}).click();
+  await page.getByRole('button',{name:'독자 미리보기'}).click();
+  const dialog=page.getByRole('dialog',{name:'독자 미리보기'}),next=dialog.getByRole('button',{name:'다음 컷'}),previous=dialog.getByRole('button',{name:'이전 컷'}),scroll=dialog.getByLabel('원고 미리보기 스크롤');
+  await expect(next).toBeEnabled();
+  await expect(previous).toBeDisabled();
+  await next.click();
+  await expect(dialog.getByText('2 / 2 컷')).toBeVisible();
+  await expect.poll(()=>scroll.evaluate(e=>e.scrollTop)).toBeGreaterThan(500);
+  await previous.click();
+  await expect(dialog.getByText('1 / 2 컷')).toBeVisible();
+  await expect.poll(()=>scroll.evaluate(e=>e.scrollTop)).toBeLessThan(200);
+});
