@@ -5,6 +5,8 @@ on:
     paths:
       - 'ai-cleaner/**'
       - 'AIPlayground/DalbitUnse/**'
+      - 'AIPlayground/MaeumDogam/**'
+      - 'AIPlayground/GomFoxMusic/**'
       - 'AIPlayground/WebtoonStudio/**'
       - 'AIPlayground/WebtoonStudioSource/**'
       - 'NaverNovelShelf/site/**'
@@ -21,6 +23,8 @@ on:
     paths:
       - 'ai-cleaner/**'
       - 'AIPlayground/DalbitUnse/**'
+      - 'AIPlayground/MaeumDogam/**'
+      - 'AIPlayground/GomFoxMusic/**'
       - 'AIPlayground/WebtoonStudio/**'
       - 'AIPlayground/WebtoonStudioSource/**'
       - 'NaverNovelShelf/site/**'
