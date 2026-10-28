@@ -1848,3 +1848,16 @@ test('quality checks reveal warnings beyond the first thirty',async({page})=>{
   await warnings.last().click();
   await expect(page.locator('.web-bubble.is-selected')).toHaveAttribute('data-element-id',await page.locator('.web-bubble').last().getAttribute('data-element-id'));
 });
+test('quality checks show important errors before many advisory warnings',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  const warnings=Array.from({length:31},(_,i)=>({id:`bubble_${i}`,type:'bubble',kind:'speech',text:'',x:40,y:50+i*100,w:300,h:80,z:i+1,fontSize:24}));
+  const project={schemaVersion:4,title:'검수 순서',episode:'1',canvas:{width:690,height:6000,background:'#ffffff'},scenes:[{id:'scene_root',name:'장면',startY:0,collapsed:false}],elements:[...warnings,{id:'missing_font',type:'text',text:'글꼴 확인',fontFamily:'wtoon_font_missing',x:40,y:3500,w:300,h:100,z:50,fontSize:24}],assets:[],settings:{snap:false,guides:true,gridSize:10,smartSnapDistance:8}};
+  await page.locator('input[type=file][accept=".wtoon,.json"]').setInputFiles({name:'quality.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project))});
+  const first=page.locator('.web-issues button').first();
+  await expect(first).toContainText('사용 중인 가져온 글꼴');
+  await expect(first).toContainText('확인 필요');
+  await expect(page.locator('.web-issue-summary')).toContainText('확인 필요 1');
+  await first.click();
+  await expect(page.locator('.web-text.is-selected')).toHaveAttribute('data-element-id','missing_font');
+});
