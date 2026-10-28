@@ -1797,3 +1797,26 @@ test('reader navigation retains the chosen cut for shared rows and the page end'
   await previous.click();
   await expect(dialog.getByText('1 / 3 컷')).toBeVisible();
 });
+for(const viewport of [{width:1280,height:800},{width:390,height:844}])test(`reader jumps to the chosen cut in editor at ${viewport.width}px`,async({page})=>{
+  await page.setViewportSize(viewport);
+  await page.goto(studio);
+  if(viewport.width<760)await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  if(viewport.width<760)await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  if(viewport.width<760)await page.getByRole('button',{name:/레이어·속성/}).click();
+  await page.getByLabel('위쪽',{exact:true}).fill('2500');
+  const targetId=await page.locator('.web-panel').last().getAttribute('data-element-id');
+  if(viewport.width<760)await page.getByRole('button',{name:'캔버스',exact:true}).click();
+  await page.getByRole('button',{name:'독자 미리보기'}).click();
+  const dialog=page.getByRole('dialog',{name:'독자 미리보기'});
+  await expect(dialog.getByRole('button',{name:'다음 컷'})).toBeEnabled();
+  await dialog.getByRole('button',{name:'다음 컷'}).click();
+  await dialog.getByRole('button',{name:'이 컷 편집'}).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(page.locator('.web-panel.is-selected')).toHaveAttribute('data-element-id',targetId);
+  await expect.poll(()=>page.locator('.web-canvas-scroll').evaluate(e=>e.scrollTop)).toBeGreaterThan(500);
+  const rects=await page.locator('.web-panel.is-selected').evaluate(e=>{const r=e.getBoundingClientRect(),v=e.closest('.web-canvas-scroll').getBoundingClientRect();return {top:r.top,viewTop:v.top,viewBottom:v.bottom}});
+  expect(rects.top).toBeGreaterThanOrEqual(rects.viewTop-5);
+  expect(rects.top).toBeLessThan(rects.viewBottom);
+});
