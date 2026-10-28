@@ -1519,8 +1519,12 @@ test('slow image import cannot overwrite a newer image in the same panel',async(
   await input.setInputFiles({name:'new.png',mimeType:'image/png',buffer:second});
   await expect(page.locator('.web-panel img')).toHaveCount(1);
   const newer=await page.locator('.web-panel img').getAttribute('src');
+  await expect(page.getByRole('button',{name:'새 원고'})).toBeDisabled();
+  await expect(page.getByRole('button',{name:'.wtoon 저장'})).toBeDisabled();
   await page.evaluate(()=>window.releaseImageRead());
   await expect(page.getByText('이미지를 읽는 동안 컷이 바뀌어 기존 이미지를 유지했습니다.')).toBeVisible();
   await expect(page.locator('.web-panel img')).toHaveAttribute('src',newer);
   await expect(page.locator('.web-assets button')).toHaveCount(1);
+  await expect(page.getByRole('button',{name:'새 원고'})).toBeEnabled();
+  await expect(page.getByRole('button',{name:'.wtoon 저장'})).toBeEnabled();
 });
