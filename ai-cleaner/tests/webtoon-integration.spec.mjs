@@ -1588,3 +1588,51 @@ test('mobile multi-selection can copy several elements from the properties panel
   await page.getByRole('button',{name:'▤ 붙여넣기'}).click();
   await expect(page.locator('.web-panel')).toHaveCount(4);
 });
+test('group duplicate keeps relative positions, clipboard, and undo',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.getByRole('button',{name:'◯ 말풍선'}).click();
+  const layers=page.locator('.web-layers > div > button:first-child');
+  await layers.first().click();
+  await page.keyboard.press('Control+c');
+  await layers.nth(1).click({modifiers:['Shift']});
+  const originals=await page.locator('.web-element').evaluateAll(items=>items.map(e=>({x:parseFloat(e.style.left),y:parseFloat(e.style.top)})));
+  await page.keyboard.press('Control+d');
+  await expect(page.locator('.web-element')).toHaveCount(4);
+  await expect(page.locator('.web-element.is-group-selected')).toHaveCount(2);
+  const copies=await page.locator('.web-element.is-group-selected').evaluateAll(items=>items.map(e=>({x:parseFloat(e.style.left),y:parseFloat(e.style.top)})));
+  expect(Math.abs((copies[1].x-copies[0].x)-(originals[1].x-originals[0].x))).toBeLessThan(.1);
+  expect(Math.abs((copies[1].y-copies[0].y)-(originals[1].y-originals[0].y))).toBeLessThan(.1);
+  await page.keyboard.press('Control+z');
+  await expect(page.locator('.web-element')).toHaveCount(2);
+  await page.keyboard.press('Control+v');
+  await expect(page.locator('.web-element')).toHaveCount(3);
+});
+
+test('mobile multiple selection duplicates from properties',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.getByRole('button',{name:/레이어·속성/}).click();
+  await page.locator('.web-layer-select-mode').click();
+  await page.locator('.web-layers > div > button:first-child').nth(1).click();
+  await page.getByRole('button',{name:'선택 복제'}).click();
+  await expect(page.locator('.web-panel')).toHaveCount(4);
+});
+test('group context menu duplicates all selected panels',async({page})=>{
+  await page.setViewportSize({width:1280,height:800});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  await page.getByRole('button',{name:'▣ 컷'}).click();
+  const layers=page.locator('.web-layers > div > button:first-child');
+  await layers.first().click();
+  await layers.nth(1).click({modifiers:['Shift']});
+  await page.locator('.web-panel').last().click({button:'right',position:{x:5,y:5}});
+  await page.getByRole('menuitem',{name:'선택 요소 복제'}).click();
+  await expect(page.locator('.web-panel')).toHaveCount(4);
+  await expect(page.locator('.web-panel.is-group-selected')).toHaveCount(2);
+});
