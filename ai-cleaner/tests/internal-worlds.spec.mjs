@@ -29,6 +29,12 @@ test('shelf hero illustration loads and Doctor X stays in the verified catalog',
   const asset=await page.request.get(new URL('./assets/hero-books.webp',page.url()).href);
   expect(asset.status()).toBe(200);
   expect((await asset.body()).length).toBeGreaterThan(1000);
+  for(const name of ['library-background.webp','illustrated-icons.webp']){
+    const response=await page.request.get(new URL(`./assets/${name}`,page.url()).href);
+    expect(response.ok()).toBe(true);
+    expect((await response.body()).length).toBeGreaterThan(1000);
+    expect(await page.evaluate(async src=>{const image=new Image();image.src=src;await image.decode();return image.naturalWidth},new URL(`./assets/${name}`,page.url()).href)).toBeGreaterThan(0);
+  }
   const catalog=await page.evaluate(()=>window.NOVEL_CATALOG);
   expect(catalog.length).toBeGreaterThanOrEqual(28);
   expect(catalog.filter(work=>work.author==='닥터X').map(work=>work.id)).toEqual(expect.arrayContaining(['1245900','1248545','1249473','1250566']));
