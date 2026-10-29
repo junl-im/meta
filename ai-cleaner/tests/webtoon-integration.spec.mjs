@@ -39,6 +39,22 @@ test('mobile toolbar can be folded for more canvas space without losing editing 
   await expect(page.getByRole('button',{name:'도구 접기'})).toBeHidden();
   await expect(page.getByRole('button',{name:'너비 맞춤'})).toBeVisible();
 });
+
+test('compact mobile toolbar keeps active drawing and selection exit buttons available',async({page})=>{
+  await page.setViewportSize({width:320,height:568});
+  await page.goto(studio);
+  await page.getByRole('button',{name:'여러 개 선택'}).click();
+  await page.getByRole('button',{name:'도구 접기'}).click();
+  await page.getByRole('button',{name:'선택 마침'}).click();
+  await expect(page.getByRole('button',{name:'선택 마침'})).toBeHidden();
+  await page.getByRole('button',{name:'도구',exact:true}).click();
+  await page.getByRole('button',{name:'✎ 펜 그리기'}).click();
+  await expect(page.getByLabel('펜 그리기 영역')).toBeVisible();
+  await page.getByRole('button',{name:'✎ 펜 종료'}).click();
+  await expect(page.getByLabel('펜 그리기 영역')).toBeHidden();
+  await page.getByRole('button',{name:'도구 펼치기'}).click();
+  await expect(page.getByRole('button',{name:'여러 개 선택'})).toHaveAttribute('aria-pressed','false');
+});
 async function dropImage(page,selector,buffer){
   await page.evaluate(({selector,bytes})=>{
     const file=new File([new Uint8Array(bytes)],'dropped.png',{type:'image/png'});
