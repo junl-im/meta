@@ -1,0 +1,41 @@
+<!-- Codex: PLACE A inside the existing studioPickerGroup "소리와 음악" studioPickerLinks.
+     PLACE B inside the existing homeWorldCollection--audio homeWorldGrid.
+     PLACE C near the end of body, after the main tools and before noscript.
+     These are templates, not auto-injected; do not copy comments into production. -->
+
+<!-- A: header dropdown link; always safe even if third-party iframe is blocked. -->
+<a id="openRadioExternal" href="https://gomfox-ai-music-radio.mcwoogi.workers.dev/" target="_blank" rel="noopener noreferrer">
+  <span class="studioPickerRadioGlyph" aria-hidden="true">♫</span>
+  <span>AI 뮤직 라디오<small>55곡 방송 듣기 ↗</small></span>
+</a>
+
+<!-- B: audio worlds card; grid on desktop must allow four columns after adding this card. -->
+<button class="radioWorldCard" id="radioDockOpen" type="button"
+  aria-controls="radioDockPanel" aria-expanded="false" aria-label="AI 뮤직 라디오 창 열기">
+  <span class="homeWorldRadioIcon" aria-hidden="true">♫</span>
+  <strong>AI 뮤직 라디오</strong><small>55곡 · 음악 듣기</small>
+</button>
+
+<!-- C: one persistent iframe within the same AI Playground document.
+     HTML src is intentionally omitted. The script sets it only on explicit click. -->
+<section id="radioDockPanel" class="radioDockPanel" aria-label="AI 뮤직 라디오 플레이어" hidden>
+  <header class="radioDockHead">
+    <span class="radioDockMark" aria-hidden="true">♫</span>
+    <span class="radioDockTitle"><strong>곰같은여우 AI MUSIC RADIO</strong><small>24H RADIO · 55곡</small></span>
+    <span class="radioDockActions">
+      <button id="radioDockMinimize" type="button" aria-label="라디오 창 접기, 재생은 유지">접기</button>
+      <button id="radioDockStop" type="button" aria-label="라디오 끄기">종료</button>
+    </span>
+  </header>
+  <div class="radioDockBody">
+    <iframe id="radioDockFrame" class="radioDockFrame"
+      title="곰같은여우 AI MUSIC RADIO" loading="eager"
+      allow="autoplay; encrypted-media; picture-in-picture"
+      referrerpolicy="no-referrer"></iframe>
+  </div>
+  <footer class="radioDockFooter">
+    <span>음악 재생은 라디오 창 안에서 시작해 주세요.</span>
+    <a href="https://gomfox-ai-music-radio.mcwoogi.workers.dev/" target="_blank"
+      rel="noopener noreferrer">별도 창에서 듣기 ↗</a>
+  </footer>
+</section>
