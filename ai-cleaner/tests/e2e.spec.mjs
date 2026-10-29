@@ -32,9 +32,9 @@ test('illustrated home opens first and cards, brand and browser back connect the
   await expect(page.locator('.workspaceNav')).toBeHidden();
   await expect(page.locator('.homeHero > .homeExplore .homeToolCard')).toHaveCount(4);
   await expect(page.locator('.homeHeroCopy button')).toHaveCount(0);
-  await expect(page.locator('#homeTool img')).toHaveCount(19);
-  await expect(page.locator('.gameComingSoon')).toHaveCount(4);
-  await expect(page.locator('.gameComingSoon a, .gameComingSoon button')).toHaveCount(0);
+  await expect(page.locator('#homeTool img')).toHaveCount(20);
+  await expect(page.locator('.homeWorldCollection--games a')).toHaveCount(5);
+  await expect(page.locator('.dailyGameWidget')).toHaveAttribute('href',/SixtySecondPlayground/);
   for(const icon of await page.locator('#homeTool img').all()){await icon.scrollIntoViewIfNeeded();await expect.poll(()=>icon.evaluate(img=>img.naturalWidth)).toBeGreaterThan(0);}
   await expect(page).toHaveTitle(/곰같은여우의 AI 놀이터/);
   await page.locator('.homeToolCard[data-open-tool="text"]').click();
@@ -67,7 +67,7 @@ test('desktop worlds and upcoming games align without overflow',async({page})=>{
     await page.setViewportSize({width,height:900});await gotoReady(page,{home:true});
     const layout=await page.evaluate(()=>({scrollWidth:document.documentElement.scrollWidth,groups:[...document.querySelectorAll('.homeWorldCollection')].map(group=>[...group.querySelectorAll('.homeWorldGrid > *')].map(el=>{const box=el.getBoundingClientRect();return{x:box.x,y:box.y,width:box.width,right:box.right}}))}));
     expect(layout.scrollWidth).toBeLessThanOrEqual(width);
-    expect(layout.groups.map(group=>group.length)).toEqual([4,3,5]);
+    expect(layout.groups.map(group=>group.length)).toEqual([4,4,5]);
     for(const row of layout.groups){
       expect(Math.max(...row.map(card=>card.y))-Math.min(...row.map(card=>card.y))).toBeLessThan(2);
       expect(row.every((card,index)=>index===0||card.x>=row[index-1].right)).toBe(true);

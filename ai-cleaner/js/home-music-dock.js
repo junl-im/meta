@@ -23,6 +23,7 @@
   if(!shuffle||!shuffleLabel||!close||!player||!frame||!status)return;
   let last=-1;
   shuffle.addEventListener('click',()=>{
+    window.GomFoxRadioDock?.stop?.();
     const next=songs.length<2?0:last<0?Math.floor(Math.random()*songs.length):(last+1+Math.floor(Math.random()*(songs.length-1)))%songs.length;
     last=next;
     const song=songs[next];
