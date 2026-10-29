@@ -16,6 +16,29 @@ function pngPagesFromZip(bytes){
   return pages;
 }
 const firstPngFromZip=bytes=>pngPagesFromZip(bytes).values().next().value;
+
+test('mobile toolbar can be folded for more canvas space without losing editing tools',async({page})=>{
+  await page.setViewportSize({width:320,height:568});
+  await page.goto(studio);
+  await expect(page.getByText('첫 컷부터 시작해 보세요')).toBeVisible();
+  const canvas=page.locator('.web-canvas-scroll');
+  const before=await canvas.boundingBox();
+  const toggle=page.getByRole('button',{name:'도구 접기'});
+  await expect(toggle).toHaveAttribute('aria-expanded','true');
+  await toggle.click();
+  await expect(page.getByRole('button',{name:'도구 펼치기'})).toHaveAttribute('aria-expanded','false');
+  await expect(page.getByRole('button',{name:'너비 맞춤'})).toBeHidden();
+  const after=await canvas.boundingBox();
+  expect(after.height).toBeGreaterThan(before.height+30);
+  await page.getByRole('button',{name:'첫 컷 만들기'}).click();
+  await expect(page.locator('.web-panel')).toHaveCount(1);
+  await page.getByRole('button',{name:'도구 펼치기'}).click();
+  await page.getByRole('button',{name:'너비 맞춤'}).click();
+  await expect(page.locator('.web-panel')).toHaveCount(1);
+  await page.setViewportSize({width:1280,height:800});
+  await expect(page.getByRole('button',{name:'도구 접기'})).toBeHidden();
+  await expect(page.getByRole('button',{name:'너비 맞춤'})).toBeVisible();
+});
 async function dropImage(page,selector,buffer){
   await page.evaluate(({selector,bytes})=>{
     const file=new File([new Uint8Array(bytes)],'dropped.png',{type:'image/png'});

@@ -182,3 +182,9 @@
 .web-issues .web-issues-more{justify-content:center;align-items:center;color:#087f8a;background:#eaf8f8;font-weight:700}
 
 .web-issue-summary{margin:-5px 0 9px;color:#637d85;font-size:11px;font-weight:700}
+.web-toolbar__toggle{display:none}
+@media(max-width:760px){
+  .web-toolbar .web-toolbar__heading{display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px}
+  .web-toolbar .web-toolbar__toggle{display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:5px 10px;border-color:#b9d9dc;background:#e8f6f6;color:#24646d;font-weight:700}
+  .web-toolbar.is-compact .web-toolbar__controls{display:none}
+}
