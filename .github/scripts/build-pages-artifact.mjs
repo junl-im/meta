@@ -31,6 +31,7 @@ const assetFiles = [
   'home-icon-ranipang.webp',
   'game-garden.webp',
   'game-sixty.webp',
+  'daily-game-widget.webp',
   'game-matgo.webp',
   'game-physics.webp',
   'home-icon-maeum.webp',

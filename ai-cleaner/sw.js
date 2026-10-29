@@ -1,5 +1,5 @@
 'use strict';
-const CACHE_NAME='ai-cleaner-shell-1.37.5-games1';
+const CACHE_NAME='ai-cleaner-shell-1.37.5-games2';
 const CORE_ASSETS=[
   './','./index.html','./version.json','./site.webmanifest','./css/app.css','./js/boot.js','./js/hosting-redirect.js','./js/home-music-dock.js',
   './js/core/event-bus.js','./js/core/history-store.js','./js/core/work-lock.js','./js/core/text-utils.js',
@@ -8,7 +8,7 @@ const CORE_ASSETS=[
   './js/ui/panel-manager.js','./js/ui/diff-view.js','./js/features/file-import.js','./js/features/typewriter-engine.js',
   './js/features/result-checkpoint-store.js','./js/features/gomfox-reach.js','./js/app.js','./vendor/app-core.bundle.js','./js/rewrite-studio.js','./js/features/ai-writing-os.js',
   './data/daily-engine-status.json','./data/daily-topics.json','./ai-writing-os/prompt-compiler.json','./ai-writing-os/os-manifest.json',
-  './assets/game-garden.webp','./assets/game-sixty.webp','./assets/game-matgo.webp','./assets/game-physics.webp','./assets/fox-logo.png','./assets/music-play.png','./assets/playground-home-v1.webp','./assets/home-icon-text.webp','./assets/home-icon-image.webp','./assets/home-icon-writing.webp','./assets/home-icon-reach.webp','./assets/home-icon-dalbit.webp','./assets/home-icon-mastering.webp','./assets/home-icon-sorion.webp','./assets/home-icon-ranipang.webp','./assets/home-icon-maeum.webp','./assets/home-icon-shelf.webp','./assets/home-icon-music.webp','./assets/home-icon-webtoon.png','./assets/home-divider-v1.webp','./assets/exit-fox-v1.webp','./assets/typewriter-action.webp','./assets/favicon-v66.png','./assets/apple-touch-icon-v66.png','./assets/icon-v66-192.png','./assets/icon-v66-512.png'
+  './assets/game-garden.webp','./assets/game-sixty.webp','./assets/daily-game-widget.webp','./assets/game-matgo.webp','./assets/game-physics.webp','./assets/fox-logo.png','./assets/music-play.png','./assets/playground-home-v1.webp','./assets/home-icon-text.webp','./assets/home-icon-image.webp','./assets/home-icon-writing.webp','./assets/home-icon-reach.webp','./assets/home-icon-dalbit.webp','./assets/home-icon-mastering.webp','./assets/home-icon-sorion.webp','./assets/home-icon-ranipang.webp','./assets/home-icon-maeum.webp','./assets/home-icon-shelf.webp','./assets/home-icon-music.webp','./assets/home-icon-webtoon.png','./assets/home-divider-v1.webp','./assets/exit-fox-v1.webp','./assets/typewriter-action.webp','./assets/favicon-v66.png','./assets/apple-touch-icon-v66.png','./assets/icon-v66-192.png','./assets/icon-v66-512.png'
 ];
 const FRESH_PATHS=new Set(['/version.json','/data/daily-topics.json','/data/daily-engine-status.json']);
 const normalizeKey=request=>{

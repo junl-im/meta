@@ -32,7 +32,7 @@ test('illustrated home opens first and cards, brand and browser back connect the
   await expect(page.locator('.workspaceNav')).toBeHidden();
   await expect(page.locator('.homeHero > .homeExplore .homeToolCard')).toHaveCount(4);
   await expect(page.locator('.homeHeroCopy button')).toHaveCount(0);
-  await expect(page.locator('#homeTool img')).toHaveCount(18);
+  await expect(page.locator('#homeTool img')).toHaveCount(19);
   await expect(page.locator('.gameComingSoon')).toHaveCount(4);
   await expect(page.locator('.gameComingSoon a, .gameComingSoon button')).toHaveCount(0);
   for(const icon of await page.locator('#homeTool img').all()){await icon.scrollIntoViewIfNeeded();await expect.poll(()=>icon.evaluate(img=>img.naturalWidth)).toBeGreaterThan(0);}
