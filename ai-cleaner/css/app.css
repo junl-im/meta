@@ -786,6 +786,7 @@ button,.btn,.mini,.tab,.floatWidget,.filelabel,summary{touch-action:manipulation
   .osFactoryPresets{grid-template-columns:1fr}
 }
 @media(prefers-reduced-motion:reduce){
+.dailyGameWidget{animation:none}
   html:focus-within{scroll-behavior:auto}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
   .floatWidget.attention,.floatWidget.attention .widgetIcon,.floatWidget.rewrite.rewriteReady,.rewriteReady,.resultarea.resultFlash,.resultarea.resultApplied,#typingPreviewButton.typewriterRecommended{animation:none!important}
@@ -1327,3 +1328,13 @@ body{background:radial-gradient(circle at 8% 7%,#f8dbc6b8 0,transparent 28%),rad
 .gameComingSoon .homeWorldIcon,.gameComingSoon .homeWorldIcon img{width:64px;height:64px}.gameComingSoon>div{display:grid;gap:5px;min-width:0;padding-top:12px}.gameComingSoon strong{font-size:14px;line-height:1.35;overflow-wrap:anywhere}.gameComingSoon small{font-size:11px;line-height:1.4;color:#816b5a;word-break:keep-all}.gameComingBadge{position:absolute;right:12px;top:10px;color:#9a6848;background:#f5e7d9;border-radius:999px;padding:3px 7px;font-size:10px;font-weight:700}
 @media(min-width:981px){.homeWorldCollection--games{grid-column:1/-1!important}.homeWorldCollection--games .homeWorldGrid{grid-template-columns:repeat(5,minmax(0,1fr))!important}.homeWorldCollection--audio{grid-column:1/-1!important}}
 @media(max-width:620px){.gameComingSoon{min-height:128px;grid-template-columns:minmax(0,1fr);align-content:start;gap:2px;padding:9px 11px}.gameComingSoon .homeWorldIcon,.gameComingSoon .homeWorldIcon img{width:45px;height:45px}.gameComingSoon>div{padding-top:2px;gap:2px}.gameComingSoon strong{font-size:13px}.gameComingSoon small{font-size:11.5px}.gameComingBadge{top:9px;right:9px}}
+
+/* A small invitation floats over the illustration until the game opens. */
+.homeHeroArt{position:relative}
+.dailyGameWidget{position:absolute;z-index:1;right:3%;top:13%;display:flex;align-items:center;gap:5px;width:min(215px,34%);padding:9px 12px 9px 5px;border:1px solid #fff9e8c7;border-radius:22px;background:linear-gradient(135deg,#fffaf2eb,#ffefd9d9);box-shadow:0 12px 28px #5e321d38,0 1px 0 #fff inset;color:#523221;animation:dailyGameFloat 4.5s ease-in-out infinite;pointer-events:none}
+.homeHeroArt .dailyGameWidgetIcon{width:68px;height:68px;object-fit:contain;flex:none;filter:drop-shadow(0 4px 5px #8c521d36)}
+.dailyGameWidgetCopy{display:grid;gap:2px;min-width:0}.dailyGameWidgetCopy>span{font-size:10px;font-weight:700;color:#9b633b;letter-spacing:.02em}.dailyGameWidgetCopy strong{font-size:15px;line-height:1.25;word-break:keep-all}.dailyGameWidgetCopy small{font-size:10px;font-weight:700;color:#ae642c}
+@keyframes dailyGameFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@media(max-width:980px){.dailyGameWidget{right:2%;top:9%;width:min(190px,48%)}.homeHeroArt .dailyGameWidgetIcon{width:55px;height:55px}.dailyGameWidgetCopy strong{font-size:13px}}
+@media(max-width:620px){.dailyGameWidget{top:7%;right:3%;width:auto;max-width:48%;padding:5px 9px 5px 4px;border-radius:15px;gap:3px}.homeHeroArt .dailyGameWidgetIcon{width:44px;height:44px}.dailyGameWidgetCopy>span{display:none}.dailyGameWidgetCopy strong{font-size:11px}.dailyGameWidgetCopy small{font-size:9.5px}}
+
