@@ -45,5 +45,7 @@
     if(restoreFocus)shuffle.focus();
   };
   close.addEventListener('click',()=>stop({restoreFocus:true}));
+  const mobile=window.matchMedia('(max-width: 620px)');
+  mobile.addEventListener('change',event=>{if(event.matches)stop();});
   window.GomFoxHomeMusicDock={stop};
 })();

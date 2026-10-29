@@ -77,7 +77,7 @@ test('desktop worlds and upcoming games align without overflow',async({page})=>{
 });
 
 test('home music dock loads only after a gesture and changes to a different owned track', async ({ page }) => {
-  await page.setViewportSize({width:320,height:568});
+  await page.setViewportSize({width:1280,height:900});
   await gotoReady(page,{home:true});
   const dock=page.locator('#homeMusicDock');
   const frame=dock.locator('iframe');
@@ -107,7 +107,7 @@ test('home music dock loads only after a gesture and changes to a different owne
   await page.locator('#homeMusicShuffle').click();
   await page.locator('.homeToolCard[data-open-tool="text"]').click();
   await expect(frame).not.toHaveAttribute('src',/spotify/);
-  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(1280);
 });
 
 test('first music shuffle can select the last track and the next pick differs', async ({ page }) => {
@@ -1226,4 +1226,23 @@ test('confirmed exit returns to the previous site when browser closing is blocke
   await expect(page.locator('#exitDialog')).toBeVisible();
   await page.locator('#exitLeave').click();
   await expect(page).toHaveURL(previous);
+});
+
+test('mobile shows only radio and panel supports minimize and stop', async ({page}) => {
+  await page.setViewportSize({width:320,height:568});
+  await page.route('https://gomfox-ai-music-radio.mcwoogi.workers.dev/**', route=>route.fulfill({status:200,contentType:'text/html',body:'<title>Radio test</title>'}));
+  await gotoReady(page,{home:true});
+  await expect(page.locator('#homeMusicShuffle')).toBeHidden();
+  await expect(page.locator('#radioDockHomeOpen')).toBeVisible();
+  const frame=page.locator('#radioDockFrame');
+  await expect(frame).not.toHaveAttribute('src',/workers/);
+  await page.locator('#radioDockHomeOpen').click();
+  await expect(frame).toHaveAttribute('src',/workers/);
+  await page.locator('#radioDockMinimize').click();
+  await expect(page.locator('#radioDockPanel')).toHaveClass(/is-minimized/);
+  await expect(frame).toHaveAttribute('src',/workers/);
+  await page.locator('#radioDockMinimize').click();
+  await page.locator('#radioDockStop').click();
+  await expect(frame).not.toHaveAttribute('src',/workers/);
+  await expect(page.locator('#radioDockPanel')).toBeHidden();
 });

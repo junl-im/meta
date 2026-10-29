@@ -1340,3 +1340,5 @@ body{background:radial-gradient(circle at 8% 7%,#f8dbc6b8 0,transparent 28%),rad
 
 @media(min-width:981px){.homeWorldCollection--audio .homeWorldGrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .dailyGameWidget:focus-visible{outline:3px solid #b9571d;outline-offset:-3px}
+
+@media(max-width:620px){#homeMusicShuffle,#homeMusicPlayer{display:none!important}}
