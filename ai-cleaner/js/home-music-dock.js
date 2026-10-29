@@ -23,6 +23,7 @@
   if(!shuffle||!shuffleLabel||!close||!player||!frame||!status)return;
   let last=-1;
   shuffle.addEventListener('click',()=>{
+    window.GomFoxRadioDock?.stop?.();
     const next=songs.length<2?0:last<0?Math.floor(Math.random()*songs.length):(last+1+Math.floor(Math.random()*(songs.length-1)))%songs.length;
     last=next;
     const song=songs[next];
@@ -37,12 +38,14 @@
   const stop=({restoreFocus=false}={})=>{
     frame.removeAttribute('src');
     player.hidden=true;
-    status.textContent='노래 한 곡, 쉬어 가기';
+    status.textContent='노래가 이어지는 라디오';
     shuffleLabel.textContent='랜덤 듣기';
     shuffle.setAttribute('aria-label','곰같은여우 무작위 곡 고르기');
     shuffle.setAttribute('aria-expanded','false');
     if(restoreFocus)shuffle.focus();
   };
   close.addEventListener('click',()=>stop({restoreFocus:true}));
+  const mobile=window.matchMedia('(max-width: 620px)');
+  mobile.addEventListener('change',event=>{if(event.matches)stop();});
   window.GomFoxHomeMusicDock={stop};
 })();

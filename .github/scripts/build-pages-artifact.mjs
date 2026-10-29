@@ -32,6 +32,7 @@ const assetFiles = [
   'game-garden.webp',
   'game-sixty.webp',
   'daily-game-widget.webp',
+  'home-icon-radio.webp',
   'game-matgo.webp',
   'game-physics.webp',
   'home-icon-maeum.webp',
