@@ -32,7 +32,7 @@ test('illustrated home opens first and cards, brand and browser back connect the
   await expect(page.locator('.workspaceNav')).toBeHidden();
   await expect(page.locator('.homeHero > .homeExplore .homeToolCard')).toHaveCount(4);
   await expect(page.locator('.homeHeroCopy button')).toHaveCount(0);
-  await expect(page.locator('#homeTool img')).toHaveCount(20);
+  await expect(page.locator('#homeTool img')).toHaveCount(21);
   await expect(page.locator('.homeWorldCollection--games a')).toHaveCount(5);
   await expect(page.locator('.dailyGameWidget')).toHaveAttribute('href',/SixtySecondPlayground/);
   for(const icon of await page.locator('#homeTool img:visible').all()){await icon.scrollIntoViewIfNeeded();await expect.poll(()=>icon.evaluate(img=>img.naturalWidth)).toBeGreaterThan(0);}
