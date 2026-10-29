@@ -1,0 +1,76 @@
+/* AI MUSIC RADIO — isolated integration, independent of the existing Spotify dock. */
+.homeWorldGrid .radioWorldCard{
+  position:relative;display:grid;grid-template-columns:36px minmax(0,1fr);
+  grid-template-rows:auto auto;column-gap:10px;align-items:center;
+  min-height:82px;padding:16px;border:1px solid #d8c5ed;border-radius:17px;
+  background:linear-gradient(120deg,#fdf9ff,#f4edff);color:#39244c;
+  text-align:left;font:inherit;cursor:pointer;transition:border-color .15s,background .15s,transform .15s;
+}
+.homeWorldGrid .radioWorldCard:hover{border-color:#9b73c6;background:#f1e6ff;transform:translateY(-1px)}
+.homeWorldGrid .radioWorldCard:focus-visible{outline:3px solid #7445ab;outline-offset:3px}
+.homeWorldGrid .radioWorldCard .homeWorldRadioIcon{
+  grid-row:1/3;display:grid;place-items:center;width:36px;height:36px;border-radius:11px;
+  color:#fff;font-size:22px;background:linear-gradient(145deg,#ad77d2,#644396);
+  box-shadow:inset 0 1px 0 #ffffff80,0 4px 12px #6947a433;
+}
+.homeWorldGrid .radioWorldCard strong{font-size:13px;font-weight:900}
+.homeWorldGrid .radioWorldCard small{color:#766081;font-size:11px}
+.studioPickerRadioGlyph{
+  display:grid;place-items:center;flex:none;width:30px;height:30px;border-radius:9px;
+  background:linear-gradient(145deg,#aa70d3,#5f4199);color:white;font-size:19px;
+}
+@media(min-width:981px){
+  .homeWorldCollection--audio .homeWorldGrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+.radioDockPanel{
+  position:fixed;z-index:180;right:max(12px,env(safe-area-inset-right));
+  bottom:calc(12px + env(safe-area-inset-bottom));width:min(390px,calc(100vw - 24px));
+  display:flex;flex-direction:column;max-height:calc(100dvh - 24px - env(safe-area-inset-bottom));
+  overflow:hidden;border:1px solid #c6b0dd;border-radius:20px;
+  background:#fdf9ff;color:#34213f;box-shadow:0 14px 46px #23152c52;
+}
+.radioDockPanel[hidden]{display:none!important}
+.radioDockHead{
+  display:flex;align-items:center;gap:8px;min-height:48px;padding:7px 9px;
+  background:linear-gradient(105deg,#e9d8fa,#f7ecff);
+}
+.radioDockMark{
+  display:grid;place-items:center;flex:none;width:33px;height:33px;border-radius:11px;
+  background:linear-gradient(145deg,#aa70d3,#57368a);color:#fff;font-size:21px;
+}
+.radioDockTitle{display:grid;gap:1px;min-width:0;flex:1}
+.radioDockTitle strong{font-size:12px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.radioDockTitle small{font-size:10px;color:#765b8c}
+.radioDockActions{display:flex;gap:5px;flex:none}
+.radioDockActions button{
+  min-height:34px;padding:5px 9px;border:1px solid #b798d7;border-radius:10px;
+  background:#fff8ff;color:#573a75;font:inherit;font-weight:800;font-size:11px;cursor:pointer
+}
+.radioDockActions button:hover{background:#f4e8ff}
+.radioDockActions button:focus-visible,.radioDockFooter a:focus-visible{outline:3px solid #8354b3;outline-offset:2px}
+.radioDockBody{position:relative;min-height:0;padding:7px;background:#2a203f}
+.radioDockFrame{
+  display:block;width:100%;height:min(62dvh,490px);
+  border:0;border-radius:13px;background:#241932;
+}
+.radioDockFooter{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;
+  background:#f7efff;color:#725985;font-size:10px
+}
+.radioDockFooter a{color:#6b3e9d;font-weight:800;white-space:nowrap;text-decoration:underline}
+.radioDockPanel.is-minimized .radioDockBody{
+  position:absolute;bottom:0;left:0;width:1px;height:1px;padding:0;opacity:0;
+  pointer-events:none;overflow:hidden;visibility:hidden
+}
+.radioDockPanel.is-minimized .radioDockFrame{width:1px;height:1px}
+.radioDockPanel.is-minimized .radioDockFooter{display:none}
+@media(max-width:620px){
+  .radioDockPanel{right:8px;bottom:calc(8px + env(safe-area-inset-bottom));width:calc(100vw - 16px);border-radius:17px}
+  .radioDockFrame{height:min(65dvh,520px)}
+  .radioDockHead{padding:7px}
+}
+@media(max-width:350px){
+  .radioDockHead{gap:4px}.radioDockActions{gap:3px}
+  .radioDockActions button{font-size:10px;padding:5px 7px}
+  .radioDockTitle strong{font-size:11px}
+}
