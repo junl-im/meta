@@ -1337,4 +1337,3 @@ body{background:radial-gradient(circle at 8% 7%,#f8dbc6b8 0,transparent 28%),rad
 @keyframes dailyGameFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @media(max-width:980px){.dailyGameWidget{right:2%;top:9%;width:min(190px,48%)}.homeHeroArt .dailyGameWidgetIcon{width:55px;height:55px}.dailyGameWidgetCopy strong{font-size:13px}}
 @media(max-width:620px){.dailyGameWidget{top:7%;right:3%;width:auto;max-width:48%;padding:5px 9px 5px 4px;border-radius:15px;gap:3px}.homeHeroArt .dailyGameWidgetIcon{width:44px;height:44px}.dailyGameWidgetCopy>span{display:none}.dailyGameWidgetCopy strong{font-size:11px}.dailyGameWidgetCopy small{font-size:9.5px}}
-
