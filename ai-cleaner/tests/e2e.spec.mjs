@@ -35,7 +35,7 @@ test('illustrated home opens first and cards, brand and browser back connect the
   await expect(page.locator('#homeTool img')).toHaveCount(20);
   await expect(page.locator('.homeWorldCollection--games a')).toHaveCount(5);
   await expect(page.locator('.dailyGameWidget')).toHaveAttribute('href',/SixtySecondPlayground/);
-  for(const icon of await page.locator('#homeTool img').all()){await icon.scrollIntoViewIfNeeded();await expect.poll(()=>icon.evaluate(img=>img.naturalWidth)).toBeGreaterThan(0);}
+  for(const icon of await page.locator('#homeTool img:visible').all()){await icon.scrollIntoViewIfNeeded();await expect.poll(()=>icon.evaluate(img=>img.naturalWidth)).toBeGreaterThan(0);}
   await expect(page).toHaveTitle(/곰같은여우의 AI 놀이터/);
   await page.locator('.homeToolCard[data-open-tool="text"]').click();
   await expect(page.locator('#textTool')).toBeVisible();
@@ -76,47 +76,14 @@ test('desktop worlds and upcoming games align without overflow',async({page})=>{
   }
 });
 
-test('home music dock loads only after a gesture and changes to a different owned track', async ({ page }) => {
-  await page.setViewportSize({width:1280,height:900});
-  await gotoReady(page,{home:true});
-  const dock=page.locator('#homeMusicDock');
-  const frame=dock.locator('iframe');
-  const playIcon=dock.locator('#homeMusicShuffle img');
-  await expect(dock).toBeVisible();
-  await expect(playIcon).toHaveAttribute('src','assets/music-play.png');
-  expect(await playIcon.evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
-  const compact=await dock.evaluate(el=>({height:el.getBoundingClientRect().height,introTop:el.querySelector('.homeMusicDockIntro').getBoundingClientRect().top,actionsTop:el.querySelector('.homeMusicDockActions').getBoundingClientRect().top}));
-  expect(compact.height).toBeLessThanOrEqual(56);
-  expect(Math.abs(compact.introTop-compact.actionsTop)).toBeLessThanOrEqual(3);
-  await expect(frame).not.toHaveAttribute('src',/spotify/);
-  await page.locator('#homeMusicShuffle').click();
-  const first=await frame.getAttribute('src');
-  const ownedTrackIds=['7tHDyufKgMGt3qnGnxt52V','6tGXxCzjM8ITzxPXRoWgcF','6dZ4FEEqykrfAOoCcWT0BR','2BwbGZpj9cN20N4T94B2AW','46Jyixc5S41aS8ivzhE0OA','40f3q3Gnw7s0Vl7LxfuAqd','6acQRifnKihYz6ADstRjx3','67fZar2nbB2aZElT4med8W','1LugoliyiInISgC8bEpvz4','1c9gRsbdYEXWMGTtOGGDVe','0XG0pagGR4H4MsoPEOQ4zO','5Q1FQUxag4EvI1BiFifzle'];
-  expect(ownedTrackIds).toContain(first?.match(/^https:\/\/open\.spotify\.com\/embed\/track\/([A-Za-z0-9]{22})/)?.[1]);
-  await expect(page.locator('#homeMusicPlayer')).toBeVisible();
-  await expect(page.locator('#homeMusicShuffle')).toHaveAttribute('aria-expanded','true');
-  await expect(playIcon).toBeVisible();
-  await expect(dock.locator('.homeMusicShuffleLabel')).toHaveText('다른 곡');
-  await page.locator('#homeMusicShuffle').click();
-  expect(await frame.getAttribute('src')).not.toBe(first);
-  await page.locator('#homeMusicClose').click();
-  await expect(page.locator('#homeMusicPlayer')).toBeHidden();
-  await expect(frame).not.toHaveAttribute('src',/spotify/);
-  await expect(page.locator('#homeMusicShuffle')).toBeFocused();
-  await expect(dock.locator('.homeMusicShuffleLabel')).toHaveText('랜덤 듣기');
-  await page.locator('#homeMusicShuffle').click();
-  await page.locator('.homeToolCard[data-open-tool="text"]').click();
-  await expect(frame).not.toHaveAttribute('src',/spotify/);
-  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(1280);
-});
-
-test('first music shuffle can select the last track and the next pick differs', async ({ page }) => {
-  await page.addInitScript(() => { Math.random=()=>0.999999; });
-  await gotoReady(page,{home:true});
-  await page.locator('#homeMusicShuffle').click();
-  await expect(page.locator('#homeMusicFrame')).toHaveAttribute('src',/5Q1FQUxag4EvI1BiFifzle/);
-  await page.locator('#homeMusicShuffle').click();
-  await expect(page.locator('#homeMusicFrame')).not.toHaveAttribute('src',/5Q1FQUxag4EvI1BiFifzle/);
+test('home music dock presents AI radio at desktop and mobile widths', async ({page}) => {
+  for(const width of [320,1280]) {
+    await page.setViewportSize({width,height:850}); await gotoReady(page,{home:true});
+    await expect(page.locator('#homeMusicShuffle')).toBeHidden();
+    await expect(page.locator('#radioDockHomeOpen')).toBeVisible();
+    await expect(page.locator('#radioDockFrame')).not.toHaveAttribute('src',/workers/);
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+  }
 });
 
 test('Back returns to home before opening the illustrated exit confirmation', async ({ page }) => {

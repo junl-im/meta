@@ -38,7 +38,7 @@
   const stop=({restoreFocus=false}={})=>{
     frame.removeAttribute('src');
     player.hidden=true;
-    status.textContent='노래 한 곡, 쉬어 가기';
+    status.textContent='노래가 이어지는 라디오';
     shuffleLabel.textContent='랜덤 듣기';
     shuffle.setAttribute('aria-label','곰같은여우 무작위 곡 고르기');
     shuffle.setAttribute('aria-expanded','false');
