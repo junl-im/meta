@@ -20,7 +20,7 @@
   const state = {
     chunks: [], currentIndex: 0, mode: null, playing: false, busy: false,
     connectedApi: null, connectionInProgress: false, session: 0,
-    abort: null, currentJobId: null, currentApi: null, localWorker: null, localUrl: null, localPart: 0, localReady: false, preparing: false, prefetch: null,
+    abort: null, currentJobId: null, currentApi: null, localWorker: null, localUrl: null, localPart: 0, localReady: false, preparing: false, prefetch: [], localPriming: false, lastGenerationMs: 0,
   };
   let saveThrottle = 0;
   let episodeController = null, chapterController = null, episodePage = 0, episodeWork = '', episodeBusy = false;
@@ -318,8 +318,8 @@
 
   function stopPlayback({ preserveIndex = true, keepReadyWorker = false } = {}) {
     state.session += 1;
-    const hadPrefetch=Boolean(state.prefetch);
-    state.prefetch = null;
+    const hadPrefetch=state.prefetch.length > 0;
+    state.prefetch = [];
     closeVoiceLoading();
     const api = state.currentApi;
     const job = state.currentJobId;
@@ -426,12 +426,14 @@
 
   function requestLocalAudio(sessionId, index, part, showProgress) {
     const worker = state.localWorker ||= new Worker('./sorion-local-worker.js', {type:'module'});
+    let synthesisStarted=0;
     return new Promise((resolve, reject) => {
       worker.onmessage = event => {
         if (event.data?.id !== sessionId) return;
         if (event.data.type === 'progress') {
+          if (String(event.data.message).includes('음성 파일 생성 중')) synthesisStarted=performance.now();
           if (showProgress) { report(String(event.data.message)); voiceLoading(String(event.data.message)); }
-        } else if (event.data.type === 'audio') resolve(event.data.blob);
+        } else if (event.data.type === 'audio') { if(synthesisStarted) state.lastGenerationMs=performance.now()-synthesisStarted; resolve(event.data.blob); }
         else if (event.data.type === 'error') reject(new Error(event.data.message));
       };
       worker.onerror = () => reject(new Error('기기 AI 음성 엔진을 시작하지 못했어요.'));
@@ -444,11 +446,21 @@
   }
 
   function prefetchNext(sessionId) {
-    let index=state.currentIndex, part=state.localPart+1;
-    if (part >= chunkText(state.chunks[index],120).length) { index++; part=0; }
-    if (index >= state.chunks.length) return;
-    const task=requestLocalAudio(sessionId,index,part,false).then(blob=>({blob}),error=>({error}));
-    state.prefetch={index,part,task};
+    const queue=state.prefetch;
+    let index=queue.length ? queue[queue.length-1].index : state.currentIndex;
+    let part=queue.length ? queue[queue.length-1].part : state.localPart;
+    while (queue.length < 3) {
+      part++;
+      if (part >= chunkText(state.chunks[index],120).length) { index++; part=0; }
+      if (index >= state.chunks.length) break;
+      const nextIndex=index, nextPart=part, previous=queue[queue.length-1];
+      const task=(previous ? previous.task : Promise.resolve()).then(result=>{
+        if (result?.error) throw result.error;
+        if (sessionId !== state.session) throw new Error('취소된 음성 준비');
+        return requestLocalAudio(sessionId,nextIndex,nextPart,false);
+      }).then(blob=>({blob}),error=>({error}));
+      queue.push({index:nextIndex,part:nextPart,task});
+    }
   }
 
   async function playLocalChunk(sessionId) {
@@ -458,10 +470,10 @@
     paintProgress();
     report('듣는 서재 AI 음성을 준비하고 있어요. 첫 사용에는 모델 다운로드가 필요해요.');
     try {
-      const ready=state.prefetch;
+      const ready=state.prefetch[0];
       let blob;
       if (ready && ready.index===state.currentIndex && ready.part===state.localPart) {
-        state.prefetch=null;
+        state.prefetch.shift();
         const result=await ready.task;
         if (result.error) throw result.error;
         blob=result.blob;
@@ -470,6 +482,24 @@
         blob=await requestLocalAudio(sessionId,state.currentIndex,state.localPart,!state.localReady);
       }
       if (sessionId !== state.session) return;
+      if (state.localPriming) {
+        state.localPriming=false;
+        const generationMs=state.lastGenerationMs;
+        const header=await blob.slice(0,44).arrayBuffer();
+        if (sessionId !== state.session) return;
+        if (header.byteLength===44) {
+          const view=new DataView(header), byteRate=view.getUint32(28,true), dataSize=view.getUint32(40,true);
+          const durationMs=byteRate ? dataSize/byteRate*1000/Number(elements.speed.value) : 0;
+          if (view.getUint32(0,false)===0x52494646 && durationMs>0 && generationMs>durationMs*.9) {
+            prefetchNext(sessionId);
+            if (state.prefetch.length) {
+              voiceLoading('끊김을 줄이기 위해 다음 부분도 미리 준비하고 있어요.');
+              await state.prefetch[0].task;
+              if (sessionId !== state.session) return;
+            }
+          }
+        }
+      }
       closeVoiceLoading();
       if (state.localUrl) URL.revokeObjectURL(state.localUrl);
       state.localReady = true;
@@ -588,6 +618,7 @@
     stopPlayback({keepReadyWorker: mode === 'local'});
     state.mode = mode;
     state.localPart = 0;
+    state.localPriming = mode === 'local'; state.lastGenerationMs=0;
     const sessionId = state.session;
     elements.mode.textContent = mode === 'sorion' ? 'SoriON AI 성우' : mode === 'local' ? '듣는 서재 AI' : '기기 음성 · 체험용';
     if (mode === 'sorion') await playSorionChunk(sessionId);
