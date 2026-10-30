@@ -963,14 +963,23 @@ const exitDialog=$('#exitDialog');
 const startingUrl=new URL(location.href);
 const initialTool=startingUrl.hash.slice(1);
 const hadPriorPage=history.state?.playgroundHadPriorPage??history.length>1;
+let interactionGuardAdded=Boolean(history.state?.playgroundInteractionGuard);
 const homeUrl=new URL(startingUrl);homeUrl.hash='';
 if(history.state?.playgroundGuarded!==true){
   history.replaceState({playgroundExitGuard:true,playgroundHadPriorPage:hadPriorPage},'',homeUrl);
   history.pushState({playgroundTool:TOOL_SECTION_IDS[initialTool]?initialTool:'home',playgroundGuarded:true,playgroundHadPriorPage:hadPriorPage},'',startingUrl);
 }
+function armBackAfterInteraction(){
+  if(interactionGuardAdded || !history.state?.playgroundGuarded)return;
+  interactionGuardAdded=true;
+  history.replaceState({...history.state,playgroundGuarded:false,playgroundExitGuard:true,playgroundInteractionGuard:true},'',location.href);
+  history.pushState({playgroundTool:location.hash.slice(1)||'home',playgroundGuarded:true,playgroundHadPriorPage:hadPriorPage,playgroundInteractionGuard:true},'',location.href);
+}
+window.addEventListener('pointerdown',armBackAfterInteraction,{once:true,capture:true});
+window.addEventListener('keydown',armBackAfterInteraction,{once:true,capture:true});
 function writeToolHistory(tool){
   const url=new URL(location.href);url.hash=tool==='home'?'':tool;
-  history.replaceState({playgroundTool:tool,playgroundGuarded:true,playgroundHadPriorPage:hadPriorPage},'',url);
+  history.replaceState({playgroundTool:tool,playgroundGuarded:true,playgroundHadPriorPage:hadPriorPage,playgroundInteractionGuard:interactionGuardAdded},'',url);
 }
 function showExitDialog(){
   if(!exitDialog.open)exitDialog.showModal();
@@ -983,7 +992,7 @@ function leavePlayground(){
   setTimeout(()=>{
     if(window.closed)return;
     if(hadPriorPage&&history.length>2){
-      history.go(-2);
+      history.go(interactionGuardAdded?-3:-2);
       // A history entry may be blocked or point back into the guarded app.
       setTimeout(()=>{if(!window.closed)location.replace('about:blank');},900);
       return;
@@ -1034,7 +1043,7 @@ $('#exitLeave').addEventListener('click',leavePlayground);
 window.addEventListener('popstate',event=>{
   if(event.state?.playgroundExitGuard){
     const wasHome=!$('#homeTool').classList.contains('hidden');
-    history.pushState({playgroundTool:'home',playgroundGuarded:true,playgroundHadPriorPage:hadPriorPage},'',homeUrl);
+    history.pushState({playgroundTool:'home',playgroundGuarded:true,playgroundHadPriorPage:hadPriorPage,playgroundInteractionGuard:interactionGuardAdded},'',homeUrl);
     if(!wasHome){showHome({updateHistory:false});return;}
     if(exitDialog.open){exitDialog.close();return;}
     showExitDialog();return;

@@ -139,6 +139,13 @@ test('direct tool links and reloads also return home on the first Back', async (
   await page.evaluate(()=>history.back());
   await expect(page.locator('#exitDialog')).toBeVisible();
 });
+test('home back after a real touch opens exit confirmation instead of leaving',async({browser})=>{
+  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,serviceWorkers:'block'});
+  const page=await context.newPage();await page.goto(BASE);await page.waitForFunction(()=>window.__AI_CLEANER_APP_READY__===true);
+  await page.locator('#homeButton').tap();
+  await page.evaluate(()=>history.back());
+  await expect(page.locator('#exitDialog')).toBeVisible();await context.close();
+});
 test('exit confirmation closes a window opened by the site', async ({ page }) => {
   await page.setContent('<button id="open">open</button><script>document.querySelector("#open").onclick=()=>window.open("'+BASE+'","_blank")</script>');
   const [popup]=await Promise.all([page.waitForEvent('popup'),page.locator('#open').click()]);
