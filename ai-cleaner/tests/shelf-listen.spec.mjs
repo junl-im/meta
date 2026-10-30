@@ -4,14 +4,17 @@ const base=process.env.AI_CLEANER_TEST_URL||'http://127.0.0.1:4173/ai-cleaner/';
 const listen=new URL('../NaverNovelShelf/site/listen.html',base).href;
 
 test('listening room keeps controls and optional sections usable on narrow screens',async({page})=>{
+  const asset=await page.request.get(new URL('assets/listening-play-medallion.png',listen).href);
+  expect(asset.ok()).toBe(true);expect(asset.headers()['content-type']).toContain('image/png');
   for(const width of [320,360,390,430,768,1280]){
     await page.setViewportSize({width,height:800});await page.goto(listen);
     await expect(page.locator('#manual-entry')).not.toHaveAttribute('open','');
     await expect(page.locator('#other-voices')).not.toHaveAttribute('open','');
     await expect(page.locator('#local-ai-play')).toBeVisible();
+    await expect(page.locator('#pause-resume')).toHaveCSS('background-image',/listening-play-medallion\.png/);
     const size=await page.locator('#local-ai-play').boundingBox();expect(size.height).toBeGreaterThanOrEqual(44);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
-    await page.locator('#local-ai-play').click();
+    await page.locator('#pause-resume').click();
     await expect(page.locator('#manual-entry')).toHaveAttribute('open','');
     await expect(page.locator('#manuscript-text')).toBeFocused();
     const checkbox=await page.locator('#clean-for-reading').boundingBox();
@@ -74,7 +77,7 @@ test('library voices synthesize short segments and use the chosen reading mood',
   await page.waitForTimeout(300);
   await page.locator('#library-voice').selectOption('library-male');
   await page.locator('#library-expression').selectOption('vivid');
-  await page.locator('#local-ai-play').click();
+  await page.locator('#pause-resume').click();
   await expect.poll(()=>page.evaluate(()=>window.__requests.length)).toBeGreaterThan(0);
   await expect(page.locator('#playback-mode')).toHaveText('듣는 서재 AI');
   const first=await page.evaluate(()=>window.__requests[0]);
@@ -155,6 +158,7 @@ test('voice preparation uses one worker and keeps it ready when manuscript chang
     HTMLMediaElement.prototype.play=function(){this.dispatchEvent(new Event('play'));return Promise.resolve()};
   });
   await page.goto(listen);
+  await page.locator('.voice-info').evaluate(el=>{el.open=true});
   await page.locator('#local-ai-prepare').click();
   await expect(page.locator('#local-ai-status')).toContainText('준비 완료');
   await page.locator('#manual-entry').evaluate(el=>{el.open=true});

@@ -147,6 +147,8 @@
 
   function report(message) {
     elements.message.textContent = message;
+    const quick = $('local-play-status');
+    if (state.mode === 'local' || !quick.hidden) { quick.hidden = false; quick.textContent = message; }
   }
 
   function chunkText(raw, limit = 520) {
@@ -214,7 +216,10 @@
     });
     const active = elements.reader.querySelector('[data-chunk="' + state.currentIndex + '"]');
     if (active && state.mode) active.scrollIntoView({ block: 'nearest', behavior: 'auto' });
-    elements.pause.textContent = state.playing ? 'Ⅱ' : '▶';
+    elements.pause.textContent = state.playing ? 'Ⅱ' : '';
+    elements.pause.dataset.playing = String(state.playing);
+    elements.pause.disabled = state.busy;
+    elements.pause.setAttribute('aria-label', state.busy ? '음성 생성 중' : state.playing ? '일시정지' : state.mode ? '다시 재생' : '듣는 서재 AI로 재생');
   }
 
   function renderText() {
@@ -563,7 +568,8 @@
   }
 
   function togglePause() {
-    if (!state.mode || state.busy) return;
+    if (state.busy) return;
+    if (!state.mode) { void start('local'); return; }
     if (state.mode === 'sorion' || state.mode === 'local') {
       if (elements.audio.paused) void elements.audio.play().catch(() => report('재생을 다시 시작할 수 없어요.'));
       else elements.audio.pause();
