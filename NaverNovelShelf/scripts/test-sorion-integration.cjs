@@ -13,8 +13,9 @@ const ids = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map((m) => m[1]));
 
 for (const m of js.matchAll(/\$\('([^']+)'\)/g)) assert(ids.has(m[1]), 'missing element #' + m[1]);
 for (const m of html.matchAll(/<script\s+src="([^"]+)"/g)) {
-  if (m[1] === './catalog.js') continue; // meta 원본 빌드 파일이 따로 있음
-  assert(fs.existsSync(path.join(root, 'site', m[1])), 'missing script ' + m[1]);
+  const scriptPath = m[1].split(/[?#]/, 1)[0];
+  if (scriptPath === './catalog.js') continue; // meta 원본 빌드 파일이 따로 있음
+  assert(fs.existsSync(path.join(root, 'site', scriptPath)), 'missing script ' + m[1]);
 }
 assert(html.includes('sorion-naver-reader-v0.3.0.zip'), 'new canonical ZIP missing from link');
 assert(fs.existsSync(path.join(root, 'site/downloads/sorion-naver-reader-v0.3.0.zip')));
