@@ -96,10 +96,18 @@ test('library voices synthesize short segments and use the chosen reading mood',
   expect(first.voiceId).toBe('library-male');
   expect(first.speed).toBeCloseTo(1.08);
   expect(first.text.length).toBeLessThanOrEqual(120);
-  await page.locator('#sorion-audio').evaluate(el=>el.dispatchEvent(new Event('ended')));
   await expect.poll(()=>page.evaluate(()=>window.__requests.length)).toBe(2);
+  await page.locator('#sorion-audio').evaluate(el=>el.dispatchEvent(new Event('ended')));
+  await expect.poll(()=>page.evaluate(()=>window.__requests.length)).toBe(3);
   await page.locator('#stop-play').click();
   expect(await page.evaluate(()=>window.__terminated)).toBe(true);
+});
+
+test('voice preparation shows stages and cancellation closes the dialog',async({page})=>{
+  await page.addInitScript(()=>{window.Worker=class{postMessage(request){this.onmessage?.({data:{id:request.id,type:'progress',message:'한국어 WAV 엔진 불러오는 중 · Text Encoder 2/4'}})}terminate(){window.__cancelled=true}}});
+  await page.goto(listen);await page.locator('.voice-info').evaluate(el=>el.open=true);await page.locator('#local-ai-prepare').click();
+  await expect(page.locator('#voice-loading')).toBeVisible();await expect(page.locator('#voice-loading-progress')).toHaveAttribute('value','2');
+  await page.locator('#voice-loading-cancel').click();await expect(page.locator('#voice-loading')).toBeHidden();expect(await page.evaluate(()=>window.__cancelled)).toBe(true);
 });
 
 test('episode chooser lists only the selected work and opens official chapter links',async({page})=>{

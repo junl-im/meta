@@ -7,7 +7,7 @@
   <meta name="description" content="AI놀이터 서재에서 내 네이버 소설 회차를 자동 인식하고 SoriON으로 낭독하는 작업실">
   <title>곰같은여우의 듣는 서재</title>
   <link rel="icon" type="image/webp" href="./assets/hero-books.webp">
-  <link rel="stylesheet" href="./listen.css?v=20261030-library-controls">
+  <link rel="stylesheet" href="./listen.css?v=20261030-prefetch">
 </head>
 <body>
   <div class="listen-shell">
@@ -116,8 +116,16 @@
     </main>
     <footer class="listen-footer"><span>© 곰같은여우 · 소리온 연동 베타 · <a href="../../ai-cleaner/">AI놀이터로 돌아가기</a></span><span>내 작품의 선택한 회차만 인식 · 원고 브라우저 임시 처리</span></footer>
   </div>
+  <dialog class="voice-loading" id="voice-loading" aria-labelledby="voice-loading-title" aria-describedby="voice-loading-status">
+    <div class="voice-loading-ornament" aria-hidden="true"></div><p class="eyebrow">LISTENING LIBRARY</p>
+    <h2 id="voice-loading-title">이야기를 준비하고 있어요</h2>
+    <p id="voice-loading-status" role="status" aria-live="polite">목소리를 불러오고 있어요.</p>
+    <progress id="voice-loading-progress" max="4" aria-label="음성 준비 단계"></progress>
+    <small>처음에는 음성 모델을 내려받아 시간이 걸릴 수 있어요.</small>
+    <button class="secondary-action" id="voice-loading-cancel" type="button">준비 취소</button>
+  </dialog>
   <script src="./catalog.js" defer></script>
   <script src="./sorion-config.js" defer></script>
-  <script src="./listen.js?v=20261030-quick-play" defer></script>
+  <script src="./listen.js?v=20261030-prefetch" defer></script>
 </body>
 </html>

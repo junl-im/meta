@@ -20,7 +20,7 @@
   const state = {
     chunks: [], currentIndex: 0, mode: null, playing: false, busy: false,
     connectedApi: null, connectionInProgress: false, session: 0,
-    abort: null, currentJobId: null, currentApi: null, localWorker: null, localUrl: null, localPart: 0, localReady: false, preparing: false,
+    abort: null, currentJobId: null, currentApi: null, localWorker: null, localUrl: null, localPart: 0, localReady: false, preparing: false, prefetch: null,
   };
   let saveThrottle = 0;
   let episodeController = null, chapterController = null, episodePage = 0, episodeWork = '', episodeBusy = false;
@@ -150,6 +150,15 @@
     const quick = $('local-play-status');
     if (state.mode === 'local' || !quick.hidden) { quick.hidden = false; quick.textContent = message; }
   }
+
+  function voiceLoading(message) {
+    const dialog = $('voice-loading'), progress = $('voice-loading-progress');
+    $('voice-loading-status').textContent = message;
+    const stage = message.match(/\b([1-4])\/4\b/);
+    if (stage) progress.value = Number(stage[1]); else progress.removeAttribute('value');
+    if (!dialog.open) dialog.showModal();
+  }
+  function closeVoiceLoading() { if ($('voice-loading').open) $('voice-loading').close(); }
 
   function chunkText(raw, limit = 520) {
     const normalized = raw.replace(/\r\n?/g, '\n').trim();
@@ -309,11 +318,14 @@
 
   function stopPlayback({ preserveIndex = true, keepReadyWorker = false } = {}) {
     state.session += 1;
+    const hadPrefetch=Boolean(state.prefetch);
+    state.prefetch = null;
+    closeVoiceLoading();
     const api = state.currentApi;
     const job = state.currentJobId;
     state.abort?.abort();
     state.abort = null;
-    if (!keepReadyWorker || !state.localReady || state.busy || state.preparing) {
+    if (!keepReadyWorker || !state.localReady || state.busy || state.preparing || hadPrefetch) {
       state.localWorker?.terminate(); state.localWorker = null; state.localReady = false;
       if (state.preparing) elements.prepareStatus.textContent = '음성 준비가 중단됐어요. 다시 준비할 수 있어요.';
     }
@@ -412,6 +424,33 @@
     }
   }
 
+  function requestLocalAudio(sessionId, index, part, showProgress) {
+    const worker = state.localWorker ||= new Worker('./sorion-local-worker.js', {type:'module'});
+    return new Promise((resolve, reject) => {
+      worker.onmessage = event => {
+        if (event.data?.id !== sessionId) return;
+        if (event.data.type === 'progress') {
+          if (showProgress) { report(String(event.data.message)); voiceLoading(String(event.data.message)); }
+        } else if (event.data.type === 'audio') resolve(event.data.blob);
+        else if (event.data.type === 'error') reject(new Error(event.data.message));
+      };
+      worker.onerror = () => reject(new Error('기기 AI 음성 엔진을 시작하지 못했어요.'));
+      const text = chunkText(state.chunks[index], 120)[part];
+      if (!text) { reject(new Error('읽을 문장을 찾지 못했어요.')); return; }
+      const expression=elements.expression.value;
+      const adjustment=expression === 'calm' ? -.05 : expression === 'vivid' ? .08 : /[!！]{2,}|[!?！？]{2,}/.test(text) ? .06 : 0;
+      worker.postMessage({id:sessionId,text,voiceId:elements.libraryVoice.value,voiceName:elements.libraryVoice.selectedOptions[0].textContent,speed:1+adjustment});
+    });
+  }
+
+  function prefetchNext(sessionId) {
+    let index=state.currentIndex, part=state.localPart+1;
+    if (part >= chunkText(state.chunks[index],120).length) { index++; part=0; }
+    if (index >= state.chunks.length) return;
+    const task=requestLocalAudio(sessionId,index,part,false).then(blob=>({blob}),error=>({error}));
+    state.prefetch={index,part,task};
+  }
+
   async function playLocalChunk(sessionId) {
     if (sessionId !== state.session || state.currentIndex >= state.chunks.length) return;
     state.busy = true;
@@ -419,24 +458,19 @@
     paintProgress();
     report('듣는 서재 AI 음성을 준비하고 있어요. 첫 사용에는 모델 다운로드가 필요해요.');
     try {
-      state.localWorker ||= new Worker('./sorion-local-worker.js', {type:'module'});
-      const worker = state.localWorker;
-      const blob = await new Promise((resolve, reject) => {
-        worker.onmessage = event => {
-          if (event.data?.id !== sessionId) return;
-          if (event.data.type === 'progress') report(String(event.data.message));
-          else if (event.data.type === 'audio') resolve(event.data.blob);
-          else if (event.data.type === 'error') reject(new Error(event.data.message));
-        };
-        worker.onerror = () => reject(new Error('기기 AI 음성 엔진을 시작하지 못했어요.'));
-        const text=chunkText(state.chunks[state.currentIndex],120)[state.localPart];
-        if (!text) { reject(new Error('읽을 문장을 찾지 못했어요.')); return; }
-        const expression=elements.expression.value;
-        const adjustment=expression === 'calm' ? -.05 : expression === 'vivid' ? .08 : /[!！]{2,}|[!?！？]{2,}/.test(text) ? .06 : 0;
-        const speed=1+adjustment;
-        worker.postMessage({id:sessionId,text,voiceId:elements.libraryVoice.value,voiceName:elements.libraryVoice.selectedOptions[0].textContent,speed});
-      });
+      const ready=state.prefetch;
+      let blob;
+      if (ready && ready.index===state.currentIndex && ready.part===state.localPart) {
+        state.prefetch=null;
+        const result=await ready.task;
+        if (result.error) throw result.error;
+        blob=result.blob;
+      } else {
+        if (!state.localReady) voiceLoading('목소리를 불러오고 있어요.');
+        blob=await requestLocalAudio(sessionId,state.currentIndex,state.localPart,!state.localReady);
+      }
       if (sessionId !== state.session) return;
+      closeVoiceLoading();
       if (state.localUrl) URL.revokeObjectURL(state.localUrl);
       state.localReady = true;
       state.localUrl = URL.createObjectURL(blob);
@@ -448,8 +482,10 @@
       state.playing = true;
       paintProgress();
       report('듣는 서재 AI 목소리로 낭독 중 · 원문은 이 기기에서 합성해요.');
+      prefetchNext(sessionId);
     } catch (error) {
       if (sessionId !== state.session) return;
+      closeVoiceLoading();
       state.busy = false; state.playing = false;
       report('기기 AI 음성을 만들지 못했어요: ' + (error?.message || '모델과 기기 상태를 확인해 주세요.'));
       paintProgress();
@@ -463,13 +499,14 @@
     const sessionId = state.session;
     state.preparing = true; elements.prepare.disabled = true; elements.localAi.disabled = true;
     elements.prepareStatus.textContent = 'AI 음성 준비 중 · 첫 사용에는 약 380MB를 내려받아요.';
+    voiceLoading(elements.prepareStatus.textContent);
     try {
       state.localWorker = new Worker('./sorion-local-worker.js', {type:'module'});
       const worker = state.localWorker;
       await new Promise((resolve, reject) => {
         worker.onmessage = event => {
           if (event.data?.id !== sessionId) return;
-          if (event.data.type === 'progress') elements.prepareStatus.textContent = String(event.data.message);
+          if (event.data.type === 'progress') { elements.prepareStatus.textContent = String(event.data.message); voiceLoading(elements.prepareStatus.textContent); }
           else if (event.data.type === 'ready') resolve();
           else if (event.data.type === 'error') reject(new Error(event.data.message));
         };
@@ -484,7 +521,7 @@
       state.localWorker?.terminate(); state.localWorker = null; state.localReady = false;
       elements.prepareStatus.textContent = '음성 준비 실패 · 인터넷 연결과 기기 저장 공간을 확인하고 다시 시도해 주세요.';
     } finally {
-      if (sessionId === state.session) { state.preparing = false; elements.prepare.disabled = false; elements.localAi.disabled = false; }
+      if (sessionId === state.session) { closeVoiceLoading(); state.preparing = false; elements.prepare.disabled = false; elements.localAi.disabled = false; }
     }
   }
 
@@ -710,6 +747,11 @@
     elements.start.addEventListener('click', () => void start('sorion'));
     elements.localAi.addEventListener('click', () => void start('local'));
     elements.prepare.addEventListener('click', () => void prepareLocalAi());
+    $('voice-loading-cancel').addEventListener('click', () => { stopPlayback(); report('음성 준비를 취소했어요.'); });
+    $('voice-loading').addEventListener('cancel', event => { event.preventDefault(); stopPlayback(); report('음성 준비를 취소했어요.'); });
+    [elements.libraryVoice,elements.expression].forEach(select=>select.addEventListener('change',()=>{
+      if (state.mode==='local') { stopPlayback(); report('목소리가 바뀌었어요. 재생을 눌러 계속 들어 주세요.'); }
+    }));
     elements.device.addEventListener('click', () => void start('device'));
     elements.pause.addEventListener('click', togglePause);
     elements.previous.addEventListener('click', () => jump(-1));
