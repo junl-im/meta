@@ -437,7 +437,7 @@
   }
 
   function requestLocalAudio(sessionId, index, part, showProgress) {
-    const worker = state.localWorker ||= new Worker('./sorion-local-worker.js', {type:'module'});
+    const worker = state.localWorker ||= new Worker('./sorion-local-worker.js?v=20261030-mixed-language', {type:'module'});
     let synthesisStarted=0;
     return new Promise((resolve, reject) => {
       worker.onmessage = event => {
@@ -543,7 +543,7 @@
     elements.prepareStatus.textContent = 'AI 음성 준비 중 · 첫 사용에는 약 380MB를 내려받아요.';
     voiceLoading(elements.prepareStatus.textContent);
     try {
-      state.localWorker = new Worker('./sorion-local-worker.js', {type:'module'});
+      state.localWorker = new Worker('./sorion-local-worker.js?v=20261030-mixed-language', {type:'module'});
       const worker = state.localWorker;
       await new Promise((resolve, reject) => {
         worker.onmessage = event => {

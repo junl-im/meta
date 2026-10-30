@@ -1,4 +1,5 @@
 import type * as SupertonicHelper from './supertonicHelper.js'
+import {languageSegments} from './languageSegments.mjs'
 type TimelineVoiceBlock = { text: string; voiceId: string; voiceName: string; speed: number }
 
 const MODEL_REVISION = 'aafc6e32416a594460b32413efc49d7fe4ce6d46'
@@ -77,13 +78,19 @@ export async function synthesizeSupertonicWav(
   const style = await stylePromise
   if (signal.aborted) throw new DOMException('생성이 취소되었습니다.', 'AbortError')
   onProgress(`${block.voiceName} · 음성 파일 생성 중`)
-  // Entirely English passages use the English language token; mixed text keeps
-  // Korean context so spaced Korean syllables and punctuation remain intact.
-  const language = /[A-Za-z]/.test(block.text) && !/[\u1100-\u11ff\u3130-\u318f\uac00-\ud7af]/.test(block.text) ? 'en' : 'ko'
-  const { wav, duration } = await model.call(block.text, language, style, 6,
-    Math.max(0.9, Math.min(1.13, block.speed)), 0.25)
+  const segments=languageSegments(block.text)
+  const audioParts: Float32Array[]=[]
+  for (const segment of segments) {
+    if (signal.aborted) throw new DOMException('생성이 취소되었습니다.', 'AbortError')
+    if (!/[A-Za-z\u1100-\u11ff\u3130-\u318f\uac00-\ud7af\d]/.test(segment.text)) continue
+    const {wav,duration}=await model.call(segment.text,segment.language,style,6,
+      Math.max(0.9,Math.min(1.13,block.speed)),0.25)
+    audioParts.push(Float32Array.from(wav.slice(0,Math.min(wav.length,Math.floor(model.sampleRate*duration[0])))))
+  }
   if (signal.aborted) throw new DOMException('생성이 취소되었습니다.', 'AbortError')
-  const sampleCount = Math.min(wav.length, Math.floor(model.sampleRate * duration[0]))
-  const buffer = helper.writeWavFile(wav.slice(0, sampleCount), model.sampleRate)
+  const sampleCount=audioParts.reduce((sum,part)=>sum+part.length,0)
+  const wav=new Float32Array(sampleCount);let offset=0
+  for (const part of audioParts) { wav.set(part,offset);offset+=part.length }
+  const buffer = helper.writeWavFile(wav, model.sampleRate)
   return { blob: new Blob([buffer], { type: 'audio/wav' }), durationSeconds: sampleCount / model.sampleRate, styleId }
 }

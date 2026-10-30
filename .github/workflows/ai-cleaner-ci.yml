@@ -121,6 +121,7 @@ jobs:
           node ai-cleaner/tests/module-check.mjs
           node NaverNovelShelf/scripts/test-sorion-capture.cjs
           node NaverNovelShelf/scripts/test-sorion-integration.cjs
+          node NaverNovelShelf/scripts/test-language-segments.mjs
       - name: Static checks
         run: node ai-cleaner/tests/static-check.mjs
 
