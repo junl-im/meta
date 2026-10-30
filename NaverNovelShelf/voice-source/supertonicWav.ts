@@ -77,7 +77,10 @@ export async function synthesizeSupertonicWav(
   const style = await stylePromise
   if (signal.aborted) throw new DOMException('생성이 취소되었습니다.', 'AbortError')
   onProgress(`${block.voiceName} · 음성 파일 생성 중`)
-  const { wav, duration } = await model.call(block.text, 'ko', style, 6,
+  // Entirely English passages use the English language token; mixed text keeps
+  // Korean context so spaced Korean syllables and punctuation remain intact.
+  const language = /[A-Za-z]/.test(block.text) && !/[\u1100-\u11ff\u3130-\u318f\uac00-\ud7af]/.test(block.text) ? 'en' : 'ko'
+  const { wav, duration } = await model.call(block.text, language, style, 6,
     Math.max(0.9, Math.min(1.13, block.speed)), 0.25)
   if (signal.aborted) throw new DOMException('생성이 취소되었습니다.', 'AbortError')
   const sampleCount = Math.min(wav.length, Math.floor(model.sampleRate * duration[0]))

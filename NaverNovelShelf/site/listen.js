@@ -228,7 +228,10 @@
       node.classList.toggle('active', Number(node.dataset.chunk) === state.currentIndex);
     });
     const active = elements.reader.querySelector('[data-chunk="' + state.currentIndex + '"]');
-    if (active && state.mode) active.scrollIntoView({ block: 'nearest', behavior: 'auto' });
+    elements.reader.querySelectorAll('[data-part].speaking').forEach(node=>node.classList.remove('speaking'));
+    const spoken=state.mode==='local' && active ? active.querySelector('[data-part="'+state.localPart+'"]') : null;
+    if (spoken && state.playing) spoken.classList.add('speaking');
+    if (active && state.mode) (spoken || active).scrollIntoView({ block: 'nearest', behavior: 'auto' });
     elements.pause.textContent = state.playing ? 'Ⅱ' : '';
     elements.pause.dataset.playing = String(state.playing);
     elements.pause.disabled = state.busy;
@@ -251,7 +254,10 @@
     const nodes = state.chunks.map((piece, index) => {
       const paragraph = document.createElement('p');
       paragraph.dataset.chunk = String(index);
-      paragraph.textContent = piece;
+      for (const [part,text] of chunkText(piece,120).entries()) {
+        if (part) paragraph.append(document.createTextNode('\n'));
+        const span=document.createElement('span');span.dataset.part=String(part);span.textContent=text;paragraph.append(span);
+      }
       return paragraph;
     });
     if (!nodes.length) {
@@ -523,7 +529,7 @@
       if (sessionId !== state.session) return;
       closeVoiceLoading();
       state.busy = false; state.playing = false;
-      report('기기 AI 음성을 만들지 못했어요: ' + (error?.message || '모델과 기기 상태를 확인해 주세요.'));
+      report(error?.name === 'NotAllowedError' ? '브라우저가 자동 재생을 막았어요. 재생 버튼을 눌러 이어 들어 주세요.' : '기기 AI 음성을 만들지 못했어요: ' + (error?.message || '모델과 기기 상태를 확인해 주세요.'));
       paintProgress();
     }
   }
@@ -698,6 +704,7 @@
     params.delete('handoff');
     params.delete('capture');
     history.replaceState(null, '', location.pathname + (params.size ? '?' + params : '') + location.hash);
+    void start('local');
   }
 
   function acceptExtensionMessage(event) {
