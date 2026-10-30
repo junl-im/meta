@@ -102,6 +102,29 @@ test('reading follows inside the manuscript without moving the mobile page and k
   expect(await page.evaluate(()=>window.scrollY)).toBe(0);
 });
 
+test('imported chapter opens the mobile reader with current text and controls in view',async({page})=>{
+  await page.addInitScript(()=>{
+    window.Worker=class{postMessage(request){setTimeout(()=>this.onmessage?.({data:{id:request.id,type:'audio',blob:new Blob(['audio'],{type:'audio/wav'})}}),80)}terminate(){}};
+    HTMLMediaElement.prototype.load=function(){};HTMLMediaElement.prototype.pause=function(){};HTMLMediaElement.prototype.play=function(){this.dispatchEvent(new Event('play'));return Promise.resolve()};
+  });
+  for(const [width,height] of [[320,568],[390,700],[768,900]]){
+    await page.setViewportSize({width,height});await page.goto(listen);
+    await page.evaluate(()=>window.postMessage({type:'GOMFOX_SORION_CHAPTER_IMPORTED_V1',chapter:{novelId:'1247361',volumeNo:'39',url:'https://m.novel.naver.com/challenge/detail?novelId=1247361&volumeNo=39',title:'39화',text:'별빛이 숲을 비추었다. '.repeat(150)}},location.origin));
+    await expect(page.locator('#reader-text [data-part].speaking')).toHaveCount(1);
+    await expect.poll(()=>page.evaluate(()=>{
+      const pane=document.querySelector('.reading-pane').getBoundingClientRect();
+      const line=document.querySelector('#reader-text .speaking').getBoundingClientRect();
+      const controls=document.querySelector('.player-controls').getBoundingClientRect();
+      return window.scrollY>0 && pane.top>=0 && pane.top<30 && line.top>=0 && line.bottom<=innerHeight && controls.bottom<=innerHeight;
+    })).toBe(true);
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+  }
+  await page.setViewportSize({width:1280,height:800});await page.goto(listen);
+  await page.evaluate(()=>window.postMessage({type:'GOMFOX_SORION_CHAPTER_IMPORTED_V1',chapter:{novelId:'1247361',volumeNo:'39',url:'https://m.novel.naver.com/challenge/detail?novelId=1247361&volumeNo=39',title:'39화',text:'별빛이 숲을 비추었다. '.repeat(150)}},location.origin));
+  await expect(page.locator('#reader-text [data-part].speaking')).toHaveCount(1);
+  expect(await page.evaluate(()=>window.scrollY)).toBe(0);
+});
+
 test('library voices synthesize short segments and use the chosen reading mood',async({page})=>{
   await page.addInitScript(()=>{
     window.__requests=[];
@@ -234,6 +257,7 @@ test('episode lookup failure offers the official work page',async({page})=>{
 });
 
 test('public chapter imports only a matching work and preserves paragraph breaks',async({page})=>{
+  await page.setViewportSize({width:390,height:700});
   await page.route('https://r.jina.ai/**',async route=>{
     const url=route.request().url();
     if(!url.includes('/detail?'))return route.fulfill({status:200,headers:{'Access-Control-Allow-Origin':'*'},body:'*   [책갈피 39화. 시험 회차 2026.10.29 별점 10](https://m.novel.naver.com/challenge/detail?novelId=1247361&volumeNo=39)'});
@@ -246,6 +270,7 @@ test('public chapter imports only a matching work and preserves paragraph breaks
   await expect(page.locator('#episode-status')).toContainText('39화 불러오기 완료');
   await expect(page.locator('#manuscript-text')).toHaveValue(/첫 줄입니다\.[\s\S]*\n다음 줄\n다음 문단/);
   await expect(page.locator('#file-name')).toHaveText('공개 회차 조회로 본문 가져옴');
+  await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBeGreaterThan(0);
 });
 
 test('public chapter rejects a mismatched source without replacing the manuscript',async({page})=>{
