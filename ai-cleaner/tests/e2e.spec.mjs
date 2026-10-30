@@ -56,10 +56,12 @@ test('home stardust decorates without blocking the game or motion preferences',a
     await page.emulateMedia({reducedMotion:'no-preference'});
     await gotoReady(page,{home:true});
     await expect(page.locator('.dailyGameStardust')).toHaveAttribute('aria-hidden','true');
-    await expect(page.locator('.dailyGameStardust i')).toHaveCount(6);
+    await expect(page.locator('.dailyGameStardust i')).toHaveCount(16);
     await expect(page.locator('.dailyGameWidget')).toBeVisible();
     await expect(page.locator('.dailyGameWidget')).toHaveCSS('pointer-events','auto');
     await expect(page.locator('.dailyGameStardust')).toHaveCSS('pointer-events','none');
+    const travel=await page.locator('.dailyGameStardust i').first().evaluate(el=>{const a=el.getAnimations()[0];a.pause();a.currentTime=700;const start=el.getBoundingClientRect();a.currentTime=4700;const end=el.getBoundingClientRect();return end.left-start.left});
+    expect(travel).toBeGreaterThan(width*.15);
     await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await page.locator('#homeButton').hover();
     await expect(page.locator('.brandName em')).toHaveCSS('text-decoration-line','none');
