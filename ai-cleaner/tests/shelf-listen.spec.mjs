@@ -85,7 +85,7 @@ test('library voices synthesize short segments and use the chosen reading mood',
   });
   await page.goto(listen);
   await page.locator('#manual-entry').evaluate(el=>{el.open=true});
-  await page.locator('#manuscript-text').fill('여우가 말했다. '.repeat(30));
+  await page.locator('#manuscript-text').fill('여우가 말했다. '.repeat(80));
   await page.waitForTimeout(300);
   await choose(page,'library-voice','library-male');
   await choose(page,'library-expression','vivid');
@@ -96,9 +96,9 @@ test('library voices synthesize short segments and use the chosen reading mood',
   expect(first.voiceId).toBe('library-male');
   expect(first.speed).toBeCloseTo(1.08);
   expect(first.text.length).toBeLessThanOrEqual(120);
-  await expect.poll(()=>page.evaluate(()=>window.__requests.length)).toBe(2);
+  await expect.poll(()=>page.evaluate(()=>window.__requests.length)).toBe(4);
   await page.locator('#sorion-audio').evaluate(el=>el.dispatchEvent(new Event('ended')));
-  await expect.poll(()=>page.evaluate(()=>window.__requests.length)).toBe(3);
+  await expect.poll(()=>page.evaluate(()=>window.__requests.length)).toBe(5);
   await page.locator('#stop-play').click();
   expect(await page.evaluate(()=>window.__terminated)).toBe(true);
 });
@@ -108,6 +108,33 @@ test('voice preparation shows stages and cancellation closes the dialog',async({
   await page.goto(listen);await page.locator('.voice-info').evaluate(el=>el.open=true);await page.locator('#local-ai-prepare').click();
   await expect(page.locator('#voice-loading')).toBeVisible();await expect(page.locator('#voice-loading-progress')).toHaveAttribute('value','2');
   await page.locator('#voice-loading-cancel').click();await expect(page.locator('#voice-loading')).toBeHidden();expect(await page.evaluate(()=>window.__cancelled)).toBe(true);
+});
+
+test('stopping cancels queued synthesis without starting later requests',async({page})=>{
+  await page.addInitScript(()=>{
+    window.__bufferRequests=[];
+    window.Worker=class{postMessage(request){window.__bufferRequests.push(request);if(window.__bufferRequests.length===1)queueMicrotask(()=>this.onmessage?.({data:{id:request.id,type:'audio',blob:new Blob(['audio'],{type:'audio/wav'})}}))}terminate(){window.__bufferTerminated=true}};
+    HTMLMediaElement.prototype.load=function(){};HTMLMediaElement.prototype.pause=function(){};HTMLMediaElement.prototype.play=function(){this.dispatchEvent(new Event('play'));return Promise.resolve()};
+  });
+  await page.goto(listen);await page.locator('#manual-entry').evaluate(el=>el.open=true);
+  await page.locator('#manuscript-text').fill('여우가 책을 읽습니다. '.repeat(80));await page.waitForTimeout(250);await page.locator('#local-ai-play').click();
+  await expect.poll(()=>page.evaluate(()=>window.__bufferRequests.length)).toBe(2);
+  await page.locator('#stop-play').click();await page.waitForTimeout(250);
+  expect(await page.evaluate(()=>window.__bufferRequests.length)).toBe(2);expect(await page.evaluate(()=>window.__bufferTerminated)).toBe(true);
+});
+
+test('slow synthesis prepares a second segment before starting playback',async({page})=>{
+  await page.addInitScript(()=>{
+    window.__adaptiveRequests=[];window.__adaptivePlayed=false;
+    window.Worker=class{postMessage(request){window.__adaptiveRequests.push(request);this.onmessage?.({data:{id:request.id,type:'progress',message:'음성 파일 생성 중'}});const bytes=new ArrayBuffer(64),v=new DataView(bytes);v.setUint32(0,0x52494646,false);v.setUint32(28,2000,true);v.setUint32(40,20,true);setTimeout(()=>this.onmessage?.({data:{id:request.id,type:'audio',blob:new Blob([bytes],{type:'audio/wav'})}}),60)}terminate(){}};
+    HTMLMediaElement.prototype.load=function(){};HTMLMediaElement.prototype.pause=function(){};HTMLMediaElement.prototype.play=function(){window.__adaptivePlayed=true;this.dispatchEvent(new Event('play'));return Promise.resolve()};
+  });
+  await page.goto(listen);await page.locator('#manual-entry').evaluate(el=>el.open=true);
+  await page.locator('#manuscript-text').fill('여우가 책을 읽습니다. '.repeat(80));await page.waitForTimeout(250);await page.locator('#local-ai-play').click();
+  await expect(page.locator('#voice-loading-status')).toContainText('다음 부분');
+  expect(await page.evaluate(()=>window.__adaptivePlayed)).toBe(false);
+  await expect.poll(()=>page.evaluate(()=>window.__adaptivePlayed)).toBe(true);
+  expect(await page.evaluate(()=>window.__adaptiveRequests.length)).toBeGreaterThanOrEqual(2);
 });
 
 test('episode chooser lists only the selected work and opens official chapter links',async({page})=>{
