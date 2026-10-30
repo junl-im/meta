@@ -2,6 +2,18 @@ import {test, expect} from '@playwright/test';
 
 const base=process.env.AI_CLEANER_TEST_URL||'http://127.0.0.1:4173/ai-cleaner/';
 const listen=new URL('../NaverNovelShelf/site/listen.html',base).href;
+async function choose(page,id,value){const widget=page.locator(`.illustrated-select[data-select-id="${id}"]`);await widget.locator('.illustrated-select-trigger').click();await widget.locator(`[role="option"][data-value="${value}"]`).click();}
+
+test('illustrated voice choices support keyboard selection and closing',async({page})=>{
+  await page.setViewportSize({width:390,height:844});await page.goto(listen);
+  const widget=page.locator('.illustrated-select[data-select-id="library-expression"]');
+  const trigger=widget.locator('.illustrated-select-trigger');await trigger.focus();await page.keyboard.press('ArrowDown');
+  await expect(trigger).toHaveAttribute('aria-expanded','true');
+  await page.keyboard.press('ArrowDown');await page.keyboard.press('Enter');
+  await expect(trigger).toContainText('차분하게');await expect(trigger).toHaveAttribute('aria-expanded','false');
+  await expect(page.locator('#library-expression')).toHaveValue('calm');
+  await trigger.click();await page.keyboard.press('Escape');await expect(trigger).toHaveAttribute('aria-expanded','false');
+});
 
 test('listening room keeps controls and optional sections usable on narrow screens',async({page})=>{
   const asset=await page.request.get(new URL('assets/listening-play-medallion.png',listen).href);
@@ -75,8 +87,8 @@ test('library voices synthesize short segments and use the chosen reading mood',
   await page.locator('#manual-entry').evaluate(el=>{el.open=true});
   await page.locator('#manuscript-text').fill('여우가 말했다. '.repeat(30));
   await page.waitForTimeout(300);
-  await page.locator('#library-voice').selectOption('library-male');
-  await page.locator('#library-expression').selectOption('vivid');
+  await choose(page,'library-voice','library-male');
+  await choose(page,'library-expression','vivid');
   await page.locator('#pause-resume').click();
   await expect.poll(()=>page.evaluate(()=>window.__requests.length)).toBeGreaterThan(0);
   await expect(page.locator('#playback-mode')).toHaveText('듣는 서재 AI');
@@ -99,7 +111,7 @@ test('episode chooser lists only the selected work and opens official chapter li
     await route.fulfill({status:200,headers:{'Access-Control-Allow-Origin':'*'},contentType:'text/plain',body:rows.join('\n')});
   });
   await page.goto(listen);
-  await page.locator('#work-select').selectOption('1247361');
+  await choose(page,'work-select','1247361');
   await expect(page.locator('#episode-list a')).toHaveCount(10);
   await expect(page.locator('#episode-list a').first()).toHaveAttribute('href',/novelId=1247361.*volumeNo=39/);
   await expect(page.locator('#episode-list')).not.toContainText('다른 작품');
@@ -112,7 +124,7 @@ test('episode chooser lists only the selected work and opens official chapter li
 test('episode lookup failure offers the official work page',async({page})=>{
   await page.route('https://r.jina.ai/**',route=>route.fulfill({status:503,headers:{'Access-Control-Allow-Origin':'*'},body:'unavailable'}));
   await page.goto(listen);
-  await page.locator('#work-select').selectOption('1247361');
+  await choose(page,'work-select','1247361');
   await expect(page.locator('#episode-status')).toHaveText('목록을 불러오지 못했어요');
   await expect(page.locator('#episode-list a')).toHaveAttribute('href','https://m.novel.naver.com/challenge/list?novelId=1247361');
 });
@@ -125,7 +137,7 @@ test('public chapter imports only a matching work and preserves paragraph breaks
     return route.fulfill({status:200,headers:{'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'X-Return-Format'},body:`<meta property="og:url" content="https://m.novel.naver.com/challenge/detail?novelId=1247361&volumeNo=39"><div id="detailContents"><h2>제목 : 시험 회차</h2><div id="con_data"><p>${text}<br>다음 줄</p><p>다음 문단</p></div></div>`});
   });
   await page.goto(listen);
-  await page.locator('#work-select').selectOption('1247361');
+  await choose(page,'work-select','1247361');
   await page.locator('.episode-row button').click();
   await expect(page.locator('#episode-status')).toContainText('39화 불러오기 완료');
   await expect(page.locator('#manuscript-text')).toHaveValue(/첫 줄입니다\.[\s\S]*\n다음 줄\n다음 문단/);
@@ -138,7 +150,7 @@ test('public chapter rejects a mismatched source without replacing the manuscrip
     return route.fulfill({status:200,headers:{'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'X-Return-Format'},body:`<meta property="og:url" content="https://m.novel.naver.com/challenge/detail?novelId=9999999&volumeNo=39"><div id="con_data">${'잘못된 작품 '.repeat(30)}</div>`});
   });
   await page.goto(listen);
-  await page.locator('#work-select').selectOption('1247361');
+  await choose(page,'work-select','1247361');
   await page.locator('#manual-entry').evaluate(el=>{el.open=true});
   await page.locator('#manuscript-text').fill('보존할 원문');
   await page.locator('.episode-row button').click();

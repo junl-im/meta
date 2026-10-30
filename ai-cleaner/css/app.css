@@ -1360,3 +1360,33 @@ body{background:radial-gradient(circle at 8% 7%,#f8dbc6b8 0,transparent 28%),rad
 .dailyGameWidget:focus-visible{outline:3px solid #b9571d;outline-offset:-3px}
 
 #homeMusicShuffle,#homeMusicPlayer{display:none!important}
+
+/* Home: keep the radio beside the brand and bring the worlds closer. */
+.homeMusicDock{display:none}
+.homeActive .top{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap}
+.homeActive .homeMusicDock{display:grid;flex:none;width:min(350px,42%);margin:0;padding:6px 8px;border:1px solid #ead5bd;border-radius:15px;background:linear-gradient(135deg,#fffaf3f2,#fff1e7f2);box-shadow:0 6px 18px #79533812}
+.homeActive .homeMusicDockIntro strong{font-size:11px}.homeActive .homeMusicDockIntro small{font-size:10px}
+.homeActive .homeMusicDockActions button{min-height:38px}
+.homeWorlds{padding-top:20px;row-gap:14px}
+.homeWorlds::before{display:none}
+@media(min-width:621px){
+  .homeHero{grid-template-rows:minmax(235px,1fr) auto;min-height:420px}
+  .homeHeroCopy{padding-top:clamp(26px,3vw,42px)}
+}
+@media(max-width:620px){
+  .homeActive .top{gap:6px;padding:5px 0;min-height:51px;margin-inline:0}
+  .homeActive .top .brand{width:auto;min-width:0;flex:0 1 auto}
+  .homeActive .homeMusicDock{display:flex;width:auto;max-width:none;margin:0;padding:0;border:0;background:none;box-shadow:none}
+  .homeActive .homeMusicDockIntro{display:none}
+  .homeActive .homeMusicDockActions button{min-height:40px;padding:3px 7px;font-size:10px}
+  .homeActive .homeMusicDockActions button img{width:24px;height:24px}
+  .playgroundHome{padding-top:5px}
+  .homeHeroCopy{padding:15px 16px 13px}.homeHero h1{font-size:clamp(27px,7.3vw,36px);margin:0 0 7px}.homeHero p{line-height:1.5}
+  .homeHeroArt{aspect-ratio:1.85}
+  .homeWorlds{padding-top:18px;row-gap:14px}
+}
+@media(max-width:390px){
+  .homeActive .brandName b{font-size:12px}.homeActive .brandName .pill{font-size:9.5px;padding:2px 4px}.homeActive .brandKicker{display:none}
+  .homeActive .top .logo{width:28px;height:28px;flex-basis:28px}.homeActive .top .brand{gap:5px}
+  .homeActive .homeMusicDockActions button{padding-inline:4px}.homeActive .homeMusicDockActions button img{width:20px;height:20px}
+}

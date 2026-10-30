@@ -140,3 +140,23 @@ html::-webkit-scrollbar-thumb:hover,.setup-pane::-webkit-scrollbar-thumb:hover,.
 .player-controls .main-play:hover:not(:disabled){filter:drop-shadow(0 4px 10px #d0a86988)}
 .voice-info>summary{padding:9px 0;min-height:36px}
 @media(max-width:350px){.player-controls{gap:7px}.player-controls .main-play{width:64px;height:64px}.player-controls button:not(.main-play){width:43px}}
+
+/* Illustrated menus retain the real select as their source of truth. */
+.illustrated-select{position:relative;min-width:0;width:100%}.illustrated-select.is-open{z-index:12}
+.illustrated-select-trigger{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:43px;padding:9px 12px;border:1px solid #bca67c75;border-radius:9px;background:linear-gradient(135deg,#243d3d,#172c31);color:#f5e7d0;text-align:left;font-size:12px;font-weight:700;box-shadow:inset 0 1px #ffffff0d}
+.illustrated-select-trigger span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.illustrated-select-trigger::after{content:'';flex:none;width:7px;height:7px;border-right:2px solid #dfc392;border-bottom:2px solid #dfc392;transform:rotate(45deg) translateY(-2px)}
+.illustrated-select-trigger[aria-expanded=true]{border-color:#dfbc82;box-shadow:0 0 0 2px #e9c78f26}
+.illustrated-select-list{position:absolute;top:calc(100% + 5px);left:0;right:0;max-height:220px;overflow:auto;padding:5px;border:1px solid #b69a6c99;border-radius:11px;background:#1a3034;box-shadow:0 12px 26px #061115a8;scrollbar-color:#a98c65 #14282e;scrollbar-width:thin}
+.illustrated-select-option{display:block;width:100%;min-height:40px;padding:8px 10px;border:0;border-radius:7px;background:transparent;color:#eddfca;text-align:left;font-size:11px;line-height:1.4;overflow-wrap:anywhere}
+.illustrated-select-option:hover,.illustrated-select-option:focus-visible{background:#3b5650;color:#fff1d4}.illustrated-select-option[aria-selected=true]{background:#51604a;color:#ffdfaa;font-weight:800}
+.library-voice-settings .illustrated-select[data-select-id=library-voice]{grid-area:2/1}.library-voice-settings .illustrated-select[data-select-id=library-expression]{grid-area:2/2}
+@media(max-width:520px){.illustrated-select-trigger{font-size:11px;padding-inline:9px}.illustrated-select-list{max-height:190px}}
+
+/* Matching painted previous, next, pause and stop medallions. */
+.player-controls button:not(.main-play){width:56px;height:56px;flex:none;padding:0;border:0;border-radius:50%;background-image:url('./assets/listening-control-icons.png');background-size:200% 200%;background-repeat:no-repeat;background-color:transparent;box-shadow:none;color:transparent;font-size:0}
+.player-controls #prev-chunk{background-position:0 0}.player-controls #next-chunk{background-position:100% 0}.player-controls #stop-play{background-position:100% 100%}
+.player-controls .main-play[data-playing=true]{border:0;background:transparent url('./assets/listening-control-icons.png') 0 100%/200% 200% no-repeat;box-shadow:none;color:transparent;font-size:0}
+.player-controls button:hover:not(:disabled){filter:drop-shadow(0 4px 8px #dfbb8180)}
+@media(max-width:350px){.player-controls{gap:5px}.player-controls button:not(.main-play){width:48px;height:48px}}
+@media(max-width:400px){.listen-brand small{display:none}.listen-header .beta-label{display:none}.listen-brand strong{font-size:11px;white-space:nowrap}}

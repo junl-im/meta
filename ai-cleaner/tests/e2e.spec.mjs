@@ -32,7 +32,7 @@ test('illustrated home opens first and cards, brand and browser back connect the
   await expect(page.locator('.workspaceNav')).toBeHidden();
   await expect(page.locator('.homeHero > .homeExplore .homeToolCard')).toHaveCount(4);
   await expect(page.locator('.homeHeroCopy button')).toHaveCount(0);
-  await expect(page.locator('#homeTool img')).toHaveCount(21);
+  await expect(page.locator('#homeTool img')).toHaveCount(19);
   await expect(page.locator('.homeWorldCollection--games a')).toHaveCount(5);
   await expect(page.locator('.dailyGameWidget')).toHaveAttribute('href',/SixtySecondPlayground/);
   for(const icon of await page.locator('#homeTool img:visible').all()){await icon.scrollIntoViewIfNeeded();await expect.poll(()=>icon.evaluate(img=>img.naturalWidth)).toBeGreaterThan(0);}
@@ -71,16 +71,17 @@ test('home stardust decorates without blocking the game or motion preferences',a
     await page.locator('.dailyGameWidget').click({trial:true});
   }
 });
-test('desktop music dock is right aligned and clear of the hero illustration',async({page})=>{
-  for(const width of [1024,1280,1440]){
+test('home radio stays beside the brand and above the illustration',async({page})=>{
+  for(const width of [320,360,390,620,768,1024,1280,1440]){
     await page.setViewportSize({width,height:900});await gotoReady(page,{home:true});
-    const boxes=await page.evaluate(()=>({hero:document.querySelector('.homeHero').getBoundingClientRect(),dock:document.querySelector('.homeMusicDock').getBoundingClientRect(),scrollWidth:document.documentElement.scrollWidth}));
+    const boxes=await page.evaluate(()=>({hero:document.querySelector('.homeHero').getBoundingClientRect(),dock:document.querySelector('.homeMusicDock').getBoundingClientRect(),brand:document.querySelector('.brandHome').getBoundingClientRect(),scrollWidth:document.documentElement.scrollWidth}));
     expect(boxes.scrollWidth).toBeLessThanOrEqual(width);
-    expect(boxes.dock.width).toBeLessThanOrEqual(boxes.hero.width*.55);
     expect(boxes.dock.right).toBeLessThanOrEqual(boxes.hero.right+1);
-    expect(boxes.hero.right-boxes.dock.right).toBeLessThanOrEqual(2);
-    expect(boxes.dock.top).toBeGreaterThanOrEqual(boxes.hero.bottom+7);
+    expect(boxes.dock.left).toBeGreaterThanOrEqual(boxes.brand.right-1);
+    expect(boxes.dock.bottom).toBeLessThanOrEqual(boxes.hero.top);
   }
+  await page.locator('.homeToolCard[data-open-tool="text"]').click();
+  await expect(page.locator('#homeMusicDock')).toBeHidden();
 });
 
 test('desktop worlds and upcoming games align without overflow',async({page})=>{
