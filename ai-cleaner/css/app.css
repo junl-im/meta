@@ -787,6 +787,7 @@ button,.btn,.mini,.tab,.floatWidget,.filelabel,summary{touch-action:manipulation
 }
 @media(prefers-reduced-motion:reduce){
 .dailyGameWidget,.dailyGameStardust i{animation:none!important}
+.dailyGameStardust{display:none!important}
   html:focus-within{scroll-behavior:auto}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
   .floatWidget.attention,.floatWidget.attention .widgetIcon,.floatWidget.rewrite.rewriteReady,.rewriteReady,.resultarea.resultFlash,.resultarea.resultApplied,#typingPreviewButton.typewriterRecommended{animation:none!important}
@@ -1331,15 +1332,20 @@ body{background:radial-gradient(circle at 8% 7%,#f8dbc6b8 0,transparent 28%),rad
 
 /* A small invitation floats over the illustration until the game opens. */
 .homeHeroArt{position:relative}
-.dailyGameStardust{position:absolute;z-index:0;inset:0;overflow:hidden;pointer-events:none}
-.dailyGameStardust i{position:absolute;left:var(--x);top:var(--y);width:var(--size,5px);height:var(--size,5px);border-radius:50%;background:#fff8d1;box-shadow:0 0 4px 2px #fff1b3,0 0 11px 4px #f2c77b99;opacity:.75;animation:stardustDrift 5s ease-in-out infinite;animation-delay:var(--delay,0s)}
-.dailyGameStardust i:nth-child(1){--x:58%;--y:43%;--delay:-1s;--size:4px}
-.dailyGameStardust i:nth-child(2){--x:63%;--y:37%;--delay:-3.3s;--size:3px}
-.dailyGameStardust i:nth-child(3){--x:68%;--y:32%;--delay:-2s;--size:5px}
-.dailyGameStardust i:nth-child(4){--x:73%;--y:27%;--delay:-4.2s;--size:3px}
-.dailyGameStardust i:nth-child(5){--x:77%;--y:23%;--delay:-.5s;--size:4px;background:#e5f6ff;box-shadow:0 0 5px 2px #c9ecff,0 0 12px 3px #9bd9ff88}
-.dailyGameStardust i:nth-child(6){--x:82%;--y:20%;--delay:-2.8s;--size:3px}
-@keyframes stardustDrift{0%,100%{transform:translate(0,0) scale(.65);opacity:.25}50%{transform:translate(12px,-9px) scale(1);opacity:.9}}
+.dailyGameStardust{position:absolute;z-index:0;inset:0;overflow:hidden;pointer-events:none;container-type:size}
+.dailyGameStardust i{position:absolute;left:0;top:0;width:6px;height:6px;border-radius:50%;background:#fffdf0;box-shadow:0 0 4px 2px #fff3b7,0 0 14px 5px #ffc665d9,-10px 5px 0 -1px #ffe9a9,9px -6px 0 -1px #e4f6ff,-17px 10px 0 -2px #fff3c7,15px -10px 0 -2px #ffe9a9;opacity:0;animation:var(--route) 5.6s linear infinite;animation-delay:var(--delay)}
+.dailyGameStardust i:nth-child(4n+1){--route:dustFromUpper;--delay:0s}
+.dailyGameStardust i:nth-child(4n+2){--route:dustFromLower;--delay:-1.4s}
+.dailyGameStardust i:nth-child(4n+3){--route:dustFromSky;--delay:-2.8s;background:#e5f6ff}
+.dailyGameStardust i:nth-child(4n){--route:dustFromRight;--delay:-4.2s}
+.dailyGameStardust i:nth-child(n+5){animation-delay:calc(var(--delay) - 1.4s);width:3px;height:3px}
+.dailyGameStardust i:nth-child(n+9){animation-delay:calc(var(--delay) - 2.8s)}
+.dailyGameStardust i:nth-child(n+13){animation-delay:calc(var(--delay) - 4.2s)}
+@keyframes dustFromUpper{0%{transform:translate(5cqw,5cqh) scale(.5);opacity:0}12%{opacity:.9}40%{transform:translate(25cqw,27cqh) scale(1)}70%{transform:translate(48cqw,34cqh) scale(.85)}92%{opacity:1}100%{transform:translate(70cqw,25cqh) scale(.3);opacity:0}}
+@keyframes dustFromLower{0%{transform:translate(7cqw,72cqh) scale(.5);opacity:0}12%{opacity:.9}40%{transform:translate(28cqw,61cqh) scale(1)}70%{transform:translate(50cqw,48cqh) scale(.85)}92%{opacity:1}100%{transform:translate(70cqw,27cqh) scale(.3);opacity:0}}
+@keyframes dustFromSky{0%{transform:translate(54cqw,2cqh) scale(.5);opacity:0}15%{opacity:.85}60%{transform:translate(62cqw,14cqh) scale(1)}92%{opacity:1}100%{transform:translate(70cqw,23cqh) scale(.3);opacity:0}}
+@keyframes dustFromRight{0%{transform:translate(76cqw,66cqh) scale(.5);opacity:0}15%{opacity:.85}60%{transform:translate(73cqw,43cqh) scale(1)}92%{opacity:1}100%{transform:translate(70cqw,27cqh) scale(.3);opacity:0}}
+@media(max-width:620px){.dailyGameStardust i:nth-child(n+9){display:none}}
 .dailyGameWidget{position:absolute;z-index:1;right:3%;top:13%;display:flex;align-items:center;gap:5px;width:min(215px,34%);padding:9px 12px 9px 5px;border:1px solid #fff9e8c7;border-radius:22px;background:linear-gradient(135deg,#fffaf2eb,#ffefd9d9);box-shadow:0 12px 28px #5e321d38,0 1px 0 #fff inset;color:#523221;animation:dailyGameFloat 4.5s ease-in-out infinite;text-decoration:none;pointer-events:auto}
 .homeHeroArt .dailyGameWidgetIcon{width:68px;height:68px;object-fit:contain;flex:none;filter:drop-shadow(0 4px 5px #8c521d36)}
 .dailyGameWidgetCopy{display:grid;gap:2px;min-width:0}.dailyGameWidgetCopy>span{font-size:10px;font-weight:700;color:#9b633b;letter-spacing:.02em}.dailyGameWidgetCopy strong{font-size:15px;line-height:1.25;word-break:keep-all}.dailyGameWidgetCopy small{font-size:10px;font-weight:700;color:#ae642c}
