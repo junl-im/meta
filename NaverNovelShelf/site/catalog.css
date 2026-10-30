@@ -86,6 +86,11 @@
 body{background:#0d202a url("./assets/library-background.webp") center top / cover fixed no-repeat}
 .asset-icon{display:inline-block;flex:none;width:25px;height:25px;background-image:url("./assets/illustrated-icons.webp");background-size:200% 200%;background-repeat:no-repeat;vertical-align:middle}
 .asset-book{background-position:0% 0%}
+.hero-actions .primary-button,.hero-actions .sorion-shelf-action{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;text-decoration:none;box-shadow:0 6px 20px #030e1280,inset 0 1px #fff5d426}
+.hero-actions .sorion-shelf-action,.header-shelf-link,.playground-return{background:linear-gradient(145deg,#304744e8,#142b31e8);border:1px solid #d9b77b91;color:#f8dfb3}
+.hero-actions .sorion-shelf-action:hover,.header-shelf-link:hover,.playground-return:hover{background:linear-gradient(145deg,#476054,#223a3a);border-color:#f0d29a}
+.hero-actions .asset-icon,.header-shelf-link .asset-icon{width:28px;height:28px}.shelf-button-art{display:inline-block;width:29px;height:29px;flex:none;background:center/contain no-repeat}.shelf-button-home{background-image:url('../../ai-cleaner/assets/fox-logo.png')}.shelf-button-listen{background-image:url('./assets/listening-play-medallion.png')}
+@media(max-width:480px){.hero-actions .primary-button,.hero-actions .sorion-shelf-action{min-height:46px;padding-inline:10px;font-size:11px}.hero-actions .asset-icon,.shelf-button-art{width:25px;height:25px}}
 .asset-search{background-position:100% 0%}
 .asset-best{background-position:0% 100%}
 .asset-quill{background-position:100% 100%}

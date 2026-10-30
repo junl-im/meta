@@ -39,10 +39,12 @@ test('listening room keeps controls and optional sections usable on narrow scree
 test('chapter handoff, non-destructive cleanup and device playback',async({page})=>{
   await page.addInitScript(()=>{
     window.__spoken=[];
+    window.Worker=class{postMessage(request){queueMicrotask(()=>this.onmessage?.({data:{id:request.id,type:'audio',blob:new Blob(['audio'],{type:'audio/wav'})}}))}terminate(){}};
     Object.defineProperty(window,'speechSynthesis',{configurable:true,value:{paused:false,getVoices:()=>[{lang:'ko-KR'}],cancel(){},pause(){this.paused=true},resume(){this.paused=false},speak(utterance){window.__spoken.push({text:utterance.text,rate:utterance.rate});utterance.onstart?.()}}});
     window.SpeechSynthesisUtterance=class {constructor(text){this.text=text}};
     HTMLMediaElement.prototype.pause=function(){};
     HTMLMediaElement.prototype.load=function(){};
+    HTMLMediaElement.prototype.play=function(){this.dispatchEvent(new Event('play'));return Promise.resolve()};
   });
   for(const width of [320,390,768,1280]){
     await page.setViewportSize({width,height:800});
@@ -70,6 +72,19 @@ test('chapter handoff, non-destructive cleanup and device playback',async({page}
     await expect(page.locator('#manuscript-text')).toHaveValue(source);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
   }
+});
+
+test('imported chapter starts AI narration and highlights the current segment',async({page})=>{
+  await page.addInitScript(()=>{
+    window.__autoRequests=[];
+    window.Worker=class{postMessage(request){window.__autoRequests.push(request);queueMicrotask(()=>this.onmessage?.({data:{id:request.id,type:'audio',blob:new Blob(['audio'],{type:'audio/wav'})}}))}terminate(){}};
+    HTMLMediaElement.prototype.load=function(){};HTMLMediaElement.prototype.pause=function(){};HTMLMediaElement.prototype.play=function(){this.dispatchEvent(new Event('play'));return Promise.resolve()};
+  });
+  await page.goto(listen);
+  await page.evaluate(()=>window.postMessage({type:'GOMFOX_SORION_CHAPTER_IMPORTED_V1',chapter:{novelId:'1247361',volumeNo:'39',url:'https://m.novel.naver.com/challenge/detail?novelId=1247361&volumeNo=39',title:'39화',text:'별빛이 숲을 비추었다. '.repeat(30)}},location.origin));
+  await expect.poll(()=>page.evaluate(()=>window.__autoRequests.length)).toBeGreaterThan(0);
+  await expect(page.locator('#reader-text [data-part].speaking')).toHaveCount(1);
+  await expect(page.locator('#reader-text [data-part].speaking')).toContainText('별빛');
 });
 
 test('library voices synthesize short segments and use the chosen reading mood',async({page})=>{
