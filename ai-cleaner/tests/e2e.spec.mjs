@@ -50,6 +50,25 @@ test('illustrated home opens first and cards, brand and browser back connect the
   await page.locator('#homeButton').click();
   await expect(page.locator('#homeTool')).toBeVisible();
 });
+test('home stardust decorates without blocking the game or motion preferences',async({page})=>{
+  for(const width of [320,390,768,1280]){
+    await page.setViewportSize({width,height:800});
+    await page.emulateMedia({reducedMotion:'no-preference'});
+    await gotoReady(page,{home:true});
+    await expect(page.locator('.dailyGameStardust')).toHaveAttribute('aria-hidden','true');
+    await expect(page.locator('.dailyGameStardust i')).toHaveCount(6);
+    await expect(page.locator('.dailyGameWidget')).toBeVisible();
+    await expect(page.locator('.dailyGameWidget')).toHaveCSS('pointer-events','auto');
+    await expect(page.locator('.dailyGameStardust')).toHaveCSS('pointer-events','none');
+    await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    await page.locator('#homeButton').hover();
+    await expect(page.locator('.brandName em')).toHaveCSS('text-decoration-line','none');
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await expect(page.locator('.dailyGameStardust i').first()).toHaveCSS('animation-name','none');
+    await expect(page.locator('.dailyGameWidget')).toHaveCSS('animation-name','none');
+    await page.locator('.dailyGameWidget').click({trial:true});
+  }
+});
 test('desktop music dock is right aligned and clear of the hero illustration',async({page})=>{
   for(const width of [1024,1280,1440]){
     await page.setViewportSize({width,height:900});await gotoReady(page,{home:true});

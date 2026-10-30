@@ -786,7 +786,7 @@ button,.btn,.mini,.tab,.floatWidget,.filelabel,summary{touch-action:manipulation
   .osFactoryPresets{grid-template-columns:1fr}
 }
 @media(prefers-reduced-motion:reduce){
-.dailyGameWidget{animation:none}
+.dailyGameWidget,.dailyGameStardust i{animation:none!important}
   html:focus-within{scroll-behavior:auto}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
   .floatWidget.attention,.floatWidget.attention .widgetIcon,.floatWidget.rewrite.rewriteReady,.rewriteReady,.resultarea.resultFlash,.resultarea.resultApplied,#typingPreviewButton.typewriterRecommended{animation:none!important}
@@ -1133,7 +1133,7 @@ body{background:linear-gradient(180deg,#f9f4ed 0,#fcfaf6 280px,#f9f8f5 100%)}
 
 /* 1.24 · illustrated playground home */
 .brandHome{appearance:none;border:0;background:none;padding:0;color:inherit;text-align:left;cursor:pointer;border-radius:12px}
-.brandHome:hover .brandName em{text-decoration:underline;text-underline-offset:3px}
+.brandHome:hover .brandName em{color:#d36a22}
 .brandHome:focus-visible{outline:3px solid #de7429;outline-offset:5px}
 .playgroundHome{display:grid;gap:34px;padding-top:22px}
 .homeHero{display:grid;grid-template-columns:minmax(270px,.82fr) minmax(0,1.18fr);align-items:center;overflow:hidden;border:1px solid #ead5bd;border-radius:30px;background:linear-gradient(145deg,#fffdf8,#ffecd5 72%,#f5dac7);box-shadow:0 16px 40px #6b43241c}
@@ -1331,6 +1331,15 @@ body{background:radial-gradient(circle at 8% 7%,#f8dbc6b8 0,transparent 28%),rad
 
 /* A small invitation floats over the illustration until the game opens. */
 .homeHeroArt{position:relative}
+.dailyGameStardust{position:absolute;z-index:0;inset:0;overflow:hidden;pointer-events:none}
+.dailyGameStardust i{position:absolute;left:var(--x);top:var(--y);width:var(--size,5px);height:var(--size,5px);border-radius:50%;background:#fff8d1;box-shadow:0 0 4px 2px #fff1b3,0 0 11px 4px #f2c77b99;opacity:.75;animation:stardustDrift 5s ease-in-out infinite;animation-delay:var(--delay,0s)}
+.dailyGameStardust i:nth-child(1){--x:58%;--y:43%;--delay:-1s;--size:4px}
+.dailyGameStardust i:nth-child(2){--x:63%;--y:37%;--delay:-3.3s;--size:3px}
+.dailyGameStardust i:nth-child(3){--x:68%;--y:32%;--delay:-2s;--size:5px}
+.dailyGameStardust i:nth-child(4){--x:73%;--y:27%;--delay:-4.2s;--size:3px}
+.dailyGameStardust i:nth-child(5){--x:77%;--y:23%;--delay:-.5s;--size:4px;background:#e5f6ff;box-shadow:0 0 5px 2px #c9ecff,0 0 12px 3px #9bd9ff88}
+.dailyGameStardust i:nth-child(6){--x:82%;--y:20%;--delay:-2.8s;--size:3px}
+@keyframes stardustDrift{0%,100%{transform:translate(0,0) scale(.65);opacity:.25}50%{transform:translate(12px,-9px) scale(1);opacity:.9}}
 .dailyGameWidget{position:absolute;z-index:1;right:3%;top:13%;display:flex;align-items:center;gap:5px;width:min(215px,34%);padding:9px 12px 9px 5px;border:1px solid #fff9e8c7;border-radius:22px;background:linear-gradient(135deg,#fffaf2eb,#ffefd9d9);box-shadow:0 12px 28px #5e321d38,0 1px 0 #fff inset;color:#523221;animation:dailyGameFloat 4.5s ease-in-out infinite;text-decoration:none;pointer-events:auto}
 .homeHeroArt .dailyGameWidgetIcon{width:68px;height:68px;object-fit:contain;flex:none;filter:drop-shadow(0 4px 5px #8c521d36)}
 .dailyGameWidgetCopy{display:grid;gap:2px;min-width:0}.dailyGameWidgetCopy>span{font-size:10px;font-weight:700;color:#9b633b;letter-spacing:.02em}.dailyGameWidgetCopy strong{font-size:15px;line-height:1.25;word-break:keep-all}.dailyGameWidgetCopy small{font-size:10px;font-weight:700;color:#ae642c}
