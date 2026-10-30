@@ -33,10 +33,11 @@
     try {
       const source = new URL(`https://m.novel.naver.com/${work.league}/detail`);
       source.searchParams.set('novelId', work.id); source.searchParams.set('volumeNo', volume);
-      const response = await timedFetch('https://r.jina.ai/' + source.href, {signal:controller.signal,credentials:'omit',headers:{'X-Return-Format':'html'}}, 30000);
-      if (!response.ok) throw new Error('공개 회차 조회에 실패했어요.');
-      const html = await response.text();
-      if (html.length > 3000000) throw new Error('회차 응답이 너무 커요.');
+      const html = await window.ShelfPublicReader.read('https://r.jina.ai/' + source.href, {
+        signal:controller.signal,headers:{'X-Return-Format':'html'},timeout:30000,maxLength:3000000,
+        validate: text=>/\bid\s*=\s*["']con_data["']/.test(text),
+        onRetry:()=>{if(chapterController===controller) $('episode-status').textContent = `${volume}화 연결을 다시 확인하는 중…`;}
+      });
       const doc = new DOMParser().parseFromString(html, 'text/html');
       const reported = new URL(doc.querySelector('meta[property="og:url"]')?.content || 'about:blank');
       if (!['m.novel.naver.com','novel.naver.com'].includes(reported.hostname) || reported.pathname !== `/${work.league}/detail` || reported.searchParams.get('novelId') !== work.id || reported.searchParams.get('volumeNo') !== volume) throw new Error('회차 출처를 확인할 수 없어요.');
@@ -52,7 +53,7 @@
       acceptExtensionChapter({novelId:work.id,volumeNo:volume,url:source.href,title,text}, 'public');
       $('episode-status').textContent = `${volume}화 불러오기 완료`;
     } catch (error) {
-      if (error.name !== 'AbortError' && elements.work.value === work.id) $('episode-status').textContent = '본문 조회 실패 · 네이버 원문을 확인해 주세요';
+      if (!controller.signal.aborted && chapterController===controller && elements.work.value === work.id) $('episode-status').textContent = '본문을 불러오지 못했어요 · 다시 누르거나 원문을 확인해 주세요';
     } finally { button.disabled = false; if (chapterController === controller) chapterController = null; }
   }
 
@@ -61,7 +62,7 @@
     if (reset) {
       episodeController?.abort(); episodeController = null; chapterController?.abort(); chapterController = null;
       episodePage = 0; episodeWork = work?.id || ''; episodeBusy = false;
-      $('episode-list').replaceChildren(); $('episode-more').hidden = true;
+      $('episode-list').replaceChildren(); $('episode-more').hidden = true; $('episode-more').textContent = '이전 회차 더 보기';
     }
     if (!work || episodeBusy) { if (!work) $('episode-status').textContent = '작품을 선택해 주세요.'; return; }
     if (!['best','challenge'].includes(work.league) || !/^\d{5,9}$/.test(work.id)) return;
@@ -72,10 +73,11 @@
     try {
       const source = new URL(`https://m.novel.naver.com/${work.league}/list`);
       source.searchParams.set('novelId', work.id); if (page > 1) source.searchParams.set('page', String(page));
-      const response = await timedFetch('https://r.jina.ai/' + source.href, {signal:controller.signal}, 15000);
-      if (!response.ok) throw new Error('조회 실패');
-      const body = await response.text();
-      if (body.length > 500000) throw new Error('응답이 너무 깁니다');
+      const body = await window.ShelfPublicReader.read('https://r.jina.ai/' + source.href, {
+        signal:controller.signal,timeout:15000,maxLength:500000,
+        validate: text=>page>1 || /https:\/\/m\.novel\.naver\.com\/(?:best|challenge)\/detail\?[^\s)]*volumeNo=\d+/.test(text),
+        onRetry:()=>{if(episodeController===controller) $('episode-status').textContent = '회차 연결을 다시 확인하는 중…';}
+      });
       if (selected !== episodeWork || controller.signal.aborted) return;
       const entries = [], seen = new Set([...$('episode-list').querySelectorAll('a')].map(link => link.dataset.volume));
       for (const match of body.matchAll(/^\s*\*\s+\[([^\]\n]{1,350})\]\((https:\/\/m\.novel\.naver\.com\/[^\s)]+)\)/gm)) {
@@ -90,13 +92,19 @@
         const play = document.createElement('button'); play.type = 'button'; play.textContent = '본문 가져오기'; play.setAttribute('aria-label', `${title} 본문 가져오기`); play.addEventListener('click', () => void loadPublicChapter(work, volume, play));
         row.append(a, play); entries.push(row);
       }
+      if (!entries.length && page===1) throw new Error('회차 목록 형식을 확인할 수 없어요');
+      $('episode-list').querySelector('[data-episode-fallback]')?.remove();
       $('episode-list').append(...entries); episodePage = page;
       $('episode-status').textContent = entries.length ? `회차 ${$('episode-list').children.length}개` : '더 불러올 회차가 없어요';
       $('episode-more').hidden = entries.length < 10;
+      $('episode-more').textContent = '이전 회차 더 보기';
     } catch (error) {
-      if (error.name !== 'AbortError' && selected === episodeWork) {
+      if (!controller.signal.aborted && episodeController===controller && selected === episodeWork) {
         $('episode-status').textContent = '목록을 불러오지 못했어요';
-        const a = document.createElement('a'); a.href = work.url; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = '네이버에서 회차 목록 열기 ↗'; $('episode-list').append(a);
+        $('episode-more').hidden = false; $('episode-more').textContent = '회차 다시 불러오기';
+        if (!$('episode-list').querySelector('[data-episode-fallback]')) {
+          const a = document.createElement('a'); a.href = work.url; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.dataset.episodeFallback = ''; a.textContent = '네이버에서 회차 목록 열기 ↗'; $('episode-list').append(a);
+        }
       }
     } finally { if (episodeController === controller) { episodeBusy = false; $('episode-more').disabled = false; } }
   }

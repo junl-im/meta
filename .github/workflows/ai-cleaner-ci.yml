@@ -102,6 +102,7 @@ jobs:
           node --check NaverNovelShelf/site/catalog.js
           node --check NaverNovelShelf/site/popularity.js
           node --check NaverNovelShelf/site/listen.js
+          node --check NaverNovelShelf/site/public-reader-fetch.js
           node --check .github/scripts/build-pages-artifact.mjs
           node --check .github/scripts/build-runtime-vendor.mjs
           node --check ai-cleaner/sw.js
@@ -123,6 +124,7 @@ jobs:
           node NaverNovelShelf/scripts/test-sorion-integration.cjs
           node NaverNovelShelf/scripts/test-language-segments.mjs
           node NaverNovelShelf/scripts/test-model-cache.mjs
+          node --test NaverNovelShelf/scripts/test-public-reader.cjs
       - name: Static checks
         run: node ai-cleaner/tests/static-check.mjs
 

@@ -219,11 +219,18 @@ test('episode chooser lists only the selected work and opens official chapter li
 });
 
 test('episode lookup failure offers the official work page',async({page})=>{
-  await page.route('https://r.jina.ai/**',route=>route.fulfill({status:503,headers:{'Access-Control-Allow-Origin':'*'},body:'unavailable'}));
+  let unavailable=true;
+  await page.route('https://r.jina.ai/**',route=>unavailable
+    ? route.fulfill({status:503,headers:{'Access-Control-Allow-Origin':'*'},body:'unavailable'})
+    : route.fulfill({status:200,headers:{'Access-Control-Allow-Origin':'*'},body:'* [39화. 시험 회차](https://m.novel.naver.com/challenge/detail?novelId=1247361&volumeNo=39)'}));
   await page.goto(listen);
   await choose(page,'work-select','1247361');
   await expect(page.locator('#episode-status')).toHaveText('목록을 불러오지 못했어요');
   await expect(page.locator('#episode-list a')).toHaveAttribute('href','https://m.novel.naver.com/challenge/list?novelId=1247361');
+  unavailable=false;
+  await page.locator('#episode-more').click();
+  await expect(page.locator('.episode-row')).toHaveCount(1);
+  await expect(page.locator('[data-episode-fallback]')).toHaveCount(0);
 });
 
 test('public chapter imports only a matching work and preserves paragraph breaks',async({page})=>{
@@ -251,8 +258,28 @@ test('public chapter rejects a mismatched source without replacing the manuscrip
   await page.locator('#manual-entry').evaluate(el=>{el.open=true});
   await page.locator('#manuscript-text').fill('보존할 원문');
   await page.locator('.episode-row button').click();
-  await expect(page.locator('#episode-status')).toContainText('본문 조회 실패');
+  await expect(page.locator('#episode-status')).toContainText('본문을 불러오지 못했어요');
   await expect(page.locator('#manuscript-text')).toHaveValue('보존할 원문');
+});
+
+test('first episode list and chapter failures recover automatically',async({page})=>{
+  let lists=0,chapters=0;
+  await page.route('https://r.jina.ai/**',async route=>{
+    const detail=route.request().url().includes('/detail?');
+    const count=detail?++chapters:++lists;
+    const headers={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'X-Return-Format'};
+    if(count===1)return route.fulfill({status:503,headers,body:'temporary'});
+    if(!detail)return route.fulfill({status:200,headers,body:'* [39화. 시험 회차](https://m.novel.naver.com/challenge/detail?novelId=1247361&volumeNo=39)'});
+    return route.fulfill({status:200,headers,body:`<meta property="og:url" content="https://m.novel.naver.com/challenge/detail?novelId=1247361&volumeNo=39"><div id="con_data">${'회차 본문입니다. '.repeat(20)}</div>`});
+  });
+  await page.goto(listen);
+  await choose(page,'work-select','1247361');
+  await expect(page.locator('.episode-row')).toHaveCount(1);
+  expect(lists).toBe(2);
+  await page.locator('.episode-row button').click();
+  await expect(page.locator('#episode-status')).toContainText('39화 불러오기 완료');
+  await expect(page.locator('#manuscript-text')).toHaveValue(/회차 본문/);
+  expect(chapters).toBe(2);
 });
 
 test('voice preparation uses one worker and keeps it ready when manuscript changes',async({page})=>{
