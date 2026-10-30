@@ -1375,7 +1375,9 @@ body{background:radial-gradient(circle at 8% 7%,#f8dbc6b8 0,transparent 28%),rad
 }
 @media(max-width:620px){
   .homeActive .top{gap:6px;padding:5px 0;min-height:51px;margin-inline:0}
-  .homeActive .top .brand{width:auto;min-width:0;flex:0 1 auto}
+  .homeActive .top .brand{width:auto;min-width:0;flex:1 1 0}
+  .homeActive .top .brand>div:last-child,.homeActive .brandName{min-width:0}
+  .homeActive .brandName b{min-width:0;overflow:hidden;text-overflow:ellipsis}
   .homeActive .homeMusicDock{display:flex;width:auto;max-width:none;margin:0;padding:0;border:0;background:none;box-shadow:none}
   .homeActive .homeMusicDockIntro{display:none}
   .homeActive .homeMusicDockActions button{min-height:40px;padding:3px 7px;font-size:10px}
