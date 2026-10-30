@@ -544,6 +544,7 @@
   }
 
   async function start(mode) {
+    if (saveThrottle) resetDocument();
     if (!state.chunks.length) { report('먼저 회차 원고를 불러와 주세요.'); $('manual-entry').open = true; elements.text.focus(); return; }
     if (mode === 'sorion' && !state.connectedApi) { report('소리온 엔진이 연결되지 않았어요.'); return; }
     if (mode === 'device' && !('speechSynthesis' in window)) { report('이 브라우저는 기기 음성을 지원하지 않아요.'); return; }
@@ -583,6 +584,8 @@
   }
 
   function resetDocument() {
+    clearTimeout(saveThrottle);
+    saveThrottle = 0;
     stopPlayback({ preserveIndex: false, keepReadyWorker: true });
     state.mode = null;
     elements.mode.textContent = '낭독 준비';

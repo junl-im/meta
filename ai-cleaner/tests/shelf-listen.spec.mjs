@@ -181,3 +181,18 @@ test('voice preparation uses one worker and keeps it ready when manuscript chang
   expect(await page.evaluate(()=>window.__created)).toBe(1);
   expect(await page.evaluate(()=>window.__requests.map(request=>request.type||'speak'))).toEqual(['prepare','speak']);
 });
+
+test('pasting and immediately playing uses the latest manuscript without interrupting playback',async({page})=>{
+  await page.addInitScript(()=>{
+    window.__quickRequests=[];window.__quickTerminated=false;
+    window.Worker=class {postMessage(request){window.__quickRequests.push(request);queueMicrotask(()=>this.onmessage?.({data:{id:request.id,type:'audio',blob:new Blob(['audio'],{type:'audio/wav'})}}))}terminate(){window.__quickTerminated=true}};
+    HTMLMediaElement.prototype.load=function(){};HTMLMediaElement.prototype.pause=function(){};
+    HTMLMediaElement.prototype.play=function(){this.dispatchEvent(new Event('play'));return Promise.resolve()};
+  });
+  await page.goto(listen);
+  await page.evaluate(()=>{const input=document.querySelector('#manuscript-text');input.value='방금 붙여넣은 원고를 읽습니다.';input.dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('#local-ai-play').click()});
+  await expect.poll(()=>page.evaluate(()=>window.__quickRequests.length)).toBe(1);
+  expect(await page.evaluate(()=>window.__quickRequests[0].text)).toContain('방금 붙여넣은 원고');
+  await page.waitForTimeout(300);
+  expect(await page.evaluate(()=>window.__quickTerminated)).toBe(false);
+});
