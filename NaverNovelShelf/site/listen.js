@@ -529,7 +529,7 @@
       if (sessionId !== state.session) return;
       closeVoiceLoading();
       state.busy = false; state.playing = false;
-      report('기기 AI 음성을 만들지 못했어요: ' + (error?.message || '모델과 기기 상태를 확인해 주세요.'));
+      report(error?.name === 'NotAllowedError' ? '브라우저가 자동 재생을 막았어요. 재생 버튼을 눌러 이어 들어 주세요.' : '기기 AI 음성을 만들지 못했어요: ' + (error?.message || '모델과 기기 상태를 확인해 주세요.'));
       paintProgress();
     }
   }
