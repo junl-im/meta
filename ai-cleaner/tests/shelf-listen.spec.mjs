@@ -137,6 +137,38 @@ test('slow synthesis prepares a second segment before starting playback',async({
   expect(await page.evaluate(()=>window.__adaptiveRequests.length)).toBeGreaterThanOrEqual(2);
 });
 
+test('local narration resumes at the saved segment and accepts older saved positions',async({page})=>{
+  await page.addInitScript(()=>{
+    window.__resumeRequests=[];
+    window.Worker=class{postMessage(request){window.__resumeRequests.push(request);queueMicrotask(()=>this.onmessage?.({data:{id:request.id,type:'audio',blob:new Blob(['audio'],{type:'audio/wav'})}}))}terminate(){}};
+    HTMLMediaElement.prototype.load=function(){};HTMLMediaElement.prototype.pause=function(){};HTMLMediaElement.prototype.play=function(){this.dispatchEvent(new Event('play'));return Promise.resolve()};
+  });
+  await page.goto(listen);await page.locator('#manual-entry').evaluate(el=>el.open=true);
+  const source='첫번째 문장입니다. '.repeat(14)+'두번째 문장입니다. '.repeat(14)+'세번째 문장입니다. '.repeat(14);
+  await page.locator('#manuscript-text').fill(source);await page.waitForTimeout(250);await page.locator('#local-ai-play').click();
+  await expect.poll(()=>page.evaluate(()=>window.__resumeRequests.length)).toBeGreaterThan(1);
+  const second=await page.evaluate(()=>window.__resumeRequests[1].text);
+  await page.locator('#sorion-audio').evaluate(el=>el.dispatchEvent(new Event('ended')));
+  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('gomfox-sorion-progress-v1::')).part)).toBe(1);
+  await page.reload();await page.locator('#manual-entry').evaluate(el=>el.open=true);await page.locator('#manuscript-text').fill(source);await page.waitForTimeout(250);
+  await page.locator('#local-ai-play').click();await expect.poll(()=>page.evaluate(()=>window.__resumeRequests.length)).toBeGreaterThan(0);
+  expect(await page.evaluate(()=>window.__resumeRequests[0].text)).toBe(second);
+  await page.reload();await page.evaluate(()=>localStorage.setItem('gomfox-sorion-progress-v1::','0'));
+  await page.locator('#manual-entry').evaluate(el=>el.open=true);await page.locator('#manuscript-text').fill(source);await page.waitForTimeout(250);
+  await page.locator('#local-ai-play').click();await expect.poll(()=>page.evaluate(()=>window.__resumeRequests.length)).toBeGreaterThan(0);
+  expect(await page.evaluate(()=>window.__resumeRequests[0].text)).not.toBe(second);
+});
+
+test('switching chapters does not overwrite the new chapter saved position',async({page})=>{
+  await page.goto(listen);await page.locator('#manual-entry').evaluate(el=>el.open=true);
+  await page.locator('#episode-name').fill('첫 회차');await page.locator('#episode-name').dispatchEvent('change');
+  await page.locator('#manuscript-text').fill('여우가 숲속의 책을 읽습니다. '.repeat(100));await page.waitForTimeout(250);
+  await page.evaluate(()=>localStorage.setItem('gomfox-sorion-progress-v1::다음 회차',JSON.stringify({index:0,part:2})));
+  await page.locator('#episode-name').fill('다음 회차');await page.locator('#episode-name').dispatchEvent('change');
+  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('gomfox-sorion-progress-v1::다음 회차')));
+  expect(saved).toEqual({index:0,part:2});
+});
+
 test('episode chooser lists only the selected work and opens official chapter links',async({page})=>{
   await page.setViewportSize({width:320,height:700});
   await page.route('https://r.jina.ai/**',async route=>{

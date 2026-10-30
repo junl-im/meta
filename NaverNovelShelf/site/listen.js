@@ -22,7 +22,7 @@
     connectedApi: null, connectionInProgress: false, session: 0,
     abort: null, currentJobId: null, currentApi: null, localWorker: null, localUrl: null, localPart: 0, localReady: false, preparing: false, prefetch: [], localPriming: false, lastGenerationMs: 0,
   };
-  let saveThrottle = 0;
+  let saveThrottle = 0, documentProgressKey = null;
   let episodeController = null, chapterController = null, episodePage = 0, episodeWork = '', episodeBusy = false;
 
   async function loadPublicChapter(work, volume, button) {
@@ -201,14 +201,18 @@
 
   function saveProgress() {
     if (!state.chunks.length) return;
-    try { localStorage.setItem(progressKey(), String(state.currentIndex)); } catch {}
+    try { localStorage.setItem(documentProgressKey || progressKey(), JSON.stringify({index:state.currentIndex,part:state.localPart})); } catch {}
   }
 
   function restoreProgress() {
     try {
-      const stored = Number(localStorage.getItem(progressKey()));
+      const raw=localStorage.getItem(progressKey());
+      const data=JSON.parse(raw || 'null');
+      const stored=typeof data==='number' ? data : data?.index;
       if (Number.isInteger(stored) && stored >= 0 && stored < state.chunks.length) {
         state.currentIndex = stored;
+        const part=typeof data==='object' && data ? data.part : 0;
+        state.localPart=Number.isInteger(part) && part>=0 && part<chunkText(state.chunks[stored],120).length ? part : 0;
       }
     } catch {}
   }
@@ -239,6 +243,8 @@
     const reading = elements.clean.checked ? content.replace(/\*\*|[\u200B\uFEFF]/g, '') : content;
     state.chunks = chunkText(reading);
     state.currentIndex = 0;
+    state.localPart = 0;
+    documentProgressKey = progressKey();
     elements.charCount.textContent = content.length.toLocaleString('ko-KR') + '자';
     elements.readerTitle.textContent = elements.episode.value.trim() || '원고 미리보기';
     elements.selectedWork.textContent = selectedWorkTitle();
@@ -617,7 +623,7 @@
     if (mode === 'device' && !('speechSynthesis' in window)) { report('이 브라우저는 기기 음성을 지원하지 않아요.'); return; }
     stopPlayback({keepReadyWorker: mode === 'local'});
     state.mode = mode;
-    state.localPart = 0;
+    if (mode !== 'local') state.localPart = 0;
     state.localPriming = mode === 'local'; state.lastGenerationMs=0;
     const sessionId = state.session;
     elements.mode.textContent = mode === 'sorion' ? 'SoriON AI 성우' : mode === 'local' ? '듣는 서재 AI' : '기기 음성 · 체험용';
@@ -631,6 +637,7 @@
     const mode = state.mode;
     stopPlayback();
     state.currentIndex = Math.max(0, Math.min(state.currentIndex + delta, state.chunks.length - 1));
+    state.localPart = 0;
     paintProgress();
     saveProgress();
     if (mode) void start(mode);
@@ -791,6 +798,7 @@
     elements.audio.addEventListener('ended', () => {
       if (state.mode === 'local' && state.localPart + 1 < chunkText(state.chunks[state.currentIndex],120).length) {
         state.localPart++;
+        saveProgress();
         void playLocalChunk(state.session);
       } else if (state.mode === 'sorion' || state.mode === 'local') {
         state.localPart = 0;
