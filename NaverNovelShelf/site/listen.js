@@ -23,12 +23,43 @@
     abort: null, currentJobId: null, currentApi: null, localWorker: null, localUrl: null, localPart: 0, localReady: false, preparing: false,
   };
   let saveThrottle = 0;
-  let episodeController = null, episodePage = 0, episodeWork = '', episodeBusy = false;
+  let episodeController = null, chapterController = null, episodePage = 0, episodeWork = '', episodeBusy = false;
+
+  async function loadPublicChapter(work, volume, button) {
+    if (!works.some(item => item.id === work.id && item.league === work.league) || !/^\d{1,6}$/.test(volume)) return;
+    chapterController?.abort();
+    const controller = new AbortController(); chapterController = controller;
+    button.disabled = true; $('episode-status').textContent = `${volume}화 본문을 가져오는 중…`;
+    try {
+      const source = new URL(`https://m.novel.naver.com/${work.league}/detail`);
+      source.searchParams.set('novelId', work.id); source.searchParams.set('volumeNo', volume);
+      const response = await timedFetch('https://r.jina.ai/' + source.href, {signal:controller.signal,credentials:'omit',headers:{'X-Return-Format':'html'}}, 30000);
+      if (!response.ok) throw new Error('공개 회차 조회에 실패했어요.');
+      const html = await response.text();
+      if (html.length > 3000000) throw new Error('회차 응답이 너무 커요.');
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const reported = new URL(doc.querySelector('meta[property="og:url"]')?.content || 'about:blank');
+      if (!['m.novel.naver.com','novel.naver.com'].includes(reported.hostname) || reported.pathname !== `/${work.league}/detail` || reported.searchParams.get('novelId') !== work.id || reported.searchParams.get('volumeNo') !== volume) throw new Error('회차 출처를 확인할 수 없어요.');
+      const main = doc.querySelector('#con_data');
+      if (!main) throw new Error('공개된 본문을 확인할 수 없어요. 네이버 원문에서 접근 상태를 확인해 주세요.');
+      const copy = main.cloneNode(true);
+      copy.querySelectorAll('br').forEach(node => node.replaceWith('\n'));
+      copy.querySelectorAll('p').forEach(node => node.append('\n'));
+      const text = (copy.textContent || '').replace(/\r\n?/g,'\n').trim();
+      if (text.length < 80 || text.length > 200000) throw new Error('읽을 수 있는 본문을 확인하지 못했어요.');
+      if (controller.signal.aborted || elements.work.value !== work.id) return;
+      const title = (doc.querySelector('#detailContents h2')?.textContent || `제${volume}화`).replace(/^\s*제목\s*:\s*/, '').trim().slice(0,100);
+      acceptExtensionChapter({novelId:work.id,volumeNo:volume,url:source.href,title,text}, 'public');
+      $('episode-status').textContent = `${volume}화 불러오기 완료`;
+    } catch (error) {
+      if (error.name !== 'AbortError' && elements.work.value === work.id) $('episode-status').textContent = '본문 조회 실패 · 네이버 원문을 확인해 주세요';
+    } finally { button.disabled = false; if (chapterController === controller) chapterController = null; }
+  }
 
   async function loadEpisodes(reset = false) {
     const work = works.find(item => item.id === elements.work.value);
     if (reset) {
-      episodeController?.abort(); episodeController = null;
+      episodeController?.abort(); episodeController = null; chapterController?.abort(); chapterController = null;
       episodePage = 0; episodeWork = work?.id || ''; episodeBusy = false;
       $('episode-list').replaceChildren(); $('episode-more').hidden = true;
     }
@@ -54,7 +85,10 @@
         seen.add(volume);
         const title = match[1].replace(/^(?:책갈피\s*|UP\s*)+/g,'').replace(/\s+(?:\d{4}\.\d{2}\.\d{2}|\d{1,2}:\d{2})[\s\S]*$/,'').trim().slice(0,120);
         if (!title) continue;
-        const a = document.createElement('a'); a.href = url.href; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.dataset.volume = volume; a.textContent = title + ' ↗'; entries.push(a);
+        const row = document.createElement('div'); row.className = 'episode-row';
+        const a = document.createElement('a'); a.href = url.href; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.dataset.volume = volume; a.textContent = title + ' ↗';
+        const play = document.createElement('button'); play.type = 'button'; play.textContent = '본문 가져오기'; play.setAttribute('aria-label', `${title} 본문 가져오기`); play.addEventListener('click', () => void loadPublicChapter(work, volume, play));
+        row.append(a, play); entries.push(row);
       }
       $('episode-list').append(...entries); episodePage = page;
       $('episode-status').textContent = entries.length ? `회차 ${$('episode-list').children.length}개` : '더 불러올 회차가 없어요';
@@ -549,7 +583,7 @@
     renderText();
   }
 
-  function acceptExtensionChapter(chapter) {
+  function acceptExtensionChapter(chapter, sourceKind = 'extension') {
     if (!chapter || typeof chapter !== 'object') return;
     if (typeof chapter.text !== 'string' || chapter.text.length < 80 || chapter.text.length > 200000) return;
     if (typeof chapter.novelId !== 'string' || !/^\d{5,9}$/.test(chapter.novelId)) return;
@@ -564,7 +598,7 @@
     elements.work.value = chapter.novelId;
     elements.episode.value = String(chapter.title || `제${chapter.volumeNo}화`).slice(0, 100);
     elements.text.value = chapter.text;
-    elements.fileName.textContent = '네이버 현재 회차에서 자동 인식';
+    elements.fileName.textContent = sourceKind === 'public' ? '공개 회차 조회로 본문 가져옴' : '네이버 현재 회차에서 자동 인식';
     elements.file.value = '';
     const sourceLink = $('chapter-source-link');
     sourceLink.href = source.href;
@@ -573,8 +607,8 @@
     report('네이버 ' + chapter.volumeNo + '화 본문 ' + chapter.text.length.toLocaleString('ko-KR') + '자를 자동으로 불러왔어요. 이제 목소리를 선택하고 재생해 주세요.');
     const banner = $('extension-import-status');
     banner.hidden = false;
-    banner.textContent = `네이버 ${chapter.volumeNo}화 인식 완료 · 원고를 다시 붙여넣을 필요가 없어요.`;
-    window.postMessage({ type: 'GOMFOX_SORION_CHAPTER_ACCEPTED_V1' }, location.origin);
+    banner.textContent = `네이버 ${chapter.volumeNo}화 가져오기 완료 · 원문을 확인한 뒤 재생해 주세요.`;
+    if (sourceKind === 'extension') window.postMessage({ type: 'GOMFOX_SORION_CHAPTER_ACCEPTED_V1' }, location.origin);
     const params = new URLSearchParams(location.search);
     params.delete('handoff');
     params.delete('capture');

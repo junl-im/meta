@@ -92,6 +92,34 @@ test('episode lookup failure offers the official work page',async({page})=>{
   await expect(page.locator('#episode-list a')).toHaveAttribute('href','https://m.novel.naver.com/challenge/list?novelId=1247361');
 });
 
+test('public chapter imports only a matching work and preserves paragraph breaks',async({page})=>{
+  await page.route('https://r.jina.ai/**',async route=>{
+    const url=route.request().url();
+    if(!url.includes('/detail?'))return route.fulfill({status:200,headers:{'Access-Control-Allow-Origin':'*'},body:'*   [책갈피 39화. 시험 회차 2026.10.29 별점 10](https://m.novel.naver.com/challenge/detail?novelId=1247361&volumeNo=39)'});
+    const text='첫 줄입니다. '.repeat(12);
+    return route.fulfill({status:200,headers:{'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'X-Return-Format'},body:`<meta property="og:url" content="https://m.novel.naver.com/challenge/detail?novelId=1247361&volumeNo=39"><div id="detailContents"><h2>제목 : 시험 회차</h2><div id="con_data"><p>${text}<br>다음 줄</p><p>다음 문단</p></div></div>`});
+  });
+  await page.goto(listen);
+  await page.locator('#work-select').selectOption('1247361');
+  await page.locator('.episode-row button').click();
+  await expect(page.locator('#episode-status')).toContainText('39화 불러오기 완료');
+  await expect(page.locator('#manuscript-text')).toHaveValue(/첫 줄입니다\.[\s\S]*\n다음 줄\n다음 문단/);
+  await expect(page.locator('#file-name')).toHaveText('공개 회차 조회로 본문 가져옴');
+});
+
+test('public chapter rejects a mismatched source without replacing the manuscript',async({page})=>{
+  await page.route('https://r.jina.ai/**',async route=>{
+    if(!route.request().url().includes('/detail?'))return route.fulfill({status:200,headers:{'Access-Control-Allow-Origin':'*'},body:'*   [책갈피 39화. 시험 회차 2026.10.29 별점 10](https://m.novel.naver.com/challenge/detail?novelId=1247361&volumeNo=39)'});
+    return route.fulfill({status:200,headers:{'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'X-Return-Format'},body:`<meta property="og:url" content="https://m.novel.naver.com/challenge/detail?novelId=9999999&volumeNo=39"><div id="con_data">${'잘못된 작품 '.repeat(30)}</div>`});
+  });
+  await page.goto(listen);
+  await page.locator('#work-select').selectOption('1247361');
+  await page.locator('#manuscript-text').fill('보존할 원문');
+  await page.locator('.episode-row button').click();
+  await expect(page.locator('#episode-status')).toContainText('본문 조회 실패');
+  await expect(page.locator('#manuscript-text')).toHaveValue('보존할 원문');
+});
+
 test('voice preparation uses one worker and keeps it ready when manuscript changes',async({page})=>{
   await page.addInitScript(()=>{
     window.__created=0;window.__requests=[];

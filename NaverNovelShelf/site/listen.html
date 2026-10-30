@@ -25,7 +25,7 @@
         </div>
         <div class="auto-capture-guide">
           <div class="auto-capture-head"><strong>회차 본문 가져오기</strong></div>
-          <p>PC에서는 연결 도구로 네이버 회차 본문을 가져올 수 있어요. 휴대폰에서는 현재 원문을 직접 입력하거나 TXT 파일을 선택해야 해요.</p>
+          <p>아래에서 공개 회차를 골라 본문을 가져오거나 TXT 파일을 선택할 수 있어요. 공개 조회가 실패하면 PC 연결 도구를 이용할 수 있어요.</p>
           <details><summary>PC 연결 도구 설치 방법</summary><p>이 도구는 음성 설치와 별개이며, 브라우저에서 직접 설치를 승인해야 합니다.</p><a class="extension-download" href="./downloads/sorion-naver-reader-v0.3.0.zip" download>PC 연결 도구 ZIP 받기 ↓</a><ol><li>ZIP 압축 풀기</li><li>Chrome <code>chrome://extensions</code> 또는 Whale <code>whale://extensions</code> 열기</li><li>개발자 모드에서 <b>압축해제된 확장 프로그램을 로드</b> 선택</li><li>압축 해제한 폴더 지정 후 네이버 소설 회차 페이지 새로고침</li><li>화면 아래 <b>소리온으로 듣기 ▶</b> 버튼 선택</li></ol></details>
           <div id="extension-import-status" class="import-status" role="status" hidden></div>
           <a id="chapter-source-link" class="chapter-source" target="_blank" rel="noopener noreferrer" hidden>네이버 원본 회차 다시 열기 ↗</a>
@@ -34,7 +34,7 @@
           <label for="work-select">작품 선택</label>
           <select id="work-select"><option value="">작품을 선택하세요</option></select>
         </div>
-        <section class="episode-picker" aria-labelledby="episodes-title"><div class="episode-head"><strong id="episodes-title">회차 고르기</strong><span id="episode-status" role="status">작품을 선택해 주세요.</span></div><p>공개 회차 제목·링크는 외부 공개 페이지 조회 서비스로 확인하며 본문은 네이버에서 열립니다.</p><div id="episode-list" class="episode-list"></div><button type="button" id="episode-more" class="mini-button" hidden>이전 회차 더 보기</button></section>
+        <section class="episode-picker" aria-labelledby="episodes-title"><div class="episode-head"><strong id="episodes-title">회차 고르기</strong><span id="episode-status" role="status">작품을 선택해 주세요.</span></div><p>공개 회차 목록과 본문은 외부 공개 조회 서비스(Jina Reader)를 통해 가져와요. 로그인 또는 유료 접근은 지원하지 않아요.</p><div id="episode-list" class="episode-list"></div><button type="button" id="episode-more" class="mini-button" hidden>이전 회차 더 보기</button></section>
         <div class="field-group">
           <label for="episode-name">회차 이름</label>
           <input id="episode-name" type="text" maxlength="100" placeholder="예: 제1화 · 새로운 시작" autocomplete="off">
