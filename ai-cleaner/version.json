@@ -1,6 +1,6 @@
 {
-  "version": "1.37.5",
-  "assetVersion": "1375",
+  "version": "1.37.6",
+  "assetVersion": "1376",
   "channel": "stable",
   "updateMode": "exact-source-incremental-write",
   "notes": "Fill desktop linked-world rows with four evenly sized cards while preserving the mobile groups."
