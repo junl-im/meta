@@ -12,7 +12,7 @@
   <title>곰같은여우의 소설 서재</title>
   <link rel="icon" type="image/webp" href="./assets/hero-books.webp">
   <link rel="stylesheet" href="./styles.css">
-  <link rel="stylesheet" href="./catalog.css">
+  <link rel="stylesheet" href="./catalog.css?v=20261030-search-recovery">
 </head>
 <body>
   <div class="app-shell">
@@ -59,7 +59,7 @@
         </div>
         <div class="catalog-summary"><span id="result-description" role="status" aria-live="polite">총 28편의 이야기</span><span>표지를 누르면 네이버 회차 목록이 열려요 <span aria-hidden="true">↗</span></span></div>
         <div id="league-groups" class="league-groups"></div>
-        <div id="empty-books" class="empty-state" hidden><span aria-hidden="true">✧</span><h3>찾는 작품이 없어요</h3><p>다른 제목으로 찾아보세요.</p></div>
+        <div id="empty-books" class="empty-state" hidden><span aria-hidden="true">✧</span><h3>찾는 작품이 없어요</h3><p>검색어나 선택한 리그를 바꿔 보세요.</p><button type="button" id="reset-catalog" class="catalog-reset">전체 작품 다시 보기</button></div>
       </section>
       <section class="reading-note">
         <div class="reading-icon asset-icon asset-book" aria-hidden="true"></div>
@@ -82,6 +82,6 @@
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="./catalog.js?v=20261027-1" defer></script>
-  <script src="./app.js?v=20261027-1" defer></script>
+  <script src="./app.js?v=20261030-search-recovery" defer></script>
 </body>
 </html>

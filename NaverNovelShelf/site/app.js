@@ -145,6 +145,17 @@
     });
     renderWorks();
   }));
+  byId("reset-catalog").addEventListener("click",()=>{
+    byId("search-input").value="";
+    selectedLeague="all";
+    document.querySelectorAll("[data-league]").forEach(b=>{
+      const active=b.dataset.league==="all";
+      b.classList.toggle("active",active);
+      b.setAttribute("aria-pressed",String(active));
+    });
+    renderWorks();
+    byId("search-input").focus({preventScroll:true});
+  });
   byId("resume-button").addEventListener("click",openLast);
   byId("reopen-last").addEventListener("click",openLast);
   byId("copy-recent-link").addEventListener("click",copyLast);
