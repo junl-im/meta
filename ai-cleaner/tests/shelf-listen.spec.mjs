@@ -278,3 +278,19 @@ test('pasting and immediately playing uses the latest manuscript without interru
   await page.waitForTimeout(300);
   expect(await page.evaluate(()=>window.__quickTerminated)).toBe(false);
 });
+
+test('finishing a chapter saves a valid restart point and replay begins at the start',async({page})=>{
+  await page.addInitScript(()=>{
+    window.__finishRequests=[];
+    window.Worker=class{postMessage(request){window.__finishRequests.push(request);queueMicrotask(()=>this.onmessage?.({data:{id:request.id,type:'audio',blob:new Blob(['audio'],{type:'audio/wav'})}}))}terminate(){}};
+    HTMLMediaElement.prototype.load=function(){};HTMLMediaElement.prototype.pause=function(){};HTMLMediaElement.prototype.play=function(){this.dispatchEvent(new Event('play'));return Promise.resolve()};
+  });
+  await page.goto(listen);await page.locator('#manual-entry').evaluate(el=>el.open=true);
+  await page.locator('#manuscript-text').fill('짧은 이야기의 마지막입니다.');await page.waitForTimeout(250);
+  await page.locator('#local-ai-play').click();await expect.poll(()=>page.evaluate(()=>window.__finishRequests.length)).toBe(1);
+  await page.locator('#sorion-audio').evaluate(el=>el.dispatchEvent(new Event('ended')));
+  await expect(page.locator('#player-message')).toContainText('처음부터 다시');
+  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('gomfox-sorion-progress-v1::')))).toEqual({index:0,part:0});
+  await page.locator('#pause-resume').click();await expect.poll(()=>page.evaluate(()=>window.__finishRequests.length)).toBe(2);
+  expect(await page.evaluate(()=>window.__finishRequests[1].text)).toBe('짧은 이야기의 마지막입니다.');
+});
