@@ -11,7 +11,7 @@
     readerTitle: $('reading-title'), selectedWork: $('selected-work'), reader: $('reader-text'),
     mode: $('playback-mode'), count: $('chunk-count'), progress: $('progress-track'),
     fill: $('progress-fill'), message: $('player-message'), audio: $('sorion-audio'),
-    start: $('sorion-play'), device: $('device-play'), localAi: $('local-ai-play'), pause: $('pause-resume'),
+    start: $('sorion-play'), device: $('device-play'), localAi: $('local-ai-play'), prepare: $('local-ai-prepare'), prepareStatus: $('local-ai-status'), pause: $('pause-resume'),
     previous: $('prev-chunk'), next: $('next-chunk'), stop: $('stop-play'),
   };
   let works = (Array.isArray(window.NOVEL_CATALOG) ? window.NOVEL_CATALOG : [])
@@ -20,9 +20,52 @@
   const state = {
     chunks: [], currentIndex: 0, mode: null, playing: false, busy: false,
     connectedApi: null, connectionInProgress: false, session: 0,
-    abort: null, currentJobId: null, currentApi: null, localWorker: null, localUrl: null, localPart: 0,
+    abort: null, currentJobId: null, currentApi: null, localWorker: null, localUrl: null, localPart: 0, localReady: false, preparing: false,
   };
   let saveThrottle = 0;
+  let episodeController = null, episodePage = 0, episodeWork = '', episodeBusy = false;
+
+  async function loadEpisodes(reset = false) {
+    const work = works.find(item => item.id === elements.work.value);
+    if (reset) {
+      episodeController?.abort(); episodeController = null;
+      episodePage = 0; episodeWork = work?.id || ''; episodeBusy = false;
+      $('episode-list').replaceChildren(); $('episode-more').hidden = true;
+    }
+    if (!work || episodeBusy) { if (!work) $('episode-status').textContent = '작품을 선택해 주세요.'; return; }
+    if (!['best','challenge'].includes(work.league) || !/^\d{5,9}$/.test(work.id)) return;
+    const selected = work.id, page = episodePage + 1, controller = new AbortController();
+    episodeController = controller; episodeBusy = true;
+    $('episode-status').textContent = '회차를 불러오는 중…';
+    $('episode-more').disabled = true;
+    try {
+      const source = new URL(`https://m.novel.naver.com/${work.league}/list`);
+      source.searchParams.set('novelId', work.id); if (page > 1) source.searchParams.set('page', String(page));
+      const response = await timedFetch('https://r.jina.ai/' + source.href, {signal:controller.signal}, 15000);
+      if (!response.ok) throw new Error('조회 실패');
+      const body = await response.text();
+      if (body.length > 500000) throw new Error('응답이 너무 깁니다');
+      if (selected !== episodeWork || controller.signal.aborted) return;
+      const entries = [], seen = new Set([...$('episode-list').querySelectorAll('a')].map(link => link.dataset.volume));
+      for (const match of body.matchAll(/^\s*\*\s+\[([^\]\n]{1,350})\]\((https:\/\/m\.novel\.naver\.com\/[^\s)]+)\)/gm)) {
+        let url; try { url = new URL(match[2]); } catch { continue; }
+        const volume = url.searchParams.get('volumeNo');
+        if (url.hostname !== 'm.novel.naver.com' || url.pathname !== `/${work.league}/detail` || url.searchParams.get('novelId') !== selected || !/^\d{1,6}$/.test(volume || '') || seen.has(volume)) continue;
+        seen.add(volume);
+        const title = match[1].replace(/^(?:책갈피\s*|UP\s*)+/g,'').replace(/\s+(?:\d{4}\.\d{2}\.\d{2}|\d{1,2}:\d{2})[\s\S]*$/,'').trim().slice(0,120);
+        if (!title) continue;
+        const a = document.createElement('a'); a.href = url.href; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.dataset.volume = volume; a.textContent = title + ' ↗'; entries.push(a);
+      }
+      $('episode-list').append(...entries); episodePage = page;
+      $('episode-status').textContent = entries.length ? `회차 ${$('episode-list').children.length}개` : '더 불러올 회차가 없어요';
+      $('episode-more').hidden = entries.length < 10;
+    } catch (error) {
+      if (error.name !== 'AbortError' && selected === episodeWork) {
+        $('episode-status').textContent = '목록을 불러오지 못했어요';
+        const a = document.createElement('a'); a.href = work.url; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = '네이버에서 회차 목록 열기 ↗'; $('episode-list').append(a);
+      }
+    } finally { if (episodeController === controller) { episodeBusy = false; $('episode-more').disabled = false; } }
+  }
 
   // AI놀이터 서재와 동일한 최신 GitHub Pages 카탈로그를 사용합니다.
   async function refreshPublicWorks() {
@@ -225,14 +268,17 @@
     }
   }
 
-  function stopPlayback({ preserveIndex = true } = {}) {
+  function stopPlayback({ preserveIndex = true, keepReadyWorker = false } = {}) {
     state.session += 1;
     const api = state.currentApi;
     const job = state.currentJobId;
     state.abort?.abort();
     state.abort = null;
-    state.localWorker?.terminate();
-    state.localWorker = null;
+    if (!keepReadyWorker || !state.localReady || state.busy || state.preparing) {
+      state.localWorker?.terminate(); state.localWorker = null; state.localReady = false;
+      if (state.preparing) elements.prepareStatus.textContent = '음성 준비가 중단됐어요. 다시 준비할 수 있어요.';
+    }
+    state.preparing = false; elements.prepare.disabled = false; elements.localAi.disabled = false;
     state.currentApi = null;
     state.currentJobId = null;
     if (api && job) {
@@ -353,6 +399,7 @@
       });
       if (sessionId !== state.session) return;
       if (state.localUrl) URL.revokeObjectURL(state.localUrl);
+      state.localReady = true;
       state.localUrl = URL.createObjectURL(blob);
       state.busy = false;
       elements.audio.src = state.localUrl;
@@ -367,6 +414,38 @@
       state.busy = false; state.playing = false;
       report('기기 AI 음성을 만들지 못했어요: ' + (error?.message || '모델과 기기 상태를 확인해 주세요.'));
       paintProgress();
+    }
+  }
+
+  async function prepareLocalAi() {
+    if (state.preparing) return;
+    if (state.localReady && state.localWorker) { elements.prepareStatus.textContent = '이 화면에서 AI 음성을 사용할 준비가 되었어요.'; return; }
+    stopPlayback();
+    const sessionId = state.session;
+    state.preparing = true; elements.prepare.disabled = true; elements.localAi.disabled = true;
+    elements.prepareStatus.textContent = 'AI 음성 준비 중 · 첫 사용에는 약 380MB를 내려받아요.';
+    try {
+      state.localWorker = new Worker('./sorion-local-worker.js', {type:'module'});
+      const worker = state.localWorker;
+      await new Promise((resolve, reject) => {
+        worker.onmessage = event => {
+          if (event.data?.id !== sessionId) return;
+          if (event.data.type === 'progress') elements.prepareStatus.textContent = String(event.data.message);
+          else if (event.data.type === 'ready') resolve();
+          else if (event.data.type === 'error') reject(new Error(event.data.message));
+        };
+        worker.onerror = () => reject(new Error('AI 음성 엔진을 시작하지 못했어요.'));
+        worker.postMessage({id:sessionId,type:'prepare'});
+      });
+      if (sessionId !== state.session) return;
+      state.localReady = true;
+      elements.prepareStatus.textContent = 'AI 음성 준비 완료 · 내용을 불러온 뒤 바로 재생할 수 있어요.';
+    } catch (error) {
+      if (sessionId !== state.session) return;
+      state.localWorker?.terminate(); state.localWorker = null; state.localReady = false;
+      elements.prepareStatus.textContent = '음성 준비 실패 · 인터넷 연결과 기기 저장 공간을 확인하고 다시 시도해 주세요.';
+    } finally {
+      if (sessionId === state.session) { state.preparing = false; elements.prepare.disabled = false; elements.localAi.disabled = false; }
     }
   }
 
@@ -429,7 +508,7 @@
     if (!state.chunks.length) { report('먼저 회차 원고를 불러와 주세요.'); elements.text.focus(); return; }
     if (mode === 'sorion' && !state.connectedApi) { report('소리온 엔진이 연결되지 않았어요.'); return; }
     if (mode === 'device' && !('speechSynthesis' in window)) { report('이 브라우저는 기기 음성을 지원하지 않아요.'); return; }
-    stopPlayback();
+    stopPlayback({keepReadyWorker: mode === 'local'});
     state.mode = mode;
     state.localPart = 0;
     const sessionId = state.session;
@@ -464,7 +543,7 @@
   }
 
   function resetDocument() {
-    stopPlayback({ preserveIndex: false });
+    stopPlayback({ preserveIndex: false, keepReadyWorker: true });
     state.mode = null;
     elements.mode.textContent = '낭독 준비';
     renderText();
@@ -536,7 +615,8 @@
     }
     const requestedId = new URLSearchParams(location.search).get('novelId');
     if (works.some((work) => work.id === requestedId)) elements.work.value = requestedId;
-    elements.work.addEventListener('change', resetDocument);
+    elements.work.addEventListener('change', () => { resetDocument(); void loadEpisodes(true); });
+    $('episode-more').addEventListener('click', () => void loadEpisodes());
     elements.episode.addEventListener('change', resetDocument);
     elements.text.addEventListener('input', () => {
       clearTimeout(saveThrottle);
@@ -549,6 +629,7 @@
     $('recheck-engine').addEventListener('click', () => void checkEngine());
     elements.start.addEventListener('click', () => void start('sorion'));
     elements.localAi.addEventListener('click', () => void start('local'));
+    elements.prepare.addEventListener('click', () => void prepareLocalAi());
     elements.device.addEventListener('click', () => void start('device'));
     elements.pause.addEventListener('click', togglePause);
     elements.previous.addEventListener('click', () => jump(-1));
@@ -568,6 +649,7 @@
     elements.audio.addEventListener('error', () => { if ((state.mode !== 'sorion' && state.mode !== 'local') || state.busy) return; report('음성 파일을 재생하지 못했어요. 연결 상태를 확인해 주세요.'); });
     window.addEventListener('pagehide', () => { saveProgress(); stopPlayback(); });
     renderText();
+    if (elements.work.value) void loadEpisodes(true);
     void checkEngine();
     void refreshPublicWorks();
   }
