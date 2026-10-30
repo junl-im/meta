@@ -87,6 +87,21 @@ test('imported chapter starts AI narration and highlights the current segment',a
   await expect(page.locator('#reader-text [data-part].speaking')).toContainText('별빛');
 });
 
+test('reading follows inside the manuscript without moving the mobile page and keeps the pause highlight',async({page})=>{
+  await page.setViewportSize({width:390,height:700});
+  await page.addInitScript(()=>{
+    window.Worker=class{postMessage(request){queueMicrotask(()=>this.onmessage?.({data:{id:request.id,type:'audio',blob:new Blob(['audio'],{type:'audio/wav'})}}))}terminate(){}};
+    HTMLMediaElement.prototype.load=function(){};HTMLMediaElement.prototype.pause=function(){this.dispatchEvent(new Event('pause'))};HTMLMediaElement.prototype.play=function(){this.dispatchEvent(new Event('play'));return Promise.resolve()};
+  });
+  await page.goto(listen);
+  await page.evaluate(()=>{const t=document.querySelector('#manuscript-text');t.value='긴 원고를 차분하게 읽습니다. '.repeat(300);t.dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('#local-ai-play').click()});
+  await expect(page.locator('#reader-text [data-part].speaking')).toHaveCount(1);
+  expect(await page.evaluate(()=>window.scrollY)).toBe(0);
+  await page.evaluate(()=>document.querySelector('#sorion-audio').dispatchEvent(new Event('pause')));
+  await expect(page.locator('#reader-text [data-part].speaking')).toHaveCount(1);
+  expect(await page.evaluate(()=>window.scrollY)).toBe(0);
+});
+
 test('library voices synthesize short segments and use the chosen reading mood',async({page})=>{
   await page.addInitScript(()=>{
     window.__requests=[];
