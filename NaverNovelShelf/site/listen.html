@@ -7,7 +7,7 @@
   <meta name="description" content="AI놀이터 서재에서 내 네이버 소설 회차를 자동 인식하고 SoriON으로 낭독하는 작업실">
   <title>소리온 낭독 작업실 · 곰같은여우의 서재</title>
   <link rel="icon" type="image/webp" href="./assets/hero-books.webp">
-  <link rel="stylesheet" href="./listen.css?v=20261030-library-room">
+  <link rel="stylesheet" href="./listen.css?v=20261030-library-player">
 </head>
 <body>
   <div class="listen-shell">
@@ -27,7 +27,7 @@
           <label for="work-select">작품 선택</label>
           <select id="work-select"><option value="">작품을 선택하세요</option></select>
         </div>
-        <section class="episode-picker" aria-labelledby="episodes-title"><div class="episode-head"><strong id="episodes-title">회차 고르기</strong><span id="episode-status" role="status">작품을 선택해 주세요.</span></div><p>공개 회차 목록과 본문은 외부 공개 조회 서비스(Jina Reader)를 통해 가져와요. 로그인 또는 유료 접근은 지원하지 않아요.</p><div id="episode-list" class="episode-list"></div><button type="button" id="episode-more" class="mini-button" hidden>이전 회차 더 보기</button></section>
+        <section class="episode-picker" aria-labelledby="episodes-title"><div class="episode-head"><strong id="episodes-title">회차 고르기</strong><span id="episode-status" role="status">작품을 선택해 주세요.</span></div><p>공개 회차 조회: Jina Reader · 로그인·유료 회차 제외</p><div id="episode-list" class="episode-list"></div><button type="button" id="episode-more" class="mini-button" hidden>이전 회차 더 보기</button></section>
         <div id="extension-import-status" class="import-status" role="status" hidden></div>
         <a id="chapter-source-link" class="chapter-source" target="_blank" rel="noopener noreferrer" hidden>네이버 원본 회차 다시 열기 ↗</a>
         <div class="listening-voice-panel">
@@ -38,10 +38,9 @@
           <label for="library-expression">낭독 분위기</label>
           <select id="library-expression"><option value="auto">장면에 따라 자연스럽게</option><option value="calm">차분하게</option><option value="vivid">생동감 있게</option></select>
         </div>
-        <button type="button" id="local-ai-play" class="primary-action local-ai-action">듣는 서재 AI로 재생</button>
-        <button type="button" id="local-ai-prepare" class="secondary-action local-ai-action">AI 음성 미리 준비하기</button>
-        <p id="local-ai-status" class="voice-prepare-status" role="status" aria-live="polite">재생할 때 자동으로 준비할 수도 있어요. 브라우저가 저장 공간을 정리하면 다시 내려받을 수 있어요.</p>
-        <details class="voice-info"><summary>첫 사용 시 모델 약 380MB · 자세히</summary><p class="privacy-note">듣는 서재 AI는 기기에서 음성을 만들어요. 온결과 해온은 기존 AI 음성 스타일을 활용한 서재용 목소리이며 실제 인물의 녹음 음색은 아닙니다. 자동 분위기는 문장 부호 등을 참고해 속도를 조절하므로 장면 해석이 정확하지 않을 수 있어요.</p></details>
+        <button type="button" id="local-ai-play" class="primary-action local-ai-action">이야기 듣기</button>
+        <p id="local-play-status" class="voice-prepare-status" role="status" hidden></p>
+        <details class="voice-info"><summary>음성 미리 준비 · 첫 사용 약 380MB</summary><button type="button" id="local-ai-prepare" class="secondary-action local-ai-action">AI 음성 미리 준비하기</button><p id="local-ai-status" class="voice-prepare-status" role="status" aria-live="polite">재생할 때 자동으로 준비할 수도 있어요. 브라우저가 저장 공간을 정리하면 다시 내려받을 수 있어요.</p><p class="privacy-note">듣는 서재 AI는 기기에서 음성을 만들어요. 온결과 해온은 기존 AI 음성 스타일을 활용한 서재용 목소리이며 실제 인물의 녹음 음색은 아닙니다. 자동 분위기는 문장 부호 등을 참고해 속도를 조절하므로 장면 해석이 정확하지 않을 수 있어요.</p></details>
         <div class="field-group speed-group">
           <label for="speed">낭독 속도 <output id="speed-output" for="speed">1.0배</output></label>
           <input id="speed" type="range" min="0.8" max="1.3" step="0.05" value="1">
@@ -105,10 +104,10 @@
           <div class="player-head"><span id="playback-mode">낭독 준비</span><span id="chunk-count">0 / 0</span></div>
           <div class="progress-track" role="progressbar" aria-label="낭독 진행률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-track"><div id="progress-fill"></div></div>
           <div class="player-controls">
-            <button id="prev-chunk" type="button" aria-label="이전 문단" title="이전 문단">◀◀</button>
-            <button id="pause-resume" class="main-play" type="button" aria-label="일시정지 또는 다시 재생">▶</button>
-            <button id="next-chunk" type="button" aria-label="다음 문단" title="다음 문단">▶▶</button>
-            <button id="stop-play" type="button" aria-label="낭독 중지" title="중지">■</button>
+            <button id="prev-chunk" type="button" aria-label="이전 문단" title="이전 문단">이전</button>
+            <button id="pause-resume" class="main-play" type="button" aria-label="듣는 서재 AI로 재생"></button>
+            <button id="next-chunk" type="button" aria-label="다음 문단" title="다음 문단">다음</button>
+            <button id="stop-play" type="button" aria-label="낭독 중지" title="중지">중지</button>
           </div>
           <p id="player-message" class="player-message" aria-live="polite">낭독할 원고를 준비해 주세요.</p>
           <audio id="sorion-audio" preload="none"></audio>
