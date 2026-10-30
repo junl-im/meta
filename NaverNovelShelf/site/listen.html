@@ -7,13 +7,13 @@
   <meta name="description" content="AI놀이터 서재에서 내 네이버 소설 회차를 자동 인식하고 SoriON으로 낭독하는 작업실">
   <title>소리온 낭독 작업실 · 곰같은여우의 서재</title>
   <link rel="icon" type="image/webp" href="./assets/hero-books.webp">
-  <link rel="stylesheet" href="./listen.css">
+  <link rel="stylesheet" href="./listen.css?v=20261030-library-room">
 </head>
 <body>
   <div class="listen-shell">
     <header class="listen-header">
       <a class="back-link" href="./index.html">〈 서재 돌아가기</a>
-      <div class="listen-brand"><span class="brand-orbit" aria-hidden="true">◉</span><span><strong>소리온 낭독 작업실</strong><small>GOMFOX LIBRARY × SoriON AI</small></span></div>
+      <div class="listen-brand"><span class="brand-orbit" aria-hidden="true"></span><span><strong>소리온 낭독 작업실</strong><small>GOMFOX LIBRARY × SoriON AI</small></span></div>
       <span class="beta-label">연동 베타</span>
     </header>
     <main class="workspace">
@@ -23,18 +23,36 @@
           <h1 id="setup-title">글로 읽던 이야기를<br><em>소리로 만나기</em></h1>
           <p>작품과 회차를 고르고, 낭독할 내용을 준비해 이야기를 들어 보세요.</p>
         </div>
-        <div class="auto-capture-guide">
-          <div class="auto-capture-head"><strong>회차 본문 가져오기</strong></div>
-          <p>아래에서 공개 회차를 골라 본문을 가져오거나 TXT 파일을 선택할 수 있어요. 공개 조회가 실패하면 PC 연결 도구를 이용할 수 있어요.</p>
-          <details><summary>PC 연결 도구 설치 방법</summary><p>이 도구는 음성 설치와 별개이며, 브라우저에서 직접 설치를 승인해야 합니다.</p><a class="extension-download" href="./downloads/sorion-naver-reader-v0.3.0.zip" download>PC 연결 도구 ZIP 받기 ↓</a><ol><li>ZIP 압축 풀기</li><li>Chrome <code>chrome://extensions</code> 또는 Whale <code>whale://extensions</code> 열기</li><li>개발자 모드에서 <b>압축해제된 확장 프로그램을 로드</b> 선택</li><li>압축 해제한 폴더 지정 후 네이버 소설 회차 페이지 새로고침</li><li>화면 아래 <b>소리온으로 듣기 ▶</b> 버튼 선택</li></ol></details>
-          <div id="extension-import-status" class="import-status" role="status" hidden></div>
-          <a id="chapter-source-link" class="chapter-source" target="_blank" rel="noopener noreferrer" hidden>네이버 원본 회차 다시 열기 ↗</a>
-        </div>
         <div class="field-group">
           <label for="work-select">작품 선택</label>
           <select id="work-select"><option value="">작품을 선택하세요</option></select>
         </div>
         <section class="episode-picker" aria-labelledby="episodes-title"><div class="episode-head"><strong id="episodes-title">회차 고르기</strong><span id="episode-status" role="status">작품을 선택해 주세요.</span></div><p>공개 회차 목록과 본문은 외부 공개 조회 서비스(Jina Reader)를 통해 가져와요. 로그인 또는 유료 접근은 지원하지 않아요.</p><div id="episode-list" class="episode-list"></div><button type="button" id="episode-more" class="mini-button" hidden>이전 회차 더 보기</button></section>
+        <div id="extension-import-status" class="import-status" role="status" hidden></div>
+        <a id="chapter-source-link" class="chapter-source" target="_blank" rel="noopener noreferrer" hidden>네이버 원본 회차 다시 열기 ↗</a>
+        <div class="listening-voice-panel">
+          <div class="voice-panel-heading"><span class="shelf-art-icon" aria-hidden="true"></span><div><strong>목소리를 골라요</strong><small>이야기가 소리가 되는 시간</small></div></div>
+        <div class="library-voice-settings">
+          <label for="library-voice">듣는 서재 목소리</label>
+          <select id="library-voice"><option value="library-female">온결 · 여성 낭독</option><option value="library-male">해온 · 남성 낭독</option></select>
+          <label for="library-expression">낭독 분위기</label>
+          <select id="library-expression"><option value="auto">장면에 따라 자연스럽게</option><option value="calm">차분하게</option><option value="vivid">생동감 있게</option></select>
+        </div>
+        <button type="button" id="local-ai-play" class="primary-action local-ai-action">듣는 서재 AI로 재생</button>
+        <button type="button" id="local-ai-prepare" class="secondary-action local-ai-action">AI 음성 미리 준비하기</button>
+        <p id="local-ai-status" class="voice-prepare-status" role="status" aria-live="polite">재생할 때 자동으로 준비할 수도 있어요. 브라우저가 저장 공간을 정리하면 다시 내려받을 수 있어요.</p>
+        <details class="voice-info"><summary>첫 사용 시 모델 약 380MB · 자세히</summary><p class="privacy-note">듣는 서재 AI는 기기에서 음성을 만들어요. 온결과 해온은 기존 AI 음성 스타일을 활용한 서재용 목소리이며 실제 인물의 녹음 음색은 아닙니다. 자동 분위기는 문장 부호 등을 참고해 속도를 조절하므로 장면 해석이 정확하지 않을 수 있어요.</p></details>
+        <div class="field-group speed-group">
+          <label for="speed">낭독 속도 <output id="speed-output" for="speed">1.0배</output></label>
+          <input id="speed" type="range" min="0.8" max="1.3" step="0.05" value="1">
+        </div>
+        </div>
+        <details class="optional-panel" id="manual-entry"><summary>원고 직접 입력 · 파일 불러오기</summary>
+        <div class="auto-capture-guide">
+          <div class="auto-capture-head"><strong>회차 본문 가져오기</strong></div>
+          <p>아래에서 공개 회차를 골라 본문을 가져오거나 TXT 파일을 선택할 수 있어요. 공개 조회가 실패하면 PC 연결 도구를 이용할 수 있어요.</p>
+          <details><summary>PC 연결 도구 설치 방법</summary><p>이 도구는 음성 설치와 별개이며, 브라우저에서 직접 설치를 승인해야 합니다.</p><a class="extension-download" href="./downloads/sorion-naver-reader-v0.3.0.zip" download>PC 연결 도구 ZIP 받기 ↓</a><ol><li>ZIP 압축 풀기</li><li>Chrome <code>chrome://extensions</code> 또는 Whale <code>whale://extensions</code> 열기</li><li>개발자 모드에서 <b>압축해제된 확장 프로그램을 로드</b> 선택</li><li>압축 해제한 폴더 지정 후 네이버 소설 회차 페이지 새로고침</li><li>화면 아래 <b>소리온으로 듣기 ▶</b> 버튼 선택</li></ol></details>
+        </div>
         <div class="field-group">
           <label for="episode-name">회차 이름</label>
           <input id="episode-name" type="text" maxlength="100" placeholder="예: 제1화 · 새로운 시작" autocomplete="off">
@@ -52,6 +70,8 @@
           <label class="narration-clean"><input id="clean-for-reading" type="checkbox" checked> 낭독할 때 **와 숨은 공백 정리 <span>원본은 그대로 유지</span></label>
           <p id="text-scan" class="text-scan" aria-live="polite">원고를 불러오면 정리할 부분을 살펴봐요.</p>
         </div>
+        </details>
+        <details class="optional-panel" id="other-voices"><summary>다른 낭독 방법</summary>
         <div class="field-group">
           <label for="voice-select">소리온 성우</label>
           <select id="voice-select">
@@ -63,10 +83,6 @@
           </select>
           <span class="hint">실제 성우 음색은 소리온 엔진의 승인된 기준 WAV가 준비되어야 재생돼요.</span>
         </div>
-        <div class="field-group speed-group">
-          <label for="speed">낭독 속도 <output id="speed-output" for="speed">1.0배</output></label>
-          <input id="speed" type="range" min="0.8" max="1.3" step="0.05" value="1">
-        </div>
         <div class="engine-check" role="status" aria-live="polite">
           <span id="engine-indicator" class="engine-indicator"></span>
           <div><strong id="engine-status">소리온 엔진 확인 중</strong><span id="engine-detail">연결 가능 여부를 점검하고 있어요.</span></div>
@@ -76,22 +92,13 @@
           <button type="button" id="sorion-play" class="primary-action">소리온 성우로 듣기</button>
           <button type="button" id="device-play" class="secondary-action">기기 기본 음성으로 시험</button>
         </div>
-        <div class="library-voice-settings">
-          <label for="library-voice">듣는 서재 목소리</label>
-          <select id="library-voice"><option value="library-female">온결 · 여성 낭독</option><option value="library-male">해온 · 남성 낭독</option></select>
-          <label for="library-expression">낭독 분위기</label>
-          <select id="library-expression"><option value="auto">장면에 따라 자연스럽게</option><option value="calm">차분하게</option><option value="vivid">생동감 있게</option></select>
-        </div>
-        <button type="button" id="local-ai-play" class="primary-action local-ai-action">듣는 서재 AI로 재생</button>
-        <button type="button" id="local-ai-prepare" class="secondary-action local-ai-action">AI 음성 미리 준비하기</button>
-        <p id="local-ai-status" class="voice-prepare-status" role="status" aria-live="polite">재생할 때 자동으로 준비할 수도 있어요. 브라우저가 저장 공간을 정리하면 다시 내려받을 수 있어요.</p>
-        <p class="privacy-note">듣는 서재 AI는 처음 실행할 때 약 380MB 모델을 내려받고 이 기기에서 음성을 만들어요. 온결과 해온은 기존 AI 음성 스타일을 활용한 서재용 목소리이며 실제 인물의 녹음 음색은 아닙니다. 자동 분위기는 문장 부호 등을 참고해 속도를 조절하므로 장면 해석이 정확하지 않을 수 있어요.</p>
         <p class="privacy-note">※ 기기 기본 음성은 소리온 성우가 아닙니다. 실제 소리온으로 합성할 때에만 입력 원고가 연결된 음성 엔진으로 전송돼요. 음성 엔진은 별도로 실행되어야 합니다.</p>
+        </details>
       </section>
       <section class="reading-pane" aria-labelledby="reading-title">
         <div class="reader-heading">
           <div><span class="eyebrow">LISTEN & READ</span><h2 id="reading-title">원고 미리보기</h2><p id="selected-work">원고 파일을 불러오면 이곳에 본문이 나타나요.</p></div>
-          <span class="book-ornament" aria-hidden="true">✧</span>
+          <span class="book-ornament" aria-hidden="true"></span>
         </div>
         <div id="reader-text" class="reader-text" tabindex="0"><p class="reader-placeholder">오늘은 어떤 이야기를 들려줄까요?<br>왼쪽에서 작품을 고르고 원고를 불러와 주세요.</p></div>
         <div class="player" aria-label="낭독 재생기">
@@ -108,7 +115,7 @@
         </div>
       </section>
     </main>
-    <footer class="listen-footer"><span>© 곰같은여우 · 소리온 연동 베타 · <a href="../../ai-cleaner/">AI놀이터로 돌아가기</a></span><span>내 작품의 선택한 회차만 인식 · 원고 브라우저 임시 처리 · SVG 사용 없음</span></footer>
+    <footer class="listen-footer"><span>© 곰같은여우 · 소리온 연동 베타 · <a href="../../ai-cleaner/">AI놀이터로 돌아가기</a></span><span>내 작품의 선택한 회차만 인식 · 원고 브라우저 임시 처리</span></footer>
   </div>
   <script src="./catalog.js" defer></script>
   <script src="./sorion-config.js" defer></script>

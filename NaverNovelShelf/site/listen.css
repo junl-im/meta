@@ -92,3 +92,40 @@ a{color:inherit;text-decoration:none}
 @media(max-width:860px){.listen-shell{padding:0 14px}.workspace{grid-template-columns:1fr;gap:13px;padding:13px 0}.setup-pane,.reading-pane{max-height:none}.setup-pane{overflow:visible}.reading-pane{height:500px}.pane-heading h1{font-size:24px}.listen-footer{flex-direction:column}}
 @media(max-width:520px){.listen-header{height:65px}.back-link{font-size:10px;padding:8px}.listen-brand{gap:6px}.listen-brand strong{font-size:12px}.listen-brand small{letter-spacing:1px;font-size:7px}.brand-orbit{width:27px;height:27px}.beta-label{font-size:9px;padding:5px}.setup-pane{padding:18px 15px}.reading-pane{padding:17px 15px;height:450px}.reader-text{font-size:15px}.play-actions{grid-template-columns:1fr}.listen-footer{text-align:center}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important}}
+
+/* The listening room shares the illustrated shelf's colours and artwork. */
+html{scrollbar-color:#b99464 #14282e;scrollbar-width:thin}
+body{background:linear-gradient(#10242bd9,#10242be8),url('./assets/library-background.webp') center top/cover fixed no-repeat}
+.listen-shell{width:min(1260px,100%);padding-inline:clamp(14px,3vw,40px)}
+.brand-orbit,.shelf-art-icon,.book-ornament{display:block;flex:none;background:url('./assets/illustrated-icons.webp') 0 0/200% 200% no-repeat;border:0;border-radius:0;box-shadow:none}
+.brand-orbit{width:43px;height:43px}
+.book-ornament{width:58px;height:58px}
+.pane-heading{position:relative;isolation:isolate;min-height:135px;padding:7px 84px 10px 0}
+.pane-heading::after{content:'';position:absolute;z-index:-1;right:-9px;top:4px;width:110px;height:110px;background:linear-gradient(90deg,#243a3e 2%,transparent 52%),url('./assets/hero-books.webp') center/cover no-repeat;border-radius:50%;opacity:.78;pointer-events:none}
+.pane-heading h1{font-size:clamp(23px,2.3vw,28px)}
+.listening-voice-panel{display:flex;flex-direction:column;margin:14px 0;padding:15px;border:1px solid #e2bf8750;border-radius:12px;background:linear-gradient(145deg,#344941,#21363a)}
+.voice-panel-heading{order:0}.library-voice-settings{order:1}.listening-voice-panel .speed-group{order:2}#local-ai-play{order:3}#local-ai-prepare{order:4}#local-ai-status{order:5}.voice-info{order:6;font-size:10px;color:#c7d6c5;margin-top:8px}.voice-info summary{cursor:pointer;color:#e5c898;line-height:1.5}
+.voice-panel-heading{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.shelf-art-icon{width:38px;height:38px}
+.voice-panel-heading strong,.voice-panel-heading small{display:block}.voice-panel-heading strong{font:700 15px var(--serif);color:#f6e1bf}.voice-panel-heading small{margin-top:3px;color:#b3c6ba;font-size:10px}
+.library-voice-settings{margin:0 0 12px;gap:7px}
+.library-voice-settings select{appearance:auto;color-scheme:dark;background:#172c31;color:#f7ead5;border:1px solid #a997765c;border-radius:8px;min-height:43px;padding:7px;font-size:12px}
+.listening-voice-panel .speed-group{margin:12px 0 3px}
+.local-ai-action{margin-top:7px;border-radius:9px}
+.listening-voice-panel .privacy-note{font-size:10px;margin:8px 0 0;color:#b6c8bb}
+.optional-panel{margin-top:9px;padding:0 13px;border:1px solid #c9b58a3d;border-radius:10px;background:#20363a}
+.optional-panel>summary{min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:8px;list-style:none;cursor:pointer;color:#f1d8ae;font-size:12px;font-weight:700}
+.optional-panel>summary::-webkit-details-marker{display:none}.optional-panel>summary::after{content:'+';font-size:20px;font-weight:400;color:#e6c48d}.optional-panel[open]>summary::after{content:'−'}
+.optional-panel[open]{padding-bottom:13px}.optional-panel .auto-capture-guide{margin-top:1px}
+.field-group .narration-clean input[type=checkbox]{appearance:auto;width:18px;min-width:18px;height:18px;min-height:18px;margin:0;accent-color:#e9c58f}
+.import-status{padding:8px 10px;border-radius:8px;background:#305048;color:#c2efd2;margin:8px 0}.chapter-source{margin:7px 0 12px}
+.reader-text{position:relative;isolation:isolate}
+.reader-text:has(.reader-placeholder)::before{content:'';position:absolute;z-index:-1;inset:15% 15% 20%;background:url('./assets/hero-books.webp') center/contain no-repeat;opacity:.12;pointer-events:none}
+.reader-placeholder{color:#b6c5be}
+html::-webkit-scrollbar,.setup-pane::-webkit-scrollbar,.reader-text::-webkit-scrollbar,.episode-list::-webkit-scrollbar,textarea::-webkit-scrollbar{width:9px;height:9px}
+html::-webkit-scrollbar-track,.setup-pane::-webkit-scrollbar-track,.reader-text::-webkit-scrollbar-track,.episode-list::-webkit-scrollbar-track,textarea::-webkit-scrollbar-track{background:#14282e;border-radius:12px}
+html::-webkit-scrollbar-thumb,.setup-pane::-webkit-scrollbar-thumb,.reader-text::-webkit-scrollbar-thumb,.episode-list::-webkit-scrollbar-thumb,textarea::-webkit-scrollbar-thumb{background:#a98c65;border:2px solid #14282e;border-radius:12px}
+html::-webkit-scrollbar-thumb:hover,.setup-pane::-webkit-scrollbar-thumb:hover,.reader-text::-webkit-scrollbar-thumb:hover,.episode-list::-webkit-scrollbar-thumb:hover,textarea::-webkit-scrollbar-thumb:hover{background:#d5b984}
+.setup-pane,.reader-text,.episode-list,textarea{scrollbar-color:#a98c65 #14282e;scrollbar-width:thin}
+@media(max-width:860px){body{background-attachment:scroll}.reading-pane{height:auto;min-height:410px}.reader-text{min-height:205px}.setup-pane{overflow:visible}.listen-header{gap:6px}.listen-brand{min-width:0}.listen-brand strong{white-space:nowrap}}
+@media(max-width:520px){.brand-orbit{width:34px;height:34px}.book-ornament{width:47px;height:47px}.pane-heading{min-height:119px;padding-right:78px}.pane-heading::after{width:93px;height:93px}.listening-voice-panel{padding:12px}.library-voice-settings select{font-size:11px}.listen-footer{line-height:1.6}.episode-row button{min-height:42px}}

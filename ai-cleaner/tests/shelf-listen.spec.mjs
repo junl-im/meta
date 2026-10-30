@@ -3,6 +3,24 @@ import {test, expect} from '@playwright/test';
 const base=process.env.AI_CLEANER_TEST_URL||'http://127.0.0.1:4173/ai-cleaner/';
 const listen=new URL('../NaverNovelShelf/site/listen.html',base).href;
 
+test('listening room keeps controls and optional sections usable on narrow screens',async({page})=>{
+  for(const width of [320,360,390,430,768,1280]){
+    await page.setViewportSize({width,height:800});await page.goto(listen);
+    await expect(page.locator('#manual-entry')).not.toHaveAttribute('open','');
+    await expect(page.locator('#other-voices')).not.toHaveAttribute('open','');
+    await expect(page.locator('#local-ai-play')).toBeVisible();
+    const size=await page.locator('#local-ai-play').boundingBox();expect(size.height).toBeGreaterThanOrEqual(44);
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    await page.locator('#local-ai-play').click();
+    await expect(page.locator('#manual-entry')).toHaveAttribute('open','');
+    await expect(page.locator('#manuscript-text')).toBeFocused();
+    const checkbox=await page.locator('#clean-for-reading').boundingBox();
+    expect(checkbox.width).toBeLessThanOrEqual(24);expect(checkbox.height).toBeLessThanOrEqual(24);
+    await expect(page.locator('#manuscript-text')).toBeVisible();
+    await page.locator('#other-voices > summary').click();await expect(page.locator('#device-play')).toBeVisible();
+  }
+});
+
 test('chapter handoff, non-destructive cleanup and device playback',async({page})=>{
   await page.addInitScript(()=>{
     window.__spoken=[];
@@ -14,6 +32,8 @@ test('chapter handoff, non-destructive cleanup and device playback',async({page}
   for(const width of [320,390,768,1280]){
     await page.setViewportSize({width,height:800});
     await page.goto(listen);
+    await page.locator('#manual-entry').evaluate(el=>{el.open=true});
+    await page.locator('#other-voices').evaluate(el=>{el.open=true});
     const source=('첫 줄 **강조**와 숨은\u200b 공백.\n다음 문단입니다. ').repeat(10);
     await page.evaluate(text=>window.postMessage({type:'GOMFOX_SORION_CHAPTER_IMPORTED_V1',chapter:{novelId:'1247361',volumeNo:'39',url:'https://m.novel.naver.com/challenge/detail?novelId=1247361&volumeNo=39',title:'39화',text}},location.origin),source);
     await expect(page.locator('#manuscript-text')).toHaveValue(source);
@@ -49,12 +69,14 @@ test('library voices synthesize short segments and use the chosen reading mood',
     HTMLMediaElement.prototype.play=function(){this.dispatchEvent(new Event('play'));return Promise.resolve()};
   });
   await page.goto(listen);
+  await page.locator('#manual-entry').evaluate(el=>{el.open=true});
   await page.locator('#manuscript-text').fill('여우가 말했다. '.repeat(30));
   await page.waitForTimeout(300);
   await page.locator('#library-voice').selectOption('library-male');
   await page.locator('#library-expression').selectOption('vivid');
   await page.locator('#local-ai-play').click();
-  await expect(page.locator('#player-message')).toContainText('듣는 서재 AI 목소리로 낭독 중');
+  await expect.poll(()=>page.evaluate(()=>window.__requests.length)).toBeGreaterThan(0);
+  await expect(page.locator('#playback-mode')).toHaveText('듣는 서재 AI');
   const first=await page.evaluate(()=>window.__requests[0]);
   expect(first.voiceId).toBe('library-male');
   expect(first.speed).toBeCloseTo(1.08);
@@ -114,6 +136,7 @@ test('public chapter rejects a mismatched source without replacing the manuscrip
   });
   await page.goto(listen);
   await page.locator('#work-select').selectOption('1247361');
+  await page.locator('#manual-entry').evaluate(el=>{el.open=true});
   await page.locator('#manuscript-text').fill('보존할 원문');
   await page.locator('.episode-row button').click();
   await expect(page.locator('#episode-status')).toContainText('본문 조회 실패');
@@ -134,10 +157,11 @@ test('voice preparation uses one worker and keeps it ready when manuscript chang
   await page.goto(listen);
   await page.locator('#local-ai-prepare').click();
   await expect(page.locator('#local-ai-status')).toContainText('준비 완료');
+  await page.locator('#manual-entry').evaluate(el=>{el.open=true});
   await page.locator('#manuscript-text').fill('책장을 넘기자 작은 여우가 웃었습니다.');
   await page.waitForTimeout(300);
   await page.locator('#local-ai-play').click();
-  await expect(page.locator('#player-message')).toContainText('낭독 중');
+  await expect.poll(()=>page.evaluate(()=>window.__requests.length)).toBe(2);
   expect(await page.evaluate(()=>window.__created)).toBe(1);
   expect(await page.evaluate(()=>window.__requests.map(request=>request.type||'speak'))).toEqual(['prepare','speak']);
 });
