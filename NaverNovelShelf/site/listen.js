@@ -602,6 +602,7 @@
         || source.searchParams.get('volumeNo') !== chapter.volumeNo) return;
     if (!works.some((work) => work.id === chapter.novelId)) return;
     elements.work.value = chapter.novelId;
+    elements.work.dispatchEvent(new Event('shelf-select-sync'));
     elements.episode.value = String(chapter.title || `제${chapter.volumeNo}화`).slice(0, 100);
     elements.text.value = chapter.text;
     elements.fileName.textContent = sourceKind === 'public' ? '공개 회차 조회로 본문 가져옴' : '네이버 현재 회차에서 자동 인식';
@@ -645,6 +646,41 @@
     } catch { report('TXT 파일을 읽지 못했어요. 파일 형식을 확인해 주세요.'); }
   }
 
+  function setupIllustratedSelect(select) {
+    const wrapper = document.createElement('div'); wrapper.className = 'illustrated-select'; wrapper.dataset.selectId = select.id;
+    const trigger = document.createElement('button'); trigger.type = 'button'; trigger.className = 'illustrated-select-trigger'; trigger.setAttribute('aria-haspopup','listbox'); trigger.setAttribute('aria-expanded','false');
+    const text = document.createElement('span'); trigger.append(text);
+    const list = document.createElement('div'); list.className = 'illustrated-select-list'; list.id = select.id + '-options'; list.setAttribute('role','listbox'); list.hidden = true;
+    trigger.setAttribute('aria-controls',list.id);
+    const label = document.querySelector(`label[for="${select.id}"]`);
+    if (label) { label.id ||= select.id + '-label'; trigger.setAttribute('aria-labelledby',label.id + ' ' + select.id + '-value'); text.id = select.id + '-value'; label.addEventListener('click',event => { event.preventDefault(); trigger.focus(); }); }
+    select.insertAdjacentElement('afterend',wrapper); wrapper.append(trigger,list); select.hidden = true;
+    const close = (restore = false) => { list.hidden = true; wrapper.classList.remove('is-open'); trigger.setAttribute('aria-expanded','false'); if (restore) trigger.focus(); };
+    const sync = () => { text.textContent = select.selectedOptions[0]?.textContent || '선택하세요'; for (const option of list.querySelectorAll('[role=option]')) option.setAttribute('aria-selected',String(option.dataset.value === select.value)); };
+    const build = () => {
+      list.replaceChildren();
+      for (const item of select.options) {
+        const option = document.createElement('button'); option.type='button'; option.className='illustrated-select-option'; option.setAttribute('role','option'); option.dataset.value=item.value; option.textContent=item.textContent; option.disabled=item.disabled;
+        option.addEventListener('click',() => { select.value=item.value; select.dispatchEvent(new Event('change',{bubbles:true})); sync(); close(true); });
+        list.append(option);
+      }
+      sync();
+    };
+    const open = (focus = false) => { build(); list.hidden=false; wrapper.classList.add('is-open'); trigger.setAttribute('aria-expanded','true'); if (focus) (list.querySelector('[aria-selected=true]:not(:disabled)') || list.querySelector('button:not(:disabled)'))?.focus(); };
+    trigger.addEventListener('click',() => { if (list.hidden) open(); else close(); });
+    trigger.addEventListener('keydown',event => { if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); open(true); } else if (event.key === 'Escape') close(); });
+    list.addEventListener('keydown',event => {
+      if (event.key === 'Escape') { event.preventDefault(); close(true); return; }
+      if (!['ArrowDown','ArrowUp','Home','End'].includes(event.key)) return;
+      event.preventDefault(); const items=[...list.querySelectorAll('button:not(:disabled)')]; if (!items.length) return;
+      const i=items.indexOf(document.activeElement); const next=event.key==='Home'?0:event.key==='End'?items.length-1:event.key==='ArrowDown'?(i+1)%items.length:(i-1+items.length)%items.length; items[next].focus();
+    });
+    document.addEventListener('click',event => { if (!wrapper.contains(event.target)) close(); });
+    document.addEventListener('focusin',event => { if (!wrapper.contains(event.target)) close(); });
+    select.addEventListener('change',sync); select.addEventListener('shelf-select-sync',sync);
+    new MutationObserver(build).observe(select,{childList:true,subtree:true}); build();
+  }
+
   function init() {
     window.addEventListener('message', acceptExtensionMessage);
     for (const work of works) {
@@ -655,6 +691,7 @@
     }
     const requestedId = new URLSearchParams(location.search).get('novelId');
     if (works.some((work) => work.id === requestedId)) elements.work.value = requestedId;
+    [elements.work, elements.voice, elements.libraryVoice, elements.expression].forEach(setupIllustratedSelect);
     elements.work.addEventListener('change', () => { resetDocument(); void loadEpisodes(true); });
     $('episode-more').addEventListener('click', () => void loadEpisodes());
     elements.episode.addEventListener('change', resetDocument);

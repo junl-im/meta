@@ -35,6 +35,11 @@
       <div class="brandName"><b>곰같은여우의 <em>AI 놀이터</em></b><span class="pill" id="versionBadge">version</span></div>
     </div>
   </button>
+  <section class="homeMusicDock" id="homeMusicDock" aria-label="곰같은여우 AI MUSIC RADIO">
+    <div class="homeMusicDockIntro"><span class="homeMusicNote" aria-hidden="true">♫</span><div><strong>AI MUSIC RADIO</strong><small id="homeMusicStatus" role="status" aria-live="polite">노래가 이어지는 라디오</small></div></div>
+    <div class="homeMusicDockActions"><button id="radioDockHomeOpen" type="button" aria-label="AI 라디오 재생창 열기"><span>라디오 듣기</span><img src="assets/music-play.png" alt="" width="32" height="32"></button><button id="homeMusicShuffle" type="button" aria-controls="homeMusicPlayer" aria-expanded="false" aria-label="곰같은여우 무작위 곡 고르기"><img src="assets/music-play.png" alt="" width="32" height="32"><span class="homeMusicShuffleLabel">랜덤 듣기</span></button></div>
+    <div class="homeMusicPlayer" id="homeMusicPlayer" hidden><iframe id="homeMusicFrame" title="Spotify 곰같은여우 음악 플레이어" width="100%" height="152" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe><div class="homeMusicPlayerFoot"><span>재생은 Spotify 플레이어에서 눌러 주세요.</span><button id="homeMusicClose" type="button">플레이어 닫기</button></div></div>
+  </section>
 <section class="workspaceNav" aria-label="AI 놀이터 작업 도구">
   <div class="studioGroup">
     <div class="studioGroupLabel" id="creativeStudioLabel">콘텐츠 스튜디오</div>
@@ -95,11 +100,6 @@
         <button class="homeToolCard" type="button" data-open-tool="reach"><img class="homeCardIcon" src="assets/home-icon-reach.webp" alt="" width="80" height="80" loading="lazy"><strong>GomFox Reach</strong><small>여러 자료의 출처와 서로 다른 주장을 비교해요.</small></button>
       </div>
     </section>
-  </section>
-  <section class="homeMusicDock" id="homeMusicDock" aria-label="곰같은여우 AI MUSIC RADIO">
-    <div class="homeMusicDockIntro"><span class="homeMusicNote" aria-hidden="true">♫</span><div><strong>AI MUSIC RADIO</strong><small id="homeMusicStatus" role="status" aria-live="polite">노래가 이어지는 라디오</small></div></div>
-    <div class="homeMusicDockActions"><button id="radioDockHomeOpen" type="button" aria-label="AI 라디오 재생창 열기"><span>라디오 듣기</span><img src="assets/music-play.png" alt="" width="32" height="32"></button><button id="homeMusicShuffle" type="button" aria-controls="homeMusicPlayer" aria-expanded="false" aria-label="곰같은여우 무작위 곡 고르기"><img src="assets/music-play.png" alt="" width="32" height="32"><span class="homeMusicShuffleLabel">랜덤 듣기</span></button></div>
-    <div class="homeMusicPlayer" id="homeMusicPlayer" hidden><iframe id="homeMusicFrame" title="Spotify 곰같은여우 음악 플레이어" width="100%" height="152" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe><div class="homeMusicPlayerFoot"><span>재생은 Spotify 플레이어에서 눌러 주세요.</span><button id="homeMusicClose" type="button">플레이어 닫기</button></div></div>
   </section>
   <section class="homeWorlds" aria-labelledby="homeWorldsTitle">
     <div class="homeSectionHeading"><span>MORE WORLDS</span><h2 id="homeWorldsTitle">이야기가 이어지는 놀이터</h2></div>
