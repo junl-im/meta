@@ -603,19 +603,20 @@
   async function advanceChunk(sessionId) {
     if (sessionId !== state.session) return;
     state.currentIndex++;
-    saveProgress();
     if (state.currentIndex >= state.chunks.length) {
-      state.currentIndex = state.chunks.length - 1;
+      state.currentIndex = 0;
+      state.localPart = 0;
+      state.mode = null;
       state.playing = false;
       state.busy = false;
-      elements.fill.style.width = '100%';
-      elements.progress.setAttribute('aria-valuenow', '100');
-      report('이 회차의 낭독이 끝났어요.');
+      saveProgress();
       paintProgress();
       elements.fill.style.width = '100%';
       elements.progress.setAttribute('aria-valuenow', '100');
+      report('이 회차의 낭독이 끝났어요. 재생을 누르면 처음부터 다시 들어요.');
       return;
     }
+    saveProgress();
     paintProgress();
     if (state.mode === 'sorion') await playSorionChunk(sessionId);
     else if (state.mode === 'local') await playLocalChunk(sessionId);
