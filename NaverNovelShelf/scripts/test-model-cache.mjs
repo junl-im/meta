@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {installModelAssetCache} from '../voice-source/modelAssetCache.mjs';
+const base='https://example.test/model/revision';let requests=0,offline=false,failStorage=false;const saved=new Map();
+const cache={match:async request=>saved.get(request.url)?.clone(),put:async(request,response)=>{if(failStorage)throw Error('quota');saved.set(request.url,response.clone())}};
+const scope={caches:{open:async()=>cache},fetch:async()=>{requests++;if(offline)throw Error('offline');return new Response('model-data',{status:200})}};
+installModelAssetCache(scope,base);
+assert.equal(await (await scope.fetch(base+'/one.onnx')).text(),'model-data');assert.equal(requests,1);
+offline=true;assert.equal(await (await scope.fetch(base+'/one.onnx')).text(),'model-data');assert.equal(requests,1);
+await assert.rejects(scope.fetch('https://example.test/unrelated'));offline=false;failStorage=true;
+assert.equal(await (await scope.fetch(base+'/two.onnx')).text(),'model-data');
+console.log('Pinned model cache reuse, offline and quota fallback: OK');
