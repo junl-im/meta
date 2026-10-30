@@ -47,6 +47,10 @@ async function loadModel(onProgress: (message: string) => void): Promise<{ model
   return modelPromise
 }
 
+export async function prepareLocalVoice(onProgress: (message: string) => void): Promise<void> {
+  await loadModel(onProgress)
+}
+
 export interface LocalWavResult {
   blob: Blob
   durationSeconds: number
