@@ -6,12 +6,12 @@
   const elements = {
     work: $('work-select'), episode: $('episode-name'), file: $('manuscript-file'),
     text: $('manuscript-text'), fileName: $('file-name'), charCount: $('char-count'), clean: $('clean-for-reading'), scan: $('text-scan'),
-    voice: $('voice-select'), speed: $('speed'), speedOutput: $('speed-output'),
+    voice: $('voice-select'), libraryVoice: $('library-voice'), expression: $('library-expression'), speed: $('speed'), speedOutput: $('speed-output'),
     status: $('engine-status'), detail: $('engine-detail'), indicator: $('engine-indicator'),
     readerTitle: $('reading-title'), selectedWork: $('selected-work'), reader: $('reader-text'),
     mode: $('playback-mode'), count: $('chunk-count'), progress: $('progress-track'),
     fill: $('progress-fill'), message: $('player-message'), audio: $('sorion-audio'),
-    start: $('sorion-play'), device: $('device-play'), pause: $('pause-resume'),
+    start: $('sorion-play'), device: $('device-play'), localAi: $('local-ai-play'), pause: $('pause-resume'),
     previous: $('prev-chunk'), next: $('next-chunk'), stop: $('stop-play'),
   };
   let works = (Array.isArray(window.NOVEL_CATALOG) ? window.NOVEL_CATALOG : [])
@@ -20,7 +20,7 @@
   const state = {
     chunks: [], currentIndex: 0, mode: null, playing: false, busy: false,
     connectedApi: null, connectionInProgress: false, session: 0,
-    abort: null, currentJobId: null, currentApi: null,
+    abort: null, currentJobId: null, currentApi: null, localWorker: null, localUrl: null, localPart: 0,
   };
   let saveThrottle = 0;
 
@@ -90,10 +90,12 @@
       if (part.length <= limit) { buffer = part; continue; }
       let cursor = 0;
       while (cursor < part.length) {
-        const slice = part.slice(cursor, cursor + limit);
-        if (slice.length >= limit) result.push(slice);
+        let end = Math.min(cursor + limit, part.length);
+        if (end < part.length && /[\uD800-\uDBFF]/.test(part[end - 1]) && /[\uDC00-\uDFFF]/.test(part[end])) end--;
+        const slice = part.slice(cursor, end);
+        if (end < part.length || slice.length >= limit) result.push(slice);
         else buffer = slice;
-        cursor += limit;
+        cursor = end;
       }
     }
     if (buffer) result.push(buffer);
@@ -229,6 +231,8 @@
     const job = state.currentJobId;
     state.abort?.abort();
     state.abort = null;
+    state.localWorker?.terminate();
+    state.localWorker = null;
     state.currentApi = null;
     state.currentJobId = null;
     if (api && job) {
@@ -238,6 +242,8 @@
     elements.audio.pause();
     elements.audio.removeAttribute('src');
     elements.audio.load();
+    if (state.localUrl) URL.revokeObjectURL(state.localUrl);
+    state.localUrl = null;
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     state.playing = false;
     state.busy = false;
@@ -321,6 +327,49 @@
     }
   }
 
+  async function playLocalChunk(sessionId) {
+    if (sessionId !== state.session || state.currentIndex >= state.chunks.length) return;
+    state.busy = true;
+    state.playing = false;
+    paintProgress();
+    report('듣는 서재 AI 음성을 준비하고 있어요. 첫 사용에는 모델 다운로드가 필요해요.');
+    try {
+      state.localWorker ||= new Worker('./sorion-local-worker.js', {type:'module'});
+      const worker = state.localWorker;
+      const blob = await new Promise((resolve, reject) => {
+        worker.onmessage = event => {
+          if (event.data?.id !== sessionId) return;
+          if (event.data.type === 'progress') report(String(event.data.message));
+          else if (event.data.type === 'audio') resolve(event.data.blob);
+          else if (event.data.type === 'error') reject(new Error(event.data.message));
+        };
+        worker.onerror = () => reject(new Error('기기 AI 음성 엔진을 시작하지 못했어요.'));
+        const text=chunkText(state.chunks[state.currentIndex],120)[state.localPart];
+        if (!text) { reject(new Error('읽을 문장을 찾지 못했어요.')); return; }
+        const expression=elements.expression.value;
+        const adjustment=expression === 'calm' ? -.05 : expression === 'vivid' ? .08 : /[!！]{2,}|[!?！？]{2,}/.test(text) ? .06 : 0;
+        const speed=1+adjustment;
+        worker.postMessage({id:sessionId,text,voiceId:elements.libraryVoice.value,voiceName:elements.libraryVoice.selectedOptions[0].textContent,speed});
+      });
+      if (sessionId !== state.session) return;
+      if (state.localUrl) URL.revokeObjectURL(state.localUrl);
+      state.localUrl = URL.createObjectURL(blob);
+      state.busy = false;
+      elements.audio.src = state.localUrl;
+      elements.audio.playbackRate = Number(elements.speed.value);
+      await elements.audio.play();
+      if (sessionId !== state.session) return;
+      state.playing = true;
+      paintProgress();
+      report('듣는 서재 AI 목소리로 낭독 중 · 원문은 이 기기에서 합성해요.');
+    } catch (error) {
+      if (sessionId !== state.session) return;
+      state.busy = false; state.playing = false;
+      report('기기 AI 음성을 만들지 못했어요: ' + (error?.message || '모델과 기기 상태를 확인해 주세요.'));
+      paintProgress();
+    }
+  }
+
   function selectBrowserVoice() {
     const voices = window.speechSynthesis.getVoices();
     return voices.find((voice) => voice.lang?.toLowerCase() === 'ko-kr')
@@ -372,6 +421,7 @@
     }
     paintProgress();
     if (state.mode === 'sorion') await playSorionChunk(sessionId);
+    else if (state.mode === 'local') await playLocalChunk(sessionId);
     else if (state.mode === 'device') playDeviceChunk(sessionId);
   }
 
@@ -381,9 +431,11 @@
     if (mode === 'device' && !('speechSynthesis' in window)) { report('이 브라우저는 기기 음성을 지원하지 않아요.'); return; }
     stopPlayback();
     state.mode = mode;
+    state.localPart = 0;
     const sessionId = state.session;
-    elements.mode.textContent = mode === 'sorion' ? 'SoriON AI 성우' : '기기 음성 · 체험용';
+    elements.mode.textContent = mode === 'sorion' ? 'SoriON AI 성우' : mode === 'local' ? '듣는 서재 AI' : '기기 음성 · 체험용';
     if (mode === 'sorion') await playSorionChunk(sessionId);
+    else if (mode === 'local') await playLocalChunk(sessionId);
     else playDeviceChunk(sessionId);
   }
 
@@ -399,7 +451,7 @@
 
   function togglePause() {
     if (!state.mode || state.busy) return;
-    if (state.mode === 'sorion') {
+    if (state.mode === 'sorion' || state.mode === 'local') {
       if (elements.audio.paused) void elements.audio.play().catch(() => report('재생을 다시 시작할 수 없어요.'));
       else elements.audio.pause();
       state.playing = !elements.audio.paused;
@@ -493,18 +545,27 @@
     elements.clean.addEventListener('change', resetDocument);
     elements.file.addEventListener('change', () => void loadTextFile(elements.file.files?.[0]));
     $('clear-text').addEventListener('click', () => { elements.text.value = ''; elements.file.value = ''; elements.fileName.textContent = '선택한 파일 없음'; $('chapter-source-link').hidden = true; $('extension-import-status').hidden = true; resetDocument(); });
-    elements.speed.addEventListener('input', () => { elements.speedOutput.value = Number(elements.speed.value).toFixed(2).replace(/0$/, '') + '배'; });
+    elements.speed.addEventListener('input', () => { elements.speedOutput.value = Number(elements.speed.value).toFixed(2).replace(/0$/, '') + '배'; if(state.mode === 'local') elements.audio.playbackRate=Number(elements.speed.value); });
     $('recheck-engine').addEventListener('click', () => void checkEngine());
     elements.start.addEventListener('click', () => void start('sorion'));
+    elements.localAi.addEventListener('click', () => void start('local'));
     elements.device.addEventListener('click', () => void start('device'));
     elements.pause.addEventListener('click', togglePause);
     elements.previous.addEventListener('click', () => jump(-1));
     elements.next.addEventListener('click', () => jump(1));
     elements.stop.addEventListener('click', () => { stopPlayback(); report('낭독을 중지했어요.'); });
-    elements.audio.addEventListener('ended', () => { if (state.mode === 'sorion') void advanceChunk(state.session); });
-    elements.audio.addEventListener('pause', () => { if (state.mode !== 'sorion') return; state.playing = false; paintProgress(); });
-    elements.audio.addEventListener('play', () => { if (state.mode !== 'sorion') return; state.playing = true; paintProgress(); });
-    elements.audio.addEventListener('error', () => { if (state.mode !== 'sorion' || state.busy) return; report('음성 파일을 재생하지 못했어요. 서명 만료 또는 서버 연결을 확인해 주세요.'); });
+    elements.audio.addEventListener('ended', () => {
+      if (state.mode === 'local' && state.localPart + 1 < chunkText(state.chunks[state.currentIndex],120).length) {
+        state.localPart++;
+        void playLocalChunk(state.session);
+      } else if (state.mode === 'sorion' || state.mode === 'local') {
+        state.localPart = 0;
+        void advanceChunk(state.session);
+      }
+    });
+    elements.audio.addEventListener('pause', () => { if (state.mode !== 'sorion' && state.mode !== 'local') return; state.playing = false; paintProgress(); });
+    elements.audio.addEventListener('play', () => { if (state.mode !== 'sorion' && state.mode !== 'local') return; state.playing = true; paintProgress(); });
+    elements.audio.addEventListener('error', () => { if ((state.mode !== 'sorion' && state.mode !== 'local') || state.busy) return; report('음성 파일을 재생하지 못했어요. 연결 상태를 확인해 주세요.'); });
     window.addEventListener('pagehide', () => { saveProgress(); stopPlayback(); });
     renderText();
     void checkEngine();

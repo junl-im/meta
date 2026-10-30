@@ -36,3 +36,31 @@ test('chapter handoff, non-destructive cleanup and device playback',async({page}
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
   }
 });
+
+test('library voices synthesize short segments and use the chosen reading mood',async({page})=>{
+  await page.addInitScript(()=>{
+    window.__requests=[];
+    window.Worker=class {
+      postMessage(request){window.__requests.push(request);queueMicrotask(()=>this.onmessage?.({data:{id:request.id,type:'audio',blob:new Blob(['audio'],{type:'audio/wav'})}}))}
+      terminate(){window.__terminated=true}
+    };
+    HTMLMediaElement.prototype.load=function(){};
+    HTMLMediaElement.prototype.pause=function(){};
+    HTMLMediaElement.prototype.play=function(){this.dispatchEvent(new Event('play'));return Promise.resolve()};
+  });
+  await page.goto(listen);
+  await page.locator('#manuscript-text').fill('여우가 말했다. '.repeat(30));
+  await page.waitForTimeout(300);
+  await page.locator('#library-voice').selectOption('library-male');
+  await page.locator('#library-expression').selectOption('vivid');
+  await page.locator('#local-ai-play').click();
+  await expect(page.locator('#player-message')).toContainText('듣는 서재 AI 목소리로 낭독 중');
+  const first=await page.evaluate(()=>window.__requests[0]);
+  expect(first.voiceId).toBe('library-male');
+  expect(first.speed).toBeCloseTo(1.08);
+  expect(first.text.length).toBeLessThanOrEqual(120);
+  await page.locator('#sorion-audio').evaluate(el=>el.dispatchEvent(new Event('ended')));
+  await expect.poll(()=>page.evaluate(()=>window.__requests.length)).toBe(2);
+  await page.locator('#stop-play').click();
+  expect(await page.evaluate(()=>window.__terminated)).toBe(true);
+});

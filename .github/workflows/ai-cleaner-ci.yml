@@ -12,6 +12,8 @@ on:
       - 'NaverNovelShelf/site/**'
       - 'NaverNovelShelf/integration/**'
       - 'NaverNovelShelf/extension/**'
+      - 'NaverNovelShelf/voice-source/**'
+      - 'NaverNovelShelf/scripts/build-sorion-local.mjs'
       - 'NaverNovelShelf/scripts/test-sorion-*.cjs'
       - 'index.html'
       - 'package.json'
@@ -32,6 +34,8 @@ on:
       - 'NaverNovelShelf/site/**'
       - 'NaverNovelShelf/integration/**'
       - 'NaverNovelShelf/extension/**'
+      - 'NaverNovelShelf/voice-source/**'
+      - 'NaverNovelShelf/scripts/build-sorion-local.mjs'
       - 'NaverNovelShelf/scripts/test-sorion-*.cjs'
       - 'index.html'
       - 'OPTION/SS_OPTION.txt'
@@ -142,6 +146,10 @@ jobs:
           fi
       - name: Build local runtime vendor
         run: npm run build:vendor
+      - name: Build and verify library voice runtime
+        run: |
+          npm run build:shelf-voice
+          git diff --exit-code -- NaverNovelShelf/site/sorion-local-worker.js NaverNovelShelf/site/voice-runtime/ort-wasm-simd-threaded.mjs NaverNovelShelf/site/voice-runtime/ort-wasm-simd-threaded.wasm
       - name: Verify Pages artifact contents
         run: node .github/scripts/build-pages-artifact.mjs
       - name: Install Chromium
