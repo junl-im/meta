@@ -23,6 +23,7 @@
     abort: null, currentJobId: null, currentApi: null, localWorker: null, localUrl: null, localPart: 0, localReady: false, preparing: false, prefetch: [], localPriming: false, lastGenerationMs: 0,
   };
   let saveThrottle = 0, documentProgressKey = null, activeParagraph = null, activeSpoken = null;
+  let navigateAfterVoiceLoading = false;
   let episodeController = null, chapterController = null, episodePage = 0, episodeWork = '', episodeBusy = false;
 
   async function loadPublicChapter(work, volume, button) {
@@ -166,7 +167,19 @@
     if (stage) progress.value = Number(stage[1]); else progress.removeAttribute('value');
     if (!dialog.open) dialog.showModal();
   }
-  function closeVoiceLoading() { if ($('voice-loading').open) $('voice-loading').close(); }
+  function showImportedReader() {
+    if (!window.matchMedia('(max-width: 860px)').matches) return;
+    const pane=elements.reader.closest('.reading-pane');
+    if (!pane) return;
+    window.scrollTo({top:Math.max(0,window.scrollY+pane.getBoundingClientRect().top-12),behavior:'instant'});
+  }
+  function closeVoiceLoading() {
+    if ($('voice-loading').open) $('voice-loading').close();
+    if (navigateAfterVoiceLoading) {
+      navigateAfterVoiceLoading=false;
+      requestAnimationFrame(showImportedReader);
+    }
+  }
 
   function chunkText(raw, limit = 520) {
     const normalized = raw.replace(/\r\n?/g, '\n').trim();
@@ -716,6 +729,8 @@
     params.delete('capture');
     history.replaceState(null, '', location.pathname + (params.size ? '?' + params : '') + location.hash);
     void start('local');
+    navigateAfterVoiceLoading = window.matchMedia('(max-width: 860px)').matches && $('voice-loading').open;
+    requestAnimationFrame(showImportedReader);
   }
 
   function acceptExtensionMessage(event) {
