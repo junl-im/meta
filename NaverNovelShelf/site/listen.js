@@ -5,7 +5,7 @@
   const $ = (id) => document.getElementById(id);
   const elements = {
     work: $('work-select'), episode: $('episode-name'), file: $('manuscript-file'),
-    text: $('manuscript-text'), fileName: $('file-name'), charCount: $('char-count'),
+    text: $('manuscript-text'), fileName: $('file-name'), charCount: $('char-count'), clean: $('clean-for-reading'), scan: $('text-scan'),
     voice: $('voice-select'), speed: $('speed'), speedOutput: $('speed-output'),
     status: $('engine-status'), detail: $('engine-detail'), indicator: $('engine-indicator'),
     readerTitle: $('reading-title'), selectedWork: $('selected-work'), reader: $('reader-text'),
@@ -140,7 +140,11 @@
 
   function renderText() {
     const content = elements.text.value.slice(0, 200000);
-    state.chunks = chunkText(content);
+    const markers = (content.match(/\*\*/g) || []).length;
+    const hidden = (content.match(/[\u200B\uFEFF]/g) || []).length;
+    elements.scan.textContent = content ? `발견: ** ${markers}개 · 숨은 공백 ${hidden}개${elements.clean.checked ? ' · 낭독에만 정리 적용' : ' · 원문 그대로 낭독'}` : '원고를 불러오면 정리할 부분을 살펴봐요.';
+    const reading = elements.clean.checked ? content.replace(/\*\*|[\u200B\uFEFF]/g, '') : content;
+    state.chunks = chunkText(reading);
     state.currentIndex = 0;
     elements.charCount.textContent = content.length.toLocaleString('ko-KR') + '자';
     elements.readerTitle.textContent = elements.episode.value.trim() || '원고 미리보기';
@@ -363,6 +367,7 @@
       report('이 회차의 낭독이 끝났어요.');
       paintProgress();
       elements.fill.style.width = '100%';
+      elements.progress.setAttribute('aria-valuenow', '100');
       return;
     }
     paintProgress();
@@ -424,14 +429,7 @@
         || !/^\/(best|challenge)\/detail$/.test(source.pathname)
         || source.searchParams.get('novelId') !== chapter.novelId
         || source.searchParams.get('volumeNo') !== chapter.volumeNo) return;
-    if (!works.some((work) => work.id === chapter.novelId)) {
-      const title = String(chapter.workTitle || '네이버 작품 ' + chapter.novelId).slice(0, 100);
-      works.push({ id: chapter.novelId, title });
-      const option = document.createElement('option');
-      option.value = chapter.novelId;
-      option.textContent = title;
-      elements.work.appendChild(option);
-    }
+    if (!works.some((work) => work.id === chapter.novelId)) return;
     elements.work.value = chapter.novelId;
     elements.episode.value = String(chapter.title || `제${chapter.volumeNo}화`).slice(0, 100);
     elements.text.value = chapter.text;
@@ -492,6 +490,7 @@
       clearTimeout(saveThrottle);
       saveThrottle = setTimeout(resetDocument, 220);
     });
+    elements.clean.addEventListener('change', resetDocument);
     elements.file.addEventListener('change', () => void loadTextFile(elements.file.files?.[0]));
     $('clear-text').addEventListener('click', () => { elements.text.value = ''; elements.file.value = ''; elements.fileName.textContent = '선택한 파일 없음'; $('chapter-source-link').hidden = true; $('extension-import-status').hidden = true; resetDocument(); });
     elements.speed.addEventListener('input', () => { elements.speedOutput.value = Number(elements.speed.value).toFixed(2).replace(/0$/, '') + '배'; });

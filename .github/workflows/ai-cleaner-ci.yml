@@ -11,6 +11,8 @@ on:
       - 'AIPlayground/WebtoonStudioSource/**'
       - 'NaverNovelShelf/site/**'
       - 'NaverNovelShelf/integration/**'
+      - 'NaverNovelShelf/extension/**'
+      - 'NaverNovelShelf/scripts/test-sorion-*.cjs'
       - 'index.html'
       - 'package.json'
       - 'package-lock.json'
@@ -29,6 +31,8 @@ on:
       - 'AIPlayground/WebtoonStudioSource/**'
       - 'NaverNovelShelf/site/**'
       - 'NaverNovelShelf/integration/**'
+      - 'NaverNovelShelf/extension/**'
+      - 'NaverNovelShelf/scripts/test-sorion-*.cjs'
       - 'index.html'
       - 'OPTION/SS_OPTION.txt'
       - 'package.json'
@@ -93,6 +97,7 @@ jobs:
           node --check AIPlayground/WebtoonStudioSource/scripts/fix-bubble-contour.mjs
           node --check NaverNovelShelf/site/catalog.js
           node --check NaverNovelShelf/site/popularity.js
+          node --check NaverNovelShelf/site/listen.js
           node --check .github/scripts/build-pages-artifact.mjs
           node --check .github/scripts/build-runtime-vendor.mjs
           node --check ai-cleaner/sw.js
@@ -108,7 +113,10 @@ jobs:
           npm run build:web --prefix AIPlayground/WebtoonStudioSource
           npm run verify:deployed --prefix AIPlayground/WebtoonStudioSource
       - name: Modular core unit checks
-        run: node ai-cleaner/tests/module-check.mjs
+        run: |
+          node ai-cleaner/tests/module-check.mjs
+          node NaverNovelShelf/scripts/test-sorion-capture.cjs
+          node NaverNovelShelf/scripts/test-sorion-integration.cjs
       - name: Static checks
         run: node ai-cleaner/tests/static-check.mjs
 
