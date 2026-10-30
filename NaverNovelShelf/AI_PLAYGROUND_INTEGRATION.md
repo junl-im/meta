@@ -4,19 +4,19 @@
 
 ## 보관 위치와 역할
 
-- 공개 웹사이트 / 웹 자산 / 사용자 화면: Sites `gomfox-naver-novels`
-- GitHub `junl-im/meta/NaverNovelShelf/`: 공개 작품 메타데이터 사본과 연동 규칙
+- 공개 웹사이트 / 웹 자산 / 사용자 화면: Firebase Hosting `meta-deee1`의 `/NaverNovelShelf/site/`
+- GitHub `junl-im/meta/NaverNovelShelf/`: **공식 원본 소스**, 작품 메타데이터 및 연동 규칙
 - Google Drive `곰같은여우의 소설 서재/`: 시점별 소스·이미지 백업 ZIP
 - Notion `곰같은여우의 소설 서재 — MASTER 개발·연동 기록`: 사양·운영 기준
-- 미래 AI놀이터: **읽기 전용** 작품 목록 제공, 네이버 공식 링크로 이동
+- 현재 AI놀이터: `/ai-cleaner/`의 소설 서재 입구와 연결되어 작품을 표시하고 네이버 공식 링크로 이동
 
 ## 기계가 읽는 내보내기
 
 프로젝트 경로에서 `node scripts/build-catalog-export.cjs` 실행.
 
-결과물: `dist/integration/catalog.v1.json`
+결과물: `NaverNovelShelf/site/catalog-feed.json`
 
-공개 URL: `https://gomfox-naver-novels.glassyroot13.chatgpt.site/integration/catalog.v1.json`
+공개 URL: `https://meta-deee1.web.app/NaverNovelShelf/site/catalog-feed.json`
 
 JSON 필드:
 
@@ -43,5 +43,5 @@ JSON 필드:
 AI놀이터는 위 JSON을 읽고 표지 카드·장르 필터·베스트/챌린지리그 화면을 구성할 수 있습니다.
 기존 AI놀이터 코드는 이 단계에서 변경하지 않습니다. CORS는 실제 AI놀이터 출처에서 테스트한 후 결정해야 합니다.
 
-새 작품을 발견하면 `dist/catalog.js` 수정 → 정합성 점검 → JSON 재생성 → Sites 배포 → GitHub `meta` 최신 사본 반영 → Drive 백업의 순서로 동기화합니다.
+새 작품을 발견하면 `dist/catalog.js` 수정 → 정합성 점검 → JSON 재생성 → GitHub `meta` 업데이트 → GitHub Pages/Firebase 동기화 → Drive 백업의 순서로 동기화합니다.
 Notion에는 변경 이력과 검증 날짜를 기록합니다. 현재 자동 갱신은 작품 검색 확인을 위한 일정이며, GitHub·Drive·Notion 연동의 완전 자동화는 별도 인증·검증이 필요합니다.

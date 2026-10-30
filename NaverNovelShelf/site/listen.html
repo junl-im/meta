@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#152229">
+  <meta name="description" content="AI놀이터 서재에서 내 네이버 소설 회차를 자동 인식하고 SoriON으로 낭독하는 작업실">
+  <title>소리온 낭독 작업실 · 곰같은여우의 서재</title>
+  <link rel="icon" type="image/webp" href="./assets/hero-books.webp">
+  <link rel="stylesheet" href="./listen.css">
+</head>
+<body>
+  <div class="listen-shell">
+    <header class="listen-header">
+      <a class="back-link" href="./index.html">〈 서재 돌아가기</a>
+      <div class="listen-brand"><span class="brand-orbit" aria-hidden="true">◉</span><span><strong>소리온 낭독 작업실</strong><small>GOMFOX LIBRARY × SoriON AI</small></span></div>
+      <span class="beta-label">연동 베타</span>
+    </header>
+    <main class="workspace">
+      <section class="setup-pane" aria-labelledby="setup-title">
+        <div class="pane-heading">
+          <span class="eyebrow">NARRATION STUDIO</span>
+          <h1 id="setup-title">글로 읽던 이야기를<br><em>소리로 만나기</em></h1>
+          <p>네이버에서 작품과 회차를 선택하면 <b>소리온으로 듣기</b> 버튼으로 본문을 자동 가져올 수 있어요. TXT 직접 불러오기도 그대로 지원해요.</p>
+        </div>
+        <div class="auto-capture-guide">
+          <div class="auto-capture-head"><strong>네이버 회차 자동 인식 · PC</strong><span>NEW</span></div>
+          <p>브라우저 확장을 한 번만 설치해 두면 네이버의 내 소설 회차 화면에서 <b>소리온으로 듣기 ▶</b>를 눌러 본문을 바로 전달할 수 있어요.</p>
+          <a class="extension-download" href="./downloads/sorion-naver-reader-v0.3.0.zip" download>브라우저 연결 도구 다운로드 ↓</a>
+          <details><summary>설치 방법 보기</summary><ol><li>ZIP 압축 풀기</li><li>Chrome <code>chrome://extensions</code> 또는 Whale <code>whale://extensions</code> 열기</li><li>개발자 모드에서 <b>압축해제된 확장 프로그램을 로드</b> 선택</li><li>압축 해제한 폴더 지정 후 네이버 소설 회차 페이지 새로고침</li><li>화면 아래 <b>소리온으로 듣기 ▶</b> 버튼 선택</li></ol></details>
+          <div id="extension-import-status" class="import-status" role="status" hidden></div>
+          <a id="chapter-source-link" class="chapter-source" target="_blank" rel="noopener noreferrer" hidden>네이버 원본 회차 다시 열기 ↗</a>
+        </div>
+        <div class="field-group">
+          <label for="work-select">작품 선택</label>
+          <select id="work-select"><option value="">작품을 선택하세요</option></select>
+        </div>
+        <div class="field-group">
+          <label for="episode-name">회차 이름</label>
+          <input id="episode-name" type="text" maxlength="100" placeholder="예: 제1화 · 새로운 시작" autocomplete="off">
+        </div>
+        <div class="field-group">
+          <label for="manuscript-file">원고 불러오기 <span class="hint">TXT 파일은 이 브라우저에서만 읽어요</span></label>
+          <label class="file-picker" for="manuscript-file"><span aria-hidden="true">▤</span> TXT 파일 선택</label>
+          <input id="manuscript-file" class="visually-hidden" type="file" accept=".txt,text/plain">
+          <div id="file-name" class="file-meta">선택한 파일 없음</div>
+        </div>
+        <div class="field-group manuscript-group">
+          <label for="manuscript-text">원고 직접 입력 · 자동 인식 결과 확인</label>
+          <textarea id="manuscript-text" placeholder="낭독할 회차 본문을 붙여넣어 주세요. 원고는 공개 서재나 GitHub에 자동 저장하지 않아요." spellcheck="false"></textarea>
+          <div class="field-bottom"><span id="char-count">0자</span><button class="mini-button" id="clear-text" type="button">본문 지우기</button></div>
+        </div>
+        <div class="field-group">
+          <label for="voice-select">소리온 성우</label>
+          <select id="voice-select">
+            <option value="dam-calm">소리 · 편안한 장문 낭독</option>
+            <option value="sori-warm">혜린 · 따뜻한 여성 목소리</option>
+            <option value="on-clear">도윤 · 또렷한 남성 목소리</option>
+            <option value="jun-deep">준호 · 묵직한 남성 저음</option>
+            <option value="min-energetic">민준 · 생동감 있는 남성 목소리</option>
+          </select>
+          <span class="hint">실제 성우 음색은 소리온 엔진의 승인된 기준 WAV가 준비되어야 재생돼요.</span>
+        </div>
+        <div class="field-group speed-group">
+          <label for="speed">낭독 속도 <output id="speed-output" for="speed">1.0배</output></label>
+          <input id="speed" type="range" min="0.8" max="1.3" step="0.05" value="1">
+        </div>
+        <div class="engine-check" role="status" aria-live="polite">
+          <span id="engine-indicator" class="engine-indicator"></span>
+          <div><strong id="engine-status">소리온 엔진 확인 중</strong><span id="engine-detail">연결 가능 여부를 점검하고 있어요.</span></div>
+          <button type="button" class="mini-button" id="recheck-engine">재확인</button>
+        </div>
+        <div class="play-actions">
+          <button type="button" id="sorion-play" class="primary-action">소리온 성우로 듣기</button>
+          <button type="button" id="device-play" class="secondary-action">기기 기본 음성으로 시험</button>
+        </div>
+        <p class="privacy-note">※ 기기 기본 음성은 소리온 성우가 아닙니다. 실제 소리온으로 합성할 때에만 입력 원고가 연결된 음성 엔진으로 전송돼요. 음성 엔진은 별도로 실행되어야 합니다.</p>
+      </section>
+      <section class="reading-pane" aria-labelledby="reading-title">
+        <div class="reader-heading">
+          <div><span class="eyebrow">LISTEN & READ</span><h2 id="reading-title">원고 미리보기</h2><p id="selected-work">원고 파일을 불러오면 이곳에 본문이 나타나요.</p></div>
+          <span class="book-ornament" aria-hidden="true">✧</span>
+        </div>
+        <div id="reader-text" class="reader-text" tabindex="0"><p class="reader-placeholder">오늘은 어떤 이야기를 들려줄까요?<br>왼쪽에서 작품을 고르고 원고를 불러와 주세요.</p></div>
+        <div class="player" aria-label="낭독 재생기">
+          <div class="player-head"><span id="playback-mode">낭독 준비</span><span id="chunk-count">0 / 0</span></div>
+          <div class="progress-track" role="progressbar" aria-label="낭독 진행률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-track"><div id="progress-fill"></div></div>
+          <div class="player-controls">
+            <button id="prev-chunk" type="button" aria-label="이전 문단" title="이전 문단">◀◀</button>
+            <button id="pause-resume" class="main-play" type="button" aria-label="일시정지 또는 다시 재생">▶</button>
+            <button id="next-chunk" type="button" aria-label="다음 문단" title="다음 문단">▶▶</button>
+            <button id="stop-play" type="button" aria-label="낭독 중지" title="중지">■</button>
+          </div>
+          <p id="player-message" class="player-message" aria-live="polite">낭독할 원고를 준비해 주세요.</p>
+          <audio id="sorion-audio" preload="none"></audio>
+        </div>
+      </section>
+    </main>
+    <footer class="listen-footer"><span>© 곰같은여우 · 소리온 연동 베타 · <a href="../../ai-cleaner/">AI놀이터로 돌아가기</a></span><span>내 작품의 선택한 회차만 인식 · 원고 브라우저 임시 처리 · SVG 사용 없음</span></footer>
+  </div>
+  <script src="./catalog.js" defer></script>
+  <script src="./sorion-config.js" defer></script>
+  <script src="./listen.js" defer></script>
+</body>
+</html>

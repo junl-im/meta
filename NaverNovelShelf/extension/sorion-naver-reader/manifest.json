@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "곰같은여우 · 소리온 회차 읽기",
+  "version": "0.3.0",
+  "description": "네이버에 공개된 내 소설의 현재 회차를 소리온 낭독 작업실로 보냅니다.",
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": ["https://m.novel.naver.com/*", "https://novel.naver.com/*", "https://meta-deee1.web.app/NaverNovelShelf/site/*"],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_title": "현재 네이버 회차를 소리온으로 듣기" },
+  "content_scripts": [
+    { "matches": ["https://m.novel.naver.com/*", "https://novel.naver.com/*"], "js": ["naver-capture.js"], "run_at": "document_idle" },
+    { "matches": ["https://meta-deee1.web.app/NaverNovelShelf/site/*"], "js": ["shelf-bridge.js"], "run_at": "document_idle" }
+  ]
+}

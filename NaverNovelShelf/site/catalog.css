@@ -187,3 +187,7 @@ html{scrollbar-color:#b08c5e #142831;scrollbar-width:thin}
 .catalog-reset{min-height:44px;margin-top:12px;padding:9px 18px;border:1px solid #d8b778;border-radius:10px;background:#e7c58b;color:#2c2520;font:700 13px var(--sans);cursor:pointer}
 .catalog-reset:hover{background:#f3d9a7}
 .catalog-reset:focus-visible{outline:3px solid #ffe2a4;outline-offset:3px}
+
+/* SoriON audiobook entry: scoped to the existing shelf hero. */
+.sorion-shelf-action{display:inline-flex;align-items:center;justify-content:center;min-height:47px;border:1px solid #b39a6a;border-radius:7px;padding:10px 16px;background:#263b40;color:#eed8ad;text-decoration:none;font-size:12px;font-weight:800}
+.sorion-shelf-action:hover{background:#334d50;border-color:#f0cb8b}
