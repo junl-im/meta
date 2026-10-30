@@ -22,7 +22,7 @@
     connectedApi: null, connectionInProgress: false, session: 0,
     abort: null, currentJobId: null, currentApi: null, localWorker: null, localUrl: null, localPart: 0, localReady: false, preparing: false, prefetch: [], localPriming: false, lastGenerationMs: 0,
   };
-  let saveThrottle = 0, documentProgressKey = null;
+  let saveThrottle = 0, documentProgressKey = null, activeParagraph = null, activeSpoken = null;
   let episodeController = null, chapterController = null, episodePage = 0, episodeWork = '', episodeBusy = false;
 
   async function loadPublicChapter(work, volume, button) {
@@ -224,14 +224,15 @@
     elements.count.textContent = index + ' / ' + total;
     elements.fill.style.width = percentage + '%';
     elements.progress.setAttribute('aria-valuenow', String(percentage));
-    elements.reader.querySelectorAll('[data-chunk]').forEach((node) => {
-      node.classList.toggle('active', Number(node.dataset.chunk) === state.currentIndex);
-    });
     const active = elements.reader.querySelector('[data-chunk="' + state.currentIndex + '"]');
-    elements.reader.querySelectorAll('[data-part].speaking').forEach(node=>node.classList.remove('speaking'));
+    if (activeParagraph !== active) { activeParagraph?.classList.remove('active'); active?.classList.add('active'); activeParagraph=active; }
     const spoken=state.mode==='local' && active ? active.querySelector('[data-part="'+state.localPart+'"]') : null;
-    if (spoken && state.playing) spoken.classList.add('speaking');
-    if (active && state.mode) (spoken || active).scrollIntoView({ block: 'nearest', behavior: 'auto' });
+    if (activeSpoken !== spoken) { activeSpoken?.classList.remove('speaking'); spoken?.classList.add('speaking'); activeSpoken=spoken; }
+    const target=spoken || active;
+    if (target && state.mode && state.playing) {
+      const box=elements.reader.getBoundingClientRect(), rect=target.getBoundingClientRect();
+      if (rect.top < box.top || rect.bottom > box.bottom) elements.reader.scrollTop += rect.top-box.top;
+    }
     elements.pause.textContent = state.playing ? 'Ⅱ' : '';
     elements.pause.dataset.playing = String(state.playing);
     elements.pause.disabled = state.busy;
@@ -266,6 +267,7 @@
       empty.textContent = '회차 원고를 선택하거나 붙여넣으면 여기에서 읽을 수 있어요.';
       nodes.push(empty);
     }
+    activeParagraph=null;activeSpoken=null;
     elements.reader.replaceChildren(...nodes);
     restoreProgress();
     paintProgress();
