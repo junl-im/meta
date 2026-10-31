@@ -161,6 +161,13 @@ html::-webkit-scrollbar-thumb:hover,.setup-pane::-webkit-scrollbar-thumb:hover,.
 @media(max-width:350px){.player-controls{gap:5px}.player-controls button:not(.main-play){width:48px;height:48px}}
 @media(max-width:400px){.listen-brand small{display:none}.listen-header .beta-label{display:none}.listen-brand strong{font-size:11px;white-space:nowrap}}
 .reader-text [data-part].speaking{color:#fff0cb;background:#b88e4859;border-radius:4px;box-shadow:0 0 0 3px #b88e4820}
+.reader-jump{display:none}
+.reader-heading-actions{display:flex;flex-direction:column;align-items:center;gap:5px;flex:none}
+@media(max-width:860px){
+  .reader-heading-actions .book-ornament{display:none}
+  .reader-jump{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:7px 10px;border:1px solid #c8a66f;border-radius:10px;background:linear-gradient(145deg,#394c45,#20383c);color:#f9dfb4;font-size:11px;font-weight:800;white-space:nowrap;box-shadow:0 3px 10px #07181c55}
+  .episode-picker .reader-jump{margin:9px 0 0 6px}
+}
 /* After import, keep the current line and playback controls together on mobile. */
 @media(max-width:860px) and (min-height:481px){
   .reading-pane{height:calc(100dvh - 24px);min-height:0;overflow:hidden;scroll-margin-top:12px}

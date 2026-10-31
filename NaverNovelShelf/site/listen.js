@@ -267,6 +267,7 @@
     elements.scan.textContent = content ? `발견: ** ${markers}개 · 숨은 공백 ${hidden}개${elements.clean.checked ? ' · 낭독에만 정리 적용' : ' · 원문 그대로 낭독'}` : '원고를 불러오면 정리할 부분을 살펴봐요.';
     const reading = elements.clean.checked ? content.replace(/\*\*|[\u200B\uFEFF]/g, '') : content;
     state.chunks = chunkText(reading);
+    $('back-to-reader').hidden = !state.chunks.length;
     state.currentIndex = 0;
     state.localPart = 0;
     documentProgressKey = progressKey();
@@ -709,8 +710,10 @@
         || source.searchParams.get('novelId') !== chapter.novelId
         || source.searchParams.get('volumeNo') !== chapter.volumeNo) return;
     if (!works.some((work) => work.id === chapter.novelId)) return;
+    const previousWork = elements.work.value;
     elements.work.value = chapter.novelId;
     elements.work.dispatchEvent(new Event('shelf-select-sync'));
+    if (previousWork !== chapter.novelId) void loadEpisodes(true);
     elements.episode.value = String(chapter.title || `제${chapter.volumeNo}화`).slice(0, 100);
     elements.text.value = chapter.text;
     elements.fileName.textContent = sourceKind === 'public' ? '공개 회차 조회로 본문 가져옴' : '네이버 현재 회차에서 자동 인식';
@@ -805,6 +808,15 @@
     [elements.work, elements.voice, elements.libraryVoice, elements.expression].forEach(setupIllustratedSelect);
     elements.work.addEventListener('change', () => { resetDocument(); void loadEpisodes(true); });
     $('episode-more').addEventListener('click', () => void loadEpisodes());
+    $('jump-to-episodes').addEventListener('click', () => {
+      const picker=$('episodes-title');
+      window.scrollTo({top:Math.max(0,window.scrollY+picker.getBoundingClientRect().top-16),behavior:'instant'});
+      picker.focus({preventScroll:true});
+    });
+    $('back-to-reader').addEventListener('click', () => {
+      showImportedReader();
+      elements.reader.focus({preventScroll:true});
+    });
     elements.episode.addEventListener('change', resetDocument);
     elements.text.addEventListener('input', () => {
       clearTimeout(saveThrottle);

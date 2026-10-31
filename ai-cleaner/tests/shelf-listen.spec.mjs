@@ -125,6 +125,40 @@ test('imported chapter opens the mobile reader with current text and controls in
   expect(await page.evaluate(()=>window.scrollY)).toBe(0);
 });
 
+test('mobile reader and episode list provide a round trip without stopping narration',async({page})=>{
+  await page.setViewportSize({width:390,height:700});
+  await page.addInitScript(()=>{
+    window.Worker=class{postMessage(request){queueMicrotask(()=>this.onmessage?.({data:{id:request.id,type:'audio',blob:new Blob(['audio'],{type:'audio/wav'})}}))}terminate(){}};
+    HTMLMediaElement.prototype.load=function(){};HTMLMediaElement.prototype.pause=function(){};HTMLMediaElement.prototype.play=function(){this.dispatchEvent(new Event('play'));return Promise.resolve()};
+  });
+  await page.goto(listen);
+  await page.evaluate(()=>window.postMessage({type:'GOMFOX_SORION_CHAPTER_IMPORTED_V1',chapter:{novelId:'1247361',volumeNo:'39',url:'https://m.novel.naver.com/challenge/detail?novelId=1247361&volumeNo=39',title:'39화',text:'별빛이 숲을 비추었다. '.repeat(150)}},location.origin));
+  await expect(page.locator('#reader-text [data-part].speaking')).toHaveCount(1);
+  const before=await page.locator('#chunk-count').innerText();
+  await page.locator('#jump-to-episodes').click();
+  await expect(page.locator('#episodes-title')).toBeFocused();
+  await expect(page.locator('#back-to-reader')).toBeVisible();
+  await page.locator('#back-to-reader').click();
+  await expect(page.locator('#reader-text')).toBeFocused();
+  await expect(page.locator('#reader-text [data-part].speaking')).toHaveCount(1);
+  await expect(page.locator('#chunk-count')).toHaveText(before);
+  await expect.poll(()=>page.evaluate(()=>document.querySelector('.reading-pane').getBoundingClientRect().top)).toBeLessThan(30);
+});
+
+test('incoming chapter from another work refreshes the episode list',async({page})=>{
+  await page.route('https://r.jina.ai/**',async route=>{
+    const id=route.request().url().includes('1249028')?'1249028':'1247361';
+    const league=id==='1249028'?'best':'challenge';
+    await route.fulfill({status:200,headers:{'Access-Control-Allow-Origin':'*'},body:`* [${id} 작품 1화](https://m.novel.naver.com/${league}/detail?novelId=${id}&volumeNo=1)`});
+  });
+  await page.goto(listen);await choose(page,'work-select','1247361');
+  await expect(page.locator('.episode-row a')).toContainText('1247361');
+  await page.evaluate(()=>window.postMessage({type:'GOMFOX_SORION_CHAPTER_IMPORTED_V1',chapter:{novelId:'1249028',volumeNo:'1',url:'https://m.novel.naver.com/best/detail?novelId=1249028&volumeNo=1',title:'1화',text:'새로운 작품의 본문입니다. '.repeat(30)}},location.origin));
+  await expect(page.locator('#work-select')).toHaveValue('1249028');
+  await expect(page.locator('.episode-row a')).toContainText('1249028');
+  await expect(page.locator('.episode-row a')).not.toContainText('1247361');
+});
+
 test('library voices synthesize short segments and use the chosen reading mood',async({page})=>{
   await page.addInitScript(()=>{
     window.__requests=[];
