@@ -63,7 +63,11 @@ class UiEventMockTests(unittest.TestCase):
             modules[name] = mod
         modules["shared.utils.plugins"].WAN2GPPlugin = StubPlugin
         for name, contents in {
-            "catalog": {"format_model_catalog": lambda *args: "catalog"},
+            "catalog": {
+                "format_model_catalog": lambda *args: "catalog",
+                "format_model_details": lambda *args: "details",
+                "format_queue_status": lambda *args: "queue",
+            },
             "hardware": {"read_hardware_report": lambda: "report"},
             "help_content": {
                 "TOPICS": ("처음 시작", "저사양 설정"),
@@ -90,7 +94,7 @@ class UiEventMockTests(unittest.TestCase):
             app.setup_ui()
             app.create_ui()
 
-        self.assertGreaterEqual(len(events), 15)
+        self.assertGreaterEqual(len(events), 18)
         self.assertEqual(app.requests, ["state", "main_tabs", "GomFoxStudio"])
         self.assertEqual(
             sum("navigator.clipboard.writeText" in e[1].get("js", "") for e in events),
