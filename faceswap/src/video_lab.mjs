@@ -17,6 +17,7 @@ const canvas = get("composite-canvas");
 const resultVideo = get("result-video");
 const download = get("download-demo");
 const status = get("lab-status");
+const supportNote = get("recording-support");
 const scale = get("overlay-scale");
 const opacity = get("overlay-opacity");
 const context = canvas.getContext("2d", {alpha: false});
@@ -29,6 +30,11 @@ let outputUrl = null;
 let generation = 0;
 
 const announce = (message) => { status.textContent = message; };
+const unsupportedReason = !context ? "Canvas 2D가 미지원이라 이 브라우저에서는 렌더할 수 없어." :
+  typeof canvas.captureStream !== "function" ? "이 브라우저는 Canvas 영상 캡처를 지원하지 않아. 로컬 미리보기·입력 점검은 사용할 수 있어." :
+  !chooseRecordingFormat(globalThis.MediaRecorder) ? "이 브라우저에서 지원하는 MP4/WebM 녹화 형식을 찾지 못했어. 로컬 미리보기·입력 점검은 사용할 수 있어." : "";
+supportNote.textContent = unsupportedReason;
+supportNote.hidden = !unsupportedReason;
 const inputReady = () => Boolean(
   context && consent.checked && inputVideo.files?.length && inputPhoto.files?.length &&
   video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA && video.videoWidth &&
