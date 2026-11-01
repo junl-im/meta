@@ -43,9 +43,19 @@ test("local input to recorded playable output, with no model download", async ({
     "-v", "error", "-show_streams", "-show_format", "-of", "json", filepath
   ], {encoding: "utf8"}));
   expect(metadata.streams.some((stream) => stream.codec_type === "video")).toBeTruthy();
-  const duration = Number(metadata.format?.duration);
-  expect(duration).toBeGreaterThan(1.8);
-  expect(duration).toBeLessThan(4.8);
+  // MediaRecorder WebM output may omit container Duration metadata.
+  // Independently derive playback extent from actual encoded video packets.
+  const packetInfo = JSON.parse(execFileSync("ffprobe", [
+    "-v", "error", "-select_streams", "v:0",
+    "-show_entries", "packet=pts_time,duration_time", "-of", "json", filepath
+  ], {encoding: "utf8"}));
+  const measured = Math.max(...(packetInfo.packets || []).map((packet) =>
+    Number(packet.pts_time) + (Number(packet.duration_time) || 0)));
+  expect(Number.isFinite(measured)).toBeTruthy();
+  expect(measured).toBeGreaterThan(1.8);
+  expect(measured).toBeLessThan(4.8);
+  await expect.poll(() => page.locator("#result-video").evaluate((element) => element.videoWidth))
+    .toBeGreaterThan(0);
   const uiStatus = await page.locator("#lab-status").innerText();
   if (uiStatus.includes("오디오 트랙 포함")) {
     expect(metadata.streams.some((stream) => stream.codec_type === "audio")).toBeTruthy();
