@@ -51,11 +51,11 @@ goto plugin_source_ready
 
 :download_plugin
 echo 현재 폴더에 한글 플러그인이 없으므로 고정 버전을 받습니다.
-echo GitHub 원본 버전: c265e03182915a75a88e3ee9875ebf391d37c395
+echo GitHub 원본 버전: d0457d013f1161f9a88f07c4cbfc0ec41cdc39b7
 set "PLUGIN_SOURCE=%SETUP_DIR%\wan2gp-gomfox-studio"
 mkdir "%PLUGIN_SOURCE%" >nul 2>nul
 if not exist "%PLUGIN_SOURCE%\" goto plugin_download_error
-set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/c265e03182915a75a88e3ee9875ebf391d37c395/WanGP-KR/plugin/wan2gp-gomfox-studio"
+set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/d0457d013f1161f9a88f07c4cbfc0ec41cdc39b7/WanGP-KR/plugin/wan2gp-gomfox-studio"
 call :fetch_plugin_file "__init__.py" "754b7e9e5046f2450c5fd4ea0a53d40b6ceb8671acbb6e7ddd8932a52de80066"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "plugin.py" "977a233c7238e5cf7647feac556d21f5abdd8400ccd9627f607aea7c88381d47"
@@ -68,7 +68,7 @@ call :fetch_plugin_file "help_content.py" "d7cb8e51d6049d128b9e62c1ff775c9228af0
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "hardware.py" "f6a4eb010ae10b5a6529d54a10d78c9da314caad656b65fc0411f4bb9f0824bb"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "prompt_assistant.py" "7b37ad8d89dc95f8fe92818d30d654c2613523f16a83233ab12be767e7a3c76c"
+call :fetch_plugin_file "prompt_assistant.py" "7beadb530afda5b695427e528be2b564da9932c5b8ad518921d681ab2a6c98a0"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "studio-hero.png" "68ed79eb62f1fa81e089a52f85a689eabb73db964fc84d63daf85bd87c264b66"
 if errorlevel 1 goto plugin_download_error
