@@ -62,6 +62,13 @@ class TestFullInstallerSafety(unittest.TestCase):
         ):
             self.assertIn('call :fetch_plugin_file "' + filename + '"', self.script)
 
+    def test_optional_shortcut_does_not_override_existing_file(self):
+        self.assertIn('if not exist "%GOMFOX_SHORTCUT_TARGET%" goto shortcut_unavailable', self.script)
+        self.assertIn(r"\scripts\run.bat", self.script)
+        self.assertIn("choice /C YN /M", self.script)
+        self.assertIn("if ([IO.File]::Exists($path)) { exit 4 }", self.script)
+        self.assertIn("WanGP Manager에서 Start WanGP를 이용하세요", self.script)
+
     def test_no_automatic_cloud_or_gpt_connection(self):
         self.assertIn("GPT나 Claude 로그인은 기본 생성에 필요하지 않습니다", self.script)
         self.assertNotIn("api.openai.com", self.lower)
