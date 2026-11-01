@@ -1,0 +1,10 @@
+{
+  "name": "actor-swap-studio-web",
+  "private": true,
+  "version": "0.7.0-foundation",
+  "type": "module",
+  "description": "Install-free local-media foundation; AI swapping not yet implemented",
+  "scripts": {
+    "test": "node --test tests/smoke.mjs"
+  }
+}
