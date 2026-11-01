@@ -17,3 +17,14 @@
 .button-download{display:block;text-align:center;text-decoration:none;background:#263c3a;color:#d7e5d7;font-weight:700;margin-top:8px}
 [hidden]{display:none!important}
 @media(max-width:650px){.video-lab{padding:10px;margin-top:8px}.lab-actions .button{flex-basis:85px;font-size:10px}.lab-controls{gap:7px}#composite-canvas,.result-video{max-height:155px}.lab-description,.lab-status{font-size:10px}}
+
+/* Isolated ONNX/ORT preflight; panel scrolls internally on small screens. */
+.model-lab{margin-top:12px;padding:14px;border:1px solid #39505a;border-radius:12px;background:#101d28;flex-shrink:0}
+.model-lab .section-heading h2{font-size:16px}
+.model-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:10px 0}
+.model-fields label{display:block;font-size:11px;color:#d1dfe4;font-weight:700}
+.model-fields input{margin-top:7px}
+.model-lab .model-choice{margin-top:10px}
+.model-schema-note{overflow-wrap:anywhere;color:#9db1bd;line-height:1.6;font-size:10px;margin:10px 0 0}
+.model-schema-note code{font-size:10px;color:#c3d5b1}
+@media(max-width:650px){.model-lab{padding:10px}.model-fields{grid-template-columns:1fr;gap:7px}}
