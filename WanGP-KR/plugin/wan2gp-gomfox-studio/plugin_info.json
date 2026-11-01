@@ -1,8 +1,8 @@
 {
   "name": "곰같은여우의 AI 스튜디오",
   "author": "곰같은여우",
-  "version": "0.5.0-dev",
-  "description": "원본 WanGP 무료 로컬 제작 대시보드, 전용 PNG 원화, 한글 도움말, 원본 모델 탐색기, 저사양 안내, 선택형 GPT 감독.",
+  "version": "0.6.0-dev",
+  "description": "원본 WanGP 무료 로컬 제작, 첫 실행 3단계 안내, 전용 PNG 원화, 한글 도움말, 모델 탐색기, 저사양 안내, 선택형 GPT 감독.",
   "type": "app",
   "app_tab": "GomFoxStudio",
   "app_url": "/gomfox-studio",
