@@ -1,4 +1,4 @@
-# Local ONNX / ORT model preflight — v0.7.6
+# Local ONNX / ORT model preflight — v0.7.7
 
 ## What it does
 
@@ -32,10 +32,11 @@ The `commercialUseConfirmed` field is a statement made by the user, **not an ass
 ## Current limits and safety
 
 - Allowed filenames end in `.onnx` or `.ort`; filename and format must match the JSON. Manifest at most 64 KiB.
-- Hashing uses native WebCrypto SHA-256 over the complete selected file, locally, without a server endpoint. To bound peak browser memory, the input cap is **64 MiB** on known devices with up to 4 GiB RAM, **256 MiB** otherwise. Browsers that do not expose `navigator.deviceMemory` use 256 MiB; this does not establish that enough memory actually exists. A future worker + streaming hasher must replace this limitation.
+- v0.7.7 hashes SHA-256 incrementally from **1 MiB file slices** in a same-origin module Web Worker (with a sliced fallback when Worker is unavailable). The pure-JavaScript SHA-256 implementation is tested against standard known vectors and independent Node crypto values at padding boundaries and across multi-MiB files. Unlike v0.7.6 WebCrypto digest(), it never needs the entire file in RAM. The current **2 GiB limit controls processing time and scope, not exact device memory**, and doesn't guarantee a browser can complete very large jobs.
+- The UI shows progress and offers Cancel. Changing a model file, rights checkbox or pressing the global Reset aborts/terminates active work. Worker unsupported/failing browsers should report errors or use the documented chunked fallback; real handset performance still needs measurement.
 - Comparing the entire file establishes only **byte equality with the supplied hash**. If the JSON is self-authored or malicious, it does not prove provenance; the pipeline cannot independently verify the license, authenticity, safety, operator compatibility, or performance.
 - Neither ONNX Runtime nor a pretrained identity swap checkpoint has been included. This tool does **not** parse a model graph or execute arbitrary ONNX operators.
-- Model and description inputs clear on overall Reset. An in-flight hash can finish internally after Reset, but its result is discarded rather than shown. A URL is never fetched by this module.
+- Model and description inputs clear on overall Reset. A running Worker is terminated on Reset/cancel and its result cannot reappear. In a Worker-less fallback, a pending slice read can finish before the next abort check, but no stale result is displayed. No license evidence URL is fetched.
 - Do not commit any proprietary weights, personal actor images, voice, embeddings or source video into the public GitHub repository.
 
 ## Gate to real AI rendering
@@ -45,3 +46,7 @@ The `commercialUseConfirmed` field is a statement made by the user, **not an ass
 3. Run synthetic face-free test inference first, then consented short video inference with explicit `AI-generated` provenance and protected text/hands/logo areas.
 4. Add cancelable background hashing/inference, memory budgeting, long-form decoding and muxing, source-audio preservation, A/V synchronization, and privacy assurance.
 5. Keep GitHub draft PR unmerged and Firebase production unaffected until actual manual acceptance.
+
+## SHA-256 implementation notes (v0.7.7)
+
+[MDN's SubtleCrypto.digest documentation](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest) states that native digest() requires a complete buffer and has no streaming interface. The incremental implementation in `src/sha256_stream.mjs` performs SHA-256 rounds over chunked reads, and `src/sha256_worker.mjs` keeps CPU-intensive processing off the UI thread. [Workers and termination](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers) are standard browser facilities. Tests compare many input boundaries, NIST empty/abc vectors, and multi-MiB payloads against Node crypto. This is byte-integrity plumbing only, not an audit of the upstream checkpoint or a model license.
