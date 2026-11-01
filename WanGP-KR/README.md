@@ -34,6 +34,7 @@ python WanGP-KR/scripts/bring_upstream.py
 2. [원본 기능 보존 목록](docs/UPSTREAM_FEATURE_MATRIX_KO.md)
 3. [검증·합격 기준](docs/ACCEPTANCE_KO.md)
 4. [원본 연결 및 사용 비용·라이선스](docs/UPSTREAM_AND_COSTS_KO.md)
+5. [Windows / RAM 16GB / 저사양 GPU 준비](docs/WINDOWS16_LOW_SPEC_KO.md)
 
 ## 진척
 
