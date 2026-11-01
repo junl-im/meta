@@ -83,7 +83,7 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
         with gr.Column():
             gr.Markdown(f"# {APP_TITLE}")
             gr.Markdown(
-                "**기본 모드: 무료 로컬 제작**  \\n"
+                "**기본 모드: 무료 로컬 제작**  \n"
                 "원본 WanGP가 제공하는 영상·이미지·음성·3D 모델과 "
                 "저VRAM 설정을 그대로 사용합니다. GPT·Claude·외부 생성 API는 필수가 아닙니다."
             )
