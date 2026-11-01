@@ -1,10 +1,10 @@
-# Actor Swap Studio WEB — v0.7.3 audio QA
+# Actor Swap Studio WEB — v0.7.4 container QA
 
 Independent web-first workspace inside the `junl-im/meta` repository.
 
 ## Status (2026-11-01)
 
-**Browser lab, not AI face swap.** The UI now includes a 3-second labeled picture-over-video recording test, optional MediaPipe face **location** detection, and a downloadable file (MP4 or WebM, chosen by browser capability). The photo overlay is not an identity replacement or realistic face-swap inference. The browser now uses a reusable local Web Audio capture bridge when available, with native captureStream as a fallback. Chromium E2E checks the recorded synthetic 440 Hz tone is actually non-silent; absence of an audio track is explicitly labeled silent, but source-audio fidelity and lip synchronization are not yet proven. No user footage or portrait is uploaded by our application.
+**Browser lab, not AI face swap.** The UI now includes a 3-second labeled picture-over-video recording test, optional MediaPipe face **location** detection, and a downloadable file (MP4 or WebM, chosen by browser capability). The photo overlay is not an identity replacement or realistic face-swap inference. The browser uses a reusable local Web Audio capture bridge when available, with native captureStream as a fallback. A bounded EBML metadata pass adds missing WebM Duration on supported MediaRecorder output without transcoding or network access. Chromium E2E checks the recorded synthetic 440 Hz tone is actually non-silent; absence of an audio track is explicitly labeled silent, but source-audio fidelity and lip synchronization are not yet proven. No user footage or portrait is uploaded by our application.
 
 ## Goals
 
@@ -29,6 +29,7 @@ Open `faceswap/index.html` through a local web server, or publish the folder as 
 - `src/compositor.mjs` — canvas overlay, output sizing and supported recorder format.
 - `src/video_lab.mjs` — optional tracking, 3-second local recording, cancellation, preview/download.
 - `src/audio_capture.mjs` — reusable Web Audio source and per-render local audio tracks, with disposal.
+- `src/webm_duration.mjs` — local EBML Duration repair on eligible MediaRecorder WebM files; unsupported structures pass through unchanged.
 - `tests/smoke.mjs` — Node smoke/architecture checks.
 - `docs/WEB_MIGRATION.md` — migration and acceptance gates.
 - `docs/OPEN_SOURCE_RESEARCH.md` — source candidates and licensing gates.
@@ -45,7 +46,7 @@ The repository's active Firebase publishing path is `.pages-site`. This folder i
 
 ## Verify
 
-Run `node --test faceswap/tests/smoke.mjs` from the repository root. Node checks cover geometry, format selection, browser gating and privacy-facing UI text. The GitHub Actions workflow runs syntax checks and tests. **Automated Chromium QA now passes**: [run 41297129563](https://github.com/junl-im/meta/actions/runs/41297129563) verifies six real browser flows: desktop and Pixel 7 mobile **emulation** × local synthetic video/audio record/download, consent/reset handling, and repeated recording. The synthetic input includes a 440 Hz sine track. FFprobe verifies recorded audio/video streams and packet extent; FFmpeg decodes the output and checks non-silent volume. This does **not** prove physical Android/iOS playback, model detection success, accurate A/V synchronization or original source-audio fidelity. A MediaRecorder WebM file may lack a container `Duration` field even when video packets contain valid timestamps, so dependable seeking/export requires a proper media muxer in a later milestone.
+Run `node --test faceswap/tests/smoke.mjs` from the repository root. Node checks cover geometry, format selection, browser gating and privacy-facing UI text. The GitHub Actions workflow runs syntax checks and tests. **Automated Chromium QA now passes**: [run 41304865701](https://github.com/junl-im/meta/actions/runs/41304865701) verifies six real browser flows: desktop and Pixel 7 mobile **emulation** × local synthetic video/audio record/download, consent/reset handling, and repeated recording. The synthetic input includes a 440 Hz sine track. FFprobe verifies recorded audio/video streams, packet extent, finite container Duration and bounded A/V end-time difference. FFmpeg decodes the output and checks non-silent volume. Playwright also seeks the generated result to 1.2 seconds. This does **not** prove physical Android/iOS playback, model detection success, accurate A/V synchronization or original source-audio fidelity. An eligible MediaRecorder WebM file that lacks a container `Duration` field is now repaired locally. Long-form seeking/cues, true A/V synchronization and cross-device MP4/WebM remux still require a proper media muxer in a later milestone (Mediabunny is a research candidate).
 
 Run `npm install`, `npx playwright install chromium`, prepare synthetic fixtures as in `.github/workflows/faceswap-ci.yml`, then `npm run test:browser` to reproduce. A static local server is started automatically. Future manual QA must cover Chrome/Edge desktop, Chrome Android and Safari iOS, including MediaPipe CDN failures and silent-output fallbacks.
 
