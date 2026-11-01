@@ -12,7 +12,7 @@ import gradio as gr
 
 from shared.utils.plugins import WAN2GPPlugin
 
-from .catalog import format_model_catalog
+from .catalog import format_model_catalog, format_model_details, format_queue_status
 from .hardware import read_hardware_report
 from .help_content import TOPICS, render_guide
 from .prompt_assistant import TASK_KINDS, STYLES, PROFILES, build_prompt
@@ -48,6 +48,9 @@ STUDIO_STYLE = """
 #gfs-root .gfs-workshop h3 {font-size:18px;margin:0 0 4px}
 #gfs-root .gfs-workshop p {margin:0;opacity:.85}
 
+#gfs-root #gfs-queue-refresh,#gfs-root #gfs-model-inspect {border-radius:12px;font-weight:750}
+#gfs-root .gfs-status {padding:14px 16px;border-radius:14px;border:1px solid rgba(105,152,148,.28);background:linear-gradient(120deg,rgba(53,112,123,.15),rgba(236,171,106,.09))}
+#gfs-root .gfs-status strong {color:var(--gfs-gold)}
 #gfs-root .gfs-muted {font-size:12px;opacity:.75}
 @media (max-width:740px) {
   #gfs-root #gfs-banner img {max-height:145px;border-radius:15px}
@@ -62,8 +65,8 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.7.0-dev"
-        self.description = "무료 로컬 제작 중심 한국어 대시보드 · GPT 감독 선택"
+        self.version = "0.8.0-dev"
+        self.description = "모델 상세·원본 큐 조회가 추가된 한국어 제작 대시보드 · GPT 선택"
 
     def setup_ui(self):
         self.request_component("state")
@@ -247,6 +250,47 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                         label="검색 결과", lines=12, interactive=False,
                         value="버튼을 누르면 설치된 WanGP의 원본 모델 목록을 읽습니다.",
                     )
+                    gr.Markdown(
+                        "**모델 상세 보기:** 위 목록에 표시된 대괄호 안의 원본 모델 ID를 입력하세요. "
+                        "지원 기능과 파일 준비 상태를 원본에서 조회합니다."
+                    )
+                    with gr.Row():
+                        model_id_input = gr.Textbox(
+                            label="원본 모델 ID", placeholder="예: qwen_image_20B"
+                        )
+                        model_inspect = gr.Button(
+                            "모델 정보 확인", elem_id="gfs-model-inspect"
+                        )
+                    model_detail = gr.Textbox(
+                        label="모델 상세·파일 상태 (읽기 전용)",
+                        lines=9, interactive=False,
+                        value="모델 ID를 입력한 뒤 모델 정보 확인을 눌러 주세요.",
+                    )
+
+                with gr.Tab("작업 현황 · 갤러리"):
+                    gr.HTML(
+                        '<div class="gfs-status"><strong>원본 WanGP 공용 작업 큐</strong>'
+                        '<p>지금 실행 중이거나 대기 중인 작업을 조회할 수 있어요. '
+                        '새로고침을 눌러야 최신 상태가 나타납니다.</p></div>'
+                    )
+                    queue_prompts = gr.Checkbox(
+                        label="작업 내용(프롬프트)도 표시하기 · 기본 숨김", value=False
+                    )
+                    queue_refresh = gr.Button(
+                        "현재 작업 상태 새로고침", elem_id="gfs-queue-refresh"
+                    )
+                    queue_result = gr.Textbox(
+                        label="원본 큐 현황 (읽기 전용)", lines=10, interactive=False,
+                        value="현재 작업 상태 새로고침을 눌러 주세요.",
+                    )
+                    gallery_open = gr.Button(
+                        "원본 WanGP 제작·갤러리 화면으로 이동", variant="primary"
+                    )
+                    gr.Markdown(
+                        "이 화면에서는 **조회만** 합니다. 작업 삭제·중단·재실행을 하지 않습니다. "
+                        "진행률(%)과 완료 결과 썸네일은 원본 WanGP의 제작·갤러리 화면에서 확인하세요. "
+                        "원본 큐 API가 제공되지 않는 이전 버전에서는 안내 문구만 표시됩니다."
+                    )
 
                 with gr.Tab("내 PC · 저사양 안내"):
                     gr.HTML(
@@ -331,6 +375,17 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
         catalog_refresh.click(
             fn=lambda kind, query, page: format_model_catalog(api_session, kind, query, page),
             inputs=[kind_choice, name_query, page_choice], outputs=[catalog_output],
+        )
+        model_inspect.click(
+            fn=lambda model_id: format_model_details(api_session, model_id),
+            inputs=[model_id_input], outputs=[model_detail],
+        )
+        queue_refresh.click(
+            fn=lambda show: format_queue_status(api_session, show),
+            inputs=[queue_prompts], outputs=[queue_result],
+        )
+        gallery_open.click(
+            fn=self.goto_media_tab, inputs=[self.state], outputs=[self.main_tabs]
         )
         submit.click(
             fn=self._send_optional_director_request, inputs=[instruction, consent], outputs=[outcome]
