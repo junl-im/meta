@@ -164,6 +164,7 @@ renderButton.addEventListener("click", async () => {
   let sourceStream = null;
   let audioCapture = null;
   let audioStartup = null;
+  let audioReady = false;
   let recorder = null;
   let recordingStartedAt = 0;
   let recordingStoppedAt = 0;
@@ -179,7 +180,9 @@ renderButton.addEventListener("click", async () => {
     // AudioContext must start from a direct click, before the first await.
     try {
       audioCapture = prepareAudioCapture(video);
-      audioStartup = audioCapture?.resume().catch(() => {
+      audioStartup = audioCapture?.resume().then(() => {
+        audioReady = true;
+      }).catch(() => {
         audioCapture?.dispose();
         audioCapture = null;
       });
@@ -198,7 +201,23 @@ renderButton.addEventListener("click", async () => {
     }
     showFrame();
     stream = canvas.captureStream(25);
-    await audioStartup;
+    // Firefox can leave AudioContext.resume() pending under autoplay limits.
+    // Never freeze the entire video job waiting for an optional audio track.
+    if (audioStartup) {
+      let audioTimer;
+      try {
+        await Promise.race([
+          audioStartup,
+          new Promise((resolve) => { audioTimer = setTimeout(resolve, 900); })
+        ]);
+      } finally {
+        clearTimeout(audioTimer);
+      }
+      if (!audioReady) {
+        audioCapture?.dispose();
+        audioCapture = null;
+      }
+    }
     if (thisGeneration !== generation || work.aborted) {
       audioCapture?.dispose();
       for (const track of stream.getTracks()) track.stop();
