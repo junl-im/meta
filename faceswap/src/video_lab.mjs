@@ -161,7 +161,12 @@ renderButton.addEventListener("click", async () => {
   try {
     video.pause();
     await seekStart();
-    if (thisGeneration !== generation || work.aborted) return;
+    if (thisGeneration !== generation || work.aborted) {
+      if (job === work) job = null;
+      video.controls = true;
+      updateButtons();
+      return;
+    }
     showFrame();
     stream = canvas.captureStream(25);
     // Best-effort original-audio passthrough; Safari may not provide this API.
