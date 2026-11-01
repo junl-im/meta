@@ -60,6 +60,7 @@ class TestFullInstallerSafety(unittest.TestCase):
             "hardware.py",
             "prompt_assistant.py",
             "studio-hero.png",
+            "gomfox-studio-icon.png",
         ):
             self.assertIn('call :fetch_plugin_file "' + filename + '"', self.script)
 
@@ -69,6 +70,15 @@ class TestFullInstallerSafety(unittest.TestCase):
         self.assertIn("choice /C YN /M", self.script)
         self.assertIn("if ([IO.File]::Exists($path)) { exit 4 }", self.script)
         self.assertIn("WanGP Manager에서 Start WanGP를 이용하세요", self.script)
+
+    def test_signature_icon_is_pinned_and_applied_only_to_new_shortcut(self):
+        self.assertIn('call :fetch_plugin_file "gomfox-studio-icon.png"', self.script)
+        self.assertIn('if not exist "%PLUGIN_DEST%\\gomfox-studio-icon.png" goto plugin_copy_error', self.script)
+        self.assertIn("GOMFOX_ICON_ICO", self.script)
+        self.assertIn("[System.Drawing.Imaging.ImageFormat]::Png", self.script)
+        self.assertIn("$link.IconLocation=$env:GOMFOX_SHORTCUT_ICON + ',0'", self.script)
+        self.assertLess(self.script.index("if ([IO.File]::Exists($path)) { exit 4 }"), self.script.index("$link.IconLocation="))
+        self.assertNotIn("<svg", self.lower)
 
     def test_no_automatic_cloud_or_gpt_connection(self):
         self.assertIn("GPT나 Claude 로그인은 기본 생성에 필요하지 않습니다", self.script)
