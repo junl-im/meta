@@ -75,6 +75,11 @@ function invalidate() {
 inputVideo.addEventListener("change", invalidate);
 inputPhoto.addEventListener("change", invalidate);
 consent.addEventListener("change", invalidate);
+// Reset clears file inputs programmatically, so no input change event is fired.
+get("reset-button").addEventListener("click", () => {
+  invalidate();
+  announce("초기화했어. 새 영상과 참고 사진을 선택하면 다시 실험할 수 있어.");
+});
 video.addEventListener("loadeddata", () => { updateButtons(); showFrame(); });
 video.addEventListener("loadedmetadata", updateButtons);
 photo.addEventListener("load", () => { updateButtons(); showFrame(); });
