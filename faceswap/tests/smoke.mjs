@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { chooseCandidateBackend, formatMiB, probeCapabilities } from "../src/capabilities.mjs";
 import {normalizeFaceBox, findFaceBox, loadFaceDetector, modelAssets} from "../src/face_detector.mjs";
 import {outputDimensions, chooseRecordingFormat, drawOverlayFrame, defaultBox} from "../src/compositor.mjs";
+import {prepareAudioCapture, closeAudioCapture} from "../src/audio_capture.mjs";
 
 
 const base = new URL("../", import.meta.url);
@@ -53,7 +54,7 @@ test("feature probe reports supported mock APIs", async () => {
 });
 
 test("web UI contains no SVG and never loads a native localhost engine", () => {
-  for (const name of ["index.html", "styles.css", "src/app.mjs", "src/video_lab.mjs", "src/compositor.mjs", "src/face_detector.mjs"]) {
+  for (const name of ["index.html", "styles.css", "src/app.mjs", "src/video_lab.mjs", "src/compositor.mjs", "src/audio_capture.mjs", "src/face_detector.mjs"]) {
     const source = read(name);
     assert.doesNotMatch(source, /<svg\b|\.svg\b|data:image\/svg/i, name);
     assert.doesNotMatch(source, /127\.0\.0\.1|localhost:7869/i, name);
@@ -151,4 +152,43 @@ test("experimental media path is local and network model is opt-in", () => {
   assert.doesNotMatch(js, /\bfetch\s*\(|XMLHttpRequest\b/);
   assert.match(detector, /mediapipe\/tasks-vision@1\.2\.0/);
   assert.doesNotMatch(detector, /inswapper_128|insightface/);
+});
+
+test("local audio bridge reuses the element source and disposes each track", async () => {
+  const events = [];
+  let constructed = 0;
+  class FakeContext {
+    constructor() { constructed++; this.destination = {kind: "speakers"}; }
+    createMediaElementSource() {
+      return {
+        connect: (target) => events.push(["connect", target.kind || "capture"]),
+        disconnect: () => events.push(["disconnect"])
+      };
+    }
+    createMediaStreamDestination() {
+      const track = {readyState: "live", stop: () => {
+        track.readyState = "ended";
+        events.push(["stop"]);
+      }};
+      return {kind: "capture", stream: {getAudioTracks: () => [track]}};
+    }
+    resume() { return Promise.resolve(); }
+    close() { events.push(["close"]); return Promise.resolve(); }
+  }
+  const element = {};
+  const first = prepareAudioCapture(element, {AudioContext: FakeContext});
+  await first.resume();
+  assert.equal(first.track.readyState, "live");
+  first.dispose();
+  first.dispose();
+  assert.equal(first.track.readyState, "ended");
+  const second = prepareAudioCapture(element, {AudioContext: FakeContext});
+  assert.equal(constructed, 1);
+  assert.equal(second.track.readyState, "live");
+  second.dispose();
+  await closeAudioCapture(element);
+  assert.equal(events.filter(([type]) => type === "disconnect").length, 2);
+  assert.equal(events.filter(([type]) => type === "stop").length, 2);
+  assert.equal(events.filter(([type]) => type === "close").length, 1);
+  assert.equal(prepareAudioCapture({}, {}), null);
 });
