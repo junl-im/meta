@@ -45,6 +45,7 @@ python WanGP-KR/scripts/bring_upstream.py
 4. [원본 연결 및 사용 비용·라이선스](docs/UPSTREAM_AND_COSTS_KO.md)
 5. [Windows / RAM 16GB / 저사양 GPU 준비](docs/WINDOWS16_LOW_SPEC_KO.md)
 6. [첫 한국어 플러그인 시험판](plugin/README_KO.md)
+7. [처음 쓰는 분을 위한 사용 설명서](docs/USER_GUIDE_KO.md)
 
 ## 진척
 
@@ -56,6 +57,7 @@ python WanGP-KR/scripts/bring_upstream.py
 - [ ] 선택 기능으로 Codex 로그인 후 Deepy Prime 시험
 - [x] 한국어 플러그인 최소 화면 코드 작성(실행 전)
 - [x] 원본 모델 메타데이터 기반 영상·이미지·음성·3D·월드 탐색기 코드 작성(실행 전)
+- [x] 초보자용 한글 도움말 5단계 및 분야별 안내 코드 작성(실행 전)
 - [ ] 원본 WanGP에서 한국어 플러그인 실제 설치·실행 확인
 - [ ] 원본과 기능·성능 A/B 검증
 - [ ] 원할 때만 ChatGPT에서 MCP로 직접 제어하는 연결 가능 여부 실환경 확인
