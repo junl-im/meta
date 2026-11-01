@@ -32,6 +32,13 @@ if errorlevel 1 goto need_64bit
 where curl.exe >nul 2>nul
 if errorlevel 1 goto need_curl
 
+echo [설치 전 안내] 현재 Windows에 표시된 그래픽카드:
+powershell.exe -NoProfile -NonInteractive -Command "Get-CimInstance Win32_VideoController -ErrorAction SilentlyContinue | ForEach-Object { Write-Output ('GPU: ' + $_.Name) }"
+echo.
+echo 그래픽카드가 감지되어도 모든 영상/3D 모델 실행이 보장되지는 않습니다.
+echo 실제 권장 프로필은 공식 WanGP Manager가 제안합니다.
+echo.
+
 echo [1/4] 공식 설치 관리자 다운로드를 준비합니다.
 set "SETUP_DIR=%TEMP%\GomFoxAIStudioSetup_%RANDOM%_%RANDOM%"
 mkdir "%SETUP_DIR%" >nul 2>nul
