@@ -1,47 +1,52 @@
-# 메타 AI 스튜디오 전체 개발 계획 — 2026-11-01
+# 곰같은여우의 AI 스튜디오 전체 개발 계획 — 2026-11-01
 
 ## 1. 개발 원칙
 
-**목표:** WanGP가 제공하는 결과물의 품질과 처리 기능을 낮추지 않으면서, 내 개인용 한글 작업실의 감독자를 **GPT(Codex)**로 전환한다.
+**목표:** WanGP의 **무료 로컬 미디어 생성·편집**을 기본 모드로 보존하고, 모든 원본 기능과 품질을 지키면서 순수 한글 개인용 작업실을 만든다. **GPT(Codex/ChatGPT)는 사용자 선택에 따라 추가하는 감독 기능**으로만 연결한다.
 
 **비목표:** 원본 모델·스케줄러·양자화·VRAM 오프로딩을 다시 구현하거나 기존 기능을 삭제하지 않는다. GPT/한국어 UI만으로 이미지·영상 모델의 물리적인 연산 속도나 품질이 저절로 향상된다고 주장하지 않는다. 광고의 `사람 없이 0원 무제한`을 사실로 가정하지 않는다.
 
 ## 2. 실제 확인된 통합 지점
 
-1. **GPT 감독자:** WanGP `Configuration → Prompt Enhancer / Deepy → LLM Engine: Codex → Deepy Prime`. Codex 실행 파일과 인증은 WanGP 외부에 있으며, 인증은 Codex에서 관리한다. 공식: [REMOTE_LLMS.md](https://github.com/deepbeepmeep/WanGP/blob/main/docs/REMOTE_LLMS.md).
-2. **제작 자동화:** 내장 [Showrunner](https://github.com/deepbeepmeep/WanGP/blob/main/docs/SHOWRUNNER.md)에서 기획 → 스토리보드 → 샷 → 재촬영 → 편집/합성. 자동 기획에는 Deepy Prime이 필요하고 수동 편집은 별도 동작.
-3. **원본 API/공유 큐:** [API.md](https://github.com/deepbeepmeep/WanGP/blob/main/docs/API.md)의 `shared/api.py`, [CLI.md](https://github.com/deepbeepmeep/WanGP/blob/main/docs/CLI.md)의 `--mcp-webui` 및 MCP API v2.1 사용. 단독 `--mcp` 실행과 웹 UI 공용 큐는 다르다.
-4. **한국어 UI 확장:** [PLUGINS.md](https://github.com/deepbeepmeep/WanGP/blob/main/docs/PLUGINS.md)의 원본 플러그인 체계를 검토해 **별도 한국어 앱/플러그인**을 제작. 기존 원본 UI는 고급 기능용 비상 통로로 유지.
-5. **ChatGPT 직접 연결:** 사용 계정에서 지원되는 ChatGPT의 외부 MCP 연결을 별도 점검한 뒤, `--mcp-webui`를 통한 지시·상태·결과 조회를 개발. **현재 연결 완료 상태가 아님**.
+1. **기본 무료 경로:** 원본 WanGP의 로컬 모델 생성/편집/큐는 GPT·Claude·외부 생성 API 없이 실행 가능. 모델 가중치 및 하드웨어 호환성을 확인한다.
+2. **선택 GPT 감독자:** 사용자가 활성화한 경우에만 WanGP `Configuration → Prompt Enhancer / Deepy → LLM Engine: Codex → Deepy Prime`. Codex 실행 파일과 인증은 WanGP 외부에 있으며, 인증은 Codex에서 관리한다. 공식: [REMOTE_LLMS.md](https://github.com/deepbeepmeep/WanGP/blob/main/docs/REMOTE_LLMS.md).
+3. **제작 자동화:** 내장 [Showrunner](https://github.com/deepbeepmeep/WanGP/blob/main/docs/SHOWRUNNER.md)에서 기획 → 스토리보드 → 샷 → 재촬영 → 편집/합성. 자동 기획에는 Deepy Prime이 필요하고 수동 편집은 별도 동작.
+4. **원본 API/공유 큐:** [API.md](https://github.com/deepbeepmeep/WanGP/blob/main/docs/API.md)의 `shared/api.py`, [CLI.md](https://github.com/deepbeepmeep/WanGP/blob/main/docs/CLI.md)의 `--mcp-webui` 및 MCP API v2.1 사용. 단독 `--mcp` 실행과 웹 UI 공용 큐는 다르다.
+5. **한국어 UI 확장:** [PLUGINS.md](https://github.com/deepbeepmeep/WanGP/blob/main/docs/PLUGINS.md)의 원본 플러그인 체계를 검토해 **별도 한국어 앱/플러그인**을 제작. 기존 원본 UI는 고급 기능용 비상 통로로 유지.
+6. **ChatGPT 직접 연결(선택):** 사용 계정에서 지원되는 ChatGPT의 외부 MCP 연결을 별도 점검한 뒤, `--mcp-webui`를 통한 지시·상태·결과 조회를 개발. **현재 연결 완료 상태가 아님**.
 
 ## 3. 권장 아키텍처
 
 ```text
-[한국어 모바일·PC 작업실]
-   ├─ 작품 만들기: 영상 / 이미지 / 음성 / 3D
-   ├─ 자동 연출: Showrunner + Deepy Prime ── Codex CLI(GPT, 기본)
-   │                                        ├─ Claude Code(선택)
-   │                                        └─ OpenCode/로컬 모델(선택)
-   ├─ 복원·편집: Media Flow
-   ├─ 생성 기록·파일: WanGP Gallery / Workspaces
-   └─ 전문 설정: 원본 WanGP 화면(항상 접근 가능)
-                     │
-              WanGP 원본 엔진
-        (모델·LoRA·큐·후처리·VRAM 최적화)
-                     │
-               로컬 GPU 및 저장 공간
+[곰같은여우의 AI 스튜디오 / 한글 모바일·PC UI]
+                    │
+      기본 선택: 무료 로컬 생성 (GPT OFF)
+                    │
+      [WanGP 원본 모델·큐·갤러리·API]
+          ├─ 영상 / 이미지 / 음성 / 3D
+          ├─ Media Flow / 후처리 / LoRA
+          └─ 저VRAM 최적화 / 성능 프로필
+                    │
+              사용자 PC 로컬 GPU
 
-[ChatGPT 직접 지시] ── (지원·인증 확인 후) MCP v2.1 ── 같은 WanGP 웹 큐
+[감독 기능은 별도 선택]
+      ├─ Deepy Prime + 로컬 LLM (하드웨어 충족 시)
+      └─ Deepy Prime + Codex CLI(GPT, 사용자가 켠 경우)
+
+[ChatGPT 대화창 직접 연결(별도 선택)]
+      └─ 지원·인증 검증 후 MCP v2.1로 WanGP 공용 큐 제어
+
+[원본 WanGP UI] ── 모든 고급 기능의 상시 복귀 경로
 ```
 
-**핵심:** 한국어 앱은 원본 엔진의 설정·메타데이터·작업 큐를 호출한다. 원본 `wgp.py`, 모델 처리, 최적화 코드, 기본 프리셋은 먼저 변경하지 않는다. 모델의 기능·매개변수를 고정 목록으로 하드코딩하지 않고 원본 메타데이터/API에서 읽어 새로운 모델 추가를 따른다.
+**핵심:** 무료 로컬 생성은 GPT/Claude/외부 생성 API 없이 동작해야 한다. 자동 감독(Showrunner)은 Deepy Prime이 필요하므로 기본 생성과 구분하고, GPT는 명시적으로 켠 경우에만 접속한다. 한국어 앱은 원본 엔진의 설정·메타데이터·작업 큐를 호출한다. 원본 `wgp.py`, 모델 처리, 최적화 코드, 기본 프리셋은 먼저 변경하지 않는다. 모델의 기능·매개변수를 고정 목록으로 하드코딩하지 않고 원본 메타데이터/API에서 읽어 새로운 모델 추가를 따른다.
 
 ## 4. 한국어 사용자 경험
 
 첫 화면: `새 작품` / `이어 만들기` / `자동 감독` / `고급 도구`.
 
 - 한 화면 작업: 자연어 브리프 → 추천 모델 및 예상 리소스 확인 → 생성/중지 → 결과 비교·승인·재작업 → 저장.
-- **자동 감독:** 사용자는 한글로 요구하고, 감독자가 샷·참조 이미지·캐릭터·오디오·길이·품질을 관리. 전송할 수 있는 원본 미디어 범위를 사용자에게 표시한다.
+- **자동 감독(선택):** 사용자는 한글로 요구하고, 감독자가 샷·참조 이미지·캐릭터·오디오·길이·품질을 관리. 전송할 수 있는 원본 미디어 범위를 사용자에게 표시한다.
 - **편집자 기능**: 스토리보드 수정, 시드·프롬프트·모델·VRAM 프로필·크기·LoRA·후처리 등 고급 옵션은 원본 UI로 진입 가능하게 한다.
 - **모바일**: 작업 중 뒤로가기는 열린 창 → 이전 작업 단계 → 종료 확인 순서. 계속하기는 진행·설정을 보존, 나가기는 홈으로 복귀.
 - **디자인**: 모든 새 이미지/아이콘/장식은 PNG/WebP 또는 CSS. 새 SVG 파일·태그·data URI 금지.
@@ -52,12 +57,13 @@
 | 단계 | 작업 | 완료 조건 |
 |---|---|---|
 | 0. 원본 고정·조사 | 공식 소스/라이선스/기능 목록, GPU·OS 질문, 설치 위치 정리 | 출처·커밋·기능 매트릭스 기록 |
-| 1. 엔진+GPT 연동 | 원본 로컬 설치, Codex 로그인, Deepy Prime, Showrunner 시범 작업 | 한국어 브리프로 실제 이미지 1개·영상 샷 1개 생성, 작업 로그 보존 |
-| 2. 순수 한글 개인 UI | 외부 플러그인 한글 홈, 작업 큐/갤러리/설정, 뒤로가기, 백업 | 주요 사용자 경로 전부 한글, 원본 고급 설정 누락 없음 |
-| 3. 자동화 | 샷 계획, 대기열, 중단·재개, 실패 자동 재시도(설정형), 비용·시간 예산 표시 | 실패 시 복구 가능, 사용자가 승인/취소 가능 |
-| 4. 직접 ChatGPT와 검증 | 허용된 MCP 인증 경로, 사용자 세션 연결, 품질·속도·VRAM 비교 | 직접 연결 실증, 원본 대비 회귀 0건 또는 명시적 이슈/보류 |
+| 1. 무료 로컬 원본 구동 | 사용자 PC에 원본 WanGP 설치, GPT OFF로 작은 이미지·짧은 영상 실측 | API 키/외부 LLM 로그인 없이 생성·저장·중단 가능 |
+| 2. 순수 한글 개인 UI | 외부 플러그인 한글 홈, 작업 큐/갤러리/설정, 뒤로가기, 백업 | 주요 사용자 경로 한글, 원본 고급 설정 누락 없음 |
+| 3. 무료 기본 작업 자동화 | 로컬 큐·배치·실패 복구·후처리·저사양 모드, 비용 표시 | GPT OFF에서도 주요 생성/편집 경로 정상, 무단 과금 없음 |
+| 4. 선택 감독·GPT | 필요 시 Deepy Prime 로컬 감독 또는 Codex 연동, 허용되면 ChatGPT MCP 연결 | OFF/ON 전환 가능, 자격·데이터 전송·비용 동의, 기본 모드 무영향 |
+| 5. 회귀 검증·출시 판정 | 기능 목록·품질·시간·VRAM 비교 및 원본 복귀 시험 | 중요 기능 회귀 0건 또는 출시 보류, 모든 편차 공개 |
 
-**단계 1 이전 결정 필요:** 사용할 PC의 운영체제, GPU 모델/VRAM, 시스템 RAM, 저장 공간, Codex 로그인 가능 여부. 하드웨어 확인 전 `하루 5편`, 렌더 시간, 무료 운용은 확답 불가.
+**단계 1 이전 결정 필요:** 사용할 PC의 GPU 모델/VRAM 및 저장 공간(Windows, RAM 16GB 확인). Codex 로그인은 GPT 선택 기능 테스트 전까지 필요하지 않다. 하드웨어 확인 전 `하루 5편`이나 렌더 시간은 확답 불가.
 
 ## 6. 버전·업데이트 전략
 
@@ -77,5 +83,6 @@
 1. GPU/VRAM/OS 체크리스트 확정.
 2. 원본 소스를 **공식 GitHub URL에서 클론**하여 읽기 전용 기준점을 남김.
 3. 원본 WanGP 실행 + 간단한 이미지/영상 샘플 재현으로 기준 측정.
-4. Codex를 Deepy Prime에 연결하여 동일 조건의 Showrunner 한글 브리프 실험.
+4. 무료 로컬 모드로 기능·성능 기준값을 먼저 확보한다.
+5. 사용자가 선택한 경우에만 Codex를 Deepy Prime에 연결해 동일 조건의 Showrunner 한글 브리프를 실험한다.
 5. 이 실측값에 따라 한국어 플러그인의 첫 화면 구현.
