@@ -15,7 +15,7 @@ from shared.utils.plugins import WAN2GPPlugin
 from .catalog import format_model_catalog, format_model_details, format_queue_status
 from .hardware import read_hardware_report
 from .help_content import TOPICS, render_guide
-from .prompt_assistant import TASK_KINDS, STYLES, PROFILES, build_prompt
+from .prompt_assistant import TASK_KINDS, STYLES, PROFILES, build_prompt, fill_example
 
 
 APP_TITLE = "곰같은여우의 AI 스튜디오"
@@ -46,6 +46,7 @@ STUDIO_STYLE = """
 #gfs-root #gfs-category-3d {background:linear-gradient(145deg,#946f4f,#78523d);color:#fff;border-color:#a47b5a}
 #gfs-root #gfs-launch {min-height:49px;border-radius:13px;font-weight:800}
 #gfs-root #gfs-copy {border-radius:12px;font-weight:750}
+#gfs-root #gfs-example {border-radius:12px;font-weight:750;border:1px solid rgba(210,154,99,.42);background:linear-gradient(135deg,rgba(239,182,111,.19),rgba(97,151,151,.14))}
 #gfs-root #gfs-compose {min-height:44px;background:linear-gradient(130deg,#2b746f,#205f68);color:#fff;border-radius:12px;font-weight:800}
 #gfs-root #gfs-prompt-box textarea {line-height:1.55;font-size:14px}
 #gfs-root .gfs-workshop {padding:14px 17px;border-radius:16px;border:1px solid rgba(122,151,153,.25);background:linear-gradient(125deg,rgba(66,125,129,.15),rgba(235,163,103,.12))}
@@ -69,7 +70,7 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.9.0-dev"
+        self.version = "0.10.0-dev"
         self.description = "곰·여우 시그니처 아이콘을 적용한 한국어 제작 대시보드 · GPT 선택"
 
     def setup_ui(self):
@@ -217,6 +218,10 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                         label="추가 조건 (선택)", lines=2,
                         placeholder="예: 아침 햇살, 부드러운 카메라 이동, 원본 색감 유지",
                     )
+                    prompt_example = gr.Button(
+                        "처음이라면 예시 넣기 · 직접 수정 가능", elem_id="gfs-example"
+                    )
+                    gr.Markdown("**사용법:** 분야를 고르고 예시를 넣은 뒤, 원하는 부분만 바꿔 보세요. 예시 입력만으로 생성이 시작되지는 않습니다.")
                     prompt_compose = gr.Button(
                         "무료 프롬프트 만들기", variant="primary", elem_id="gfs-compose"
                     )
@@ -361,6 +366,10 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
         open_generator.click(
             fn=self.goto_media_tab, inputs=[self.state], outputs=[self.main_tabs]
         )
+        prompt_example.click(
+            fn=fill_example,
+            inputs=[prompt_kind], outputs=[prompt_subject, prompt_extra],
+        )
         prompt_compose.click(
             fn=build_prompt,
             inputs=[prompt_kind, prompt_subject, prompt_style, prompt_extra, prompt_profile],
@@ -371,7 +380,7 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
             js=(
                 "async (draft) => {"
                 "  try {"
-                "    if (!draft || draft.startsWith('주제를 입력')) return '먼저 프롬프트를 만들어 주세요.';"
+                "    if (!draft || draft.startsWith('주제를 입력') || draft.startsWith('먼저 만들고 싶은')) return '먼저 프롬프트를 만들어 주세요.';"
                 "    await navigator.clipboard.writeText(draft);"
                 "    return '복사 완료! 원본 제작 화면에서 붙여넣으세요.';"
                 "  } catch (_) {"
