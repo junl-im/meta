@@ -29,6 +29,7 @@ jobs:
           node --check faceswap/src/app.mjs
           node --check faceswap/src/face_detector.mjs
           node --check faceswap/src/compositor.mjs
+          node --check faceswap/src/audio_capture.mjs
           node --check faceswap/src/video_lab.mjs
           node --check faceswap/tests/serve.mjs
           node --check faceswap/tests/e2e/local-render.spec.mjs
