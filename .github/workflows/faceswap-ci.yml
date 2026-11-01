@@ -30,5 +30,32 @@ jobs:
           node --check faceswap/src/face_detector.mjs
           node --check faceswap/src/compositor.mjs
           node --check faceswap/src/video_lab.mjs
-      - name: Local-only foundation tests
+          node --check faceswap/tests/serve.mjs
+          node --check faceswap/tests/e2e/local-render.spec.mjs
+      - name: Node smoke checks
         run: node --test faceswap/tests/smoke.mjs
+
+  browser-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install QA dependencies only
+        working-directory: faceswap
+        run: npm install --no-audit --no-fund
+      - name: Install Chromium for QA
+        working-directory: faceswap
+        run: npx playwright install --with-deps chromium
+      - name: Generate synthetic test footage and portrait
+        run: |
+          mkdir -p faceswap/tests/fixtures
+          ffmpeg -hide_banner -loglevel error -f lavfi -i testsrc2=size=640x360:rate=25 -f lavfi -i sine=frequency=440:sample_rate=48000 -t 4 -shortest -c:v libvpx -b:v 700k -c:a libopus -y faceswap/tests/fixtures/source.webm
+          ffmpeg -hide_banner -loglevel error -f lavfi -i color=c=yellow:size=256x256 -frames:v 1 -y faceswap/tests/fixtures/portrait.png
+      - name: Test desktop and mobile-emulated Chromium
+        working-directory: faceswap
+        env:
+          CI: "true"
+        run: npm run test:browser
