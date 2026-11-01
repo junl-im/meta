@@ -19,7 +19,7 @@ class StudioDashboardTests(unittest.TestCase):
         ast.parse(SOURCE)
         image = PLUGIN_DIR / "studio-hero.png"
         self.assertTrue(image.is_file())
-        self.assertEqual(image.read_bytes()[:8], b"\\x89PNG\\r\\n\\x1a\\n")
+        self.assertEqual(image.read_bytes()[:8], b"\x89PNG\r\n\x1a\n")
         for forbidden in ("<svg", "data:image/svg", "cdn.jsdelivr"):
             self.assertNotIn(forbidden, SOURCE.casefold())
 
