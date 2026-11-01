@@ -55,13 +55,14 @@ Target: `junl-im/meta/faceswap/` (one repository, independent subproject)
 - [ ] Full seekable MP4/WebM remux for long videos, Cues/SeekHead correctness, full source-audio fidelity and physical-device verification.
 - [ ] Full source-audio fidelity, A/V synchronization, frame timing and seekable output confirmed on physical devices (Web Audio tone QA is not full preservation proof).
 
-### M0.75 — rights-aware model file preflight (v0.7.6, NOT inference)
+### M0.75 — rights-aware local model preflight (v0.7.7, NOT inference)
 
 - [x] Separate code license from model-weight rights: InsightFace and SimSwap are noncommercial for public pretrained weights; GHOST generator is a research lead but the ArcFace/dependency chain has unresolved rights.
 - [x] Local ONNX/ORT model chooser plus JSON manifest schema with an explicit weights-license claim, HTTPS evidence URL and whole-file SHA-256 comparison. Network-free model check does **not** fetch the claimed evidence URL or validate its legal authenticity.
-- [x] Conservative WebCrypto memory caps: 64 MiB on detected <=4 GiB devices; otherwise 256 MiB. No model parsing/inference or third-party weights distributed.
+- [x] v0.7.7: replace whole-buffer WebCrypto with incremental 1 MiB SHA-256; background module Worker, progress %, Cancel and Reset/input-change termination, Worker-less fallback. Input upper bound 2 GiB for processing scope, not peak-RAM allocation. No model inference or third-party weights distributed.
 - [x] Node strict manifest / tampered-byte / memory budget tests and browser cross-engine UI reset/privacy test are included; CI status tracked on draft PR.
-- [ ] Streamed background integrity check for larger model files, cancel and low-RAM measurement.
+- [x] Standard SHA-256 vectors and independent Node crypto comparisons across padding boundaries and multi-MiB fixtures; deterministic Worker cancellation tests included.
+- [ ] Measure multi-hundred-MiB throughput and energy on real low-end Windows/Android/iOS hardware, verify sustained cancellation and storage limits.
 - [ ] Independent verified model package provenance, complete rights documentation and ONNX Runtime operator tests.
 
 ### M1 — legally usable 3-second proof
