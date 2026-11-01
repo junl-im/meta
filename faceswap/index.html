@@ -5,14 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#111b25">
   <meta name="description" content="Actor Swap Studio WEB — 설치 없는 로컬 영상 작업 준비 화면">
-  <title>Actor Swap Studio WEB — v0.7</title>
+  <title>Actor Swap Studio WEB — v0.7.1</title>
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./src/app.mjs"></script>
+  <script type="module" src="./src/video_lab.mjs"></script>
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <div class="brand"><span class="brand-mark" aria-hidden="true">AS</span><div><strong>ACTOR SWAP STUDIO</strong><small>WEB FOUNDATION · v0.7</small></div></div>
+      <div class="brand"><span class="brand-mark" aria-hidden="true">AS</span><div><strong>ACTOR SWAP STUDIO</strong><small>WEB VIDEO LAB · v0.7.1</small></div></div>
       <div class="top-actions"><span class="phase-pill">로컬 작업 준비</span><button id="help-button" class="button button-subtle" type="button">도움말</button><button id="exit-button" class="button button-subtle" type="button">나가기</button></div>
     </header>
 
@@ -52,13 +53,27 @@
           <div class="preview-card"><div class="preview-caption"><strong>원본 영상</strong><span>기기 내부 미리보기</span></div><div class="media-slot"><video id="source-video" controls playsinline preload="metadata" aria-label="선택한 원본 영상"></video><p id="video-placeholder" class="placeholder">원본 영상을 선택해 줘</p></div><p id="video-detail" class="preview-detail">영상 정보 대기 중</p></div>
           <div class="preview-card"><div class="preview-caption"><strong>얼굴 참고 사진</strong><span>기기 내부 미리보기</span></div><div class="media-slot"><img id="reference-image" alt="선택한 얼굴 참고 사진"><p id="face-placeholder" class="placeholder">참고 사진을 선택해 줘</p></div><p id="face-detail" class="preview-detail">이미지 정보 대기 중</p></div>
         </div>
-        <div class="render-note"><strong>AI 렌더러 연결 전</strong><span>이 버전은 입력 검증과 브라우저 기능 진단을 제공해. 얼굴 교체·영상 생성·MP4 내보내기가 완료된 것처럼 표시하지 않아.</span></div>
+        <div class="render-note"><strong>얼굴 교체 AI는 아직 없음</strong><span>아래 실험은 원본 영상 위에 참고 사진을 타원형으로 겹쳐 보는 기술 검증이야. 실제 AI 얼굴 교체 결과가 아니야.</span></div>
+        <section class="video-lab" aria-labelledby="lab-title">
+          <div class="section-heading"><div><p class="eyebrow">LOCAL RENDER LAB</p><h2 id="lab-title">3초 영상 합성 실험실</h2></div><span class="lab-tag">실험 기능</span></div>
+          <p class="lab-description">원본 첫 3초에 참고 사진을 겹쳐서 기기 안에서 영상 파일로 저장해. 얼굴 영역 자동 검출은 선택 기능이며, 검출 모델 없이도 중앙 위치로 샘플을 만들 수 있어. AI 신원 교체나 자연스러운 얼굴 합성은 아직 아니야.</p>
+          <label class="consent model-choice"><input id="model-consent" type="checkbox"><span>선택적 MediaPipe 얼굴 위치 검출을 사용하겠어. 실행 파일·모델을 외부 CDN에서 내려받고, Google에 사용량·성능 지표가 전송될 수 있음을 이해했어. 영상·사진 자체는 업로드하지 않아.</span></label>
+          <div class="lab-actions"><button class="button button-subtle" id="detect-button" disabled type="button">얼굴 위치 자동 검출</button><button class="button button-primary" id="render-button" disabled type="button">3초 샘플 생성</button><button class="button button-subtle" id="cancel-render" disabled type="button">중단</button></div>
+          <div class="lab-controls">
+            <label for="overlay-scale">사진 크기 <input id="overlay-scale" type="range" min="60" max="160" value="100"></label>
+            <label for="overlay-opacity">겹침 정도 <input id="overlay-opacity" type="range" min="25" max="100" value="86"></label>
+          </div>
+          <canvas id="composite-canvas" width="640" height="360" aria-label="현재 영상 프레임 위에 참고 얼굴 사진을 겹친 합성 미리보기"></canvas>
+          <p id="lab-status" class="lab-status" role="status" aria-live="polite">입력 점검과 사용 동의가 끝나면 실험할 수 있어. 출력 형식은 브라우저별 MP4 또는 WebM이며, 원본 오디오 보존은 지원 여부에 따라 달라져.</p>
+          <video id="result-video" class="result-video" controls playsinline hidden aria-label="완성된 3초 합성 실험 영상"></video>
+          <a id="download-demo" class="button button-download" hidden download>생성한 샘플 내려받기</a>
+        </section>
       </section>
     </main>
-    <footer class="footer"><span>LOCAL FIRST · 입력 파일 업로드 없음</span><span>모델 다운로드 및 AI 추론 미구현</span></footer>
+    <footer class="footer"><span>LOCAL FIRST · 입력 파일 업로드 없음</span><span>선택적 얼굴 위치 검출 · 얼굴 교체 AI 미구현</span></footer>
   </div>
 
-  <dialog id="help-dialog" aria-labelledby="help-title"><h2 id="help-title">현재 버전 안내</h2><p>v0.7은 설치 없는 웹판의 기반 작업이야. 영상과 사진을 선택하고 로컬 미리보기·기기 지원 상태·입력 점검 파일을 확인할 수 있어.</p><p>실제 얼굴 교체 AI와 렌더러는 모델 라이선스·기기 호환성 검증 후 연결할 예정이야.</p><button class="button button-primary dialog-close" type="button" data-close="help-dialog">확인</button></dialog>
+  <dialog id="help-dialog" aria-labelledby="help-title"><h2 id="help-title">현재 버전 안내</h2><p>v0.7.1은 설치 없는 웹판의 실험 단계야. 영상과 사진을 선택하고 로컬 미리보기·기기 지원 상태·입력 점검 파일을 확인할 수 있어.</p><p>3초 실험은 얼굴 사진 오버레이이며 실제 얼굴 교체 AI가 아니야. 얼굴 위치 검출을 선택하면 MediaPipe 파일과 모델을 CDN에서 다운로드하고 사용량 지표가 전송될 수 있어.</p><button class="button button-primary dialog-close" type="button" data-close="help-dialog">확인</button></dialog>
   <dialog id="exit-dialog" aria-labelledby="exit-title"><h2 id="exit-title">작업 화면에서 나갈까?</h2><p>현재 선택한 로컬 파일은 이 화면에만 연결돼 있어. 나가면 다시 선택해야 해.</p><div class="dialog-actions"><button class="button button-subtle" type="button" data-close="exit-dialog">계속하기</button><button id="confirm-exit" class="button button-primary" type="button">나가기</button></div></dialog>
 </body>
 </html>
