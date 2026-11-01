@@ -1,0 +1,31 @@
+name: Actor Swap WEB foundation checks
+
+on:
+  pull_request:
+    paths:
+      - "faceswap/**"
+      - ".github/workflows/faceswap-ci.yml"
+  push:
+    branches:
+      - "feat/faceswap-web-v0.7"
+    paths:
+      - "faceswap/**"
+      - ".github/workflows/faceswap-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Syntax check
+        run: |
+          node --check faceswap/src/capabilities.mjs
+          node --check faceswap/src/app.mjs
+      - name: Local-only foundation tests
+        run: node --test faceswap/tests/smoke.mjs
