@@ -1,4 +1,4 @@
-# Actor Swap Studio WEB — v0.7.1 browser video lab
+# Actor Swap Studio WEB — v0.7.2 browser QA
 
 Independent web-first workspace inside the `junl-im/meta` repository.
 
@@ -44,7 +44,9 @@ The repository's active Firebase publishing path is `.pages-site`. This folder i
 
 ## Verify
 
-Run `node --test faceswap/tests/smoke.mjs` from the repository root. Node checks cover geometry, format selection, browser gating and privacy-facing UI text. The GitHub Actions workflow runs syntax checks and tests. **Real video/audio playback has not yet been device-tested.** Future manual QA must cover Chrome/Edge desktop, Chrome Android and Safari iOS, including MediaPipe CDN failures and silent-output fallbacks.
+Run `node --test faceswap/tests/smoke.mjs` from the repository root. Node checks cover geometry, format selection, browser gating and privacy-facing UI text. The GitHub Actions workflow runs syntax checks and tests. **Automated Chromium QA now passes**: [run 41286780071](https://github.com/junl-im/meta/actions/runs/41286780071) verifies four real browser flows: desktop and Pixel 7 mobile **emulation** × local synthetic video record/download and consent/reset handling. Each recording is inspected by FFprobe for an encoded video stream and packet timestamps, not just a click or a nonempty file. This does **not** prove physical Android/iOS playback, model detection success or audio continuity. A MediaRecorder WebM file may lack a container `Duration` field even when video packets contain valid timestamps, so dependable seeking/export requires a proper media muxer in a later milestone.
+
+Run `npm install`, `npx playwright install chromium`, prepare synthetic fixtures as in `.github/workflows/faceswap-ci.yml`, then `npm run test:browser` to reproduce. A static local server is started automatically. Future manual QA must cover Chrome/Edge desktop, Chrome Android and Safari iOS, including MediaPipe CDN failures and silent-output fallbacks.
 
 ## Try the browser lab
 
