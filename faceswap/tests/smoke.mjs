@@ -11,6 +11,8 @@ import {repairWebmDuration} from "../src/webm_duration.mjs";
 import {validateModelManifest, verifyLocalModelPackage, modelByteLimit, MODEL_PACKAGE_SCHEMA} from "../src/model_preflight.mjs";
 import {Sha256Stream, sha256BlobInChunks, HASH_CHUNK_BYTES} from "../src/sha256_stream.mjs";
 import {hashFileInWorker} from "../src/sha256_worker_client.mjs";
+import {createSyntheticAddModel,SYNTHETIC_FEEDS} from "../src/synthetic_onnx.mjs";
+import {runSyntheticWasmInference,ORT_WEB_VERSION,ORT_CDN_DIST} from "../src/onnx_probe.mjs";
 
 
 const base = new URL("../", import.meta.url);
@@ -387,4 +389,60 @@ test("manifest preflight accepts large files without whole-buffer reads", async 
   assert.equal(result.integrityVerified,true);
   assert.equal(result.bytes,300*1024*1024);
   assert.equal(calls,1);
+});
+
+test("tiny original ONNX test graph is deterministic, local and contains Add(a,b)->sum", () => {
+  const first=createSyntheticAddModel(),second=createSyntheticAddModel();
+  assert.deepEqual(first,second);
+  assert.ok(first.byteLength>50&&first.byteLength<512);
+  const text=new TextDecoder("latin1").decode(first);
+  for(const token of ["synthetic_float_add","Add","sum","actor-swap-studio"])assert.ok(text.includes(token));
+  assert.deepEqual(SYNTHETIC_FEEDS,{a:2,b:3,expected:5});
+  assert.equal(ORT_WEB_VERSION,"1.31.1");
+  assert.match(ORT_CDN_DIST,/onnxruntime-web@1\.31\.1\/dist/);
+});
+
+test("ONNX inference adapter requires actual numeric output and closes the session", async () => {
+  let released=0,modelBytes=0;
+  class FakeTensor{constructor(type,data,dims){this.type=type;this.data=data;this.dims=dims;}}
+  const fakeOrt={
+    Tensor:FakeTensor,
+    InferenceSession:{
+      create:async(bytes,opts)=>{
+        modelBytes=bytes.length;
+        assert.deepEqual(opts.executionProviders,["wasm"]);
+        return {
+          run:async feeds=>({sum:{data:Float32Array.of(feeds.a.data[0]+feeds.b.data[0])}}),
+          release:async()=>{released++;}
+        };
+      }
+    }
+  };
+  const result=await runSyntheticWasmInference(fakeOrt,{now:()=>100});
+  assert.equal(result.output,5);
+  assert.equal(result.actualInferenceCompleted,true);
+  assert.equal(result.identitySwapCompleted,false);
+  assert.equal(result.mediaUploaded,false);
+  assert.ok(modelBytes>50);
+  assert.equal(released,1);
+  const wrong={...fakeOrt,InferenceSession:{
+    create:async()=>({run:async()=>({sum:{data:Float32Array.of(999)}}),
+      release:async()=>{released++;}})
+  }};
+  await assert.rejects(runSyntheticWasmInference(wrong),/예상 결과 5/);
+  assert.equal(released,2);
+});
+
+test("browser ONNX runtime is explicit opt-in and separates computation from face swap", () => {
+  const html=read("index.html");
+  const app=read("src/onnx_lab.mjs");
+  const runtime=read("src/onnx_probe.mjs");
+  assert.match(html,/id="onnx-runtime-consent"/);
+  assert.match(html,/id="onnx-probe-button"[^>]*disabled/);
+  assert.match(html,/인물이 없는 초소형 ONNX Add 계산 모델/);
+  assert.match(app,/consent\.checked/);
+  assert.match(app,/loadWasmRuntime\(\)/);
+  assert.match(runtime,/ort\.wasm\.min\.js/);
+  assert.match(runtime,/executionProviders:\["wasm"\]/);
+  assert.doesNotMatch(app+runtime, /<svg\b|data:image\/svg/i);
 });
