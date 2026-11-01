@@ -50,6 +50,10 @@ jobs:
       - name: Install Chromium for QA
         working-directory: faceswap
         run: npx playwright install --with-deps chromium
+      - name: Install FFmpeg and FFprobe for independent media verification
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
       - name: Generate synthetic test footage and portrait
         run: |
           mkdir -p faceswap/tests/fixtures
