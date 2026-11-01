@@ -40,7 +40,7 @@ Target: `junl-im/meta/faceswap/` (one repository, independent subproject)
 - [ ] Independent browser playthrough and device QA.
 - [ ] Confirm all historical source license notices.
 
-### M0.5 — local video lab and automated browser QA (v0.7.4, NOT AI swap)
+### M0.5 — local video lab and automated browser QA (v0.7.5, NOT AI swap)
 
 - [x] Optional MediaPipe CPU face **location** detection with explicit third-party download notice.
 - [x] Real 3-second in-browser canvas/photo overlay recording, preview and downloaded MP4/WebM candidate.
@@ -49,7 +49,8 @@ Target: `junl-im/meta/faceswap/` (one repository, independent subproject)
 - [x] Chromium automated E2E: desktop + Pixel 7 mobile emulation × encode/download and consent/reset = 4 PASS (2026-11-01, [Actions 41286780071](https://github.com/junl-im/meta/actions/runs/41286780071)).
 - [x] FFprobe confirms output video track and frame packet timestamps; reset state regression repaired.
 - [x] v0.7.3: Web Audio local audio bridge plus fallback capture; [GitHub Actions 41297129563](https://github.com/junl-im/meta/actions/runs/41297129563) confirms 6/6 Chromium tests: desktop + Pixel 7 emulation × local output, consent/reset, and repeated render. FFprobe checks encoded audio packets; FFmpeg volumedetect proves a non-silent 440 Hz synthetic tone in downloaded output.
-- [ ] Physical Chrome/Android/Safari playback and audio preservation tests.
+- [x] v0.7.5: [GitHub Actions 41306889969](https://github.com/junl-im/meta/actions/runs/41306889969) added Firefox desktop and iPhone-screen WebKit (Linux) browser compatibility tests. Firefox local 3s video export and FFprobe video stream PASS after a suspended AudioContext hang fix. WebKit fallback correctly disables unsupported recorder formats and explains the limitation. All 12 browser tests PASS, foundation PASS.
+- [ ] Physical Chrome/Edge Windows, Android Chrome and iOS Safari playback, recording and audio-fidelity tests. Linux WebKit emulation is not iPhone Safari hardware.
 - [x] v0.7.4: bounded local EBML Duration repair on eligible unknown-size WebM MediaRecorder output without transcoding; [Actions 41304865701](https://github.com/junl-im/meta/actions/runs/41304865701) confirms finite FFprobe container duration, 1.2s browser seek attempt and audio/video encoded end-time drift bound, 6/6 Chromium E2E PASS.
 - [ ] Full seekable MP4/WebM remux for long videos, Cues/SeekHead correctness, full source-audio fidelity and physical-device verification.
 - [ ] Full source-audio fidelity, A/V synchronization, frame timing and seekable output confirmed on physical devices (Web Audio tone QA is not full preservation proof).
