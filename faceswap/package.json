@@ -1,10 +1,14 @@
 {
   "name": "actor-swap-studio-web",
   "private": true,
-  "version": "0.7.0-foundation",
+  "version": "0.7.2-browser-qa",
   "type": "module",
-  "description": "Install-free local-media foundation; AI swapping not yet implemented",
+  "description": "Local-only web video lab; AI identity swapping not yet implemented",
   "scripts": {
-    "test": "node --test tests/smoke.mjs"
+    "test": "node --test tests/smoke.mjs",
+    "test:browser": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1"
   }
 }
