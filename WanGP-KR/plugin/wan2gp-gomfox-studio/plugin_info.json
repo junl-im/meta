@@ -1,8 +1,8 @@
 {
   "name": "곰같은여우의 AI 스튜디오",
   "author": "곰같은여우",
-  "version": "0.2.0-dev",
-  "description": "무료 로컬 생성 기본, 원본 영상·이미지·음성·3D·월드 모델 목록 조회, 사용자 선택형 Deepy Prime/Codex 감독.",
+  "version": "0.3.0-dev",
+  "description": "무료 로컬 생성 기본, 초보자용 단계별 한글 도움말, 원본 모델 탐색기, 선택형 GPT 감독.",
   "type": "app",
   "app_tab": "GomFoxStudio",
   "app_url": "/gomfox-studio",
