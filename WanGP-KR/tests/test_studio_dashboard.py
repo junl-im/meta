@@ -59,12 +59,14 @@ class StudioDashboardTests(unittest.TestCase):
     def test_offline_prompt_workshop_is_copy_only(self):
         for token in (
             "프롬프트 작업실", "prompt_compose.click(", "fn=build_prompt",
+            "prompt_example.click(", "fn=fill_example",
             "prompt_result", "prompt_copy.click(", "prompt_open.click(",
             "기존 원본 프롬프트나 생성 설정을 덮어쓰지 않습니다",
         ):
             self.assertIn(token, SOURCE)
         self.assertIn("from .prompt_assistant import", SOURCE)
         self.assertIn("navigator.clipboard.writeText", SOURCE)
+        self.assertIn("draft.startsWith('먼저 만들고 싶은')", SOURCE)
         self.assertNotIn('request_component("prompt")', SOURCE)
         self.assertNotIn("show_copy_button=True", SOURCE)
 
@@ -78,7 +80,7 @@ class StudioDashboardTests(unittest.TestCase):
         self.assertNotIn("submit_task(", SOURCE)
 
     def test_plugin_metadata_matches(self):
-        self.assertEqual(META["version"], "0.9.0-dev")
+        self.assertEqual(META["version"], "0.10.0-dev")
         self.assertIn("GomFoxStudio", META["app_tab"])
 
 
