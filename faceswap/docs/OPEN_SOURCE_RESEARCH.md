@@ -28,7 +28,7 @@ This is a research ledger, **not** a list of bundled dependencies. Verify pinned
 
 ## Blocking license warning
 
-InsightFace explicitly states its training data and pretrained models are for non-commercial research, and directs inswapper licensing requests to its rights holder. The presence of \`inswapper_128.onnx\` in an open repository does not authorize commercial redistribution. Keep all such weights out of this repository until a signed/clear license is available.
+InsightFace explicitly states its training data and pretrained models are for non-commercial research, and directs inswapper licensing requests to its rights holder. The presence of `inswapper_128.onnx` in an open repository does not authorize commercial redistribution. Keep all such weights out of this repository until a signed/clear license is available.
 
 Do not copy third-party models, pretrained face embeddings, source actor photos or user footage into GitHub. Public repo files must be clean of personal media and credentials.
 
