@@ -195,3 +195,35 @@ test("worker hashes a multi-MiB model without blocking Cancel or leaving stale o
   await expect(page.locator("#local-model-status")).not.toContainText("SHA-256 일치");
   expect(externalRequests).toEqual([]);
 });
+
+test("explicit opt-in runs a real face-free ONNX WASM Add model from local QA assets", async ({page}, testInfo) => {
+  test.setTimeout(120000);
+  await page.addInitScript(() => {globalThis.__faceswapQaRuntime = true;});
+  const externalRequests=[];
+  const runtimeRequests=[];
+  const errors=[];
+  page.on("pageerror",error=>errors.push(error.message));
+  page.on("request",request=>{
+    const url=request.url();
+    if(/^https?:/.test(url)&&!url.startsWith("http://127.0.0.1:4175/"))externalRequests.push(url);
+    if(url.includes("/__qa_ort/"))runtimeRequests.push(url);
+  });
+  await page.goto("/");
+  await expect(page.locator("#onnx-probe-button")).toBeDisabled();
+  await expect(page.locator("#onnx-probe-status")).toContainText("실행 전");
+  expect(runtimeRequests).toEqual([]);
+  await page.locator("#onnx-runtime-consent").check();
+  await page.locator("#onnx-probe-button").click();
+  await expect(page.locator("#onnx-probe-status")).toContainText("실제 ONNX WASM 추론 성공",{timeout:90000});
+  await expect(page.locator("#onnx-probe-status")).toContainText("2 + 3 = 5");
+  await expect(page.locator("#onnx-probe-status")).toContainText("AI 얼굴 교체는 아직");
+  expect(runtimeRequests.some(url=>url.endsWith("ort.wasm.min.js"))).toBeTruthy();
+  expect(runtimeRequests.some(url=>url.endsWith(".wasm"))).toBeTruthy();
+  expect(externalRequests).toEqual([]);
+  expect(errors).toEqual([]);
+  console.log(`ONNX_SYNTHETIC ${testInfo.project.name}: true WASM Add inference 2+3=5, no external requests`);
+  await page.locator("#reset-button").click();
+  await expect(page.locator("#onnx-runtime-consent")).not.toBeChecked();
+  await expect(page.locator("#onnx-probe-button")).toBeDisabled();
+  await expect(page.locator("#onnx-probe-status")).toContainText("실행 전");
+});
