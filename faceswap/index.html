@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111b25">
+  <meta name="description" content="Actor Swap Studio WEB — 설치 없는 로컬 영상 작업 준비 화면">
+  <title>Actor Swap Studio WEB — v0.7</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./src/app.mjs"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">AS</span><div><strong>ACTOR SWAP STUDIO</strong><small>WEB FOUNDATION · v0.7</small></div></div>
+      <div class="top-actions"><span class="phase-pill">로컬 작업 준비</span><button id="help-button" class="button button-subtle" type="button">도움말</button><button id="exit-button" class="button button-subtle" type="button">나가기</button></div>
+    </header>
+
+    <main class="workbench">
+      <section class="panel setup-panel" aria-labelledby="setup-title">
+        <div class="section-heading"><div><p class="eyebrow">PROJECT SETUP</p><h1 id="setup-title">영상과 얼굴 준비</h1></div><span class="step-number">01</span></div>
+        <p class="intro">선택한 파일은 이 화면 안에서만 미리보기로 열려. 지금은 웹 엔진 전환의 첫 단계이며 AI 얼굴 교체 기능은 아직 연결되지 않았어.</p>
+        <div class="file-field">
+          <div class="file-label"><label for="video-file">원본 영상</label><span>MP4 · MOV · WebM 등</span></div>
+          <input id="video-file" type="file" accept="video/*">
+          <p id="video-name" class="file-name" aria-live="polite">선택한 영상 없음</p>
+        </div>
+        <div class="file-field">
+          <div class="file-label"><label for="face-file">교체할 얼굴 참고 사진</label><span>JPG · PNG · WebP 등</span></div>
+          <input id="face-file" type="file" accept="image/*">
+          <p id="face-name" class="file-name" aria-live="polite">선택한 사진 없음</p>
+        </div>
+        <div class="diagnostics">
+          <div class="diag-top"><strong>현재 기기 진단</strong><span id="runtime" class="diag-mode">검사 중</span></div>
+          <div class="diag-grid">
+            <div><span>WebGPU</span><b id="webgpu">검사 중</b></div>
+            <div><span>WebAssembly</span><b id="wasm">검사 중</b></div>
+            <div><span>영상 디코더</span><b id="decoder">검사 중</b></div>
+            <div><span>영상 인코더</span><b id="encoder">검사 중</b></div>
+          </div>
+          <p id="device-note" class="device-note">GPU 지원 여부는 모델 실행과 별개로 판단해.</p>
+        </div>
+        <label class="consent"><input type="checkbox" id="consent"><span>이 영상과 인물의 초상을 사용할 권한·동의를 확인했어.</span></label>
+        <div class="action-row"><button class="button button-primary" id="check-button" disabled type="button">입력 점검</button><button class="button button-subtle" id="reset-button" type="button">초기화</button></div>
+        <p id="status" class="status" role="status" aria-live="polite">파일을 선택하면 이 기기에서 재생 가능 여부를 점검할 수 있어.</p>
+        <button class="button button-export" id="manifest-button" disabled type="button">점검 결과 JSON 저장</button>
+      </section>
+
+      <section class="panel preview-panel" aria-labelledby="preview-title">
+        <div class="section-heading"><div><p class="eyebrow">LOCAL PREVIEW</p><h2 id="preview-title">원본 비교 화면</h2></div><span class="step-number">02</span></div>
+        <div class="preview-grid">
+          <div class="preview-card"><div class="preview-caption"><strong>원본 영상</strong><span>기기 내부 미리보기</span></div><div class="media-slot"><video id="source-video" controls playsinline preload="metadata" aria-label="선택한 원본 영상"></video><p id="video-placeholder" class="placeholder">원본 영상을 선택해 줘</p></div><p id="video-detail" class="preview-detail">영상 정보 대기 중</p></div>
+          <div class="preview-card"><div class="preview-caption"><strong>얼굴 참고 사진</strong><span>기기 내부 미리보기</span></div><div class="media-slot"><img id="reference-image" alt="선택한 얼굴 참고 사진"><p id="face-placeholder" class="placeholder">참고 사진을 선택해 줘</p></div><p id="face-detail" class="preview-detail">이미지 정보 대기 중</p></div>
+        </div>
+        <div class="render-note"><strong>AI 렌더러 연결 전</strong><span>이 버전은 입력 검증과 브라우저 기능 진단을 제공해. 얼굴 교체·영상 생성·MP4 내보내기가 완료된 것처럼 표시하지 않아.</span></div>
+      </section>
+    </main>
+    <footer class="footer"><span>LOCAL FIRST · 입력 파일 업로드 없음</span><span>모델 다운로드 및 AI 추론 미구현</span></footer>
+  </div>
+
+  <dialog id="help-dialog" aria-labelledby="help-title"><h2 id="help-title">현재 버전 안내</h2><p>v0.7은 설치 없는 웹판의 기반 작업이야. 영상과 사진을 선택하고 로컬 미리보기·기기 지원 상태·입력 점검 파일을 확인할 수 있어.</p><p>실제 얼굴 교체 AI와 렌더러는 모델 라이선스·기기 호환성 검증 후 연결할 예정이야.</p><button class="button button-primary dialog-close" type="button" data-close="help-dialog">확인</button></dialog>
+  <dialog id="exit-dialog" aria-labelledby="exit-title"><h2 id="exit-title">작업 화면에서 나갈까?</h2><p>현재 선택한 로컬 파일은 이 화면에만 연결돼 있어. 나가면 다시 선택해야 해.</p><div class="dialog-actions"><button class="button button-subtle" type="button" data-close="exit-dialog">계속하기</button><button id="confirm-exit" class="button button-primary" type="button">나가기</button></div></dialog>
+</body>
+</html>
