@@ -1,12 +1,13 @@
+import {sha256BlobInChunks} from "./sha256_stream.mjs";
+
 // Local integrity preflight only. This module never loads or executes model weights.
 export const MODEL_PACKAGE_SCHEMA = "actor-swap-model-package/v1";
 export const MAX_MANIFEST_BYTES = 64 * 1024;
-export const MAX_MODEL_BYTES_DESKTOP = 256 * 1024 * 1024;
-export const MAX_MODEL_BYTES_MOBILE = 64 * 1024 * 1024;
+export const MAX_MODEL_BYTES = 2 * 1024 * 1024 * 1024;
 
-export function modelByteLimit(deviceMemoryGB) {
-  return Number.isFinite(deviceMemoryGB) && deviceMemoryGB > 0 && deviceMemoryGB <= 4
-    ? MAX_MODEL_BYTES_MOBILE : MAX_MODEL_BYTES_DESKTOP;
+export function modelByteLimit() {
+  // File is hashed in 1 MiB chunks; this limit bounds time, not peak RAM.
+  return MAX_MODEL_BYTES;
 }
 
 function record(value) {
@@ -56,29 +57,30 @@ export function validateModelManifest(manifest, filename) {
   };
 }
 
-function hex(buffer) {
-  return Array.from(new Uint8Array(buffer), (byte) => byte.toString(16).padStart(2, "0")).join("");
-}
-
 export async function verifyLocalModelPackage({
-  modelFile, manifestFile, digest = globalThis.crypto?.subtle?.digest?.bind(globalThis.crypto.subtle),
-  deviceMemoryGB = null
+  modelFile, manifestFile, hashFile=sha256BlobInChunks,
+  onProgress=()=>{},signal=null
 }) {
   if (!modelFile || !manifestFile) throw new Error("모델 파일과 JSON 설명서를 모두 선택해 줘.");
-  if (!modelFile.size || modelFile.size > modelByteLimit(deviceMemoryGB)) {
-    throw new Error("이 기기의 1회 검사 메모리 한도를 초과했어. 큰 모델은 아직 지원하지 않아.");
+  if (!modelFile.size || modelFile.size > MAX_MODEL_BYTES) {
+    throw new Error("모델 검사는 현재 최대 2 GiB까지 지원해.");
   }
   if (!manifestFile.size || manifestFile.size > MAX_MANIFEST_BYTES ||
       !manifestFile.name?.toLowerCase().endsWith(".json")) {
     throw new Error("설명서는 64 KiB 이하의 JSON 파일이어야 해.");
   }
-  if (typeof digest !== "function") throw new Error("이 브라우저는 보안 SHA-256 검사를 지원하지 않아.");
+  if (typeof hashFile !== "function") throw new Error("SHA-256 검사 함수가 없어.");
+  if (signal?.aborted) throw new Error("검사를 취소했어.");
   let parsed;
   try { parsed = JSON.parse(await manifestFile.text()); }
   catch { throw new Error("설명서가 올바른 JSON 형식이 아니야."); }
   const manifest = validateModelManifest(parsed, modelFile.name);
-  // WebCrypto requires a complete ArrayBuffer; limit is intentionally conservative.
-  const sha256 = hex(await digest("SHA-256", await modelFile.arrayBuffer()));
+  const sha256 = await hashFile(modelFile, {onProgress, signal,
+    shouldAbort: () => Boolean(signal?.aborted)});
+  if (signal?.aborted) throw new Error("검사를 취소했어.");
+  if (typeof sha256 !== "string" || !/^[a-f0-9]{64}$/i.test(sha256)) {
+    throw new Error("SHA-256 검사 결과를 확인하지 못했어.");
+  }
   if (sha256 !== manifest.sha256) {
     throw new Error("모델 SHA-256이 설명서와 달라. 파일 무결성 검사에 실패했어.");
   }
