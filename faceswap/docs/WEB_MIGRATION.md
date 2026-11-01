@@ -70,7 +70,7 @@ Target: `junl-im/meta/faceswap/` (one repository, independent subproject)
 - [x] Pin CPU-only ONNX Runtime Web `1.31.1` to an opt-in runtime panel; the CDN is contacted only after explicit checkbox + click. CDN network metadata can be disclosed, but selected media is not used.
 - [x] Build a minimal original ONNX IR-v8 / opset-13 `Add` fixture from byte arrays; perform a **real** `wasm` execution session and verify `2 + 3 = 5`, release resources and label results accurately.
 - [x] Add local same-origin browser QA runtime asset route and unit tests, without bundling any real identity swap model.
-- [ ] Validate Playwright Firefox/WebKit actual WASM run and CI job conclusion; physical-device resource measurements remain future work.
+- [x] [Actions 41314891674](https://github.com/junl-im/meta/actions/runs/41314891674): Node 27/27; desktop+mobile-emulated Chromium 8/8; Firefox+Linux WebKit 12/12; total 20/20 browser PASS. Four browser tests execute real WASM numeric ONNX on all three engines, with QA-local runtime assets and no external requests. Physical-device resource measurements remain future work.
 - [ ] Review all third-party runtime assets for final supply chain and offline redistribution; production currently loads jsDelivr only on permission.
 
 ### M1 — legally usable 3-second proof
