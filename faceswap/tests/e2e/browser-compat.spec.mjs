@@ -158,3 +158,40 @@ test("local ONNX manifest: rights gate, hash match, tamper detection, reset, no 
   expect(externalRequests).toEqual([]);
   expect(errors).toEqual([]);
 });
+
+test("worker hashes a multi-MiB model without blocking Cancel or leaving stale output", async ({page}) => {
+  test.setTimeout(35000);
+  const externalRequests=[];
+  page.on("request",request=>{
+    const url=request.url();
+    if(/^https?:/.test(url)&&!url.startsWith("http://127.0.0.1:4175/")) externalRequests.push(url);
+  });
+  await page.goto("/");
+  const payload=Buffer.alloc(20*1024*1024,31);
+  const manifest={
+    schema:"actor-swap-model-package/v1",name:"Cancellation fixture",
+    filename:"large.onnx",format:"onnx",
+    sha256:createHash("sha256").update(payload).digest("hex"),
+    weightsLicense:{
+      id:"Test-only-rights",evidenceUrl:"https://example.org/model-rights",
+      commercialUseConfirmed:true
+    }
+  };
+  await page.locator("#local-model-file").setInputFiles({
+    name:"large.onnx",mimeType:"application/octet-stream",buffer:payload
+  });
+  await page.locator("#local-model-manifest").setInputFiles({
+    name:"manifest.json",mimeType:"application/json",
+    buffer:Buffer.from(JSON.stringify(manifest))
+  });
+  await page.locator("#local-model-rights").check();
+  await page.locator("#verify-local-model").click();
+  await expect(page.locator("#cancel-model-check")).toBeEnabled();
+  await page.locator("#cancel-model-check").click();
+  await expect(page.locator("#local-model-status")).toContainText("취소");
+  await expect(page.locator("#cancel-model-check")).toBeDisabled();
+  await expect(page.locator("#verify-local-model")).toBeEnabled();
+  await page.waitForTimeout(200);
+  await expect(page.locator("#local-model-status")).not.toContainText("SHA-256 일치");
+  expect(externalRequests).toEqual([]);
+});
