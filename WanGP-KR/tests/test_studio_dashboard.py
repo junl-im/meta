@@ -20,6 +20,12 @@ class StudioDashboardTests(unittest.TestCase):
         image = PLUGIN_DIR / "studio-hero.png"
         self.assertTrue(image.is_file())
         self.assertEqual(image.read_bytes()[:8], b"\x89PNG\r\n\x1a\n")
+        emblem = PLUGIN_DIR / "gomfox-studio-icon.png"
+        original = ROOT / "assets" / "gomfox-studio-icon.png"
+        self.assertTrue(emblem.is_file())
+        self.assertEqual(emblem.read_bytes()[:8], b"\x89PNG\r\n\x1a\n")
+        self.assertEqual(emblem.read_bytes(), original.read_bytes())
+        self.assertIn("ICON_FILE", SOURCE)
         for forbidden in ("<svg", "data:image/svg", "cdn.jsdelivr"):
             self.assertNotIn(forbidden, SOURCE.casefold())
 
@@ -72,7 +78,7 @@ class StudioDashboardTests(unittest.TestCase):
         self.assertNotIn("submit_task(", SOURCE)
 
     def test_plugin_metadata_matches(self):
-        self.assertEqual(META["version"], "0.8.0-dev")
+        self.assertEqual(META["version"], "0.9.0-dev")
         self.assertIn("GomFoxStudio", META["app_tab"])
 
 
