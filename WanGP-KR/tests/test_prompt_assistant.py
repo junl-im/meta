@@ -35,7 +35,7 @@ class PromptAssistantTests(unittest.TestCase):
         self.assertIn("절약 시작", advice)
 
     def test_text_cleaning_is_bounded_and_single_line(self):
-        prompt, _ = module.build_prompt("영상", "가" * 500 + "\n개", "자연스럽고 사실적인", "나" * 300, "균형")
+        prompt, _ = module.build_prompt("영상", "가" * 500 + "\n개", module.STYLES[0], "나" * 300, "균형")
         self.assertNotIn("가" * 361, prompt)
         self.assertNotIn("나" * 241, prompt)
         self.assertIn("균형 시작", module.build_prompt("영상", "나무", "", "", "균형")[1])
