@@ -47,20 +47,21 @@ if not exist "%PLUGIN_SOURCE%\help_content.py" goto download_plugin
 if not exist "%PLUGIN_SOURCE%\hardware.py" goto download_plugin
 if not exist "%PLUGIN_SOURCE%\prompt_assistant.py" goto download_plugin
 if not exist "%PLUGIN_SOURCE%\studio-hero.png" goto download_plugin
+if not exist "%PLUGIN_SOURCE%\gomfox-studio-icon.png" goto download_plugin
 goto plugin_source_ready
 
 :download_plugin
 echo 현재 폴더에 한글 플러그인이 없으므로 고정 버전을 받습니다.
-echo GitHub 원본 버전: 2d545b333a9387625aced96acf5245bce38cb2ea
+echo GitHub 원본 버전: 5a3dc7b5e05c9a0acf979bd4ce8196f9d88ef321
 set "PLUGIN_SOURCE=%SETUP_DIR%\wan2gp-gomfox-studio"
 mkdir "%PLUGIN_SOURCE%" >nul 2>nul
 if not exist "%PLUGIN_SOURCE%\" goto plugin_download_error
-set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/2d545b333a9387625aced96acf5245bce38cb2ea/WanGP-KR/plugin/wan2gp-gomfox-studio"
+set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/5a3dc7b5e05c9a0acf979bd4ce8196f9d88ef321/WanGP-KR/plugin/wan2gp-gomfox-studio"
 call :fetch_plugin_file "__init__.py" "754b7e9e5046f2450c5fd4ea0a53d40b6ceb8671acbb6e7ddd8932a52de80066"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin.py" "0c7eb13165642f4dd4c529c2dd2182d1494cb88db254c4ecda3360a2546db1b0"
+call :fetch_plugin_file "plugin.py" "913e6596bf4a949caea10ee67cdf915625089ded254405ecdf7587ff739c45b0"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin_info.json" "c9a32a883a47dae9301599252a5fb4908cbf2bf94f51d0936c425fb66be4cbb9"
+call :fetch_plugin_file "plugin_info.json" "4304eabb80f7a0af514817a0af5728d988f864f108bc45ca2db40dc25f503260"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "catalog.py" "995f6d12271bff59da0a64318133e788ffbc08560bfeb0bede2aa8fc14e20b9d"
 if errorlevel 1 goto plugin_download_error
@@ -72,9 +73,29 @@ call :fetch_plugin_file "prompt_assistant.py" "7beadb530afda5b695427e528be2b564d
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "studio-hero.png" "68ed79eb62f1fa81e089a52f85a689eabb73db964fc84d63daf85bd87c264b66"
 if errorlevel 1 goto plugin_download_error
+rem Signature PNG is also fetched separately from the pinned release below.
 
 :plugin_source_ready
 echo 한글 플러그인 준비가 끝났습니다.
+echo.
+
+echo [디자인] 곰·여우 시그니처 아이콘을 준비합니다.
+set "GOMFOX_ICON_PNG=%SETUP_DIR%\gomfox-studio-icon.png"
+set "GOMFOX_ICON_URL=https://raw.githubusercontent.com/junl-im/meta/5a3dc7b5e05c9a0acf979bd4ce8196f9d88ef321/WanGP-KR/assets/gomfox-studio-icon.png"
+curl.exe --fail --location --retry 2 --connect-timeout 30 --max-time 180 --output "%GOMFOX_ICON_PNG%" "%GOMFOX_ICON_URL%"
+if errorlevel 1 goto icon_download_unavailable
+if not exist "%GOMFOX_ICON_PNG%" goto icon_download_unavailable
+powershell.exe -NoProfile -NonInteractive -Command "$actual=(Get-FileHash -Algorithm SHA256 -LiteralPath $env:GOMFOX_ICON_PNG).Hash; if($actual -ne 'ee1ccd2694f9495084e57defe3b5ddee61b13377f78a43dce819fc8fa9c2e365'){exit 5}"
+if errorlevel 1 goto icon_download_unavailable
+echo [확인] 시그니처 PNG 무결성 확인 완료.
+goto icon_download_done
+
+:icon_download_unavailable
+echo [안내] 시그니처 아이콘을 확인하지 못했습니다. 원본 설치는 계속합니다.
+echo 아이콘은 일반 Windows 바로가기 형태로 만들어질 수 있습니다.
+set "GOMFOX_ICON_PNG="
+
+:icon_download_done
 echo.
 
 set "GOMFOX_MANAGER_EXE=%SETUP_DIR%\WanGPManager.exe"
@@ -146,6 +167,25 @@ if not exist "%PLUGIN_DEST%\help_content.py" goto plugin_copy_error
 if not exist "%PLUGIN_DEST%\prompt_assistant.py" goto plugin_copy_error
 if not exist "%PLUGIN_DEST%\studio-hero.png" goto plugin_copy_error
 
+rem Copy the verified artwork only into a newly created plugin folder.
+rem Convert to a PNG-backed 256px ICO through built-in .NET; no external converter or SVG.
+set "GOMFOX_SHORTCUT_ICON="
+if "%GOMFOX_ICON_PNG%"=="" goto icon_unavailable
+copy /B "%GOMFOX_ICON_PNG%" "%PLUGIN_DEST%\gomfox-studio-icon.png" >nul
+if errorlevel 1 goto icon_unavailable
+set "GOMFOX_ICON_ICO=%PLUGIN_DEST%\gomfox-studio-icon.ico"
+powershell.exe -NoProfile -NonInteractive -Command "$ErrorActionPreference='Stop'; Add-Type -AssemblyName System.Drawing; $img=[System.Drawing.Image]::FromFile($env:GOMFOX_ICON_PNG); try { $bmp=[System.Drawing.Bitmap]::new(256,256); try { $gfx=[System.Drawing.Graphics]::FromImage($bmp); try { $gfx.InterpolationMode=[System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic; $gfx.Clear([System.Drawing.Color]::Transparent); $gfx.DrawImage($img,0,0,256,256) } finally { $gfx.Dispose() }; $mem=[System.IO.MemoryStream]::new(); try { $bmp.Save($mem,[System.Drawing.Imaging.ImageFormat]::Png); $payload=$mem.ToArray() } finally { $mem.Dispose() }; $fs=[System.IO.File]::Create($env:GOMFOX_ICON_ICO); try { $w=[System.IO.BinaryWriter]::new($fs); $w.Write([uint16]0); $w.Write([uint16]1); $w.Write([uint16]1); $w.Write([byte]0); $w.Write([byte]0); $w.Write([byte]0); $w.Write([byte]0); $w.Write([uint16]1); $w.Write([uint16]32); $w.Write([uint32]$payload.Length); $w.Write([uint32]22); $w.Write($payload); $w.Flush() } finally { $fs.Dispose() } } finally { $bmp.Dispose() } } finally { $img.Dispose() }"
+if errorlevel 1 goto icon_unavailable
+if not exist "%GOMFOX_ICON_ICO%" goto icon_unavailable
+set "GOMFOX_SHORTCUT_ICON=%GOMFOX_ICON_ICO%"
+echo [완료] 전용 Windows 아이콘 파일을 만들었습니다.
+goto icon_ready_for_shortcut
+
+:icon_unavailable
+echo [안내] 전용 아이콘 적용을 건너뜁니다. 원본 WanGP 실행 기능은 유지됩니다.
+
+:icon_ready_for_shortcut
+
 rem Only offer a shortcut for the official documented run.bat launcher.
 rem Manager-specific launch profiles may differ; skipping a shortcut is safe.
 set "GOMFOX_SHORTCUT_TARGET=%WANGP_DIR%\scripts\run.bat"
@@ -155,7 +195,7 @@ echo [선택] WanGP 실행 바로가기를 바탕화면에 추가할 수 있습�
 echo 공식 실행 스크립트가 확인되었습니다: "%GOMFOX_SHORTCUT_TARGET%"
 choice /C YN /M "곰같은여우의 AI 스튜디오 바로가기를 만들까요?"
 if errorlevel 2 goto shortcut_done
-powershell.exe -NoProfile -NonInteractive -Command "$desktop=[Environment]::GetFolderPath('DesktopDirectory'); if ([string]::IsNullOrWhiteSpace($desktop)) { exit 3 }; $path=Join-Path $desktop '곰같은여우의 AI 스튜디오.lnk'; if ([IO.File]::Exists($path)) { exit 4 }; $shell=New-Object -ComObject WScript.Shell; $link=$shell.CreateShortcut($path); $link.TargetPath=$env:GOMFOX_SHORTCUT_TARGET; $link.WorkingDirectory=$env:WANGP_DIR; $link.Description='원본 WanGP 무료 로컬 제작 실행'; $link.Save()"
+powershell.exe -NoProfile -NonInteractive -Command "$desktop=[Environment]::GetFolderPath('DesktopDirectory'); if ([string]::IsNullOrWhiteSpace($desktop)) { exit 3 }; $path=Join-Path $desktop '곰같은여우의 AI 스튜디오.lnk'; if ([IO.File]::Exists($path)) { exit 4 }; $shell=New-Object -ComObject WScript.Shell; $link=$shell.CreateShortcut($path); $link.TargetPath=$env:GOMFOX_SHORTCUT_TARGET; $link.WorkingDirectory=$env:WANGP_DIR; $link.Description='원본 WanGP 무료 로컬 제작 실행'; if ($env:GOMFOX_SHORTCUT_ICON -and [IO.File]::Exists($env:GOMFOX_SHORTCUT_ICON)) { $link.IconLocation=$env:GOMFOX_SHORTCUT_ICON + ',0' }; $link.Save()"
 if errorlevel 1 goto shortcut_failed
 echo [완료] 바탕화면 바로가기를 만들었습니다.
 goto shortcut_done
