@@ -1,4 +1,5 @@
 import test from "node:test";
+import {createHash, webcrypto} from "node:crypto";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -7,6 +8,7 @@ import {normalizeFaceBox, findFaceBox, loadFaceDetector, modelAssets} from "../s
 import {outputDimensions, chooseRecordingFormat, drawOverlayFrame, defaultBox} from "../src/compositor.mjs";
 import {prepareAudioCapture, closeAudioCapture} from "../src/audio_capture.mjs";
 import {repairWebmDuration} from "../src/webm_duration.mjs";
+import {validateModelManifest, verifyLocalModelPackage, modelByteLimit, MODEL_PACKAGE_SCHEMA} from "../src/model_preflight.mjs";
 
 
 const base = new URL("../", import.meta.url);
@@ -228,4 +230,80 @@ test("WebM repair leaves malformed, unsupported, and MP4 bytes untouched", async
     assert.equal(result.repaired, false);
     assert.strictEqual(result.blob, blob);
   }
+});
+
+const testModelBytes = Uint8Array.from([3, 7, 11, 19, 23]);
+const testModelHash = createHash("sha256").update(testModelBytes).digest("hex");
+const modelFile = () => Object.assign(new Blob([testModelBytes]), {name: "authorized.onnx"});
+const manifestData = () => ({
+  schema: MODEL_PACKAGE_SCHEMA,
+  name: "Authorized prototype model",
+  filename: "authorized.onnx",
+  format: "onnx",
+  sha256: testModelHash,
+  weightsLicense: {
+    id: "Separate-weight-license",
+    evidenceUrl: "https://example.org/model-rights",
+    commercialUseConfirmed: true
+  }
+});
+const manifestFile = (data) => Object.assign(new Blob([JSON.stringify(data)]), {name: "model-manifest.json"});
+
+test("model preflight accepts only a scoped, explicitly described weight license", () => {
+  const valid = validateModelManifest(manifestData(), "authorized.onnx");
+  assert.equal(valid.sha256, testModelHash);
+  const variants = [
+    {...manifestData(), weightsLicense: {...manifestData().weightsLicense, commercialUseConfirmed: false}},
+    {...manifestData(), weightsLicense: {...manifestData().weightsLicense, evidenceUrl: "http://example.org/"}},
+    {...manifestData(), weightsLicense: {...manifestData().weightsLicense, id: ""}},
+    {...manifestData(), sha256: "abc"},
+    {...manifestData(), filename: "another.onnx"},
+    {...manifestData(), format: "pth"},
+    {...manifestData(), schema: "invalid"}
+  ];
+  for (const variant of variants) {
+    assert.throws(() => validateModelManifest(variant, "authorized.onnx"));
+  }
+  assert.equal(modelByteLimit(4), 64 * 1024 * 1024);
+  assert.equal(modelByteLimit(8), 256 * 1024 * 1024);
+});
+
+test("local package integrity compares all weight bytes and never runs inference", async () => {
+  const result = await verifyLocalModelPackage({
+    modelFile: modelFile(), manifestFile: manifestFile(manifestData()),
+    digest: webcrypto.subtle.digest.bind(webcrypto.subtle), deviceMemoryGB: 4
+  });
+  assert.equal(result.sha256, testModelHash);
+  assert.equal(result.integrityVerified, true);
+  assert.equal(result.inferenceCompleted, false);
+  assert.equal(result.identitySwapCompleted, false);
+  assert.equal(result.mediaUploaded, false);
+  assert.match(result.licenseStatus, /unverified/);
+});
+
+test("tampered model, malformed manifest and over-budget files fail closed", async () => {
+  const run = (model, manifest, options = {}) => verifyLocalModelPackage({
+    modelFile: model, manifestFile: manifest,
+    digest: webcrypto.subtle.digest.bind(webcrypto.subtle), ...options
+  });
+  const tampered = Object.assign(new Blob([Uint8Array.from([9])]), {name: "authorized.onnx"});
+  await assert.rejects(run(tampered, manifestFile(manifestData())), /SHA-256/);
+  await assert.rejects(run(modelFile(), Object.assign(new Blob(["{"]), {name: "broken.json"})), /JSON/);
+  const huge = {name: "authorized.onnx", size: 500 * 1024 * 1024};
+  await assert.rejects(run(huge, manifestFile(manifestData())), /메모리 한도/);
+  await assert.rejects(run(modelFile(), manifestFile(manifestData()), {digest: null}), /SHA-256/);
+});
+
+test("model UI is local-only, with explicit rights and truth-in-labeling", () => {
+  const html = read("index.html");
+  const modelUI = read("src/model_lab.mjs");
+  const preflight = read("src/model_preflight.mjs");
+  assert.match(html, /id="local-model-file"/);
+  assert.match(html, /id="local-model-manifest"/);
+  assert.match(html, /id="local-model-rights"/);
+  assert.match(html, /id="verify-local-model"/);
+  assert.match(modelUI, /verifyLocalModelPackage/);
+  assert.match(modelUI, /reset-button/);
+  assert.doesNotMatch(modelUI + preflight, /\\bfetch\\s*\\(|XMLHttpRequest\\b|<svg\\b|data:image\\/svg/i);
+  assert.match(html, /ONNX 실행·AI 얼굴 교체|실행 엔진은 아직 연결되지 않았어/);
 });
