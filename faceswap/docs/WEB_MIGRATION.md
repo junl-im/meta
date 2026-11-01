@@ -16,7 +16,7 @@ Target: `junl-im/meta/faceswap/` (one repository, independent subproject)
 1. Static responsive UI; local `File` objects and object URLs; no upload.
 2. Capability probe: WebGPU adapter, WebCodecs encode/decode, WebAssembly, storage quota, cross-origin isolation.
 3. Future model registry: record source, version, SHA-256, code license, **weights license**, commercial permissions, tested operators, memory and device range.
-4. Web inference adapter with explicit `not-ready` state; WebGPU first and WASM fallback only for models successfully tested in that backend.
+4. v0.7.8 adds a **separate synthetic-only** CPU WASM ONNX probe; user-supplied swap model adapter remains `not-ready`. Future WebGPU preference and WASM fallback require individual whole-chain model compatibility testing.
 5. Media decode/encode abstraction: v0.7.4 has bounded WebM Duration metadata repair; complete mux candidate is Mediabunny/WebCodecs (MPL-2.0 source-availability obligations to be reviewed) with optional FFmpeg WASM under separate binary-license review.
 6. Frame pipeline: detection -> landmarks -> identity swap -> mask -> occlusion -> original protected pixels -> temporal QA -> mux.
 7. Local export plus optional provenance metadata and consent workflow.
@@ -64,6 +64,14 @@ Target: `junl-im/meta/faceswap/` (one repository, independent subproject)
 - [x] Standard SHA-256 vectors and independent Node crypto comparisons across padding boundaries and multi-MiB fixtures; deterministic Worker cancellation tests included.
 - [ ] Measure multi-hundred-MiB throughput and energy on real low-end Windows/Android/iOS hardware, verify sustained cancellation and storage limits.
 - [ ] Independent verified model package provenance, complete rights documentation and ONNX Runtime operator tests.
+
+### M0.8 — synthetic numeric browser inference (v0.7.8, NOT AI swap)
+
+- [x] Pin CPU-only ONNX Runtime Web `1.31.1` to an opt-in runtime panel; the CDN is contacted only after explicit checkbox + click. CDN network metadata can be disclosed, but selected media is not used.
+- [x] Build a minimal original ONNX IR-v8 / opset-13 `Add` fixture from byte arrays; perform a **real** `wasm` execution session and verify `2 + 3 = 5`, release resources and label results accurately.
+- [x] Add local same-origin browser QA runtime asset route and unit tests, without bundling any real identity swap model.
+- [ ] Validate Playwright Firefox/WebKit actual WASM run and CI job conclusion; physical-device resource measurements remain future work.
+- [ ] Review all third-party runtime assets for final supply chain and offline redistribution; production currently loads jsDelivr only on permission.
 
 ### M1 — legally usable 3-second proof
 
