@@ -48,6 +48,7 @@ class TestFullInstallerSafety(unittest.TestCase):
     def test_standalone_plugin_download_is_pinned_and_verified(self):
         self.assertIn("https://raw.githubusercontent.com/junl-im/meta/", self.script)
         self.assertIn("GOMFOX_PINNED_RAW", self.script)
+        self.assertIn("225d1759c15c5b6967d784973c0e4564b45b1004", self.script)
         self.assertIn("Get-FileHash -Algorithm SHA256 -LiteralPath $env:GOMFOX_FILE_PATH", self.script)
         self.assertLess(self.script.index("call :fetch_plugin_file"), self.script.index('start "" /wait'))
         self.assertIn("goto plugin_download_error", self.lower)
@@ -63,6 +64,13 @@ class TestFullInstallerSafety(unittest.TestCase):
             "gomfox-studio-icon.png",
         ):
             self.assertIn('call :fetch_plugin_file "' + filename + '"', self.script)
+
+    def test_preflight_reports_resources_without_changing_settings(self):
+        self.assertIn("Get-CimInstance Win32_ComputerSystem", self.script)
+        self.assertIn("Get-PSDrive -Name", self.script)
+        self.assertIn("모델 파일마다 필요한 저장 공간", self.script)
+        self.assertNotIn("Set-ExecutionPolicy", self.script)
+        self.assertNotIn("Set-CimInstance", self.script)
 
     def test_optional_shortcut_does_not_override_existing_file(self):
         self.assertIn('if not exist "%GOMFOX_SHORTCUT_TARGET%" goto shortcut_unavailable', self.script)
