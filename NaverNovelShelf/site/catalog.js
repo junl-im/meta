@@ -1,4 +1,4 @@
-/* Public Naver Web Novel work metadata, verified 2026-10-28.
+/* Public Naver Web Novel work metadata, verified 2026-11-01.
    Only titles, author pen names, official cover thumbnail URLs and links.
    No story text or reader data is reproduced. */
 window.NOVEL_CATALOG = [
@@ -30,9 +30,10 @@ window.NOVEL_CATALOG = [
   ["폐급 능력 밀도 조절로 이세계 최강","[ZERO]","1249457","best","https://novel-phinf.pstatic.net/20261027_59/novel_1793082366438eUial_PNG/400.png?type=f280_224_2","판타지"],
   ["눈 떠보니 박보검","[ZERO]","1248550","challenge","https://novel-phinf.pstatic.net/20221231_33/novel_1672413126990maFR1_PNG/romance_320_3.png?type=f280_224_2","로맨스"],
   ["검은 나를 기억한다","[ZERO]","1242932","challenge","https://novel-phinf.pstatic.net/20221231_133/novel_1672413518094fk60i_PNG/fantasy_320_1.png?type=f280_224_2","판타지"],
-  ["무림까지 집착하는 힐러가 되었다","[곰같은여우]","1250781","challenge","https://novel-phinf.pstatic.net/20221231_95/novel_1672413539316vuaf9_PNG/fantasy_320_4.png?type=f280_224_2","판타지"]
+  ["무림까지 집착하는 힐러가 되었다","[곰같은여우]","1250781","challenge","https://novel-phinf.pstatic.net/20221231_95/novel_1672413539316vuaf9_PNG/fantasy_320_4.png?type=f280_224_2","판타지"],
+  ["X같은 남자, X같은 여자","[ZERO]","1251347","challenge","https://novel-phinf.pstatic.net/20221231_194/novel_1672413226738B6sKY_PNG/romance_320_16.png?type=f280_224_2","로맨스"]
 ].map(([title,author,id,league,image,genre])=>({
   title, author, id, league, image, genre,
   url: `https://m.novel.naver.com/${league}/list?novelId=${id}`
 }));
-window.NOVEL_CATALOG_LAST_CHECK = "2026-10-28";
+window.NOVEL_CATALOG_LAST_CHECK = "2026-11-01";
