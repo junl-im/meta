@@ -50,16 +50,16 @@ goto plugin_source_ready
 
 :download_plugin
 echo 현재 폴더에 한글 플러그인이 없으므로 고정 버전을 받습니다.
-echo GitHub 원본 버전: 18a800a98daf3ea5cfb1bfbad3247b73334367ab
+echo GitHub 원본 버전: 0db6b58c102c8bd9bfc5a09bdc937590c4746148
 set "PLUGIN_SOURCE=%SETUP_DIR%\wan2gp-gomfox-studio"
 mkdir "%PLUGIN_SOURCE%" >nul 2>nul
 if not exist "%PLUGIN_SOURCE%\" goto plugin_download_error
-set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/18a800a98daf3ea5cfb1bfbad3247b73334367ab/WanGP-KR/plugin/wan2gp-gomfox-studio"
+set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/0db6b58c102c8bd9bfc5a09bdc937590c4746148/WanGP-KR/plugin/wan2gp-gomfox-studio"
 call :fetch_plugin_file "__init__.py" "754b7e9e5046f2450c5fd4ea0a53d40b6ceb8671acbb6e7ddd8932a52de80066"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin.py" "b0262abf3ac3f3631f2c6b00b859718fa7260058b0004964b75ff9357fe047e4"
+call :fetch_plugin_file "plugin.py" "a2e679f192313dd981fb5c9219e0904e3246e72032f49c5500b18ea1a4ec58ad"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin_info.json" "a35c20225cf468773bc7a059476eb39f6998a8323625698d1ae00beacc974b27"
+call :fetch_plugin_file "plugin_info.json" "d5e3ec36a0f8a166a48813592e06ea18ddf7f53d306822691ccea206358a9606"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "catalog.py" "e934ab7822dedf138dee89c6299553b87671669c62ac7c10541c263010848c10"
 if errorlevel 1 goto plugin_download_error
@@ -142,6 +142,30 @@ if not exist "%PLUGIN_DEST%\plugin_info.json" goto plugin_copy_error
 if not exist "%PLUGIN_DEST%\help_content.py" goto plugin_copy_error
 if not exist "%PLUGIN_DEST%\studio-hero.png" goto plugin_copy_error
 
+rem Only offer a shortcut for the official documented run.bat launcher.
+rem Manager-specific launch profiles may differ; skipping a shortcut is safe.
+set "GOMFOX_SHORTCUT_TARGET=%WANGP_DIR%\scripts\run.bat"
+if not exist "%GOMFOX_SHORTCUT_TARGET%" goto shortcut_unavailable
+echo.
+echo [선택] WanGP 실행 바로가기를 바탕화면에 추가할 수 있습니다.
+echo 공식 실행 스크립트가 확인되었습니다: "%GOMFOX_SHORTCUT_TARGET%"
+choice /C YN /M "곰같은여우의 AI 스튜디오 바로가기를 만들까요?"
+if errorlevel 2 goto shortcut_done
+powershell.exe -NoProfile -NonInteractive -Command "$desktop=[Environment]::GetFolderPath('DesktopDirectory'); if ([string]::IsNullOrWhiteSpace($desktop)) { exit 3 }; $path=Join-Path $desktop '곰같은여우의 AI 스튜디오.lnk'; if ([IO.File]::Exists($path)) { exit 4 }; $shell=New-Object -ComObject WScript.Shell; $link=$shell.CreateShortcut($path); $link.TargetPath=$env:GOMFOX_SHORTCUT_TARGET; $link.WorkingDirectory=$env:WANGP_DIR; $link.Description='원본 WanGP 무료 로컬 제작 실행'; $link.Save()"
+if errorlevel 1 goto shortcut_failed
+echo [완료] 바탕화면 바로가기를 만들었습니다.
+goto shortcut_done
+
+:shortcut_unavailable
+echo [안내] 공식 run.bat 실행 파일을 찾지 못해 바로가기 생성을 건너뜁니다.
+echo 공식 WanGP Manager에서 Start WanGP를 이용하세요.
+goto shortcut_done
+
+:shortcut_failed
+echo [안내] 기존 바로가기 또는 Windows 제한 때문에 새 바로가기를 만들지 못했습니다.
+echo 기존 바로가기는 덮어쓰지 않았습니다. WanGP Manager에서 실행할 수 있습니다.
+
+:shortcut_done
 echo.
 echo ===================================================
 echo [완료] 원본 WanGP와 한글 스튜디오 연결 단계가 끝났습니다.
