@@ -32,6 +32,10 @@ echo.
 echo 그래픽카드가 감지되어도 모든 영상/3D 모델 실행이 보장되지는 않습니다.
 echo 실제 권장 프로필은 공식 WanGP Manager가 제안합니다.
 echo.
+echo [설치 전 안내] 시스템 RAM과 기본 설치 드라이브 여유 공간:
+powershell.exe -NoProfile -NonInteractive -Command "$ErrorActionPreference='SilentlyContinue'; $cs=Get-CimInstance Win32_ComputerSystem; if ($cs -and $cs.TotalPhysicalMemory) { Write-Output ('RAM: '+[math]::Round($cs.TotalPhysicalMemory/1GB,1)+' GB') }; $root=[IO.Path]::GetPathRoot($env:LOCALAPPDATA); if ($root) { $vol=Get-PSDrive -Name $root.Substring(0,1); if ($vol) { $free=[math]::Round($vol.Free/1GB,1); Write-Output ('기본 설치 드라이브 여유: '+$free+' GB'); if ($free -lt 15) { Write-Output '주의: 설치나 모델 다운로드에 필요한 공간이 부족할 수 있습니다.' } } }"
+echo 모델 파일마다 필요한 저장 공간이 다르니 공식 설치 관리자에서 확인해 주세요.
+echo.
 
 echo [1/4] 공식 설치 관리자 다운로드를 준비합니다.
 set "SETUP_DIR=%TEMP%\GomFoxAIStudioSetup_%RANDOM%_%RANDOM%"
@@ -52,16 +56,16 @@ goto plugin_source_ready
 
 :download_plugin
 echo 현재 폴더에 한글 플러그인이 없으므로 고정 버전을 받습니다.
-echo GitHub 원본 버전: defffa15b2aa695e33917f78ed455f0171533aa5
+echo GitHub 원본 버전: 225d1759c15c5b6967d784973c0e4564b45b1004
 set "PLUGIN_SOURCE=%SETUP_DIR%\wan2gp-gomfox-studio"
 mkdir "%PLUGIN_SOURCE%" >nul 2>nul
 if not exist "%PLUGIN_SOURCE%\" goto plugin_download_error
-set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/defffa15b2aa695e33917f78ed455f0171533aa5/WanGP-KR/plugin/wan2gp-gomfox-studio"
+set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/225d1759c15c5b6967d784973c0e4564b45b1004/WanGP-KR/plugin/wan2gp-gomfox-studio"
 call :fetch_plugin_file "__init__.py" "754b7e9e5046f2450c5fd4ea0a53d40b6ceb8671acbb6e7ddd8932a52de80066"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin.py" "913e6596bf4a949caea10ee67cdf915625089ded254405ecdf7587ff739c45b0"
+call :fetch_plugin_file "plugin.py" "1d8ed25e7b44a4825a40f1a81675b4de2121599d368ff937801651d34e34e3c0"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin_info.json" "4304eabb80f7a0af514817a0af5728d988f864f108bc45ca2db40dc25f503260"
+call :fetch_plugin_file "plugin_info.json" "1173f6c50910b58a33f7142fdc6ea89681e9acb06b8676d9a4a0ccc8fe495665"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "catalog.py" "995f6d12271bff59da0a64318133e788ffbc08560bfeb0bede2aa8fc14e20b9d"
 if errorlevel 1 goto plugin_download_error
@@ -69,7 +73,7 @@ call :fetch_plugin_file "help_content.py" "d7cb8e51d6049d128b9e62c1ff775c9228af0
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "hardware.py" "f6a4eb010ae10b5a6529d54a10d78c9da314caad656b65fc0411f4bb9f0824bb"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "prompt_assistant.py" "7beadb530afda5b695427e528be2b564da9932c5b8ad518921d681ab2a6c98a0"
+call :fetch_plugin_file "prompt_assistant.py" "555295c725610b2882d8f6efbc8e43b4da9bee25a6aa71294cb505feb3c70b1b"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "studio-hero.png" "68ed79eb62f1fa81e089a52f85a689eabb73db964fc84d63daf85bd87c264b66"
 if errorlevel 1 goto plugin_download_error
