@@ -1,8 +1,8 @@
 {
   "name": "곰같은여우의 AI 스튜디오",
   "author": "곰같은여우",
-  "version": "0.3.0-dev",
-  "description": "무료 로컬 생성 기본, 초보자용 단계별 한글 도움말, 원본 모델 탐색기, 선택형 GPT 감독.",
+  "version": "0.4.0-dev",
+  "description": "무료 로컬 생성 기본, 초보자용 단계별 한글 도움말, 실행 PC 사양 확인, 원본 모델 탐색기, 선택형 GPT 감독.",
   "type": "app",
   "app_tab": "GomFoxStudio",
   "app_url": "/gomfox-studio",
