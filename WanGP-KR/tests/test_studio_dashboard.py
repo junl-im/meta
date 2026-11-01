@@ -62,8 +62,17 @@ class StudioDashboardTests(unittest.TestCase):
         self.assertNotIn('request_component("prompt")', SOURCE)
         self.assertNotIn("show_copy_button=True", SOURCE)
 
+    def test_queue_monitor_and_model_details_are_read_only(self):
+        for token in (
+            "작업 현황 · 갤러리", "format_queue_status", "format_model_details",
+            "model_inspect.click(", "queue_refresh.click(", "gallery_open.click(",
+        ):
+            self.assertIn(token, SOURCE)
+        self.assertNotIn("cancel_queue_task(", SOURCE)
+        self.assertNotIn("submit_task(", SOURCE)
+
     def test_plugin_metadata_matches(self):
-        self.assertEqual(META["version"], "0.7.0-dev")
+        self.assertEqual(META["version"], "0.8.0-dev")
         self.assertIn("GomFoxStudio", META["app_tab"])
 
 
