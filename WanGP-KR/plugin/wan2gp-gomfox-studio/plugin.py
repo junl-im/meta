@@ -15,6 +15,7 @@ import gradio as gr
 from shared.utils.plugins import WAN2GPPlugin
 
 from .catalog import format_model_catalog
+from .help_content import TOPICS, render_guide
 
 
 APP_TITLE = "곰같은여우의 AI 스튜디오"
@@ -25,7 +26,7 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.2.0-dev"
+        self.version = "0.3.0-dev"
         self.description = "기본 무료 로컬 제작, GPT 감독은 선택하는 한국어 작업실"
 
     def setup_ui(self):
@@ -94,6 +95,18 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                 "개인용 WanGP 사용은 라이선스 조건을 따릅니다."
             )
 
+            with gr.Accordion("도움말 · 처음 시작하기", open=True):
+                gr.Markdown(
+                    "처음이라면 **'처음 시작'**부터 읽어 보세요. "
+                    "작업 종류를 선택하면 버튼·설정·결과 확인 순서를 한글로 알려드립니다."
+                )
+                guide_topic = gr.Dropdown(
+                    choices=list(TOPICS),
+                    value="처음 시작",
+                    label="도움말 주제",
+                )
+                guide_display = gr.Markdown(value=render_guide("처음 시작"))
+
             open_generator = gr.Button("원본 무료 제작 화면 열기", variant="primary")
 
             with gr.Accordion("원본 모델 찾아보기 (무료 · 읽기 전용)", open=False):
@@ -148,6 +161,11 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                 "이 플러그인은 해당 기능을 제거하거나 대체하지 않습니다."
             )
 
+        guide_topic.change(
+            fn=render_guide,
+            inputs=[guide_topic],
+            outputs=[guide_display],
+        )
         open_generator.click(
             fn=self.goto_media_tab,
             inputs=[self.state],
