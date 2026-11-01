@@ -7,11 +7,15 @@
 - 이 GitHub 작업 브랜치는 **기획과 전용 확장 공간**이며, 아직 원본 코드가 체크아웃되거나 GPU 설치가 완료된 상태가 아니다.
 - 실제 설치 단계에서 공식 저장소를 직접 내려받고, 이 폴더의 한국어 확장과 느슨하게 결합한다. 다른 제품의 원본 실행 코드를 무분별하게 복제/수정하지 않는다.
 
+## 기본 무료 사용의 정확한 의미
+
+**기본값은 무료 로컬 모드**다. WanGP 자체의 개인 사용은 라이선스 조건 내에서 무료이고, 다운로드한 지원 모델을 로컬 PC에서 생성할 때 GPT/Claude/OpenAI API 키가 기본적으로 필요하지 않다. 다만 전기·저장 공간·하드웨어 비용이 들며, 모델별 라이선스·다운로드·특정 부가 기능 조건은 별도다. 자동 감독 Showrunner는 Deepy Prime이 필요하지만 기본 미디어 생성의 필수 조건은 아니다.
+
 ## GPT 연결의 정확한 의미
 
-1. 공식 WanGP는 Deepy Prime에서 **Codex CLI**를 LLM 엔진으로 선택할 수 있다. **ChatGPT 대화창 자체에 자동 연결된 상태는 아니다.**
+1. 공식 WanGP는 Deepy Prime에서 **Codex CLI**를 LLM 엔진으로 **선택할 수 있다**. 기본 무료 로컬 모드에서는 사용하지 않는다. **ChatGPT 대화창 자체에 자동 연결된 상태는 아니다.**
 2. 인증은 Codex에서 수행하며, 계정·사용량 제한에 따른다. 사용자가 이용 가능한 Codex/ChatGPT 계정 인증이 있다면 별도 OpenAI API 키 없이 사용할 수 있는 경로가 있지만, 그 사실이 **완전 무료·무제한을 의미하지는 않는다**.
-3. Claude Code 역시 원본이 지원하는 선택지다. GPT 전용 기본값을 마련하되 Claude 호환성은 삭제하지 않는다.
+3. Claude Code 역시 원본이 지원하지만 사용자는 사용하지 않는다. 개인 UI에서 기본 노출하지 않되 원본 호환성을 삭제하지 않는다. 기본값은 GPT가 아닌 로컬 모드다.
 4. ChatGPT에서 직접 생성 작업을 지시하려면 ChatGPT 계정의 MCP 연결 지원, WanGP MCP 서버 주소·접근·보안·인증을 별도로 확인하고 실제 연결 테스트를 해야 한다.
 5. Claude나 GPT를 이용하지 않더라도 로컬 미디어 모델은 자체적으로 돌아갈 수 있다. 하지만 Showrunner 자동 기획 기능은 공식 문서상 Deepy Prime이 필요하고, 로컬 LLM을 쓰려면 그에 맞는 모델·자원이 필요하다.
 
@@ -42,7 +46,7 @@
 - 작업 PC의 **운영체제**(Windows/Linux/macOS)
 - **GPU 제조사/정확한 모델/VRAM** 및 시스템 RAM
 - 남은 SSD/HDD 용량
-- **Codex에 로그인할 ChatGPT 계정 사용 가능 여부**
+- **선택적으로 GPT 감독을 쓸 경우** Codex에 로그인할 ChatGPT 계정 사용 가능 여부
 - 결과물 상업 판매 계획 여부 (모델별 라이선스 확인에 필요)
 
 하드웨어 확인 뒤 원본의 [설치 가이드](https://github.com/deepbeepmeep/WanGP/blob/main/docs/INSTALLATION.md)와 [시작 가이드](https://github.com/deepbeepmeep/WanGP/blob/main/docs/GETTING_STARTED.md)에 맞춘 전용 설치 문서를 확정한다.
