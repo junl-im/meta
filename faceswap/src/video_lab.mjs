@@ -1,4 +1,5 @@
 import {loadFaceDetector, findFaceBox} from "./face_detector.mjs";
+import {prepareAudioCapture, closeAudioCapture} from "./audio_capture.mjs";
 import {defaultBox, outputDimensions, chooseRecordingFormat, drawOverlayFrame} from "./compositor.mjs";
 
 const get = (id) => document.getElementById(id);
@@ -154,6 +155,8 @@ renderButton.addEventListener("click", async () => {
   const thisGeneration = generation;
   let stream = null;
   let sourceStream = null;
+  let audioCapture = null;
+  let audioStartup = null;
   let recorder = null;
   let timeout = null;
   let raf = null;
@@ -164,9 +167,21 @@ renderButton.addEventListener("click", async () => {
   updateButtons();
   announce("원본 첫 3초를 기기 안에서 처리할 준비를 하고 있어.");
   try {
+    // AudioContext must start from a direct click, before the first await.
+    try {
+      audioCapture = prepareAudioCapture(video);
+      audioStartup = audioCapture?.resume().catch(() => {
+        audioCapture?.dispose();
+        audioCapture = null;
+      });
+    } catch {
+      audioCapture?.dispose();
+      audioCapture = null;
+    }
     video.pause();
     await seekStart();
     if (thisGeneration !== generation || work.aborted) {
+      audioCapture?.dispose();
       if (job === work) job = null;
       video.controls = true;
       updateButtons();
@@ -174,12 +189,25 @@ renderButton.addEventListener("click", async () => {
     }
     showFrame();
     stream = canvas.captureStream(25);
-    // Best-effort original-audio passthrough; Safari may not provide this API.
-    try {
-      const capture = video.captureStream || video.mozCaptureStream;
-      sourceStream = typeof capture === "function" ? capture.call(video) : null;
-      for (const track of sourceStream?.getAudioTracks() || []) stream.addTrack(track);
-    } catch { /* video-only output is labeled below */ }
+    await audioStartup;
+    if (thisGeneration !== generation || work.aborted) {
+      audioCapture?.dispose();
+      for (const track of stream.getTracks()) track.stop();
+      if (job === work) job = null;
+      video.controls = true;
+      updateButtons();
+      return;
+    }
+    if (audioCapture?.track.readyState === "live") {
+      stream.addTrack(audioCapture.track);
+    } else {
+      // Fallback on browsers without Web Audio. It may expose no audio track.
+      try {
+        const capture = video.captureStream || video.mozCaptureStream;
+        sourceStream = typeof capture === "function" ? capture.call(video) : null;
+        for (const track of sourceStream?.getAudioTracks() || []) stream.addTrack(track);
+      } catch { /* silent-output fallback is stated below */ }
+    }
     const audioIncluded = stream.getAudioTracks().length > 0;
     recorder = new MediaRecorder(stream, {
       mimeType: selected.mimeType,
@@ -200,8 +228,10 @@ renderButton.addEventListener("click", async () => {
       work.finish();
     });
     recorder.addEventListener("stop", () => {
-      for (const track of stream?.getTracks() || []) track.stop();
-      // Do not stop sourceVideo itself or modify the user's original file.
+      for (const track of stream?.getVideoTracks() || []) track.stop();
+      audioCapture?.dispose();
+      for (const track of sourceStream?.getTracks() || []) track.stop();
+      // Do not modify the user's original file.
       sourceStream = null;
       if (job === work) job = null;
       video.controls = true;
@@ -220,7 +250,7 @@ renderButton.addEventListener("click", async () => {
       download.download = "actor-swap-overlay-demo-3s." + extension;
       download.hidden = false;
       announce("실제 로컬 샘플 생성 완료 · " + extension.toUpperCase() +
-        (audioIncluded ? " · 원본 오디오 트랙 포함" : " · 오디오 트랙을 가져오지 못해 무음") +
+        (audioIncluded ? " · 오디오 경로 연결(실제 음성·싱크는 별도 검증)" : " · 오디오 트랙을 가져오지 못해 무음") +
         " · AI 얼굴 교체가 아닌 사진 오버레이야.");
     }, {once: true});
     recorder.start(250);
@@ -262,6 +292,8 @@ renderButton.addEventListener("click", async () => {
     if (recorder && recorder.state !== "inactive") work.finish();
     else {
       for (const track of stream?.getTracks() || []) track.stop();
+      audioCapture?.dispose();
+      for (const track of sourceStream?.getTracks() || []) track.stop();
       if (timeout !== null) clearTimeout(timeout);
       video.pause();
       video.controls = true;
@@ -279,5 +311,6 @@ window.addEventListener("pagehide", () => {
   cancelWork("페이지를 떠나 작업을 중단했어.");
   if (outputUrl) URL.revokeObjectURL(outputUrl);
   detector?.close?.();
+  closeAudioCapture(video)?.catch?.(() => {});
 });
 updateButtons();
