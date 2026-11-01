@@ -1,4 +1,5 @@
 import {test, expect} from "@playwright/test";
+import {createHash} from "node:crypto";
 import {fileURLToPath} from "node:url";
 import {statSync} from "node:fs";
 import {execFileSync} from "node:child_process";
@@ -114,4 +115,46 @@ test("record when this engine exposes a usable media path; otherwise explain the
   ], {encoding: "utf8"}));
   expect(report.streams.some((stream) => stream.codec_type === "video")).toBeTruthy();
   console.log(`ENGINE_COMPAT ${testInfo.project.name}: local 3s export completed; video stream validated`);
+});
+
+test("local ONNX manifest: rights gate, hash match, tamper detection, reset, no network", async ({page}) => {
+  const externalRequests = [];
+  const errors = [];
+  page.on("request", (request) => {
+    const url = request.url();
+    if (/^https?:/.test(url) && !url.startsWith("http://127.0.0.1:4175/")) externalRequests.push(url);
+  });
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/");
+  const payload = Buffer.from([3, 7, 11, 19, 23]);
+  const hash = createHash("sha256").update(payload).digest("hex");
+  const manifest = {
+    schema: "actor-swap-model-package/v1", name: "Test model (inert fixture)",
+    filename: "authorized.onnx", format: "onnx", sha256: hash,
+    weightsLicense: {
+      id: "Independent-weight-license", evidenceUrl: "https://example.org/model-rights",
+      commercialUseConfirmed: true
+    }
+  };
+  const model = (buffer) => ({name: "authorized.onnx", mimeType: "application/octet-stream", buffer});
+  await page.locator("#local-model-file").setInputFiles(model(payload));
+  await page.locator("#local-model-manifest").setInputFiles({
+    name: "model.json", mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(manifest))
+  });
+  await expect(page.locator("#verify-local-model")).toBeDisabled();
+  await page.locator("#local-model-rights").check();
+  await page.locator("#verify-local-model").click();
+  await expect(page.locator("#local-model-status")).toContainText("SHA-256 일치");
+  await expect(page.locator("#local-model-status")).toContainText("독립 검증 전");
+  await page.locator("#local-model-file").setInputFiles(model(Buffer.from([0, 1, 2])));
+  await page.locator("#verify-local-model").click();
+  await expect(page.locator("#local-model-status")).toContainText("검사 실패");
+  await expect(page.locator("#local-model-status")).toContainText("SHA-256");
+  await page.locator("#reset-button").click();
+  await expect(page.locator("#verify-local-model")).toBeDisabled();
+  await expect(page.locator("#local-model-rights")).not.toBeChecked();
+  await expect(page.locator("#local-model-status")).toContainText("아직 검사하지 않았어");
+  expect(externalRequests).toEqual([]);
+  expect(errors).toEqual([]);
 });
