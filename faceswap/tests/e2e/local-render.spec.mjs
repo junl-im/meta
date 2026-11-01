@@ -124,3 +124,34 @@ test("a second recording can reuse the same local audio source", async ({page}) 
   ], {encoding: "utf8"}));
   expect(metadata.streams.some((stream) => stream.codec_type === "audio")).toBeTruthy();
 });
+
+test("Chromium opt-in executes real local synthetic ONNX WASM Add inference without media upload", async ({page}, testInfo) => {
+  test.setTimeout(90000);
+  await page.addInitScript(() => {globalThis.__faceswapQaRuntime=true;});
+  const externalRequests=[];
+  const runtimeRequests=[];
+  const errors=[];
+  page.on("pageerror",error=>errors.push(error.message));
+  page.on("request",request=>{
+    const url=request.url();
+    if(/^https?:/.test(url)&&!url.startsWith("http://127.0.0.1:4175/"))externalRequests.push(url);
+    if(url.includes("/__qa_ort/"))runtimeRequests.push(url);
+  });
+  await page.goto("/");
+  await expect(page.locator("#onnx-probe-button")).toBeDisabled();
+  expect(runtimeRequests).toEqual([]);
+  await page.locator("#onnx-runtime-consent").check();
+  await expect(page.locator("#onnx-probe-button")).toBeEnabled();
+  await page.locator("#onnx-probe-button").click();
+  await expect(page.locator("#onnx-probe-status")).toContainText("실제 ONNX WASM 추론 성공",{timeout:75000});
+  await expect(page.locator("#onnx-probe-status")).toContainText("2 + 3 = 5");
+  await expect(page.locator("#onnx-probe-status")).toContainText("AI 얼굴 교체는 아직");
+  expect(runtimeRequests.some(url=>url.endsWith("ort.wasm.min.js"))).toBeTruthy();
+  expect(runtimeRequests.some(url=>url.endsWith(".wasm"))).toBeTruthy();
+  expect(externalRequests).toEqual([]);
+  expect(errors).toEqual([]);
+  console.log(`ONNX_SYNTHETIC ${testInfo.project.name}: true WASM Add inference 2+3=5, no external requests`);
+  await page.locator("#reset-button").click();
+  await expect(page.locator("#onnx-runtime-consent")).not.toBeChecked();
+  await expect(page.locator("#onnx-probe-button")).toBeDisabled();
+});
