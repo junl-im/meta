@@ -1,0 +1,15 @@
+{
+  "name": "곰같은여우의 AI 스튜디오",
+  "author": "곰같은여우",
+  "version": "0.1.0-dev",
+  "description": "무료 로컬 생성이 기본인 개인용 한국어 작업실. Deepy Prime/Codex 감독은 사용자가 켤 때만 실행합니다.",
+  "type": "app",
+  "app_tab": "GomFoxStudio",
+  "app_url": "/gomfox-studio",
+  "fullscreen": true,
+  "info_card": {
+    "tagline": "무료 로컬 기본 · GPT 선택",
+    "description": "원본 WanGP의 영상, 이미지, 음성, 3D 생성 기능과 고급 설정을 유지하면서 한국어 작업 흐름을 제공합니다.",
+    "details": "초기 개발판 · 원본 WanGP는 별도 설치 필요"
+  }
+}
