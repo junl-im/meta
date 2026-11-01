@@ -10,7 +10,11 @@
 - 사용자에겐 완전 한국어 화면을 지향하고, 원본 UI로 돌아갈 수 있다.
 - 새 UI는 SVG 파일/태그/데이터 URI를 사용하지 않는다.
 
-## 적용 방법 (아직 실행 전)
+## 가장 쉬운 적용 방법
+
+원본 WanGP가 아직 없다면 **[Windows 전체 설치 안내](../docs/FULL_INSTALL_WINDOWS_KO.md)**를 먼저 이용하세요. `scripts/install_studio_full_windows.cmd`는 공식 WanGP Manager를 내려받아 전체 엔진 설치를 안내한 다음 한글 플러그인을 추가합니다. 모든 모델 가중치를 무조건 받는 방식은 아닙니다.
+
+## 수동 적용 방법 (개발자용, 아직 실행 전)
 
 1. 공식 WanGP를 설치한다. 프로젝트 루트의 `scripts/bring_upstream.py`는 원본 소스만 가져오며 의존성 설치는 별도다.
 2. `wan2gp-gomfox-studio/` 폴더 전체를 설치된 WanGP의 `plugins/` 아래에 **복사**한다.
