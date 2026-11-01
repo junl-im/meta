@@ -1,8 +1,8 @@
 {
   "name": "곰같은여우의 AI 스튜디오",
   "author": "곰같은여우",
-  "version": "0.1.0-dev",
-  "description": "무료 로컬 생성이 기본인 개인용 한국어 작업실. Deepy Prime/Codex 감독은 사용자가 켤 때만 실행합니다.",
+  "version": "0.2.0-dev",
+  "description": "무료 로컬 생성 기본, 원본 영상·이미지·음성·3D·월드 모델 목록 조회, 사용자 선택형 Deepy Prime/Codex 감독.",
   "type": "app",
   "app_tab": "GomFoxStudio",
   "app_url": "/gomfox-studio",
