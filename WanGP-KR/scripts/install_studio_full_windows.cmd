@@ -47,7 +47,6 @@ if not exist "%PLUGIN_SOURCE%\help_content.py" goto download_plugin
 if not exist "%PLUGIN_SOURCE%\hardware.py" goto download_plugin
 if not exist "%PLUGIN_SOURCE%\prompt_assistant.py" goto download_plugin
 if not exist "%PLUGIN_SOURCE%\studio-hero.png" goto download_plugin
-if not exist "%PLUGIN_SOURCE%\gomfox-studio-icon.png" goto download_plugin
 goto plugin_source_ready
 
 :download_plugin
