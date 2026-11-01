@@ -54,6 +54,18 @@ test("local input to recorded playable output, with no model download", async ({
   expect(Number.isFinite(measured)).toBeTruthy();
   expect(measured).toBeGreaterThan(1.8);
   expect(measured).toBeLessThan(4.8);
+  // A downloaded WebM must expose its finite Duration field to FFprobe.
+  // Browsers may choose MP4 instead; its duration should be finite too.
+  const containerDuration = Number(metadata.format.duration);
+  expect(Number.isFinite(containerDuration)).toBeTruthy();
+  expect(containerDuration).toBeGreaterThan(1.8);
+  expect(containerDuration).toBeLessThan(4.8);
+  expect(Math.abs(containerDuration - measured)).toBeLessThan(0.6);
+  await expect.poll(() => page.locator("#result-video").evaluate((element) => element.duration))
+    .toBeGreaterThan(1.8);
+  await page.locator("#result-video").evaluate((element) => { element.currentTime = 1.2; });
+  await expect.poll(() => page.locator("#result-video").evaluate((element) => element.currentTime))
+    .toBeGreaterThan(0.8);
   await expect.poll(() => page.locator("#result-video").evaluate((element) => element.videoWidth))
     .toBeGreaterThan(0);
   // The fixture contains a 440 Hz tone. Assert actual decoded audio signal:
@@ -69,6 +81,8 @@ test("local input to recorded playable output, with no model download", async ({
     Number(packet.pts_time) + (Number(packet.duration_time) || 0)));
   expect(audioEnd).toBeGreaterThan(1.8);
   expect(audioEnd).toBeLessThan(4.8);
+  // Relative encoded end times bound drift, but do not establish lip sync.
+  expect(Math.abs(audioEnd - measured)).toBeLessThan(0.7);
   const decodedAudio = spawnSync("ffmpeg", [
     "-hide_banner", "-i", filepath, "-map", "0:a:0", "-af", "volumedetect",
     "-f", "null", "-"
