@@ -43,8 +43,15 @@ class StudioDashboardTests(unittest.TestCase):
         self.assertEqual(SOURCE.count("deepy.run("), 1)
         self.assertTrue(SOURCE.index("if not consent:") < SOURCE.index("deepy.run("))
 
+    def test_onboarding_is_explicit_and_noninvasive(self):
+        for text in ("처음 실행 · 따라 하기", "welcome_topic", "welcome_hardware", "welcome_start"):
+            self.assertIn(text, SOURCE)
+        self.assertIn("fn=read_hardware_report", SOURCE)
+        self.assertIn("fn=self.goto_media_tab", SOURCE)
+        self.assertNotIn("torch.cuda.set_device", SOURCE)
+
     def test_plugin_metadata_matches(self):
-        self.assertEqual(META["version"], "0.5.0-dev")
+        self.assertEqual(META["version"], "0.6.0-dev")
         self.assertIn("GomFoxStudio", META["app_tab"])
 
 
