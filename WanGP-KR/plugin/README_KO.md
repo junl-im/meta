@@ -12,7 +12,7 @@
 
 ## 가장 쉬운 적용 방법
 
-원본 WanGP가 아직 없다면 **[Windows 전체 설치 안내](../docs/FULL_INSTALL_WINDOWS_KO.md)**를 먼저 이용하세요. `scripts/install_studio_full_windows.cmd`는 공식 WanGP Manager를 내려받아 전체 엔진 설치를 안내한 다음 한글 플러그인을 추가합니다. 모든 모델 가중치를 무조건 받는 방식은 아닙니다.
+원본 WanGP가 아직 없다면 **[Windows 전체 설치 안내](../docs/FULL_INSTALL_WINDOWS_KO.md)**를 먼저 이용하세요. `scripts/install_studio_full_windows.cmd` 파일 **하나만 받아 실행해도** 필요한 한글 코드 파일을 고정된 GitHub 버전에서 검증·다운로드한 후 공식 WanGP Manager를 실행합니다. 전체 엔진 설치가 끝나면 한글 플러그인을 추가합니다. 모든 모델 가중치를 무조건 받는 방식은 아닙니다.
 
 ## 수동 적용 방법 (개발자용, 아직 실행 전)
 
