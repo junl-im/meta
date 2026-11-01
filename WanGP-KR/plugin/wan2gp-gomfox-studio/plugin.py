@@ -41,6 +41,7 @@ STUDIO_STYLE = """
 #gfs-root #gfs-category-audio {background:linear-gradient(145deg,#267875,#21565f);color:#fff;border-color:#438c88}
 #gfs-root #gfs-category-3d {background:linear-gradient(145deg,#946f4f,#78523d);color:#fff;border-color:#a47b5a}
 #gfs-root #gfs-launch {min-height:49px;border-radius:13px;font-weight:800}
+#gfs-root #gfs-copy {border-radius:12px;font-weight:750}
 #gfs-root #gfs-compose {min-height:44px;background:linear-gradient(130deg,#2b746f,#205f68);color:#fff;border-radius:12px;font-weight:800}
 #gfs-root #gfs-prompt-box textarea {line-height:1.55;font-size:14px}
 #gfs-root .gfs-workshop {padding:14px 17px;border-radius:16px;border:1px solid rgba(122,151,153,.25);background:linear-gradient(125deg,rgba(66,125,129,.15),rgba(235,163,103,.12))}
@@ -204,10 +205,14 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                         "무료 프롬프트 만들기", variant="primary", elem_id="gfs-compose"
                     )
                     prompt_result = gr.Textbox(
-                        label="완성한 초안 · 복사 버튼으로 가져가기",
-                        lines=7, interactive=False, show_copy_button=True,
+                        label="완성한 초안",
+                        lines=7, interactive=False,
                         elem_id="gfs-prompt-box",
                         value="주제를 입력하고 무료 프롬프트 만들기를 눌러 주세요.",
+                    )
+                    prompt_copy = gr.Button("프롬프트 한 번에 복사", elem_id="gfs-copy")
+                    prompt_copy_status = gr.Markdown(
+                        value="복사 버튼이 동작하지 않는 브라우저라면 문장을 직접 선택해 복사하세요."
                     )
                     prompt_advice = gr.Markdown(
                         value="**절약 모드:** 작은 모델·짧은 길이·낮은 해상도부터 시험하세요."
@@ -303,6 +308,20 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
             fn=build_prompt,
             inputs=[prompt_kind, prompt_subject, prompt_style, prompt_extra, prompt_profile],
             outputs=[prompt_result, prompt_advice],
+        )
+        prompt_copy.click(
+            fn=None, inputs=[prompt_result], outputs=[prompt_copy_status],
+            js=(
+                "async (draft) => {"
+                "  try {"
+                "    if (!draft || draft.startsWith('주제를 입력')) return '먼저 프롬프트를 만들어 주세요.';"
+                "    await navigator.clipboard.writeText(draft);"
+                "    return '복사 완료! 원본 제작 화면에서 붙여넣으세요.';"
+                "  } catch (_) {"
+                "    return '브라우저가 자동 복사를 허용하지 않았습니다. 문장을 직접 선택해 복사하세요.';"
+                "  }"
+                "}"
+            ),
         )
         prompt_open.click(
             fn=self.goto_media_tab, inputs=[self.state], outputs=[self.main_tabs]
