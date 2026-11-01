@@ -1,4 +1,4 @@
-name: Actor Swap WEB foundation checks
+name: Actor Swap WEB checks
 
 on:
   pull_request:
@@ -27,5 +27,8 @@ jobs:
         run: |
           node --check faceswap/src/capabilities.mjs
           node --check faceswap/src/app.mjs
+          node --check faceswap/src/face_detector.mjs
+          node --check faceswap/src/compositor.mjs
+          node --check faceswap/src/video_lab.mjs
       - name: Local-only foundation tests
         run: node --test faceswap/tests/smoke.mjs
