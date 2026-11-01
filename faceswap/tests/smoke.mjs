@@ -375,3 +375,16 @@ test("worker bridge handles progress and cancellation with immediate termination
   await assert.rejects(pending,/취소/);
   assert.equal(terminated,2);
 });
+
+test("manifest preflight accepts large files without whole-buffer reads", async () => {
+  let calls=0;
+  const model={name:"authorized.onnx",size:300*1024*1024,
+    arrayBuffer:()=>{throw new Error("whole-buffer read must never happen");}};
+  const result=await verifyLocalModelPackage({
+    modelFile:model,manifestFile:manifestFile(manifestData()),
+    hashFile:async()=>{calls++;return testModelHash;}
+  });
+  assert.equal(result.integrityVerified,true);
+  assert.equal(result.bytes,300*1024*1024);
+  assert.equal(calls,1);
+});
