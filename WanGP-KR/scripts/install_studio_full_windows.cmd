@@ -45,27 +45,30 @@ if not exist "%PLUGIN_SOURCE%\plugin_info.json" goto download_plugin
 if not exist "%PLUGIN_SOURCE%\catalog.py" goto download_plugin
 if not exist "%PLUGIN_SOURCE%\help_content.py" goto download_plugin
 if not exist "%PLUGIN_SOURCE%\hardware.py" goto download_plugin
+if not exist "%PLUGIN_SOURCE%\prompt_assistant.py" goto download_plugin
 if not exist "%PLUGIN_SOURCE%\studio-hero.png" goto download_plugin
 goto plugin_source_ready
 
 :download_plugin
 echo 현재 폴더에 한글 플러그인이 없으므로 고정 버전을 받습니다.
-echo GitHub 원본 버전: 0db6b58c102c8bd9bfc5a09bdc937590c4746148
+echo GitHub 원본 버전: c265e03182915a75a88e3ee9875ebf391d37c395
 set "PLUGIN_SOURCE=%SETUP_DIR%\wan2gp-gomfox-studio"
 mkdir "%PLUGIN_SOURCE%" >nul 2>nul
 if not exist "%PLUGIN_SOURCE%\" goto plugin_download_error
-set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/0db6b58c102c8bd9bfc5a09bdc937590c4746148/WanGP-KR/plugin/wan2gp-gomfox-studio"
+set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/c265e03182915a75a88e3ee9875ebf391d37c395/WanGP-KR/plugin/wan2gp-gomfox-studio"
 call :fetch_plugin_file "__init__.py" "754b7e9e5046f2450c5fd4ea0a53d40b6ceb8671acbb6e7ddd8932a52de80066"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin.py" "a2e679f192313dd981fb5c9219e0904e3246e72032f49c5500b18ea1a4ec58ad"
+call :fetch_plugin_file "plugin.py" "977a233c7238e5cf7647feac556d21f5abdd8400ccd9627f607aea7c88381d47"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin_info.json" "d5e3ec36a0f8a166a48813592e06ea18ddf7f53d306822691ccea206358a9606"
+call :fetch_plugin_file "plugin_info.json" "457008bf9f6b91f85999d38517f1f9a7fd44c4b858dc641d1c55fe724da399a7"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "catalog.py" "e934ab7822dedf138dee89c6299553b87671669c62ac7c10541c263010848c10"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "help_content.py" "d7cb8e51d6049d128b9e62c1ff775c9228af0d8d035de4fcd4ccce5fb7ee2fcb"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "hardware.py" "f6a4eb010ae10b5a6529d54a10d78c9da314caad656b65fc0411f4bb9f0824bb"
+if errorlevel 1 goto plugin_download_error
+call :fetch_plugin_file "prompt_assistant.py" "7b37ad8d89dc95f8fe92818d30d654c2613523f16a83233ab12be767e7a3c76c"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "studio-hero.png" "68ed79eb62f1fa81e089a52f85a689eabb73db964fc84d63daf85bd87c264b66"
 if errorlevel 1 goto plugin_download_error
@@ -140,6 +143,7 @@ if errorlevel 8 goto plugin_copy_error
 if not exist "%PLUGIN_DEST%\plugin.py" goto plugin_copy_error
 if not exist "%PLUGIN_DEST%\plugin_info.json" goto plugin_copy_error
 if not exist "%PLUGIN_DEST%\help_content.py" goto plugin_copy_error
+if not exist "%PLUGIN_DEST%\prompt_assistant.py" goto plugin_copy_error
 if not exist "%PLUGIN_DEST%\studio-hero.png" goto plugin_copy_error
 
 rem Only offer a shortcut for the official documented run.bat launcher.
