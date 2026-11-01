@@ -1,4 +1,5 @@
 import {verifyLocalModelPackage, modelByteLimit} from "./model_preflight.mjs";
+import {hashFileInWorker} from "./sha256_worker_client.mjs";
 
 const byId = (id) => document.getElementById(id);
 const weightInput = byId("local-model-file");
@@ -7,15 +8,19 @@ const rightsConsent = byId("local-model-rights");
 const verifyButton = byId("verify-local-model");
 const status = byId("local-model-status");
 const limit = byId("local-model-limit");
+const cancelButton = byId("cancel-model-check");
+let activeController = null;
 let generation = 0;
 let working = false;
 
 function updateButton() {
   verifyButton.disabled = working || !weightInput.files?.length ||
     !manifestInput.files?.length || !rightsConsent.checked;
+  cancelButton.disabled = !working;
 }
 function invalidate() {
   generation++;
+  activeController?.abort();
   status.textContent = "아직 검사하지 않았어. 가중치 파일은 읽기 전용으로 확인하며 서버로 보내지 않아.";
   updateButton();
 }
@@ -28,13 +33,15 @@ byId("reset-button").addEventListener("click", () => {
   rightsConsent.checked = false;
   invalidate();
 });
-const maxMiB = modelByteLimit(navigator.deviceMemory) / 1024 / 1024;
-limit.textContent = "이 기기의 1회 SHA-256 검사 한도: " + maxMiB +
-  " MiB. 모델을 실행하거나 라이선스를 독립 인증하지는 않아.";
+limit.textContent = "1MiB씩 백그라운드 분할 검사 · 최대 " +
+  (modelByteLimit() / 1024 / 1024) +
+  "MiB · 중단 가능. 모델 실행/라이선스 독립 인증은 하지 않아.";
 
 verifyButton.addEventListener("click", async () => {
   if (verifyButton.disabled) return;
   const thisGeneration = ++generation;
+  const controller = new AbortController();
+  activeController = controller;
   working = true;
   updateButton();
   status.textContent = "로컬 파일 전체를 SHA-256으로 검사 중이야. 대용량은 시간이 걸릴 수 있어.";
@@ -42,7 +49,13 @@ verifyButton.addEventListener("click", async () => {
     const result = await verifyLocalModelPackage({
       modelFile: weightInput.files[0],
       manifestFile: manifestInput.files[0],
-      deviceMemoryGB: navigator.deviceMemory
+      signal: controller.signal,
+      hashFile: hashFileInWorker,
+      onProgress: (loaded,total) => {
+        if (generation === thisGeneration && !controller.signal.aborted) {
+          status.textContent = "모델 SHA-256 검사 " + Math.floor(loaded / total * 100) + "% · 기기 내부 처리 중";
+        }
+      }
     });
     if (generation !== thisGeneration) return;
     status.textContent = "SHA-256 일치 · " + result.sha256.slice(0, 16) +
@@ -52,7 +65,15 @@ verifyButton.addEventListener("click", async () => {
     if (generation !== thisGeneration) return;
     status.textContent = "검사 실패: " + (error?.message || "파일을 확인할 수 없어.");
   } finally {
+    if (activeController === controller) activeController = null;
     working = false;
     updateButton();
   }
+});
+
+cancelButton.addEventListener("click", () => {
+  if (!working) return;
+  generation++;
+  activeController?.abort();
+  status.textContent = "사용자 요청으로 로컬 모델 검사를 취소했어.";
 });
