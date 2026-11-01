@@ -40,13 +40,16 @@ Target: `junl-im/meta/faceswap/` (one repository, independent subproject)
 - [ ] Independent browser playthrough and device QA.
 - [ ] Confirm all historical source license notices.
 
-### M0.5 — basic local video lab (v0.7.1, NOT AI swap)
+### M0.5 — local video lab and automated browser QA (v0.7.2, NOT AI swap)
 
 - [x] Optional MediaPipe CPU face **location** detection with explicit third-party download notice.
 - [x] Real 3-second in-browser canvas/photo overlay recording, preview and downloaded MP4/WebM candidate.
 - [x] Explicitly label all outputs `DEMO / NOT AI SWAP`; no face-swap model weights included.
 - [x] Static Node tests/CI for normalization, format decision, media-local architecture.
-- [ ] Interactive Chrome/Android/Safari playback and audio preservation tests.
+- [x] Chromium automated E2E: desktop + Pixel 7 mobile emulation × encode/download and consent/reset = 4 PASS (2026-11-01, [Actions 41286780071](https://github.com/junl-im/meta/actions/runs/41286780071)).
+- [x] FFprobe confirms output video track and frame packet timestamps; reset state regression repaired.
+- [ ] Physical Chrome/Android/Safari playback and audio preservation tests.
+- [ ] A complete container Duration value / seekable WebM/MP4 mux.
 - [ ] Full source-audio continuity, frame timing and nonempty playable output confirmed on real devices.
 
 ### M1 — legally usable 3-second proof
