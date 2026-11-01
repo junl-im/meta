@@ -3,9 +3,9 @@ export default defineConfig({
   testDir: "./tests/e2e",
   testMatch: "**/*.spec.mjs",
   workers: 1,
-  retries: 1,
-  timeout: 45000,
-  expect: {timeout: 12000},
+  retries: 0,
+  timeout: 25000,
+  expect: {timeout: 8000},
   reporter: process.env.CI ? "list" : "line",
   use: {baseURL: "http://127.0.0.1:4175", trace: "retain-on-failure"},
   projects: [
