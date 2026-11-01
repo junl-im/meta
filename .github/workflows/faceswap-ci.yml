@@ -32,6 +32,8 @@ jobs:
           node --check faceswap/src/audio_capture.mjs
           node --check faceswap/src/webm_duration.mjs
           node --check faceswap/src/video_lab.mjs
+          node --check faceswap/src/model_preflight.mjs
+          node --check faceswap/src/model_lab.mjs
           node --check faceswap/tests/serve.mjs
           node --check faceswap/tests/e2e/local-render.spec.mjs
           node --check faceswap/tests/e2e/browser-compat.spec.mjs
