@@ -28,3 +28,5 @@
 .model-schema-note{overflow-wrap:anywhere;color:#9db1bd;line-height:1.6;font-size:10px;margin:10px 0 0}
 .model-schema-note code{font-size:10px;color:#c3d5b1}
 @media(max-width:650px){.model-lab{padding:10px}.model-fields{grid-template-columns:1fr;gap:7px}}
+
+.model-hash-actions{display:flex;gap:8px;flex-wrap:wrap}.model-hash-actions .button:first-child{flex:2 1 170px}.model-hash-actions .button:last-child{flex:1 1 90px}
