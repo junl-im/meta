@@ -21,12 +21,6 @@ for %%I in ("%~dp0..") do set "STUDIO_ROOT=%%~fI"
 set "PLUGIN_SOURCE=%STUDIO_ROOT%\plugin\wan2gp-gomfox-studio"
 set "DEFAULT_WANGP=%STUDIO_ROOT%\runtime\WanGP"
 
-if not exist "%PLUGIN_SOURCE%\plugin.py" goto missing_plugin
-if not exist "%PLUGIN_SOURCE%\plugin_info.json" goto missing_plugin
-if not exist "%PLUGIN_SOURCE%\catalog.py" goto missing_plugin
-if not exist "%PLUGIN_SOURCE%\help_content.py" goto missing_plugin
-if not exist "%PLUGIN_SOURCE%\hardware.py" goto missing_plugin
-
 powershell.exe -NoProfile -NonInteractive -Command "if ([Environment]::Is64BitOperatingSystem) { exit 0 } else { exit 1 }" >nul
 if errorlevel 1 goto need_64bit
 where curl.exe >nul 2>nul
@@ -43,6 +37,39 @@ echo [1/4] 공식 설치 관리자 다운로드를 준비합니다.
 set "SETUP_DIR=%TEMP%\GomFoxAIStudioSetup_%RANDOM%_%RANDOM%"
 mkdir "%SETUP_DIR%" >nul 2>nul
 if not exist "%SETUP_DIR%\" goto temp_error
+
+echo [준비] 한글 스튜디오 파일을 확인합니다.
+if not exist "%PLUGIN_SOURCE%\__init__.py" goto download_plugin
+if not exist "%PLUGIN_SOURCE%\plugin.py" goto download_plugin
+if not exist "%PLUGIN_SOURCE%\plugin_info.json" goto download_plugin
+if not exist "%PLUGIN_SOURCE%\catalog.py" goto download_plugin
+if not exist "%PLUGIN_SOURCE%\help_content.py" goto download_plugin
+if not exist "%PLUGIN_SOURCE%\hardware.py" goto download_plugin
+goto plugin_source_ready
+
+:download_plugin
+echo 현재 폴더에 한글 플러그인이 없으므로 고정 버전을 받습니다.
+echo GitHub 원본 버전: b41664c3f5d7953a5b5693372405c85bf92c115d
+set "PLUGIN_SOURCE=%SETUP_DIR%\wan2gp-gomfox-studio"
+mkdir "%PLUGIN_SOURCE%" >nul 2>nul
+if not exist "%PLUGIN_SOURCE%\" goto plugin_download_error
+set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/b41664c3f5d7953a5b5693372405c85bf92c115d/WanGP-KR/plugin/wan2gp-gomfox-studio"
+call :fetch_plugin_file "__init__.py" "754b7e9e5046f2450c5fd4ea0a53d40b6ceb8671acbb6e7ddd8932a52de80066"
+if errorlevel 1 goto plugin_download_error
+call :fetch_plugin_file "plugin.py" "2a08e69c90a9b1bbc677cb23c7ea18961d30deb804f6c8273fdbb44dd04b61ea"
+if errorlevel 1 goto plugin_download_error
+call :fetch_plugin_file "plugin_info.json" "0f59af1a29d4c6ce1d18c07e21c6f78ab85ec6872487be081d71690302f5b37b"
+if errorlevel 1 goto plugin_download_error
+call :fetch_plugin_file "catalog.py" "e934ab7822dedf138dee89c6299553b87671669c62ac7c10541c263010848c10"
+if errorlevel 1 goto plugin_download_error
+call :fetch_plugin_file "help_content.py" "d7cb8e51d6049d128b9e62c1ff775c9228af0d8d035de4fcd4ccce5fb7ee2fcb"
+if errorlevel 1 goto plugin_download_error
+call :fetch_plugin_file "hardware.py" "f6a4eb010ae10b5a6529d54a10d78c9da314caad656b65fc0411f4bb9f0824bb"
+if errorlevel 1 goto plugin_download_error
+
+:plugin_source_ready
+echo 한글 플러그인 준비가 끝났습니다.
+echo.
 
 set "GOMFOX_MANAGER_EXE=%SETUP_DIR%\WanGPManager.exe"
 set "GOMFOX_CHECK_FILE=%SETUP_DIR%\WanGPManager.exe.sha256"
@@ -125,9 +152,9 @@ echo.
 pause
 exit /b 0
 
-:missing_plugin
-echo [중단] 한글 플러그인 파일을 찾을 수 없습니다.
-echo WanGP-KR 폴더 전체를 받은 뒤 이 파일을 다시 실행해 주세요.
+:plugin_download_error
+echo [안전 중단] 한글 플러그인을 다운로드하거나 SHA-256 검증하지 못했습니다.
+echo 확인되지 않은 코드는 설치하지 않았습니다.
 goto finish_error
 
 :need_64bit
@@ -180,3 +207,15 @@ echo.
 echo 원본 및 개인 데이터를 삭제하지 않았습니다.
 pause
 exit /b 1
+
+:fetch_plugin_file
+set "GOMFOX_FILE=%~1"
+set "GOMFOX_EXPECTED_SHA=%~2"
+set "GOMFOX_FILE_PATH=%PLUGIN_SOURCE%\%GOMFOX_FILE%"
+echo 받는 중: %GOMFOX_FILE%
+curl.exe --fail --location --retry 2 --connect-timeout 30 --max-time 120 --output "%GOMFOX_FILE_PATH%" "%GOMFOX_PINNED_RAW%/%GOMFOX_FILE%"
+if errorlevel 1 exit /b 1
+if not exist "%GOMFOX_FILE_PATH%" exit /b 1
+powershell.exe -NoProfile -NonInteractive -Command "$actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $env:GOMFOX_FILE_PATH).Hash; if ($actual -ne $env:GOMFOX_EXPECTED_SHA) { exit 5 }"
+if errorlevel 1 exit /b 1
+exit /b 0
