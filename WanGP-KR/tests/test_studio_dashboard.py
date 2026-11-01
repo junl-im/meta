@@ -53,12 +53,14 @@ class StudioDashboardTests(unittest.TestCase):
     def test_offline_prompt_workshop_is_copy_only(self):
         for token in (
             "프롬프트 작업실", "prompt_compose.click(", "fn=build_prompt",
-            "prompt_result", "show_copy_button=True", "prompt_open.click(",
+            "prompt_result", "prompt_copy.click(", "prompt_open.click(",
             "기존 원본 프롬프트나 생성 설정을 덮어쓰지 않습니다",
         ):
             self.assertIn(token, SOURCE)
         self.assertIn("from .prompt_assistant import", SOURCE)
+        self.assertIn("navigator.clipboard.writeText", SOURCE)
         self.assertNotIn('request_component("prompt")', SOURCE)
+        self.assertNotIn("show_copy_button=True", SOURCE)
 
     def test_plugin_metadata_matches(self):
         self.assertEqual(META["version"], "0.7.0-dev")
