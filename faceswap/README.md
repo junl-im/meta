@@ -1,10 +1,10 @@
-# Actor Swap Studio WEB — v0.7 foundation
+# Actor Swap Studio WEB — v0.7.1 browser video lab
 
 Independent web-first workspace inside the `junl-im/meta` repository.
 
 ## Status (2026-11-01)
 
-**Foundation only.** This version includes a responsive local-media intake UI, browser capability diagnostics and an exportable input-check manifest. It does **not** yet swap faces, run an AI model, render MP4, or upload user media. The UI deliberately states that limitation.
+**Browser lab, not AI face swap.** The UI now includes a 3-second labeled picture-over-video recording test, optional MediaPipe face **location** detection, and a downloadable file (MP4 or WebM, chosen by browser capability). The photo overlay is not an identity replacement or realistic face-swap inference. Original audio is included only when the browser exposes an audio track through video capture; otherwise output is explicitly labeled silent. No user footage or portrait is uploaded by our application.
 
 ## Goals
 
@@ -17,7 +17,7 @@ Independent web-first workspace inside the `junl-im/meta` repository.
 
 ## Start
 
-Open `faceswap/index.html` through a local web server, or publish the folder as a static site with HTTPS. The UI has no runtime package dependencies. On-device inference and video export are not implemented in this foundation.
+Open `faceswap/index.html` through a local web server, or publish the folder as a static site with HTTPS. Core UI and recording need no install or bundling. Optional automatic face detection downloads MediaPipe Tasks Vision 1.2.0 WASM/runtime from jsDelivr and BlazeFace model from Google's public model host **only after the user explicitly opts in and clicks the detection button**. This optional third-party SDK notes that usage/performance metrics may be sent to Google; see its [package privacy notice](https://www.npmjs.com/package/@mediapipe/tasks-vision). Media files are used locally by canvas and the model. Actual identity swapping, long-form export and full audio-preserving MP4 muxing are not implemented.
 
 ## Files
 
@@ -25,6 +25,9 @@ Open `faceswap/index.html` through a local web server, or publish the folder as 
 - `styles.css` — self-contained desktop/mobile layout.
 - `src/capabilities.mjs` — WebGPU/WebCodecs/WASM capability probing.
 - `src/app.mjs` — local-only input preview, checks, manifest export and navigation.
+- `src/face_detector.mjs` — opt-in MediaPipe CPU face location and bounds normalization.
+- `src/compositor.mjs` — canvas overlay, output sizing and supported recorder format.
+- `src/video_lab.mjs` — optional tracking, 3-second local recording, cancellation, preview/download.
 - `tests/smoke.mjs` — Node smoke/architecture checks.
 - `docs/WEB_MIGRATION.md` — migration and acceptance gates.
 - `docs/OPEN_SOURCE_RESEARCH.md` — source candidates and licensing gates.
@@ -41,4 +44,12 @@ The repository's active Firebase publishing path is `.pages-site`. This folder i
 
 ## Verify
 
-Run `node --test faceswap/tests/smoke.mjs` from the repository root. Future browser tests must cover Chrome/Edge desktop, Chrome Android and Safari iOS.
+Run `node --test faceswap/tests/smoke.mjs` from the repository root. Node checks cover geometry, format selection, browser gating and privacy-facing UI text. The GitHub Actions workflow runs syntax checks and tests. **Real video/audio playback has not yet been device-tested.** Future manual QA must cover Chrome/Edge desktop, Chrome Android and Safari iOS, including MediaPipe CDN failures and silent-output fallbacks.
+
+## Try the browser lab
+
+1. Serve `faceswap/` from a static HTTPS host or local dev server.
+2. Choose a consented short video and reference portrait. Confirm usage rights.
+3. Click **3초 샘플 생성** to record a labeled picture overlay without any model download.
+4. Optionally acknowledge the SDK/model-network notice and click **얼굴 위치 자동 검출** to use automatic placement. This requires network for first load.
+5. Preview/download the output. A recording result is a **visual-composition test**, not an AI swap. Playback/encoding/audio support differs by browser.
