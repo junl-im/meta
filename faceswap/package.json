@@ -1,7 +1,7 @@
 {
   "name": "actor-swap-studio-web",
   "private": true,
-  "version": "0.7.2-browser-qa",
+  "version": "0.7.3-audio-qa",
   "type": "module",
   "description": "Local-only web video lab; AI identity swapping not yet implemented",
   "scripts": {
