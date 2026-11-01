@@ -1,5 +1,6 @@
 import {loadFaceDetector, findFaceBox} from "./face_detector.mjs";
 import {prepareAudioCapture, closeAudioCapture} from "./audio_capture.mjs";
+import {repairWebmDuration} from "./webm_duration.mjs";
 import {defaultBox, outputDimensions, chooseRecordingFormat, drawOverlayFrame} from "./compositor.mjs";
 
 const get = (id) => document.getElementById(id);
@@ -158,6 +159,8 @@ renderButton.addEventListener("click", async () => {
   let audioCapture = null;
   let audioStartup = null;
   let recorder = null;
+  let recordingStartedAt = 0;
+  let recordingStoppedAt = 0;
   let timeout = null;
   let raf = null;
   const chunks = [];
@@ -217,7 +220,10 @@ renderButton.addEventListener("click", async () => {
       if (raf !== null) cancelAnimationFrame(raf);
       if (timeout !== null) clearTimeout(timeout);
       video.pause();
-      if (recorder?.state !== "inactive") recorder?.stop();
+      if (recorder?.state !== "inactive") {
+        recordingStoppedAt = performance.now();
+        recorder?.stop();
+      }
     };
     recorder.addEventListener("dataavailable", (event) => {
       if (event.data?.size) chunks.push(event.data);
@@ -227,33 +233,46 @@ renderButton.addEventListener("click", async () => {
       work.message = "브라우저 영상 인코딩 중 오류가 발생했어.";
       work.finish();
     });
-    recorder.addEventListener("stop", () => {
+    recorder.addEventListener("stop", async () => {
       for (const track of stream?.getVideoTracks() || []) track.stop();
       audioCapture?.dispose();
       for (const track of sourceStream?.getTracks() || []) track.stop();
       // Do not modify the user's original file.
       sourceStream = null;
-      if (job === work) job = null;
       video.controls = true;
-      updateButtons();
-      if (work.aborted || !chunks.length) {
-        announce(work.message || "샘플을 완성하지 못했어. 기기 성능과 코덱을 확인해 줘.");
-        return;
+      try {
+        if (work.aborted || !chunks.length) {
+          announce(work.message || "샘플을 완성하지 못했어. 기기 성능과 코덱을 확인해 줘.");
+          return;
+        }
+        const mime = recorder.mimeType || selected.mimeType;
+        const extension = mime.includes("mp4") ? "mp4" : selected.extension;
+        const raw = new Blob(chunks, {type: mime});
+        const elapsedMs = Math.max(1,
+          (recordingStoppedAt || performance.now()) - recordingStartedAt);
+        // Missing WebM Duration is repaired without uploading or re-encoding
+        // any pixels or sound. MP4 and unsupported WebM structures stay intact.
+        const result = await repairWebmDuration(raw, elapsedMs);
+        if (work.aborted || thisGeneration !== generation || job !== work) return;
+        outputUrl = URL.createObjectURL(result.blob);
+        resultVideo.src = outputUrl;
+        resultVideo.hidden = false;
+        download.href = outputUrl;
+        download.download = "actor-swap-overlay-demo-3s." + extension;
+        download.hidden = false;
+        announce("실제 로컬 샘플 생성 완료 · " + extension.toUpperCase() +
+          (audioIncluded ? " · 오디오 경로 연결(실제 음성·싱크는 별도 검증)" : " · 오디오 트랙을 가져오지 못해 무음") +
+          (result.repaired ? " · 재생 길이 정보 보정" : "") +
+          " · AI 얼굴 교체가 아닌 사진 오버레이야.");
+      } catch (error) {
+        announce("출력 파일 처리 실패: " + (error?.message || "브라우저 제한"));
+      } finally {
+        if (job === work) job = null;
+        updateButtons();
       }
-      const mime = recorder.mimeType || selected.mimeType;
-      const extension = mime.includes("mp4") ? "mp4" : selected.extension;
-      const blob = new Blob(chunks, {type: mime});
-      outputUrl = URL.createObjectURL(blob);
-      resultVideo.src = outputUrl;
-      resultVideo.hidden = false;
-      download.href = outputUrl;
-      download.download = "actor-swap-overlay-demo-3s." + extension;
-      download.hidden = false;
-      announce("실제 로컬 샘플 생성 완료 · " + extension.toUpperCase() +
-        (audioIncluded ? " · 오디오 경로 연결(실제 음성·싱크는 별도 검증)" : " · 오디오 트랙을 가져오지 못해 무음") +
-        " · AI 얼굴 교체가 아닌 사진 오버레이야.");
     }, {once: true});
     recorder.start(250);
+    recordingStartedAt = performance.now();
     timeout = setTimeout(() => {
       if (job !== work) return;
       work.message = "처리 시간이 초과돼 녹화를 중단했어.";
