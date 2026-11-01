@@ -30,3 +30,8 @@
 @media(max-width:650px){.model-lab{padding:10px}.model-fields{grid-template-columns:1fr;gap:7px}}
 
 .model-hash-actions{display:flex;gap:8px;flex-wrap:wrap}.model-hash-actions .button:first-child{flex:2 1 170px}.model-hash-actions .button:last-child{flex:1 1 90px}
+
+/* CPU-only opt-in ONNX probe, keeps the outer page fixed on phones. */
+.runtime-lab{flex-shrink:0;margin-top:12px;padding:14px;border:1px solid #39505a;border-radius:12px;background:#101e28}
+.runtime-lab .section-heading h2{font-size:16px}
+@media(max-width:650px){.runtime-lab{padding:10px;margin-top:8px}}
