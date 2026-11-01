@@ -1,4 +1,4 @@
-# Actor Swap Studio WEB — v0.7.6 local model preflight + cross-browser QA
+# Actor Swap Studio WEB — v0.7.7 local model preflight + cross-browser QA
 
 Independent web-first workspace inside the `junl-im/meta` repository.
 
@@ -6,9 +6,9 @@ Independent web-first workspace inside the `junl-im/meta` repository.
 
 **Browser lab, not AI face swap.** The UI now includes a 3-second labeled picture-over-video recording test, optional MediaPipe face **location** detection, and a downloadable file (MP4 or WebM, chosen by browser capability). The photo overlay is not an identity replacement or realistic face-swap inference. The browser uses a reusable local Web Audio capture bridge when available, with native captureStream as a fallback. An audio-start timeout prevents Firefox from hanging indefinitely on a suspended AudioContext. A bounded EBML metadata pass adds missing WebM Duration on supported MediaRecorder output without transcoding or network access. Unsupported recorder APIs are explained in a separate UI status line. Chromium E2E checks the recorded synthetic 440 Hz tone is actually non-silent; absence of an audio track is explicitly labeled silent, but source-audio fidelity and lip synchronization are not yet proven. No user footage or portrait is uploaded by our application.
 
-## v0.7.6 local model gate
+## v0.7.7 local model gate
 
-A separate panel accepts a user-owned `.onnx` or `.ort` checkpoint and a small JSON manifest specifying a weight-license statement plus exact SHA-256. The browser validates format, filename, user-declared commercial weight rights + HTTPS evidence URL and whole-file SHA-256 **without a network request**. This is a **byte-integrity / user declaration check only**, not license authentication, model execution or actual AI swap. It intentionally rejects large files: 64 MiB on known <=4 GiB devices or 256 MiB otherwise; streaming background hashing is a later milestone. See [local package guide](docs/LOCAL_MODEL_PACKAGE.md) and [model rights audit](docs/OPEN_SOURCE_RESEARCH.md).
+A separate panel accepts a user-owned `.onnx` or `.ort` checkpoint and a small JSON manifest specifying a weight-license statement plus exact SHA-256. The browser validates format, filename, user-declared commercial weight rights + HTTPS evidence URL and whole-file SHA-256 **without a network request**. This is a **byte-integrity / user declaration check only**, not license authentication, model execution or actual AI swap. In v0.7.7 the file is read in 1 MiB slices by a same-origin Web Worker with progress, Cancel, input-change and Reset abort. A 2 GiB upper bound now limits processing scope, not peak buffer size; a sliced fallback supports browsers without Workers. The SHA-256 implementation is cross-checked against standard vectors and Node crypto. Physical phone and long-file performance are not yet measured. See [local package guide](docs/LOCAL_MODEL_PACKAGE.md) and [model rights audit](docs/OPEN_SOURCE_RESEARCH.md).
 
 ## Goals
 
@@ -34,7 +34,8 @@ Open `faceswap/index.html` through a local web server, or publish the folder as 
 - `src/video_lab.mjs` — optional tracking, 3-second local recording, cancellation, preview/download.
 - `src/audio_capture.mjs` — reusable Web Audio source and per-render local audio tracks, with disposal.
 - `src/webm_duration.mjs` — local EBML Duration repair on eligible MediaRecorder WebM files; unsupported structures pass through unchanged.
-- `src/model_preflight.mjs` and `src/model_lab.mjs` — inert ONNX/ORT SHA-256, model-weights license self-declaration and local-only browser controls.
+- `src/model_preflight.mjs` and `src/model_lab.mjs` — inert ONNX/ORT SHA-256, model-weights license self-declaration, local-only browser controls, progress/cancel.
+- `src/sha256_stream.mjs`, `src/sha256_worker.mjs` and `src/sha256_worker_client.mjs` — chunked independent SHA-256 core, same-origin module Worker and abort-safe bridge.
 - `docs/LOCAL_MODEL_PACKAGE.md` — model manifest format, current memory caps, and future inference gates.
 - `tests/smoke.mjs` — Node smoke/architecture checks.
 - `docs/WEB_MIGRATION.md` — migration and acceptance gates.
@@ -64,6 +65,6 @@ Run `npm install`, `npx playwright install chromium firefox webkit`, prepare syn
 4. Optionally acknowledge the SDK/model-network notice and click **얼굴 위치 자동 검출** to use automatic placement. This requires network for first load.
 5. Preview/download the output. A recording result is a **visual-composition test**, not an AI swap. Playback/encoding/audio support differs by browser.
 
-## Next milestone after v0.7.6
+## Next milestone after v0.7.7
 
 The model registry and SHA-256 do not validate ONNX operators or execute tensor inference. Next work is a rights-cleared **full** model/encoder/detector chain, then a pinned ONNX Runtime Web WASM/WebGPU smoke session with a synthetic non-personal fixture and device/memory benchmarking. The research log marks GHOST as a promising generator but not a rights-cleared full stack because its ArcFace dependency and third-party license concerns still require resolution. No public release is approved by this prototype.
