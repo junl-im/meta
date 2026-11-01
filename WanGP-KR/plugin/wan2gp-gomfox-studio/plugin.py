@@ -21,11 +21,15 @@ from .prompt_assistant import TASK_KINDS, STYLES, PROFILES, build_prompt
 APP_TITLE = "곰같은여우의 AI 스튜디오"
 TAB_ID = "GomFoxStudio"
 HERO_FILE = Path(__file__).resolve().parent / "studio-hero.png"
+ICON_FILE = Path(__file__).resolve().parent / "gomfox-studio-icon.png"
 
 # 새 UI 전용 CSS. SVG/외부 폰트/스크립트/원격 CDN에 의존하지 않는다.
 STUDIO_STYLE = """
 <style>
 #gfs-root {--gfs-blue:#162b50; --gfs-gold:#f3ab66;}
+#gfs-root #gfs-brand-row {align-items:center;gap:12px}
+#gfs-root #gfs-brand-icon {max-width:88px;flex:0 0 78px;align-self:center}
+#gfs-root #gfs-brand-icon img {width:78px;height:78px;object-fit:contain}
 #gfs-root .gfs-kicker {font-size:12px;font-weight:800;letter-spacing:.13em;color:#e99959;margin-bottom:3px}
 #gfs-root .gfs-intro {font-size:15px;line-height:1.6;color:var(--body-text-color,inherit);opacity:.86}
 #gfs-root .gfs-chip {display:inline-block;margin:3px 7px 5px 0;padding:6px 11px;border-radius:999px;background:rgba(67,139,141,.15);font-size:12px;font-weight:700}
@@ -65,8 +69,8 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.8.0-dev"
-        self.description = "모델 상세·원본 큐 조회가 추가된 한국어 제작 대시보드 · GPT 선택"
+        self.version = "0.9.0-dev"
+        self.description = "곰·여우 시그니처 아이콘을 적용한 한국어 제작 대시보드 · GPT 선택"
 
     def setup_ui(self):
         self.request_component("state")
@@ -121,8 +125,17 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                     show_fullscreen_button=False, container=False,
                     elem_id="gfs-banner",
                 )
-            gr.HTML('<div class="gfs-kicker">GOMFOX CREATIVE WORKSPACE</div>')
-            gr.Markdown(f"# {APP_TITLE}")
+            with gr.Row(elem_id="gfs-brand-row"):
+                if ICON_FILE.is_file():
+                    gr.Image(
+                        value=str(ICON_FILE), height=78, width=78,
+                        interactive=False, show_label=False,
+                        show_download_button=False, show_fullscreen_button=False,
+                        container=False, elem_id="gfs-brand-icon",
+                    )
+                with gr.Column():
+                    gr.HTML('<div class="gfs-kicker">GOMFOX CREATIVE WORKSPACE</div>')
+                    gr.Markdown(f"# {APP_TITLE}")
             gr.HTML(
                 '<div class="gfs-intro">처음에는 간단하게, 익숙해지면 원본 WanGP의 전문 기능까지. '
                 '필요한 작업을 골라 무료 로컬 제작 화면에서 시작하세요.</div>'
