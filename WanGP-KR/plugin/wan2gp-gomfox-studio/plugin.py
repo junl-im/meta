@@ -54,7 +54,7 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.5.0-dev"
+        self.version = "0.6.0-dev"
         self.description = "무료 로컬 제작 중심 한국어 대시보드 · GPT 감독 선택"
 
     def setup_ui(self):
@@ -121,6 +121,31 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
             )
 
             with gr.Tabs(elem_id="gfs-section-tabs"):
+                with gr.Tab("처음 실행 · 따라 하기"):
+                    gr.HTML(
+                        '<div class="gfs-panel"><h3>반가워요! 첫 작품을 함께 만들어 봐요.</h3>'
+                        '<p>원본 WanGP를 처음 설치한 분을 위한 안내예요. '
+                        '무료 로컬 기능부터 시작하고, GPT 연결은 건너뛰어도 됩니다.</p>'
+                        '<div class="gfs-steps">① 작업 고르기　② PC 사양 확인　③ 원본 제작 시작</div></div>'
+                    )
+                    welcome_topic = gr.Dropdown(
+                        choices=["처음 시작", "사진·그림", "짧은 영상", "목소리·음악", "3D 만들기"],
+                        value="처음 시작", label="1단계 · 어떤 작품을 만들까요?",
+                    )
+                    welcome_guide = gr.Markdown(value=render_guide("처음 시작"))
+                    welcome_hardware = gr.Button("2단계 · 내 PC 사양 살펴보기 (읽기 전용)")
+                    welcome_report = gr.Textbox(
+                        label="이 컴퓨터의 RAM · GPU 안내", lines=7, interactive=False,
+                        value="원하면 위 버튼을 누르세요. 확인을 건너뛰어도 무료 제작을 시작할 수 있습니다.",
+                    )
+                    welcome_start = gr.Button(
+                        "3단계 · 무료 제작 화면으로 이동", variant="primary", elem_id="gfs-welcome-start"
+                    )
+                    gr.Markdown(
+                        "처음에는 **이미지 한 장 또는 짧은 저해상도 영상**부터 시험해 보세요. "
+                        "모델 다운로드·생성은 원본 WanGP에서 직접 선택합니다. "
+                        "이 안내 화면은 PC 설정을 자동 변경하지 않습니다."
+                    )
                 with gr.Tab("무료 제작 · 시작"):
                     gr.HTML(
                         '<div class="gfs-panel"><h3>무엇을 만들고 싶나요?</h3>'
@@ -214,6 +239,9 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                 '이 화면은 Windows 실기 테스트 이전의 개발판입니다.</div>'
             )
 
+        welcome_topic.change(fn=render_guide, inputs=[welcome_topic], outputs=[welcome_guide])
+        welcome_hardware.click(fn=read_hardware_report, inputs=[], outputs=[welcome_report])
+        welcome_start.click(fn=self.goto_media_tab, inputs=[self.state], outputs=[self.main_tabs])
         video_button.click(fn=lambda: render_guide("짧은 영상"), inputs=[], outputs=[task_guide])
         image_button.click(fn=lambda: render_guide("사진·그림"), inputs=[], outputs=[task_guide])
         audio_button.click(fn=lambda: render_guide("목소리·음악"), inputs=[], outputs=[task_guide])
