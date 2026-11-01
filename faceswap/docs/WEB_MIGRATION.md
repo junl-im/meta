@@ -40,6 +40,15 @@ Target: `junl-im/meta/faceswap/` (one repository, independent subproject)
 - [ ] Independent browser playthrough and device QA.
 - [ ] Confirm all historical source license notices.
 
+### M0.5 — basic local video lab (v0.7.1, NOT AI swap)
+
+- [x] Optional MediaPipe CPU face **location** detection with explicit third-party download notice.
+- [x] Real 3-second in-browser canvas/photo overlay recording, preview and downloaded MP4/WebM candidate.
+- [x] Explicitly label all outputs `DEMO / NOT AI SWAP`; no face-swap model weights included.
+- [x] Static Node tests/CI for normalization, format decision, media-local architecture.
+- [ ] Interactive Chrome/Android/Safari playback and audio preservation tests.
+- [ ] Full source-audio continuity, frame timing and nonempty playable output confirmed on real devices.
+
 ### M1 — legally usable 3-second proof
 
 - [ ] Choose and document a distributable ONNX swap model with a clear weights license.
@@ -63,7 +72,7 @@ Target: `junl-im/meta/faceswap/` (one repository, independent subproject)
 
 ## Release gates
 
-Do not describe AI swapping as working until a real source video + authorized reference produces a verified playable MP4. Do not use a model whose weights/distribution license is unresolved. Keep the production `main` branch and Firebase deployment unchanged until reviews pass.
+Do not describe AI swapping as working until a real source video + authorized reference produces a verified playable MP4. A MediaRecorder photo overlay is an engineering test, not a face swap. Do not use a model whose weights/distribution license is unresolved. Keep the production `main` branch and Firebase deployment unchanged until reviews pass.
 
 ## UI conventions
 
