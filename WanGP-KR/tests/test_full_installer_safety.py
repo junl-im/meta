@@ -45,6 +45,22 @@ class TestFullInstallerSafety(unittest.TestCase):
         ):
             self.assertNotIn(forbidden, self.lower)
 
+    def test_standalone_plugin_download_is_pinned_and_verified(self):
+        self.assertIn("https://raw.githubusercontent.com/junl-im/meta/", self.script)
+        self.assertIn("GOMFOX_PINNED_RAW", self.script)
+        self.assertIn("Get-FileHash -Algorithm SHA256 -LiteralPath $env:GOMFOX_FILE_PATH", self.script)
+        self.assertLess(self.script.index("call :fetch_plugin_file"), self.script.index('start "" /wait'))
+        self.assertIn("goto plugin_download_error", self.lower)
+        for filename in (
+            "__init__.py",
+            "plugin.py",
+            "plugin_info.json",
+            "catalog.py",
+            "help_content.py",
+            "hardware.py",
+        ):
+            self.assertIn('call :fetch_plugin_file "' + filename + '"', self.script)
+
     def test_no_automatic_cloud_or_gpt_connection(self):
         self.assertIn("GPT나 Claude 로그인은 기본 생성에 필요하지 않습니다", self.script)
         self.assertNotIn("api.openai.com", self.lower)
