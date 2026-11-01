@@ -37,6 +37,9 @@ jobs:
           node --check faceswap/src/sha256_stream.mjs
           node --check faceswap/src/sha256_worker.mjs
           node --check faceswap/src/sha256_worker_client.mjs
+          node --check faceswap/src/synthetic_onnx.mjs
+          node --check faceswap/src/onnx_probe.mjs
+          node --check faceswap/src/onnx_lab.mjs
           node --check faceswap/tests/serve.mjs
           node --check faceswap/tests/e2e/local-render.spec.mjs
           node --check faceswap/tests/e2e/browser-compat.spec.mjs
