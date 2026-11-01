@@ -304,6 +304,6 @@ test("model UI is local-only, with explicit rights and truth-in-labeling", () =>
   assert.match(html, /id="verify-local-model"/);
   assert.match(modelUI, /verifyLocalModelPackage/);
   assert.match(modelUI, /reset-button/);
-  assert.doesNotMatch(modelUI + preflight, /\\bfetch\\s*\\(|XMLHttpRequest\\b|<svg\\b|data:image\\/svg/i);
+  assert.doesNotMatch(modelUI + preflight, /\bfetch\s*\(|XMLHttpRequest\b|<svg\b|data:image\/svg/i);
   assert.match(html, /ONNX 실행·AI 얼굴 교체|실행 엔진은 아직 연결되지 않았어/);
 });
