@@ -15,6 +15,7 @@ from shared.utils.plugins import WAN2GPPlugin
 from .catalog import format_model_catalog
 from .hardware import read_hardware_report
 from .help_content import TOPICS, render_guide
+from .prompt_assistant import TASK_KINDS, STYLES, PROFILES, build_prompt
 
 
 APP_TITLE = "곰같은여우의 AI 스튜디오"
@@ -40,6 +41,12 @@ STUDIO_STYLE = """
 #gfs-root #gfs-category-audio {background:linear-gradient(145deg,#267875,#21565f);color:#fff;border-color:#438c88}
 #gfs-root #gfs-category-3d {background:linear-gradient(145deg,#946f4f,#78523d);color:#fff;border-color:#a47b5a}
 #gfs-root #gfs-launch {min-height:49px;border-radius:13px;font-weight:800}
+#gfs-root #gfs-compose {min-height:44px;background:linear-gradient(130deg,#2b746f,#205f68);color:#fff;border-radius:12px;font-weight:800}
+#gfs-root #gfs-prompt-box textarea {line-height:1.55;font-size:14px}
+#gfs-root .gfs-workshop {padding:14px 17px;border-radius:16px;border:1px solid rgba(122,151,153,.25);background:linear-gradient(125deg,rgba(66,125,129,.15),rgba(235,163,103,.12))}
+#gfs-root .gfs-workshop h3 {font-size:18px;margin:0 0 4px}
+#gfs-root .gfs-workshop p {margin:0;opacity:.85}
+
 #gfs-root .gfs-muted {font-size:12px;opacity:.75}
 @media (max-width:740px) {
   #gfs-root #gfs-banner img {max-height:145px;border-radius:15px}
@@ -54,7 +61,7 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.6.0-dev"
+        self.version = "0.7.0-dev"
         self.description = "무료 로컬 제작 중심 한국어 대시보드 · GPT 감독 선택"
 
     def setup_ui(self):
@@ -169,6 +176,49 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                         "원본 **작업 큐·갤러리·Media Flow·Showrunner·LoRA**는 그대로 유지됩니다."
                     )
 
+                with gr.Tab("프롬프트 작업실"):
+                    gr.HTML(
+                        '<div class="gfs-workshop"><h3>무료 프롬프트 초안 만들기</h3>'
+                        '<p>무엇을 만들고 싶은지만 적어 보세요. 로컬에서 문장을 다듬고 '
+                        '원본 WanGP에 직접 복사해 사용할 수 있어요. GPT 연결·GPU 사용 없음.</p></div>'
+                    )
+                    with gr.Row():
+                        prompt_kind = gr.Dropdown(
+                            choices=list(TASK_KINDS), value="이미지", label="제작 분야"
+                        )
+                        prompt_style = gr.Dropdown(
+                            choices=list(STYLES), value=STYLES[0], label="분위기"
+                        )
+                        prompt_profile = gr.Dropdown(
+                            choices=list(PROFILES), value="절약", label="시작 모드"
+                        )
+                    prompt_subject = gr.Textbox(
+                        label="무엇을 만들까요?", lines=2,
+                        placeholder="예: 초록 숲에서 작은 여우가 책을 읽는 장면",
+                    )
+                    prompt_extra = gr.Textbox(
+                        label="추가 조건 (선택)", lines=2,
+                        placeholder="예: 아침 햇살, 부드러운 카메라 이동, 원본 색감 유지",
+                    )
+                    prompt_compose = gr.Button(
+                        "무료 프롬프트 만들기", variant="primary", elem_id="gfs-compose"
+                    )
+                    prompt_result = gr.Textbox(
+                        label="완성한 초안 · 복사 버튼으로 가져가기",
+                        lines=7, interactive=False, show_copy_button=True,
+                        elem_id="gfs-prompt-box",
+                        value="주제를 입력하고 무료 프롬프트 만들기를 눌러 주세요.",
+                    )
+                    prompt_advice = gr.Markdown(
+                        value="**절약 모드:** 작은 모델·짧은 길이·낮은 해상도부터 시험하세요."
+                    )
+                    prompt_open = gr.Button("복사한 프롬프트로 원본 제작 화면 열기")
+                    gr.Markdown(
+                        "복사한 문장은 원본의 프롬프트 입력칸에 직접 붙여넣으세요. "
+                        "기존 원본 프롬프트나 생성 설정을 덮어쓰지 않습니다. "
+                        "모드 선택은 **추천 안내**이며 GPU 설정을 자동으로 바꾸지 않습니다."
+                    )
+
                 with gr.Tab("처음 사용자 도움말"):
                     gr.Markdown("**처음 시작**부터 읽고 필요한 주제를 선택하세요. 어려운 용어도 한글로 풀이합니다.")
                     guide_topic = gr.Dropdown(
@@ -247,6 +297,14 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
         audio_button.click(fn=lambda: render_guide("목소리·음악"), inputs=[], outputs=[task_guide])
         model3d_button.click(fn=lambda: render_guide("3D 만들기"), inputs=[], outputs=[task_guide])
         open_generator.click(
+            fn=self.goto_media_tab, inputs=[self.state], outputs=[self.main_tabs]
+        )
+        prompt_compose.click(
+            fn=build_prompt,
+            inputs=[prompt_kind, prompt_subject, prompt_style, prompt_extra, prompt_profile],
+            outputs=[prompt_result, prompt_advice],
+        )
+        prompt_open.click(
             fn=self.goto_media_tab, inputs=[self.state], outputs=[self.main_tabs]
         )
         guide_topic.change(fn=render_guide, inputs=[guide_topic], outputs=[guide_display])
