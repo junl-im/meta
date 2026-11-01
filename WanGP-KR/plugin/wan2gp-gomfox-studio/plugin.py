@@ -16,6 +16,7 @@ from shared.utils.plugins import WAN2GPPlugin
 
 from .catalog import format_model_catalog
 from .help_content import TOPICS, render_guide
+from .hardware import read_hardware_report
 
 
 APP_TITLE = "곰같은여우의 AI 스튜디오"
@@ -26,7 +27,7 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.3.0-dev"
+        self.version = "0.4.0-dev"
         self.description = "기본 무료 로컬 제작, GPT 감독은 선택하는 한국어 작업실"
 
     def setup_ui(self):
@@ -107,6 +108,20 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                 )
                 guide_display = gr.Markdown(value=render_guide("처음 시작"))
 
+            with gr.Accordion("실행 컴퓨터 사양 확인 · 저사양 안내", open=False):
+                gr.Markdown(
+                    "버튼을 누르면 **WanGP가 실행 중인 컴퓨터**의 GPU·VRAM·RAM을 "
+                    "가능한 범위에서 읽어 저사양 시작 방법을 안내합니다. "
+                    "드라이버·원본 설정을 변경하거나 외부로 전송하지 않습니다."
+                )
+                hardware_check = gr.Button("컴퓨터 사양 확인하기")
+                hardware_result = gr.Textbox(
+                    label="확인 결과 및 권장 시작 방법",
+                    value="버튼을 누르기 전에는 사양 조회가 실행되지 않습니다.",
+                    lines=10,
+                    interactive=False,
+                )
+
             open_generator = gr.Button("원본 무료 제작 화면 열기", variant="primary")
 
             with gr.Accordion("원본 모델 찾아보기 (무료 · 읽기 전용)", open=False):
@@ -165,6 +180,11 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
             fn=render_guide,
             inputs=[guide_topic],
             outputs=[guide_display],
+        )
+        hardware_check.click(
+            fn=read_hardware_report,
+            inputs=[],
+            outputs=[hardware_result],
         )
         open_generator.click(
             fn=self.goto_media_tab,
