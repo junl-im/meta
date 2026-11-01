@@ -24,6 +24,15 @@ class PromptAssistantTests(unittest.TestCase):
             self.assertIn("절약 시작", advice)
             self.assertIn(module.TASK_HINTS[kind], advice)
 
+    def test_editable_examples_are_available_for_all_categories(self):
+        for kind in module.TASK_KINDS:
+            subject, extra = module.fill_example(kind)
+            self.assertGreater(len(subject), 5)
+            self.assertGreater(len(extra), 10)
+            draft, _ = module.build_prompt(kind, subject, module.STYLES[0], extra, "절약")
+            self.assertIn(subject, draft)
+        self.assertEqual(module.fill_example("unexpected"), module.fill_example("이미지"))
+
     def test_empty_input_never_invents_subject(self):
         prompt, advice = module.build_prompt("영상", "  ", "잘못된 값", "", "고품질")
         self.assertIn("입력해 주세요", prompt)
