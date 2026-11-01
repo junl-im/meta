@@ -14,6 +14,8 @@ import gradio as gr
 
 from shared.utils.plugins import WAN2GPPlugin
 
+from .catalog import format_model_catalog
+
 
 APP_TITLE = "곰같은여우의 AI 스튜디오"
 TAB_ID = "GomFoxStudio"
@@ -23,7 +25,7 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.1.0-dev"
+        self.version = "0.2.0-dev"
         self.description = "기본 무료 로컬 제작, GPT 감독은 선택하는 한국어 작업실"
 
     def setup_ui(self):
@@ -79,7 +81,7 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
 
         return "감독 작업이 완료됐습니다. 상세 진행 내용은 원본 Deepy 대화에서 확인해 주세요."
 
-    def create_ui(self):
+    def create_ui(self, api_session=None):
         with gr.Column():
             gr.Markdown(f"# {APP_TITLE}")
             gr.Markdown(
@@ -93,6 +95,27 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
             )
 
             open_generator = gr.Button("원본 무료 제작 화면 열기", variant="primary")
+
+            with gr.Accordion("원본 모델 찾아보기 (무료 · 읽기 전용)", open=False):
+                gr.Markdown(
+                    "원본 WanGP가 제공하는 모델을 그대로 조회합니다. "
+                    "목록을 읽는 것은 모델 다운로드나 GPU 생성 작업이 아닙니다. "
+                    "사용 가능한 VRAM과 모델의 실제 실행 가능 여부는 별도로 확인해야 합니다."
+                )
+                kind_choice = gr.Dropdown(
+                    choices=["전체", "영상", "이미지", "음성", "3D", "월드", "기타"],
+                    value="전체",
+                    label="분야",
+                )
+                name_query = gr.Textbox(label="모델 이름 검색", placeholder="예: Wan, Flux, Qwen")
+                page_choice = gr.Number(label="페이지 번호 (한 번에 40개)", value=1, precision=0)
+                catalog_refresh = gr.Button("원본 모델 목록 읽기")
+                catalog_output = gr.Textbox(
+                    label="원본 모델 목록",
+                    lines=14,
+                    value="목록을 읽으려면 버튼을 눌러 주세요.",
+                    interactive=False,
+                )
 
             with gr.Accordion("선택 기능: GPT / Deepy Prime 감독", open=False):
                 gr.Markdown(
@@ -129,6 +152,11 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
             fn=self.goto_media_tab,
             inputs=[self.state],
             outputs=[self.main_tabs],
+        )
+        catalog_refresh.click(
+            fn=lambda kind, query, page: format_model_catalog(api_session, kind, query, page),
+            inputs=[kind_choice, name_query, page_choice],
+            outputs=[catalog_output],
         )
         submit.click(
             fn=self._send_optional_director_request,
