@@ -10,13 +10,23 @@ const types = {
   ".mjs": "text/javascript; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
   ".png": "image/png",
-  ".webm": "video/webm"
+  ".webm": "video/webm",
+  ".wasm": "application/wasm"
 };
 const server = createServer((request, response) => {
   let target;
   try {
     const pathname = decodeURIComponent(new URL(request.url, "http://127.0.0.1").pathname);
-    target = resolve(root, "." + (pathname === "/" ? "/index.html" : pathname));
+    if (pathname.startsWith("/__qa_ort/")) {
+      const filename=pathname.slice("/__qa_ort/".length);
+      if (!/^ort\.wasm\.min\.js$|^ort-wasm-simd-threaded(?:\.[a-z]+)?\.(?:wasm|mjs)$/.test(filename)) {
+        response.writeHead(403).end("Forbidden");
+        return;
+      }
+      target=resolve(root,"node_modules","onnxruntime-web","dist",filename);
+    } else {
+      target = resolve(root, "." + (pathname === "/" ? "/index.html" : pathname));
+    }
     if (!target.startsWith(root + sep)) {
       response.writeHead(403).end("Forbidden");
       return;
