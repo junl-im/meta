@@ -1,9 +1,9 @@
 {
   "name": "actor-swap-studio-web",
   "private": true,
-  "version": "0.7.6-model-preflight",
+  "version": "0.7.7-streaming-model-preflight",
   "type": "module",
-  "description": "Local-only browser video lab and ONNX integrity preflight; AI identity swapping not implemented",
+  "description": "Local-only video lab with cancellable background SHA-256 model preflight; no face-swap inference",
   "scripts": {
     "test": "node --test tests/smoke.mjs",
     "test:browser": "playwright test"
