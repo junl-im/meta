@@ -6,6 +6,7 @@ import { chooseCandidateBackend, formatMiB, probeCapabilities } from "../src/cap
 import {normalizeFaceBox, findFaceBox, loadFaceDetector, modelAssets} from "../src/face_detector.mjs";
 import {outputDimensions, chooseRecordingFormat, drawOverlayFrame, defaultBox} from "../src/compositor.mjs";
 import {prepareAudioCapture, closeAudioCapture} from "../src/audio_capture.mjs";
+import {repairWebmDuration} from "../src/webm_duration.mjs";
 
 
 const base = new URL("../", import.meta.url);
@@ -54,7 +55,7 @@ test("feature probe reports supported mock APIs", async () => {
 });
 
 test("web UI contains no SVG and never loads a native localhost engine", () => {
-  for (const name of ["index.html", "styles.css", "src/app.mjs", "src/video_lab.mjs", "src/compositor.mjs", "src/audio_capture.mjs", "src/face_detector.mjs"]) {
+  for (const name of ["index.html", "styles.css", "src/app.mjs", "src/video_lab.mjs", "src/compositor.mjs", "src/audio_capture.mjs", "src/webm_duration.mjs", "src/face_detector.mjs"]) {
     const source = read(name);
     assert.doesNotMatch(source, /<svg\b|\.svg\b|data:image\/svg/i, name);
     assert.doesNotMatch(source, /127\.0\.0\.1|localhost:7869/i, name);
@@ -191,4 +192,40 @@ test("local audio bridge reuses the element source and disposes each track", asy
   assert.equal(events.filter(([type]) => type === "stop").length, 2);
   assert.equal(events.filter(([type]) => type === "close").length, 1);
   assert.equal(prepareAudioCapture({}, {}), null);
+});
+
+test("WebM metadata repair appends a finite Duration without re-encoding", async () => {
+  // Minimal EBML Header / unknown-size Segment / Info / TimestampScale.
+  const bytes = Uint8Array.from([
+    0x1a, 0x45, 0xdf, 0xa3, 0x80,
+    0x18, 0x53, 0x80, 0x67, 0xff,
+    0x15, 0x49, 0xa9, 0x66, 0x88,
+    0x2a, 0xd7, 0xb1, 0x84, 0x00, 0x0f, 0x42, 0x40
+  ]);
+  const original = new Blob([bytes], {type: "video/webm"});
+  const result = await repairWebmDuration(original, 2500);
+  assert.equal(result.repaired, true);
+  assert.equal(result.reason, "inserted");
+  assert.equal(result.blob.size, original.size + 11);
+  const fixed = new Uint8Array(await result.blob.arrayBuffer());
+  assert.equal(fixed[14], 0x93); // Info payload grows 8 -> 19 bytes.
+  assert.deepEqual(Array.from(fixed.slice(15, 23)), Array.from(bytes.slice(15)));
+  assert.deepEqual(Array.from(fixed.slice(23, 26)), [0x44, 0x89, 0x88]);
+  assert.equal(new DataView(fixed.buffer, 26, 8).getFloat64(0), 2500);
+  const second = await repairWebmDuration(result.blob, 2500);
+  assert.equal(second.repaired, false);
+  assert.equal(second.reason, "already-present");
+  assert.equal(second.blob.size, result.blob.size);
+});
+
+test("WebM repair leaves malformed, unsupported, and MP4 bytes untouched", async () => {
+  const randomWebm = new Blob([Uint8Array.from([1, 2, 3])], {type: "video/webm"});
+  const mp4 = new Blob([Uint8Array.from([1, 2, 3])], {type: "video/mp4"});
+  for (const [blob, duration] of [
+    [randomWebm, 3000], [mp4, 3000], [randomWebm, -2]
+  ]) {
+    const result = await repairWebmDuration(blob, duration);
+    assert.equal(result.repaired, false);
+    assert.strictEqual(result.blob, blob);
+  }
 });
