@@ -1,22 +1,22 @@
 # Actor Swap Studio WEB — migration plan
 
 Date: 2026-11-01
-Branch: \`feat/faceswap-web-v0.7\`
-Target: \`junl-im/meta/faceswap/\` (one repository, independent subproject)
+Branch: `feat/faceswap-web-v0.7`
+Target: `junl-im/meta/faceswap/` (one repository, independent subproject)
 
 ## Verified historical baseline
 
 - v0.6.6 archived source ZIP and test documentation exist in Google Drive.
-- Archive file inventory: 105 items under \`actor_swap_studio_mvp/\`, including Python FastAPI backend, scene masks, Product/Hand/Text Lock, batch/partial retry, QA, static app assets, Electron packaging and regression scripts.
-- Oct 27 pilot: private Site -> local \`127.0.0.1:7869\` FastAPI/FaceFusion CPU runner. This is **not** a portable no-install browser engine. New PC/mobile execution remains unverified.
+- Archive file inventory: 105 items under `actor_swap_studio_mvp/`, including Python FastAPI backend, scene masks, Product/Hand/Text Lock, batch/partial retry, QA, static app assets, Electron packaging and regression scripts.
+- Oct 27 pilot: private Site -> local `127.0.0.1:7869` FastAPI/FaceFusion CPU runner. This is **not** a portable no-install browser engine. New PC/mobile execution remains unverified.
 - Historical passing tests are not equivalent to current web-only model execution or output verification.
 
 ## Architecture
 
-1. Static responsive UI; local \`File\` objects and object URLs; no upload.
+1. Static responsive UI; local `File` objects and object URLs; no upload.
 2. Capability probe: WebGPU adapter, WebCodecs encode/decode, WebAssembly, storage quota, cross-origin isolation.
 3. Future model registry: record source, version, SHA-256, code license, **weights license**, commercial permissions, tested operators, memory and device range.
-4. Web inference adapter with explicit \`not-ready\` state; WebGPU first and WASM fallback only for models successfully tested in that backend.
+4. Web inference adapter with explicit `not-ready` state; WebGPU first and WASM fallback only for models successfully tested in that backend.
 5. Media decode/encode abstraction (Mediabunny/WebCodecs first, optional FFmpeg WASM with separate binary-license review).
 6. Frame pipeline: detection -> landmarks -> identity swap -> mask -> occlusion -> original protected pixels -> temporal QA -> mux.
 7. Local export plus optional provenance metadata and consent workflow.
@@ -34,7 +34,7 @@ Target: \`junl-im/meta/faceswap/\` (one repository, independent subproject)
 
 ### M0 — repository isolation (this branch)
 
-- [x] Dedicated \`faceswap/\` static app and documentation.
+- [x] Dedicated `faceswap/` static app and documentation.
 - [x] Local video/reference intake and capability diagnostics.
 - [x] Local input check / JSON manifest export.
 - [ ] Independent browser playthrough and device QA.
@@ -63,7 +63,7 @@ Target: \`junl-im/meta/faceswap/\` (one repository, independent subproject)
 
 ## Release gates
 
-Do not describe AI swapping as working until a real source video + authorized reference produces a verified playable MP4. Do not use a model whose weights/distribution license is unresolved. Keep the production \`main\` branch and Firebase deployment unchanged until reviews pass.
+Do not describe AI swapping as working until a real source video + authorized reference produces a verified playable MP4. Do not use a model whose weights/distribution license is unresolved. Keep the production `main` branch and Firebase deployment unchanged until reviews pass.
 
 ## UI conventions
 
