@@ -101,8 +101,10 @@ test("face detector initialization stays explicit and injection-testable", async
   assert.equal(modulePath, modelAssets.moduleUrl);
   assert.equal(modelOptions.runningMode, "VIDEO");
   assert.equal(modelOptions.baseOptions.delegate, "CPU");
-  assert.deepEqual(findFaceBox(result, {videoWidth: 100, videoHeight: 100}, 250),
-    {x: 0.088, y: 0.176, width: 0.224, height: 0.448});
+  const normalized = findFaceBox(result, {videoWidth: 100, videoHeight: 100}, 250);
+  for (const [key, expected] of Object.entries({x: 0.088, y: 0.176, width: 0.224, height: 0.448})) {
+    assert.ok(Math.abs(normalized[key] - expected) < 1e-10, key);
+  }
 });
 
 test("output video size remains within cap and even on mobile", () => {
