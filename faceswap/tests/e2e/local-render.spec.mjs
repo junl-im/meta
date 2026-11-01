@@ -25,6 +25,7 @@ test("local input to recorded playable output, with no model download", async ({
     if (/^https?:/.test(url) && !url.startsWith("http://127.0.0.1:4175/")) externalRequests.push(url);
   });
   await page.goto("/");
+  await expect(page.locator("#video-file")).toHaveCount(1);
   await loadSyntheticFiles(page);
   await expect(page.locator("#detect-button")).toBeDisabled();
   await page.locator("#check-button").click();
@@ -55,6 +56,7 @@ test("local input to recorded playable output, with no model download", async ({
 
 test("reset and revoked rights disable composition without losing source files", async ({page}) => {
   await page.goto("/");
+  await expect(page.locator("#video-file")).toHaveCount(1);
   await loadSyntheticFiles(page);
   await page.locator("#consent").uncheck();
   await expect(page.locator("#render-button")).toBeDisabled();
