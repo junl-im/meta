@@ -22,7 +22,7 @@
 1. **추천 방법: [전체 설치 도우미 파일](https://github.com/junl-im/meta/blob/feat/wangp-kr-planning-20261101/WanGP-KR/scripts/install_studio_full_windows.cmd)**에서 **Download raw file**을 눌러 `install_studio_full_windows.cmd` 파일 하나를 저장합니다. 코드를 먼저 확인할 수 있습니다. Windows 보안 경고를 무조건 무시하지 말고 출처를 확인하세요.
    - **다른 방법:** [전체 프로젝트 ZIP 받기](https://github.com/junl-im/meta/archive/refs/heads/feat/wangp-kr-planning-20261101.zip) → 압축 풀기 → `WanGP-KR/scripts/`에서 같은 설치 파일을 사용해도 됩니다.
 2. 저장한 `install_studio_full_windows.cmd`를 **더블클릭**합니다. 외부 관리자 권한이나 이미 설치된 Git/Python이 필요하지 않도록, 공식 Manager를 이용하는 경로입니다. 기본 Windows의 `curl.exe`·PowerShell은 필요합니다.
-3. 설치 도우미는 먼저 한글 플러그인 코드 7개와 전용 PNG 배너 1개를 네 GitHub의 **고정 커밋(5a3dc7b)**에서 내려받아 각각 SHA-256을 검사합니다(같은 폴더에 이미 있으면 재사용). 또한 여우·곰 시그니처 PNG 1개를 별도로 내려받아 SHA-256을 검증합니다. 그다음 공식 GitHub의 **WanGPManager.exe**와 **WanGPManager.exe.sha256**을 다운로드해 무결성을 확인합니다. 검사 실패 시 실행하지 않습니다.
+3. 설치 도우미는 먼저 한글 플러그인 코드 7개와 전용 PNG 이미지 2개(배너·아이콘)를 네 GitHub의 **고정 커밋(defffa1)**에서 내려받아 각각 SHA-256을 검사합니다(같은 폴더에 이미 있으면 재사용). 여우·곰 시그니처 아이콘은 같은 플러그인 묶음에 포함되어 검증됩니다. 그다음 공식 GitHub의 **WanGPManager.exe**와 **WanGPManager.exe.sha256**을 다운로드해 무결성을 확인합니다. 검사 실패 시 실행하지 않습니다.
 4. 질문이 나오면 **Y**를 선택해 공식 WanGP Manager를 실행합니다. Manager의 **Install** 메뉴에서 전체 WanGP를 설치하고 GPU에 맞는 추천 프로필을 확인합니다.
 5. 가능하면 설치 도우미 화면에 표시된 기본 폴더를 WanGP 설치 위치로 선택하세요. 다른 경로도 가능하지만 이후 폴더를 한 번 입력해야 합니다.
 6. Python 및 필요한 라이브러리 설치가 모두 끝나면 **WanGP Manager를 닫습니다**. 설치 도우미가 다음 단계로 넘어갑니다.
@@ -33,7 +33,7 @@
 
 ## v0.9 여우·곰 시그니처 아이콘
 
-- [원본 전용 PNG](https://github.com/junl-im/meta/blob/feat/wangp-kr-planning-20261101/WanGP-KR/assets/gomfox-studio-icon.png)를 고정된 GitHub 커밋에서 다운로드하고 SHA-256을 확인합니다. SVG는 사용하지 않습니다.
+- [원본 전용 PNG](https://github.com/junl-im/meta/blob/feat/wangp-kr-planning-20261101/WanGP-KR/assets/gomfox-studio-icon.png)를 플러그인 파일과 함께 고정된 GitHub 커밋에서 다운로드하고 SHA-256을 확인합니다. SVG는 사용하지 않습니다.
 - 한글 플러그인을 신규 설치할 때 검증된 PNG를 플러그인 폴더에 넣어 **프로그램 상단에도 표시**합니다.
 - Windows 자체 제공 **PowerShell + .NET System.Drawing**으로 256px PNG 기반 `.ico` 파일을 만들고, 바탕화면 `.lnk`의 아이콘으로 지정합니다. 별도의 변환 프로그램 설치는 필요하지 않습니다.
 - 아이콘 다운로드·변환에 실패해도 원본 엔진 설치와 로컬 생성 기능은 계속 이용할 수 있으며, 바로가기에는 일반 Windows 아이콘이 표시될 수 있습니다.
