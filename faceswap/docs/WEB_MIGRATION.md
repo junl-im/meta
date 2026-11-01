@@ -17,7 +17,7 @@ Target: `junl-im/meta/faceswap/` (one repository, independent subproject)
 2. Capability probe: WebGPU adapter, WebCodecs encode/decode, WebAssembly, storage quota, cross-origin isolation.
 3. Future model registry: record source, version, SHA-256, code license, **weights license**, commercial permissions, tested operators, memory and device range.
 4. Web inference adapter with explicit `not-ready` state; WebGPU first and WASM fallback only for models successfully tested in that backend.
-5. Media decode/encode abstraction (Mediabunny/WebCodecs first, optional FFmpeg WASM with separate binary-license review).
+5. Media decode/encode abstraction: v0.7.4 has bounded WebM Duration metadata repair; complete mux candidate is Mediabunny/WebCodecs (MPL-2.0 source-availability obligations to be reviewed) with optional FFmpeg WASM under separate binary-license review.
 6. Frame pipeline: detection -> landmarks -> identity swap -> mask -> occlusion -> original protected pixels -> temporal QA -> mux.
 7. Local export plus optional provenance metadata and consent workflow.
 8. Optional advanced renderer is a separate opt-in mode with explicit privacy/cost prompts, never silently uploads.
@@ -40,7 +40,7 @@ Target: `junl-im/meta/faceswap/` (one repository, independent subproject)
 - [ ] Independent browser playthrough and device QA.
 - [ ] Confirm all historical source license notices.
 
-### M0.5 — local video lab and automated browser QA (v0.7.3, NOT AI swap)
+### M0.5 — local video lab and automated browser QA (v0.7.4, NOT AI swap)
 
 - [x] Optional MediaPipe CPU face **location** detection with explicit third-party download notice.
 - [x] Real 3-second in-browser canvas/photo overlay recording, preview and downloaded MP4/WebM candidate.
@@ -50,7 +50,8 @@ Target: `junl-im/meta/faceswap/` (one repository, independent subproject)
 - [x] FFprobe confirms output video track and frame packet timestamps; reset state regression repaired.
 - [x] v0.7.3: Web Audio local audio bridge plus fallback capture; [GitHub Actions 41297129563](https://github.com/junl-im/meta/actions/runs/41297129563) confirms 6/6 Chromium tests: desktop + Pixel 7 emulation × local output, consent/reset, and repeated render. FFprobe checks encoded audio packets; FFmpeg volumedetect proves a non-silent 440 Hz synthetic tone in downloaded output.
 - [ ] Physical Chrome/Android/Safari playback and audio preservation tests.
-- [ ] A complete container Duration value / seekable WebM/MP4 mux.
+- [x] v0.7.4: bounded local EBML Duration repair on eligible unknown-size WebM MediaRecorder output without transcoding; [Actions 41304865701](https://github.com/junl-im/meta/actions/runs/41304865701) confirms finite FFprobe container duration, 1.2s browser seek attempt and audio/video encoded end-time drift bound, 6/6 Chromium E2E PASS.
+- [ ] Full seekable MP4/WebM remux for long videos, Cues/SeekHead correctness, full source-audio fidelity and physical-device verification.
 - [ ] Full source-audio fidelity, A/V synchronization, frame timing and seekable output confirmed on physical devices (Web Audio tone QA is not full preservation proof).
 
 ### M1 — legally usable 3-second proof
