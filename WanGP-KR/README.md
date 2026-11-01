@@ -29,7 +29,7 @@
 
 ## Windows 전체 설치 (원본 WanGP 포함)
 
-**사용자에게 권장하는 경로:** [Windows 전체 설치 안내](docs/FULL_INSTALL_WINDOWS_KO.md)에 따라 이 프로젝트를 ZIP으로 압축 해제한 뒤 **`scripts/install_studio_full_windows.cmd`를 더블클릭**합니다. 공식 WanGP Manager를 SHA-256 확인 후 실행하고, 원본 설치가 끝나면 한국어 플러그인을 추가합니다. 아직 실제 Windows에서 이 도우미를 끝까지 실행한 검증은 되지 않았습니다.
+**사용자에게 권장하는 경로:** [Windows 전체 설치 안내](docs/FULL_INSTALL_WINDOWS_KO.md)를 보고 **[전체 설치 도우미 `.cmd` 파일 하나](scripts/install_studio_full_windows.cmd)를 다운로드한 뒤 더블클릭**합니다. 별도로 개발 브랜치 전체를 ZIP으로 받을 필요는 없습니다. 공식 WanGP Manager를 SHA-256 확인 후 실행하고, 원본 설치가 끝나면 한국어 플러그인을 추가합니다. 아직 실제 Windows에서 이 도우미를 끝까지 실행한 검증은 되지 않았습니다.
 
 **모델 가중치는 필요할 때 받습니다.** 원본 WanGP 본체·라이브러리·한글 스튜디오는 설치하지만 모든 대형 모델 파일을 미리 내려받지는 않습니다.
 
@@ -67,6 +67,7 @@ python WanGP-KR/scripts/bring_upstream.py
 - [x] 초보자용 한글 도움말 5단계 및 분야별 안내 코드 작성(실행 전)
 - [x] Windows 저사양 진단용 읽기 전용 GPU/RAM 안내 버튼 코드 작성(실행 전)
 - [x] 공식 WanGP Manager SHA-256 검증 및 한국어 플러그인 추가용 전체 설치 도우미 코드 작성(실행 전)
+- [x] 단일 설치 파일에서 고정 버전 한글 플러그인만 검증·다운로드하는 부트스트랩 추가(실행 전)
 - [ ] 사용자의 Windows에서 공식 Manager + 한글 플러그인 전체 설치 통합 테스트
 - [ ] 원본 WanGP에서 한국어 플러그인 실제 설치·실행 확인
 - [ ] 원본과 기능·성능 A/B 검증
