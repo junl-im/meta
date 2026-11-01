@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#111b25">
   <meta name="description" content="Actor Swap Studio WEB — 설치 없는 로컬 영상 작업 준비 화면">
-  <title>Actor Swap Studio WEB — v0.7.1</title>
+  <title>Actor Swap Studio WEB — v0.7.3</title>
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./src/app.mjs"></script>
   <script type="module" src="./src/video_lab.mjs"></script>
@@ -13,7 +13,7 @@
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <div class="brand"><span class="brand-mark" aria-hidden="true">AS</span><div><strong>ACTOR SWAP STUDIO</strong><small>WEB VIDEO LAB · v0.7.1</small></div></div>
+      <div class="brand"><span class="brand-mark" aria-hidden="true">AS</span><div><strong>ACTOR SWAP STUDIO</strong><small>WEB VIDEO LAB · v0.7.3</small></div></div>
       <div class="top-actions"><span class="phase-pill">로컬 작업 준비</span><button id="help-button" class="button button-subtle" type="button">도움말</button><button id="exit-button" class="button button-subtle" type="button">나가기</button></div>
     </header>
 
@@ -73,7 +73,7 @@
     <footer class="footer"><span>LOCAL FIRST · 입력 파일 업로드 없음</span><span>선택적 얼굴 위치 검출 · 얼굴 교체 AI 미구현</span></footer>
   </div>
 
-  <dialog id="help-dialog" aria-labelledby="help-title"><h2 id="help-title">현재 버전 안내</h2><p>v0.7.1은 설치 없는 웹판의 실험 단계야. 영상과 사진을 선택하고 로컬 미리보기·기기 지원 상태·입력 점검 파일을 확인할 수 있어.</p><p>3초 실험은 얼굴 사진 오버레이이며 실제 얼굴 교체 AI가 아니야. 얼굴 위치 검출을 선택하면 MediaPipe 파일과 모델을 CDN에서 다운로드하고 사용량 지표가 전송될 수 있어.</p><button class="button button-primary dialog-close" type="button" data-close="help-dialog">확인</button></dialog>
+  <dialog id="help-dialog" aria-labelledby="help-title"><h2 id="help-title">현재 버전 안내</h2><p>v0.7.3은 설치 없는 웹판의 실험 단계야. 영상과 사진을 선택하고 로컬 미리보기·기기 지원 상태·입력 점검 파일을 확인할 수 있어.</p><p>3초 실험은 얼굴 사진 오버레이이며 실제 얼굴 교체 AI가 아니야. 얼굴 위치 검출을 선택하면 MediaPipe 파일과 모델을 CDN에서 다운로드하고 사용량 지표가 전송될 수 있어.</p><button class="button button-primary dialog-close" type="button" data-close="help-dialog">확인</button></dialog>
   <dialog id="exit-dialog" aria-labelledby="exit-title"><h2 id="exit-title">작업 화면에서 나갈까?</h2><p>현재 선택한 로컬 파일은 이 화면에만 연결돼 있어. 나가면 다시 선택해야 해.</p><div class="dialog-actions"><button class="button button-subtle" type="button" data-close="exit-dialog">계속하기</button><button id="confirm-exit" class="button button-primary" type="button">나가기</button></div></dialog>
 </body>
 </html>
