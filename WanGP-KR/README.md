@@ -27,6 +27,12 @@
 - 라이선스: **WanGP Community License 2.0**. 개인 수정 및 사용은 허용되지만, 소프트웨어 판매·유료 서비스 삽입·상업적 화이트라벨 등은 별도 서면 계약이 필요할 수 있음. 모델별 라이선스도 별도 확인.
 - 원본 코드와 모델 가중치는 이 폴더에 복사하지 않음. 설치 시 공식 저장소에서 가져오고, 변경은 독립된 한국어 플러그인/연동 계층에 둠.
 
+## Windows 전체 설치 (원본 WanGP 포함)
+
+**사용자에게 권장하는 경로:** [Windows 전체 설치 안내](docs/FULL_INSTALL_WINDOWS_KO.md)에 따라 이 프로젝트를 ZIP으로 압축 해제한 뒤 **`scripts/install_studio_full_windows.cmd`를 더블클릭**합니다. 공식 WanGP Manager를 SHA-256 확인 후 실행하고, 원본 설치가 끝나면 한국어 플러그인을 추가합니다. 아직 실제 Windows에서 이 도우미를 끝까지 실행한 검증은 되지 않았습니다.
+
+**모델 가중치는 필요할 때 받습니다.** 원본 WanGP 본체·라이브러리·한글 스튜디오는 설치하지만 모든 대형 모델 파일을 미리 내려받지는 않습니다.
+
 ## 원본 소스 가져오기
 
 Git과 Python이 설치된 개인 PC에서 이 폴더를 내려받은 뒤:
@@ -46,6 +52,7 @@ python WanGP-KR/scripts/bring_upstream.py
 5. [Windows / RAM 16GB / 저사양 GPU 준비](docs/WINDOWS16_LOW_SPEC_KO.md)
 6. [첫 한국어 플러그인 시험판](plugin/README_KO.md)
 7. [처음 쓰는 분을 위한 사용 설명서](docs/USER_GUIDE_KO.md)
+8. [Windows 전체 설치 안내](docs/FULL_INSTALL_WINDOWS_KO.md)
 
 ## 진척
 
@@ -59,6 +66,8 @@ python WanGP-KR/scripts/bring_upstream.py
 - [x] 원본 모델 메타데이터 기반 영상·이미지·음성·3D·월드 탐색기 코드 작성(실행 전)
 - [x] 초보자용 한글 도움말 5단계 및 분야별 안내 코드 작성(실행 전)
 - [x] Windows 저사양 진단용 읽기 전용 GPU/RAM 안내 버튼 코드 작성(실행 전)
+- [x] 공식 WanGP Manager SHA-256 검증 및 한국어 플러그인 추가용 전체 설치 도우미 코드 작성(실행 전)
+- [ ] 사용자의 Windows에서 공식 Manager + 한글 플러그인 전체 설치 통합 테스트
 - [ ] 원본 WanGP에서 한국어 플러그인 실제 설치·실행 확인
 - [ ] 원본과 기능·성능 A/B 검증
 - [ ] 원할 때만 ChatGPT에서 MCP로 직접 제어하는 연결 가능 여부 실환경 확인
