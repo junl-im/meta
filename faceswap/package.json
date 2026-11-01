@@ -1,14 +1,15 @@
 {
   "name": "actor-swap-studio-web",
   "private": true,
-  "version": "0.7.7-streaming-model-preflight",
+  "version": "0.7.8-synthetic-wasm-inference",
   "type": "module",
-  "description": "Local-only video lab with cancellable background SHA-256 model preflight; no face-swap inference",
+  "description": "Local browser video lab and synthetic ONNX WASM inference; AI identity swapping not implemented",
   "scripts": {
     "test": "node --test tests/smoke.mjs",
     "test:browser": "playwright test"
   },
   "devDependencies": {
-    "@playwright/test": "1.56.1"
+    "@playwright/test": "1.56.1",
+    "onnxruntime-web": "1.31.1"
   }
 }
