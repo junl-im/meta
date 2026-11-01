@@ -101,6 +101,7 @@ class UiEventMockTests(unittest.TestCase):
             1,
         )
         self.assertTrue(any(e[1].get("fn") is prompt.build_prompt for e in events))
+        self.assertTrue(any(e[1].get("fn") is prompt.fill_example for e in events))
         self.assertFalse(any("prompt" in name for name in app.requests))
 
 
