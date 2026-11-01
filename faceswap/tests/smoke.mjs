@@ -1,5 +1,5 @@
 import test from "node:test";
-import {createHash, webcrypto} from "node:crypto";
+import {createHash} from "node:crypto";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -9,6 +9,8 @@ import {outputDimensions, chooseRecordingFormat, drawOverlayFrame, defaultBox} f
 import {prepareAudioCapture, closeAudioCapture} from "../src/audio_capture.mjs";
 import {repairWebmDuration} from "../src/webm_duration.mjs";
 import {validateModelManifest, verifyLocalModelPackage, modelByteLimit, MODEL_PACKAGE_SCHEMA} from "../src/model_preflight.mjs";
+import {Sha256Stream, sha256BlobInChunks, HASH_CHUNK_BYTES} from "../src/sha256_stream.mjs";
+import {hashFileInWorker} from "../src/sha256_worker_client.mjs";
 
 
 const base = new URL("../", import.meta.url);
@@ -264,14 +266,14 @@ test("model preflight accepts only a scoped, explicitly described weight license
   for (const variant of variants) {
     assert.throws(() => validateModelManifest(variant, "authorized.onnx"));
   }
-  assert.equal(modelByteLimit(4), 64 * 1024 * 1024);
-  assert.equal(modelByteLimit(8), 256 * 1024 * 1024);
+  assert.equal(modelByteLimit(4), 2 * 1024 * 1024 * 1024);
+  assert.equal(modelByteLimit(8), 2 * 1024 * 1024 * 1024);
 });
 
 test("local package integrity compares all weight bytes and never runs inference", async () => {
   const result = await verifyLocalModelPackage({
     modelFile: modelFile(), manifestFile: manifestFile(manifestData()),
-    digest: webcrypto.subtle.digest.bind(webcrypto.subtle), deviceMemoryGB: 4
+    onProgress: () => {}
   });
   assert.equal(result.sha256, testModelHash);
   assert.equal(result.integrityVerified, true);
@@ -284,14 +286,14 @@ test("local package integrity compares all weight bytes and never runs inference
 test("tampered model, malformed manifest and over-budget files fail closed", async () => {
   const run = (model, manifest, options = {}) => verifyLocalModelPackage({
     modelFile: model, manifestFile: manifest,
-    digest: webcrypto.subtle.digest.bind(webcrypto.subtle), ...options
+    ...options
   });
   const tampered = Object.assign(new Blob([Uint8Array.from([9])]), {name: "authorized.onnx"});
   await assert.rejects(run(tampered, manifestFile(manifestData())), /SHA-256/);
   await assert.rejects(run(modelFile(), Object.assign(new Blob(["{"]), {name: "broken.json"})), /JSON/);
-  const huge = {name: "authorized.onnx", size: 500 * 1024 * 1024};
-  await assert.rejects(run(huge, manifestFile(manifestData())), /메모리 한도/);
-  await assert.rejects(run(modelFile(), manifestFile(manifestData()), {digest: null}), /SHA-256/);
+  const huge = {name: "authorized.onnx", size: 3 * 1024 * 1024 * 1024};
+  await assert.rejects(run(huge, manifestFile(manifestData())), /최대 2 GiB/);
+  await assert.rejects(run(modelFile(), manifestFile(manifestData()), {hashFile: null}), /SHA-256/);
 });
 
 test("model UI is local-only, with explicit rights and truth-in-labeling", () => {
@@ -306,4 +308,70 @@ test("model UI is local-only, with explicit rights and truth-in-labeling", () =>
   assert.match(modelUI, /reset-button/);
   assert.doesNotMatch(modelUI + preflight, /\bfetch\s*\(|XMLHttpRequest\b|<svg\b|data:image\/svg/i);
   assert.match(html, /ONNX 실행·AI 얼굴 교체|실행 엔진은 아직 연결되지 않았어/);
+});
+
+test("streaming SHA-256 matches NIST vectors and independent Node crypto at boundaries", () => {
+  assert.equal(new Sha256Stream().digestHex(),
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+  assert.equal(new Sha256Stream().update(new TextEncoder().encode("abc")).digestHex(),
+    "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
+  for (const size of [1,55,56,63,64,65,119,120,127,128,129,1023,1024,1025]) {
+    const bytes = Uint8Array.from({length:size},(_,i)=>(i*37+11)%256);
+    const expected = createHash("sha256").update(bytes).digest("hex");
+    const sha = new Sha256Stream();
+    for(let i=0;i<bytes.length;i+=7) sha.update(bytes.subarray(i,i+7));
+    assert.equal(sha.digestHex(),expected,"length="+size);
+    assert.throws(()=>sha.update(bytes),/이미 완료/);
+  }
+});
+
+test("chunked file hashing stays within small reads, reports progress and hashes 2MiB correctly", async () => {
+  const bytes=Uint8Array.from({length:2*1024*1024+147},(_,i)=>(i*17+3)%251);
+  const blob=new Blob([bytes]);
+  const progress=[];
+  const sha=await sha256BlobInChunks(blob,{
+    chunkBytes:65536,onProgress:(loaded,total)=>progress.push([loaded,total])
+  });
+  assert.equal(sha,createHash("sha256").update(bytes).digest("hex"));
+  assert.ok(progress.length>30);
+  assert.equal(progress.at(-1)[0],blob.size);
+  assert.equal(HASH_CHUNK_BYTES,1048576);
+});
+
+test("chunked hashing checks abort before reading more chunks", async () => {
+  const blob=new Blob([new Uint8Array(9000)]);
+  let cancel=false;
+  await assert.rejects(sha256BlobInChunks(blob,{
+    chunkBytes:1024,shouldAbort:()=>cancel,
+    onProgress:(loaded)=>{if(loaded>=2048)cancel=true;}
+  }),/취소/);
+  assert.equal(cancel,true);
+});
+
+test("worker bridge handles progress and cancellation with immediate termination", async () => {
+  let terminated=0,received=false;
+  class FakeWorker {
+    constructor(){this.onmessage=null;}
+    postMessage({file}) {
+      received=Boolean(file);
+      setTimeout(()=>this.onmessage?.({data:{type:"progress",loaded:3,total:3}}),0);
+      setTimeout(()=>this.onmessage?.({data:{type:"done",sha256:testModelHash}}),1);
+    }
+    terminate(){terminated++;}
+  }
+  const progress=[];
+  assert.equal(await hashFileInWorker(modelFile(),{
+    WorkerCtor:FakeWorker,onProgress:(a,b)=>progress.push([a,b])
+  }),testModelHash);
+  assert.deepEqual(progress,[[3,3]]);
+  assert.equal(terminated,1);
+  assert.equal(received,true);
+  const aborter=new AbortController();
+  class HangingWorker{postMessage(){} terminate(){terminated++;}}
+  const pending=hashFileInWorker(modelFile(),{
+    WorkerCtor:HangingWorker,signal:aborter.signal
+  });
+  aborter.abort();
+  await assert.rejects(pending,/취소/);
+  assert.equal(terminated,2);
 });
