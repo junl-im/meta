@@ -58,6 +58,7 @@ class TestFullInstallerSafety(unittest.TestCase):
             "catalog.py",
             "help_content.py",
             "hardware.py",
+            "prompt_assistant.py",
             "studio-hero.png",
         ):
             self.assertIn('call :fetch_plugin_file "' + filename + '"', self.script)
