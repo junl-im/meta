@@ -34,6 +34,7 @@ jobs:
           node --check faceswap/src/video_lab.mjs
           node --check faceswap/tests/serve.mjs
           node --check faceswap/tests/e2e/local-render.spec.mjs
+          node --check faceswap/tests/e2e/browser-compat.spec.mjs
       - name: Node smoke checks
         run: node --test faceswap/tests/smoke.mjs
 
@@ -65,4 +66,34 @@ jobs:
         working-directory: faceswap
         env:
           CI: "true"
-        run: npm run test:browser
+        run: npm run test:browser -- --project=desktop-chromium --project=mobile-chromium-emulation
+
+  browser-compat:
+    # Linux WebKit is an engine-level signal, not real iOS Safari hardware QA.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install QA dependencies
+        working-directory: faceswap
+        run: npm install --no-audit --no-fund
+      - name: Install Firefox and WebKit for compatibility QA
+        working-directory: faceswap
+        run: npx playwright install --with-deps firefox webkit
+      - name: Install FFmpeg for synthetic media fixture
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Generate offline non-personal compatibility fixtures
+        run: |
+          mkdir -p faceswap/tests/fixtures
+          ffmpeg -hide_banner -loglevel error -f lavfi -i testsrc2=size=640x360:rate=25 -f lavfi -i sine=frequency=440:sample_rate=48000 -t 4 -shortest -c:v libvpx -b:v 700k -c:a libopus -y faceswap/tests/fixtures/source.webm
+          ffmpeg -hide_banner -loglevel error -f lavfi -i color=c=yellow:size=256x256 -frames:v 1 -y faceswap/tests/fixtures/portrait.png
+      - name: Test desktop Firefox and mobile-emulated WebKit
+        working-directory: faceswap
+        env:
+          CI: "true"
+        run: npm run test:browser -- --project=desktop-firefox --project=mobile-webkit-emulation
