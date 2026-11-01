@@ -48,18 +48,20 @@ test("cross-browser local input gates recording and reset according to actual de
   await expect.poll(() => page.locator("#reference-image").evaluate((image) => image.naturalWidth))
     .toBeGreaterThan(0);
   await expect.poll(() => page.locator("#source-video").evaluate((video) =>
-    video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA || Boolean(video.error)), {timeout: 12000})
+    video.readyState >= HTMLMediaElement.HAVE_METADATA || Boolean(video.error)), {timeout: 12000})
     .toBeTruthy();
   await page.locator("#consent").check();
   const decoded = await page.locator("#source-video").evaluate((video) =>
     video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA && video.videoWidth > 0);
-  if (decoded) {
-    await expect(page.locator("#check-button")).toBeEnabled();
-    await page.locator("#check-button").click();
-  } else {
+  const errored = await page.locator("#source-video").evaluate((video) => Boolean(video.error));
+  if (errored) {
     await expect(page.locator("#check-button")).toBeDisabled();
     await expect(page.locator("#render-button")).toBeDisabled();
     await expect(page.locator("#video-detail")).toContainText("재생하지 못했어");
+  } else {
+    await expect(page.locator("#check-button")).toBeEnabled();
+    await page.locator("#check-button").click();
+    if (!decoded) await expect(page.locator("#render-button")).toBeDisabled();
   }
   // Only the optional model button may fetch a remote SDK; it stays disabled.
   await expect(page.locator("#detect-button")).toBeDisabled();
