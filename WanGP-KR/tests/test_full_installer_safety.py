@@ -32,6 +32,19 @@ class TestFullInstallerSafety(unittest.TestCase):
         self.assertLess(self.script.index('if exist "%PLUGIN_DEST%" goto plugin_exists'), self.script.index("robocopy"))
         self.assertIn("goto original_not_installed", self.lower)
 
+    def test_staged_copy_keeps_partial_plugin_outside_plugins(self):
+        self.assertIn('set "PLUGIN_STAGE=%WANGP_DIR%\\_gomfox_staging_', self.script)
+        self.assertIn('robocopy "%PLUGIN_SOURCE%" "%PLUGIN_STAGE%"', self.script)
+        self.assertIn('move "%PLUGIN_STAGE%" "%PLUGIN_DEST%"', self.script)
+        self.assertLess(self.script.index('robocopy "%PLUGIN_SOURCE%" "%PLUGIN_STAGE%"'), self.script.index('move "%PLUGIN_STAGE%" "%PLUGIN_DEST%"'))
+        self.assertLess(self.script.index('if exist "%PLUGIN_DEST%" goto plugin_exists'), self.script.index('move "%PLUGIN_STAGE%" "%PLUGIN_DEST%"'))
+        for filename in (
+            "__init__.py", "plugin.py", "plugin_info.json", "catalog.py",
+            "help_content.py", "hardware.py", "prompt_assistant.py",
+            "studio-hero.png", "gomfox-studio-icon.png",
+        ):
+            self.assertIn('if not exist "%PLUGIN_STAGE%\\' + filename + '" goto plugin_copy_error', self.script)
+
     def test_no_destructive_or_policy_bypass_commands(self):
         for forbidden in (
             "rmdir ",
@@ -48,7 +61,7 @@ class TestFullInstallerSafety(unittest.TestCase):
     def test_standalone_plugin_download_is_pinned_and_verified(self):
         self.assertIn("https://raw.githubusercontent.com/junl-im/meta/", self.script)
         self.assertIn("GOMFOX_PINNED_RAW", self.script)
-        self.assertIn("225d1759c15c5b6967d784973c0e4564b45b1004", self.script)
+        self.assertIn("226bacf4ffe7be6768a533c69352f34be57bf1bd", self.script)
         self.assertIn("Get-FileHash -Algorithm SHA256 -LiteralPath $env:GOMFOX_FILE_PATH", self.script)
         self.assertLess(self.script.index("call :fetch_plugin_file"), self.script.index('start "" /wait'))
         self.assertIn("goto plugin_download_error", self.lower)
@@ -81,7 +94,7 @@ class TestFullInstallerSafety(unittest.TestCase):
 
     def test_signature_icon_is_pinned_and_applied_only_to_new_shortcut(self):
         self.assertIn('call :fetch_plugin_file "gomfox-studio-icon.png"', self.script)
-        self.assertIn('if not exist "%PLUGIN_DEST%\\gomfox-studio-icon.png" goto plugin_copy_error', self.script)
+        self.assertIn('if not exist "%PLUGIN_STAGE%\\gomfox-studio-icon.png" goto plugin_copy_error', self.script)
         self.assertIn("GOMFOX_ICON_ICO", self.script)
         self.assertIn("[System.Drawing.Imaging.ImageFormat]::Png", self.script)
         self.assertIn("$link.IconLocation=$env:GOMFOX_SHORTCUT_ICON + ',0'", self.script)
