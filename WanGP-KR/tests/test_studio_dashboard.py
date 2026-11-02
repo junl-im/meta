@@ -79,8 +79,18 @@ class StudioDashboardTests(unittest.TestCase):
         self.assertNotIn("cancel_queue_task(", SOURCE)
         self.assertNotIn("submit_task(", SOURCE)
 
+    def test_compact_mobile_layout_and_keyboard_focus_are_present(self):
+        for token in (
+            "@media (max-width:740px)",
+            "@media (max-width:740px) and (max-height:740px)",
+            "prefers-reduced-motion",
+            "button:focus-visible",
+            "gfs-section-tabs .tab-nav",
+        ):
+            self.assertIn(token, SOURCE)
+
     def test_plugin_metadata_matches(self):
-        self.assertEqual(META["version"], "0.10.0-dev")
+        self.assertEqual(META["version"], "0.11.0-dev")
         self.assertIn("GomFoxStudio", META["app_tab"])
 
 
