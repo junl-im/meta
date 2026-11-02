@@ -56,16 +56,16 @@ goto plugin_source_ready
 
 :download_plugin
 echo 현재 폴더에 한글 플러그인이 없으므로 고정 버전을 받습니다.
-echo GitHub 원본 버전: 225d1759c15c5b6967d784973c0e4564b45b1004
+echo GitHub 원본 버전: 226bacf4ffe7be6768a533c69352f34be57bf1bd
 set "PLUGIN_SOURCE=%SETUP_DIR%\wan2gp-gomfox-studio"
 mkdir "%PLUGIN_SOURCE%" >nul 2>nul
 if not exist "%PLUGIN_SOURCE%\" goto plugin_download_error
-set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/225d1759c15c5b6967d784973c0e4564b45b1004/WanGP-KR/plugin/wan2gp-gomfox-studio"
+set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/226bacf4ffe7be6768a533c69352f34be57bf1bd/WanGP-KR/plugin/wan2gp-gomfox-studio"
 call :fetch_plugin_file "__init__.py" "754b7e9e5046f2450c5fd4ea0a53d40b6ceb8671acbb6e7ddd8932a52de80066"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin.py" "1d8ed25e7b44a4825a40f1a81675b4de2121599d368ff937801651d34e34e3c0"
+call :fetch_plugin_file "plugin.py" "2797b380172c76f539f106440cba13ae0410816f854b8d2eea4638a94391fb7d"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin_info.json" "1173f6c50910b58a33f7142fdc6ea89681e9acb06b8676d9a4a0ccc8fe495665"
+call :fetch_plugin_file "plugin_info.json" "27b51c7e916f2826eef84750977a516547abc97ad94746c54896a96218d5e90b"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "catalog.py" "995f6d12271bff59da0a64318133e788ffbc08560bfeb0bede2aa8fc14e20b9d"
 if errorlevel 1 goto plugin_download_error
@@ -145,15 +145,30 @@ echo 설치할 한글 스튜디오: "%PLUGIN_DEST%"
 choice /C YN /M "원본은 그대로 두고 한글 스튜디오를 새로 추가할까요?"
 if errorlevel 2 goto cancelled
 
-robocopy "%PLUGIN_SOURCE%" "%PLUGIN_DEST%" /E /R:0 /W:0 /NFL /NDL /NJH /NJS >nul
+rem Copy into a unique staging folder OUTSIDE plugins, then move it into place.
+rem If copying fails, no partially installed plugin appears in WanGP.
+set "PLUGIN_STAGE=%WANGP_DIR%\_gomfox_staging_%RANDOM%_%RANDOM%"
+if exist "%PLUGIN_STAGE%" goto plugin_stage_collision
+echo [준비] 원본 설치 폴더에 검증용 임시 작업 폴더를 만듭니다.
+robocopy "%PLUGIN_SOURCE%" "%PLUGIN_STAGE%" /E /R:0 /W:0 /NFL /NDL /NJH /NJS >nul
 if errorlevel 8 goto plugin_copy_error
 
+if not exist "%PLUGIN_STAGE%\__init__.py" goto plugin_copy_error
+if not exist "%PLUGIN_STAGE%\plugin.py" goto plugin_copy_error
+if not exist "%PLUGIN_STAGE%\plugin_info.json" goto plugin_copy_error
+if not exist "%PLUGIN_STAGE%\catalog.py" goto plugin_copy_error
+if not exist "%PLUGIN_STAGE%\help_content.py" goto plugin_copy_error
+if not exist "%PLUGIN_STAGE%\hardware.py" goto plugin_copy_error
+if not exist "%PLUGIN_STAGE%\prompt_assistant.py" goto plugin_copy_error
+if not exist "%PLUGIN_STAGE%\studio-hero.png" goto plugin_copy_error
+if not exist "%PLUGIN_STAGE%\gomfox-studio-icon.png" goto plugin_copy_error
+
+rem Avoid overwriting even if another installer created the destination meanwhile.
+if exist "%PLUGIN_DEST%" goto plugin_exists
+move "%PLUGIN_STAGE%" "%PLUGIN_DEST%" >nul
+if errorlevel 1 goto plugin_copy_error
 if not exist "%PLUGIN_DEST%\plugin.py" goto plugin_copy_error
-if not exist "%PLUGIN_DEST%\plugin_info.json" goto plugin_copy_error
-if not exist "%PLUGIN_DEST%\help_content.py" goto plugin_copy_error
-if not exist "%PLUGIN_DEST%\prompt_assistant.py" goto plugin_copy_error
-if not exist "%PLUGIN_DEST%\studio-hero.png" goto plugin_copy_error
-if not exist "%PLUGIN_DEST%\gomfox-studio-icon.png" goto plugin_copy_error
+echo [확인] 한글 스튜디오를 검증 후 설치 폴더에 연결했습니다.
 
 rem Copy the verified artwork only into a newly created plugin folder.
 rem Convert to a PNG-backed 256px ICO through built-in .NET; no external converter or SVG.
@@ -251,9 +266,14 @@ echo "%PLUGIN_DEST%"
 echo 기존 파일을 덮어쓰거나 삭제하지 않았습니다.
 goto finish_error
 
+:plugin_stage_collision
+echo [중단] 임시 작업 폴더 이름이 중복되었습니다. 다시 실행해 주세요.
+goto finish_error
+
 :plugin_copy_error
-echo [중단] 플러그인 복사 또는 확인 단계에서 문제가 발생했습니다.
-echo 일부 새 파일이 남아 있을 수 있지만 자동 삭제하지 않았습니다.
+echo [중단] 한글 스튜디오의 임시 복사·확인·폴더 이동 단계에서 문제가 발생했습니다.
+echo WanGP의 기존 플러그인 폴더는 덮어쓰지 않았습니다.
+echo 임시 작업 폴더가 남았다면 사용자 확인 후 정리하세요: "%PLUGIN_STAGE%"
 goto finish_error
 
 :cancelled
