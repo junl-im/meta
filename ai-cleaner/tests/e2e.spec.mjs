@@ -89,12 +89,28 @@ test('desktop worlds and upcoming games align without overflow',async({page})=>{
     await page.setViewportSize({width,height:900});await gotoReady(page,{home:true});
     const layout=await page.evaluate(()=>({scrollWidth:document.documentElement.scrollWidth,groups:[...document.querySelectorAll('.homeWorldCollection')].map(group=>[...group.querySelectorAll('.homeWorldGrid > *')].map(el=>{const box=el.getBoundingClientRect();return{x:box.x,y:box.y,width:box.width,right:box.right}}))}));
     expect(layout.scrollWidth).toBeLessThanOrEqual(width);
-    expect(layout.groups.map(group=>group.length)).toEqual([4,4,5]);
-    for(const row of layout.groups){
+    expect(layout.groups.map(group=>group.length)).toEqual([4,4,6]);
+    for(const row of [...layout.groups.slice(0,2),layout.groups[2].slice(0,3),layout.groups[2].slice(3)]){
       expect(Math.max(...row.map(card=>card.y))-Math.min(...row.map(card=>card.y))).toBeLessThan(2);
       expect(row.every((card,index)=>index===0||card.x>=row[index-1].right)).toBe(true);
       expect(row.every(card=>card.width>0&&card.right<=width)).toBe(true);
     }
+  }
+});
+
+test('Rani guard is presented as unavailable without a game link',async({page})=>{
+  for(const width of [320,390,1280]){
+    await page.setViewportSize({width,height:850});await gotoReady(page,{home:true});
+    const card=page.locator('.homeWorldCollection--games .gameComingSoon');
+    await expect(card).toContainText('라니 수호대');await expect(card).toContainText('준비 중');
+    await expect(card.locator('a,button')).toHaveCount(0);
+    await expect(card.locator('img')).toHaveJSProperty('naturalWidth',384);
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    await page.locator('.homeToolCard[data-open-tool="text"]').click();
+    await page.locator('#studioPicker summary').click();
+    const item=page.locator('.studioPickerLinks .studioComingSoon');
+    await expect(item).toContainText('준비 중');await expect(item.locator('a,button')).toHaveCount(0);
+    await expect(page.locator('a[href*="ForestGuard"]')).toHaveCount(0);
   }
 });
 
