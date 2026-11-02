@@ -35,6 +35,7 @@ const assetFiles = [
   'home-icon-radio.webp',
   'game-matgo.webp',
   'game-physics.webp',
+  'game-rani-guard.png',
   'home-icon-maeum.webp',
   'home-icon-shelf.webp',
   'home-icon-music.webp',
