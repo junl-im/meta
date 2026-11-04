@@ -5,11 +5,20 @@ Windows 프로세스를 실제 실행하지 않으며 Linux/Python에서도 검�
 
 from __future__ import annotations
 
+import hashlib
 import unittest
 from pathlib import Path
 
 
 SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "install_studio_full_windows.cmd"
+PLUGIN_DIR = SCRIPT_PATH.parents[1] / "plugin" / "wan2gp-gomfox-studio"
+PINNED_COMMIT = "6bf6caa2660d0a1567a0834ece3e2a5c8e34ae85"
+REQUIRED_FILES = (
+    "__init__.py", "plugin.py", "plugin_info.json", "catalog.py",
+    "help_content.py", "hardware.py", "prompt_assistant.py",
+    "studio-hero.png", "gomfox-studio-icon.png",
+    "category-video.webp", "category-image.webp", "category-audio.webp", "category-3d.webp",
+)
 
 
 class TestFullInstallerSafety(unittest.TestCase):
@@ -38,11 +47,7 @@ class TestFullInstallerSafety(unittest.TestCase):
         self.assertIn('move "%PLUGIN_STAGE%" "%PLUGIN_DEST%"', self.script)
         self.assertLess(self.script.index('robocopy "%PLUGIN_SOURCE%" "%PLUGIN_STAGE%"'), self.script.index('move "%PLUGIN_STAGE%" "%PLUGIN_DEST%"'))
         self.assertLess(self.script.index('if exist "%PLUGIN_DEST%" goto plugin_exists'), self.script.index('move "%PLUGIN_STAGE%" "%PLUGIN_DEST%"'))
-        for filename in (
-            "__init__.py", "plugin.py", "plugin_info.json", "catalog.py",
-            "help_content.py", "hardware.py", "prompt_assistant.py",
-            "studio-hero.png", "gomfox-studio-icon.png",
-        ):
+        for filename in REQUIRED_FILES:
             self.assertIn('if not exist "%PLUGIN_STAGE%\\' + filename + '" goto plugin_copy_error', self.script)
 
     def test_no_destructive_or_policy_bypass_commands(self):
@@ -61,22 +66,15 @@ class TestFullInstallerSafety(unittest.TestCase):
     def test_standalone_plugin_download_is_pinned_and_verified(self):
         self.assertIn("https://raw.githubusercontent.com/junl-im/meta/", self.script)
         self.assertIn("GOMFOX_PINNED_RAW", self.script)
-        self.assertIn("226bacf4ffe7be6768a533c69352f34be57bf1bd", self.script)
+        self.assertIn(PINNED_COMMIT, self.script)
         self.assertIn("Get-FileHash -Algorithm SHA256 -LiteralPath $env:GOMFOX_FILE_PATH", self.script)
         self.assertLess(self.script.index("call :fetch_plugin_file"), self.script.index('start "" /wait'))
         self.assertIn("goto plugin_download_error", self.lower)
-        for filename in (
-            "__init__.py",
-            "plugin.py",
-            "plugin_info.json",
-            "catalog.py",
-            "help_content.py",
-            "hardware.py",
-            "prompt_assistant.py",
-            "studio-hero.png",
-            "gomfox-studio-icon.png",
-        ):
-            self.assertIn('call :fetch_plugin_file "' + filename + '"', self.script)
+        for filename in REQUIRED_FILES:
+            expected_sha = hashlib.sha256((PLUGIN_DIR / filename).read_bytes()).hexdigest()
+            self.assertIn('call :fetch_plugin_file "' + filename + '" "' + expected_sha + '"', self.script)
+        self.assertIn("미검증 로컬 파일은 자동으로 재사용하지 않습니다", self.script)
+        self.assertNotIn('set "PLUGIN_SOURCE=%STUDIO_ROOT%', self.script)
 
     def test_preflight_reports_resources_without_changing_settings(self):
         self.assertIn("Get-CimInstance Win32_ComputerSystem", self.script)

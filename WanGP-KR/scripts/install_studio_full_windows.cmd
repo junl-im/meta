@@ -8,6 +8,7 @@ echo ===================================================
 echo       곰같은여우의 AI 스튜디오 - 전체 설치
 echo ===================================================
 echo.
+echo 한글 작업실 v0.12 개발판 - 4개 전용 일러스트 카드 포함
 echo 이 도구는 공식 WanGP Manager를 다운로드하고,
 echo 원본 WanGP 설치가 끝나면 한국어 스튜디오를 추가합니다.
 echo 원본 출처: https://github.com/deepbeepmeep/WanGP
@@ -17,8 +18,6 @@ echo 사용할 모델은 원본 WanGP에서 필요할 때 다운로드합니다.
 echo 설치 중에는 인터넷 연결과 충분한 저장 공간이 필요합니다.
 echo.
 
-for %%I in ("%~dp0..") do set "STUDIO_ROOT=%%~fI"
-set "PLUGIN_SOURCE=%STUDIO_ROOT%\plugin\wan2gp-gomfox-studio"
 set "DEFAULT_WANGP=%LOCALAPPDATA%\GomFoxAIStudio\WanGP"
 
 powershell.exe -NoProfile -NonInteractive -Command "if ([Environment]::Is64BitOperatingSystem) { exit 0 } else { exit 1 }" >nul
@@ -42,30 +41,21 @@ set "SETUP_DIR=%TEMP%\GomFoxAIStudioSetup_%RANDOM%_%RANDOM%"
 mkdir "%SETUP_DIR%" >nul 2>nul
 if not exist "%SETUP_DIR%\" goto temp_error
 
-echo [준비] 한글 스튜디오 파일을 확인합니다.
-if not exist "%PLUGIN_SOURCE%\__init__.py" goto download_plugin
-if not exist "%PLUGIN_SOURCE%\plugin.py" goto download_plugin
-if not exist "%PLUGIN_SOURCE%\plugin_info.json" goto download_plugin
-if not exist "%PLUGIN_SOURCE%\catalog.py" goto download_plugin
-if not exist "%PLUGIN_SOURCE%\help_content.py" goto download_plugin
-if not exist "%PLUGIN_SOURCE%\hardware.py" goto download_plugin
-if not exist "%PLUGIN_SOURCE%\prompt_assistant.py" goto download_plugin
-if not exist "%PLUGIN_SOURCE%\studio-hero.png" goto download_plugin
-if not exist "%PLUGIN_SOURCE%\gomfox-studio-icon.png" goto download_plugin
-goto plugin_source_ready
+echo [준비] 모든 PC에서 같은 검증된 한글 스튜디오 파일을 사용합니다.
+echo 설치 스크립트 옆의 미검증 로컬 파일은 자동으로 재사용하지 않습니다.
 
 :download_plugin
-echo 현재 폴더에 한글 플러그인이 없으므로 고정 버전을 받습니다.
-echo GitHub 원본 버전: 226bacf4ffe7be6768a533c69352f34be57bf1bd
+echo 고정된 GitHub 코드 버전의 필수 13개 파일을 받습니다.
+echo GitHub 원본 버전: 6bf6caa2660d0a1567a0834ece3e2a5c8e34ae85
 set "PLUGIN_SOURCE=%SETUP_DIR%\wan2gp-gomfox-studio"
 mkdir "%PLUGIN_SOURCE%" >nul 2>nul
 if not exist "%PLUGIN_SOURCE%\" goto plugin_download_error
-set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/226bacf4ffe7be6768a533c69352f34be57bf1bd/WanGP-KR/plugin/wan2gp-gomfox-studio"
+set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/6bf6caa2660d0a1567a0834ece3e2a5c8e34ae85/WanGP-KR/plugin/wan2gp-gomfox-studio"
 call :fetch_plugin_file "__init__.py" "754b7e9e5046f2450c5fd4ea0a53d40b6ceb8671acbb6e7ddd8932a52de80066"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin.py" "2797b380172c76f539f106440cba13ae0410816f854b8d2eea4638a94391fb7d"
+call :fetch_plugin_file "plugin.py" "305e6bfafa2a80ec53677baeddc7b7c24e962cf9fa127e9bb85a9b063507690e"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin_info.json" "27b51c7e916f2826eef84750977a516547abc97ad94746c54896a96218d5e90b"
+call :fetch_plugin_file "plugin_info.json" "321e39fe1d98c3f4fdef835871783a9632e12f188a31e728c4ae1faa02d76327"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "catalog.py" "995f6d12271bff59da0a64318133e788ffbc08560bfeb0bede2aa8fc14e20b9d"
 if errorlevel 1 goto plugin_download_error
@@ -78,6 +68,14 @@ if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "studio-hero.png" "68ed79eb62f1fa81e089a52f85a689eabb73db964fc84d63daf85bd87c264b66"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "gomfox-studio-icon.png" "ee1ccd2694f9495084e57defe3b5ddee61b13377f78a43dce819fc8fa9c2e365"
+if errorlevel 1 goto plugin_download_error
+call :fetch_plugin_file "category-video.webp" "922b041aa952592fdaf7304702425383debf442103834334581d955a08bbdbb6"
+if errorlevel 1 goto plugin_download_error
+call :fetch_plugin_file "category-image.webp" "9a92e1f873943c1e96b58dd1dea37644fe596fc040e40800e25688b86c7ca8ca"
+if errorlevel 1 goto plugin_download_error
+call :fetch_plugin_file "category-audio.webp" "77f253cefebcf8ac929d982367fc1dffd90f4ae9dffaf2652b08b87240056326"
+if errorlevel 1 goto plugin_download_error
+call :fetch_plugin_file "category-3d.webp" "9827269c0b33accb16c3dd95f250d9cd70429f9bed97ae47f6663febba208697"
 if errorlevel 1 goto plugin_download_error
 rem Signature PNG is one of the pinned-and-verified plugin files.
 
@@ -162,6 +160,10 @@ if not exist "%PLUGIN_STAGE%\hardware.py" goto plugin_copy_error
 if not exist "%PLUGIN_STAGE%\prompt_assistant.py" goto plugin_copy_error
 if not exist "%PLUGIN_STAGE%\studio-hero.png" goto plugin_copy_error
 if not exist "%PLUGIN_STAGE%\gomfox-studio-icon.png" goto plugin_copy_error
+if not exist "%PLUGIN_STAGE%\category-video.webp" goto plugin_copy_error
+if not exist "%PLUGIN_STAGE%\category-image.webp" goto plugin_copy_error
+if not exist "%PLUGIN_STAGE%\category-audio.webp" goto plugin_copy_error
+if not exist "%PLUGIN_STAGE%\category-3d.webp" goto plugin_copy_error
 
 rem Avoid overwriting even if another installer created the destination meanwhile.
 if exist "%PLUGIN_DEST%" goto plugin_exists
@@ -222,6 +224,7 @@ echo 앱에서 "도움말 - 처음 시작하기"를 따라 해 보세요.
 echo.
 echo GPT나 Claude 로그인은 기본 생성에 필요하지 않습니다.
 echo GPU 모델에 따라 일부 모델은 실행되지 않을 수 있습니다.
+echo 첫 화면에서 영상/이미지/음악/3D 원화 카드를 누르면 분야별 안내가 나옵니다.
 echo.
 pause
 exit /b 0
