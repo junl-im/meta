@@ -90,6 +90,11 @@ class UiEventMockTests(unittest.TestCase):
             source = (PLUGIN_ROOT / "plugin.py").read_text(encoding="utf-8")
             exec(compile(source, plugin_module.__file__, "exec"), plugin_module.__dict__)
 
+            art_css = plugin_module.category_art_css()
+            self.assertEqual(art_css.count("data:image/webp;base64,"), 4)
+            self.assertLess(len(art_css), 400_000)
+            self.assertNotIn("<svg", art_css.casefold())
+
             app = plugin_module.GomFoxStudioPlugin()
             app.setup_ui()
             app.create_ui()

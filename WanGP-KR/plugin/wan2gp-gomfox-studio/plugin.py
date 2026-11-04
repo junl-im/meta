@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+import base64
 from pathlib import Path
 
 import gradio as gr
@@ -22,6 +23,28 @@ APP_TITLE = "곰같은여우의 AI 스튜디오"
 TAB_ID = "GomFoxStudio"
 HERO_FILE = Path(__file__).resolve().parent / "studio-hero.png"
 ICON_FILE = Path(__file__).resolve().parent / "gomfox-studio-icon.png"
+CATEGORY_ART = {
+    "video": Path(__file__).resolve().parent / "category-video.webp",
+    "image": Path(__file__).resolve().parent / "category-image.webp",
+    "audio": Path(__file__).resolve().parent / "category-audio.webp",
+    "3d": Path(__file__).resolve().parent / "category-3d.webp",
+}
+
+
+def category_art_css() -> str:
+    """Embed only our four small, local WebP cards; no network or file URL needed."""
+    rules = []
+    for category, artwork in CATEGORY_ART.items():
+        if not artwork.is_file():
+            continue  # Existing gradient remains as an offline fallback.
+        content = base64.b64encode(artwork.read_bytes()).decode("ascii")
+        rules.append(
+            f"#gfs-root #gfs-category-{category} {{"
+            f"background-image:linear-gradient(90deg,rgba(7,17,31,.24),transparent 80%),"
+            f"url('data:image/webp;base64,{content}') !important;"
+            "background-position:center !important;background-size:cover !important;}"
+        )
+    return "<style>" + "".join(rules) + "</style>" if rules else ""
 
 # 새 UI 전용 CSS. SVG/외부 폰트/스크립트/원격 CDN에 의존하지 않는다.
 STUDIO_STYLE = """
@@ -44,12 +67,13 @@ STUDIO_STYLE = """
 #gfs-root .gfs-panel p {margin:5px 0;line-height:1.6}
 #gfs-root .gfs-steps {font-size:14px;opacity:.88;line-height:1.7}
 #gfs-root #gfs-banner img {border-radius:22px;object-fit:cover;object-position:center;max-height:235px}
-#gfs-root #gfs-category-video,#gfs-root #gfs-category-image,#gfs-root #gfs-category-audio,#gfs-root #gfs-category-3d {min-height:94px;border-radius:19px;font-size:17px;font-weight:800;line-height:1.4;white-space:pre-line;text-align:left;padding:16px 19px;border-width:1px;border-style:solid;box-shadow:inset 0 1px rgba(255,255,255,.16),0 4px 12px rgba(12,22,42,.11);transition:transform .16s ease,box-shadow .16s ease}
+#gfs-root #gfs-category-grid {gap:13px}
+#gfs-root #gfs-category-video,#gfs-root #gfs-category-image,#gfs-root #gfs-category-audio,#gfs-root #gfs-category-3d {min-height:154px;border:0;border-radius:16px;font-size:20px;font-weight:850;line-height:1.45;white-space:pre-line;text-align:left;padding:20px 23px;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.68);box-shadow:0 8px 17px rgba(9,20,35,.18);transition:transform .16s ease,box-shadow .16s ease}
 #gfs-root #gfs-category-video {background:radial-gradient(circle at 90% 17%,rgba(133,194,232,.29),transparent 38%),linear-gradient(145deg,#315982,#162e51);color:#fff;border-color:#6483a2}
 #gfs-root #gfs-category-image {background:radial-gradient(circle at 91% 22%,rgba(247,192,221,.27),transparent 38%),linear-gradient(145deg,#875a79,#553a62);color:#fff;border-color:#aa7896}
 #gfs-root #gfs-category-audio {background:radial-gradient(circle at 90% 20%,rgba(147,235,209,.25),transparent 38%),linear-gradient(145deg,#277e7a,#1b515c);color:#fff;border-color:#5b9f97}
 #gfs-root #gfs-category-3d {background:radial-gradient(circle at 90% 20%,rgba(242,194,127,.32),transparent 38%),linear-gradient(145deg,#96714f,#61422f);color:#fff;border-color:#b28b6d}
-#gfs-root #gfs-category-video:hover,#gfs-root #gfs-category-image:hover,#gfs-root #gfs-category-audio:hover,#gfs-root #gfs-category-3d:hover {transform:translateY(-2px);box-shadow:inset 0 1px rgba(255,255,255,.2),0 8px 18px rgba(12,22,42,.15)}
+#gfs-root #gfs-category-video:hover,#gfs-root #gfs-category-image:hover,#gfs-root #gfs-category-audio:hover,#gfs-root #gfs-category-3d:hover {transform:translateY(-2px);box-shadow:0 12px 23px rgba(12,22,42,.25)}
 @media (prefers-reduced-motion:reduce) {#gfs-root #gfs-category-video,#gfs-root #gfs-category-image,#gfs-root #gfs-category-audio,#gfs-root #gfs-category-3d {transition:none}}
 #gfs-root #gfs-launch {min-height:49px;border-radius:13px;font-weight:800}
 #gfs-root #gfs-copy {border-radius:12px;font-weight:750}
@@ -75,11 +99,13 @@ STUDIO_STYLE = """
   #gfs-root .gfs-panel {padding:11px 12px;border-radius:13px}
   #gfs-root .gfs-panel h3 {font-size:16px}
   #gfs-root .gfs-steps {font-size:12px}
-  #gfs-root #gfs-category-video,#gfs-root #gfs-category-image,#gfs-root #gfs-category-audio,#gfs-root #gfs-category-3d {min-height:65px;font-size:13px;padding:9px 11px;border-radius:13px}
+  #gfs-root #gfs-category-grid {gap:7px}
+  #gfs-root #gfs-category-video,#gfs-root #gfs-category-image,#gfs-root #gfs-category-audio,#gfs-root #gfs-category-3d {min-height:106px;font-size:14px;padding:13px;border-radius:12px}
 }
 @media (max-width:740px) and (max-height:740px) {
   #gfs-root #gfs-banner img {max-height:92px}
   #gfs-root #gfs-brand-icon img {width:40px;height:40px}
+  #gfs-root #gfs-category-video,#gfs-root #gfs-category-image,#gfs-root #gfs-category-audio,#gfs-root #gfs-category-3d {min-height:89px}
 }
 </style>
 """
@@ -89,8 +115,8 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.11.0-dev"
-        self.description = "곰·여우 시그니처 아이콘을 적용한 한국어 제작 대시보드 · GPT 선택"
+        self.version = "0.12.0-dev"
+        self.description = "네 분야 전용 원화와 쉬운 첫 실행 흐름을 갖춘 무료 로컬 제작실 · GPT 선택"
 
     def setup_ui(self):
         self.request_component("state")
@@ -137,7 +163,7 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
 
     def create_ui(self, api_session=None):
         with gr.Column(elem_id="gfs-root"):
-            gr.HTML(STUDIO_STYLE)
+            gr.HTML(STUDIO_STYLE + category_art_css())
             if HERO_FILE.is_file():
                 gr.Image(
                     value=str(HERO_FILE), height=225, interactive=False,
@@ -165,6 +191,29 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
             )
 
             with gr.Tabs(elem_id="gfs-section-tabs"):
+                with gr.Tab("무료 제작 · 시작"):
+                    gr.HTML(
+                        '<div class="gfs-panel"><h3>무엇을 만들고 싶나요?</h3>'
+                        '<p>원하는 그림 카드를 누르면 사용 순서가 나타나요. '
+                        '처음이라면 다음 탭의 따라 하기도 확인해 보세요.</p>'
+                        '<div class="gfs-steps">① 작업 선택　② 설명 확인　③ 원본 무료 제작 화면 열기</div></div>'
+                    )
+                    with gr.Row(equal_height=True, elem_id="gfs-category-grid"):
+                        video_button = gr.Button("영상 제작\n움직이는 장면", elem_id="gfs-category-video")
+                        image_button = gr.Button("이미지 제작\n사진과 그림", elem_id="gfs-category-image")
+                    with gr.Row(equal_height=True):
+                        audio_button = gr.Button("음성 · 음악\n소리 만들기", elem_id="gfs-category-audio")
+                        model3d_button = gr.Button("3D · 월드\n입체와 장면", elem_id="gfs-category-3d")
+                    task_guide = gr.Markdown(value=render_guide("처음 시작"))
+                    open_generator = gr.Button(
+                        "원본 WanGP 무료 제작 화면 열기", variant="primary", elem_id="gfs-launch"
+                    )
+                    gr.Markdown(
+                        "원본 화면에서 **모델과 생성 설정을 직접 선택**해야 합니다. "
+                        "모든 모델을 저사양 PC에서 실행할 수 있는 것은 아닙니다. "
+                        "원본 **작업 큐·갤러리·Media Flow·Showrunner·LoRA**는 그대로 유지됩니다."
+                    )
+
                 with gr.Tab("처음 실행 · 따라 하기"):
                     gr.HTML(
                         '<div class="gfs-panel"><h3>반가워요! 첫 작품을 함께 만들어 봐요.</h3>'
@@ -189,28 +238,6 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                         "처음에는 **이미지 한 장 또는 짧은 저해상도 영상**부터 시험해 보세요. "
                         "모델 다운로드·생성은 원본 WanGP에서 직접 선택합니다. "
                         "이 안내 화면은 PC 설정을 자동 변경하지 않습니다."
-                    )
-                with gr.Tab("무료 제작 · 시작"):
-                    gr.HTML(
-                        '<div class="gfs-panel"><h3>무엇을 만들고 싶나요?</h3>'
-                        '<p>아래에서 작업을 선택하면 사용 순서를 알려드립니다. '
-                        '실제 생성은 원본 WanGP에서 진행됩니다.</p>'
-                        '<div class="gfs-steps">① 작업 고르기　② 설명 확인　③ 무료 제작 화면 열기</div></div>'
-                    )
-                    with gr.Row(equal_height=True):
-                        video_button = gr.Button("영상 제작\n움직이는 장면", elem_id="gfs-category-video")
-                        image_button = gr.Button("이미지 제작\n사진과 그림", elem_id="gfs-category-image")
-                    with gr.Row(equal_height=True):
-                        audio_button = gr.Button("음성 · 음악\n소리 만들기", elem_id="gfs-category-audio")
-                        model3d_button = gr.Button("3D · 월드\n입체와 장면", elem_id="gfs-category-3d")
-                    task_guide = gr.Markdown(value=render_guide("처음 시작"))
-                    open_generator = gr.Button(
-                        "원본 WanGP 무료 제작 화면 열기", variant="primary", elem_id="gfs-launch"
-                    )
-                    gr.Markdown(
-                        "원본 화면에서 **모델과 생성 설정을 직접 선택**해야 합니다. "
-                        "모든 모델을 저사양 PC에서 실행할 수 있는 것은 아닙니다. "
-                        "원본 **작업 큐·갤러리·Media Flow·Showrunner·LoRA**는 그대로 유지됩니다."
                     )
 
                 with gr.Tab("프롬프트 작업실"):

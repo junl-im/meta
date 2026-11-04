@@ -26,6 +26,14 @@ class StudioDashboardTests(unittest.TestCase):
         self.assertEqual(emblem.read_bytes()[:8], b"\x89PNG\r\n\x1a\n")
         self.assertEqual(emblem.read_bytes(), original.read_bytes())
         self.assertIn("ICON_FILE", SOURCE)
+        for category in ("video", "image", "audio", "3d"):
+            art = PLUGIN_DIR / f"category-{category}.webp"
+            self.assertTrue(art.is_file())
+            self.assertEqual(art.read_bytes()[:4], b"RIFF")
+            self.assertEqual(art.read_bytes()[8:12], b"WEBP")
+            self.assertLess(art.stat().st_size, 160_000)
+        self.assertIn("data:image/webp;base64,", SOURCE)
+        self.assertIn("category_art_css()", SOURCE)
         for forbidden in ("<svg", "data:image/svg", "cdn.jsdelivr"):
             self.assertNotIn(forbidden, SOURCE.casefold())
 
@@ -40,6 +48,7 @@ class StudioDashboardTests(unittest.TestCase):
         self.assertIn('render_guide("사진·그림")', SOURCE)
         self.assertIn('render_guide("목소리·음악")', SOURCE)
         self.assertIn('render_guide("3D 만들기")', SOURCE)
+        self.assertLess(SOURCE.index('with gr.Tab("무료 제작 · 시작")'), SOURCE.index('with gr.Tab("처음 실행 · 따라 하기")'))
 
     def test_guide_explorer_hardware_and_optin_gpt(self):
         for text in ("처음 사용자 도움말", "모델 찾아보기", "내 PC · 저사양 안내", "GPT 감독 · 선택"):
@@ -90,8 +99,17 @@ class StudioDashboardTests(unittest.TestCase):
             self.assertIn(token, SOURCE)
 
     def test_plugin_metadata_matches(self):
-        self.assertEqual(META["version"], "0.11.0-dev")
+        self.assertEqual(META["version"], "0.12.0-dev")
         self.assertIn("GomFoxStudio", META["app_tab"])
+
+    def test_offline_design_preview_keeps_four_local_assets(self):
+        preview = ROOT / "docs" / "V012_VISUAL_PREVIEW.html"
+        self.assertTrue(preview.is_file())
+        html = preview.read_text(encoding="utf-8")
+        for category in ("video", "image", "audio", "3d"):
+            self.assertIn(f"category-{category}.webp", html)
+        self.assertNotIn("<svg", html.casefold())
+        self.assertNotIn("https://", html)
 
 
 if __name__ == "__main__":

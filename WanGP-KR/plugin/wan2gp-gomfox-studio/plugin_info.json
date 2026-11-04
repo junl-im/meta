@@ -1,8 +1,8 @@
 {
   "name": "곰같은여우의 AI 스튜디오",
   "author": "곰같은여우",
-  "version": "0.11.0-dev",
-  "description": "시그니처 여우·곰 아이콘, 무료 로컬 제작, 원본 큐·갤러리, 저사양 진단, 한국어 도움말, 선택형 GPT 감독.",
+  "version": "0.12.0-dev",
+  "description": "분야별 독립 WebP 원화 카드, 무료 로컬 제작, 원본 큐·갤러리, 저사양 진단, 한국어 도움말, 선택형 GPT 감독.",
   "type": "app",
   "app_tab": "GomFoxStudio",
   "app_url": "/gomfox-studio",
@@ -10,6 +10,6 @@
   "info_card": {
     "tagline": "무료 로컬 기본 · GPT 선택",
     "description": "원본 WanGP의 미디어 생성, 고급 설정, 갤러리 기능을 유지하는 한국어 작업실.",
-    "details": "Windows 설치·렌더링 미검증 개발판"
+    "details": "Windows 실기기 설치·GPU 렌더링 미검증 개발판"
   }
 }

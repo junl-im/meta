@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>곰같은여우의 AI 스튜디오 | v0.12 디자인 미리보기</title>
+  <style>
+    :root { color-scheme:dark; font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; padding:22px 16px; color:#fff2dd; background:radial-gradient(ellipse at 50% 0%,#2b4869 0%,#152439 48%,#0d1626 100%); }
+    main { max-width:1080px; margin:auto; }
+    .hero { min-height:170px; border-radius:23px; background:url('../plugin/wan2gp-gomfox-studio/studio-hero.png') center 52%/cover; }
+    .brand { display:flex; align-items:center; gap:14px; margin:14px 0 6px; }
+    .brand img { width:65px; height:65px; object-fit:contain; }
+    .kicker { margin:0;color:#f1b579;font-size:11px;font-weight:800;letter-spacing:.15em; }
+    h1 { margin:2px 0;font-size:clamp(23px,4vw,32px);letter-spacing:-.04em; }
+    .summary { margin:5px 0 17px;color:#c7d9e0;font-size:14px;line-height:1.6; }
+    .chips { display:flex;flex-wrap:wrap;gap:8px;margin-bottom:15px; }
+    .chip { border-radius:30px;padding:6px 11px;background:#273f4b;color:#d5f1df;font-size:12px; }
+    .chip:last-child { background:#42382e;color:#ffd0a6; }
+    .tabs { display:flex;flex-wrap:wrap;gap:7px;margin-bottom:13px; }
+    .tab { color:#b7c7da;padding:10px 13px;background:#22334b;border-radius:11px;font-size:13px; }
+    .tab.active { color:#fff1dc;background:#456478;font-weight:800; }
+    .heading { margin:8px 0 13px;font-size:14px;color:#d5e3eb; }
+    .cards { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px; }
+    .card { height:170px;padding:22px 23px;display:flex;flex-direction:column;justify-content:center;background-size:cover;background-position:center;border-radius:16px;box-shadow:0 10px 25px #0005;text-shadow:0 2px 9px #000c; }
+    .card strong { font-size:22px;letter-spacing:-.04em; }
+    .card small { margin-top:6px;font-size:13px;color:#f1e7de; }
+    .video { background-image:url('../plugin/wan2gp-gomfox-studio/category-video.webp'); }
+    .image { background-image:url('../plugin/wan2gp-gomfox-studio/category-image.webp'); }
+    .audio { background-image:url('../plugin/wan2gp-gomfox-studio/category-audio.webp'); }
+    .model { background-image:url('../plugin/wan2gp-gomfox-studio/category-3d.webp'); }
+    .note { margin-top:15px;font-size:12px;color:#9ab1c1;line-height:1.65; }
+    @media(max-width:680px) {
+      body { padding:10px; }
+      .hero { min-height:100px;border-radius:13px; }
+      .brand { margin:8px 0 4px;gap:8px; }
+      .brand img { width:47px;height:47px; }
+      .summary { font-size:12px;margin-bottom:11px; }
+      .chips { gap:5px;margin-bottom:10px; }
+      .chip { font-size:10px;padding:5px 8px; }
+      .tabs { flex-wrap:nowrap;overflow:hidden; }
+      .tab { white-space:nowrap;padding:8px;font-size:11px; }
+      .cards { gap:7px; }
+      .card { height:105px;padding:12px;border-radius:11px; }
+      .card strong { font-size:15px; }
+      .card small { font-size:11px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="hero" aria-label="곰과 여우가 함께하는 AI 스튜디오 배너"></div>
+    <div class="brand">
+      <img src="../plugin/wan2gp-gomfox-studio/gomfox-studio-icon.png" alt="곰같은여우 시그니처 아이콘">
+      <div><p class="kicker">GOMFOX CREATIVE WORKSPACE</p><h1>곰같은여우의 AI 스튜디오</h1></div>
+    </div>
+    <p class="summary">한 곳에서 영상, 이미지, 음악, 3D 제작을 시작하세요. 원본 WanGP의 전문 기능은 그대로 유지됩니다.</p>
+    <div class="chips"><span class="chip">무료 로컬 기본</span><span class="chip">Windows 16GB 배려</span><span class="chip">GPT 선택 · 기본 꺼짐</span></div>
+    <div class="tabs"><span class="tab active">무료 제작 · 시작</span><span class="tab">처음 실행</span><span class="tab">프롬프트</span><span class="tab">도움말</span></div>
+    <p class="heading">만들고 싶은 작업을 고르세요. 실제 플러그인에서는 카드를 눌러 안내를 표시합니다.</p>
+    <div class="cards">
+      <div class="card video"><strong>영상 제작</strong><small>움직이는 장면</small></div>
+      <div class="card image"><strong>이미지 제작</strong><small>사진과 그림</small></div>
+      <div class="card audio"><strong>음성 · 음악</strong><small>소리 만들기</small></div>
+      <div class="card model"><strong>3D · 월드</strong><small>입체와 장면</small></div>
+    </div>
+    <p class="note">v0.12 디자인 구조만 확인하는 오프라인 미리보기입니다. 실제 제작·탭 이동은 WanGP 내부 Gradio 플러그인에서 동작합니다. 새 UI 자산에 SVG를 사용하지 않습니다.</p>
+  </main>
+</body>
+</html>
