@@ -48,42 +48,51 @@ def category_art_css() -> str:
         content = base64.b64encode(payload).decode("ascii")
         rules.append(
             f"#gfs-root #gfs-category-{category} {{"
-            f"background-image:linear-gradient(90deg,rgba(7,17,31,.24),transparent 80%),"
+            f"background-image:linear-gradient(90deg,rgba(7,17,31,.48),rgba(7,17,31,.07) 69%,transparent 88%),"
             f"url('data:image/webp;base64,{content}') !important;"
-            "background-position:center !important;background-size:cover !important;}"
+            "background-position:right 67% !important;background-size:cover !important;"
+            "background-repeat:no-repeat !important;}"
         )
     return "<style>" + "".join(rules) + "</style>" if rules else ""
 
 # 새 UI 전용 CSS. SVG/외부 폰트/스크립트/원격 CDN에 의존하지 않는다.
 STUDIO_STYLE = """
 <style>
-#gfs-root {--gfs-blue:#162b50; --gfs-gold:#f3ab66; width:100%;max-width:1180px;margin:0 auto}
+#gfs-root {--gfs-blue:#162b50;--gfs-gold:#f3ab66;width:100%;max-width:1180px;margin:0 auto;font-family:"Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;letter-spacing:-.012em}
 #gfs-root * {box-sizing:border-box}
 #gfs-root #gfs-section-tabs {min-width:0}
-#gfs-root #gfs-section-tabs .tab-nav {overflow-x:auto;scrollbar-width:thin;scrollbar-color:rgba(151,162,172,.55) transparent}
-#gfs-root #gfs-section-tabs .tab-nav button {white-space:nowrap;min-height:44px}
+#gfs-root #gfs-section-tabs .tab-nav {overflow-x:auto;scrollbar-width:thin;scrollbar-color:rgba(130,154,158,.55) transparent;gap:4px}
+#gfs-root #gfs-section-tabs .tab-nav button {white-space:nowrap;min-height:44px;border-radius:9px 9px 0 0;font-weight:650}
+#gfs-root #gfs-section-tabs .tab-nav button[aria-selected="true"] {color:var(--body-text-color,#f7ebda);background:rgba(223,166,98,.13);border-bottom:2px solid #d69a5f}
 #gfs-root button:focus-visible {outline:3px solid #e4aa63;outline-offset:2px}
-#gfs-root #gfs-brand-row {align-items:center;gap:12px}
-#gfs-root #gfs-brand-icon {max-width:88px;flex:0 0 78px;align-self:center}
-#gfs-root #gfs-brand-icon img {width:78px;height:78px;object-fit:contain}
+#gfs-root #gfs-brand-row {align-items:center;gap:11px;margin-top:8px}
+#gfs-root #gfs-brand-icon {width:68px !important;height:68px !important;max-width:68px;flex:0 0 68px;align-self:center}
+#gfs-root #gfs-brand-icon .image-container {height:100% !important;max-height:100% !important}
+#gfs-root #gfs-brand-icon img {width:100%;height:100%;object-fit:contain}
 #gfs-root .gfs-kicker {font-size:12px;font-weight:800;letter-spacing:.13em;color:#e99959;margin-bottom:3px}
-#gfs-root .gfs-intro {font-size:15px;line-height:1.6;color:var(--body-text-color,inherit);opacity:.86}
+#gfs-root #gfs-brand-row h1 {font-size:clamp(21px,2.5vw,31px);line-height:1.2;letter-spacing:-.045em;margin:0}
+#gfs-root .gfs-intro {font-size:14px;line-height:1.55;color:var(--body-text-color,inherit);opacity:.88;margin-top:3px}
 #gfs-root .gfs-chip {display:inline-block;margin:3px 7px 5px 0;padding:6px 11px;border-radius:999px;background:rgba(67,139,141,.15);font-size:12px;font-weight:700}
 #gfs-root .gfs-chip.gfs-note {background:rgba(235,145,77,.14)}
-#gfs-root .gfs-panel {padding:16px 18px;border-radius:17px;background:linear-gradient(128deg,rgba(53,117,128,.11),rgba(232,159,95,.09));border:1px solid rgba(128,148,166,.23)}
+#gfs-root .gfs-panel {padding:14px 16px;border-radius:15px;background:linear-gradient(120deg,rgba(53,117,128,.12),rgba(232,159,95,.075));border:0}
 #gfs-root .gfs-panel h3 {margin:0 0 6px;font-size:19px}
 #gfs-root .gfs-panel p {margin:5px 0;line-height:1.6}
 #gfs-root .gfs-steps {font-size:14px;opacity:.88;line-height:1.7}
-#gfs-root #gfs-banner img {border-radius:22px;object-fit:cover;object-position:center;max-height:235px}
-#gfs-root #gfs-category-grid {gap:13px}
-#gfs-root #gfs-category-video,#gfs-root #gfs-category-image,#gfs-root #gfs-category-audio,#gfs-root #gfs-category-3d {min-height:154px;border:0;border-radius:16px;font-size:20px;font-weight:850;line-height:1.45;white-space:pre-line;text-align:left;padding:20px 23px;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.68);box-shadow:0 8px 17px rgba(9,20,35,.18);transition:transform .16s ease,box-shadow .16s ease}
+#gfs-root #gfs-banner {height:184px !important;min-height:0 !important;overflow:hidden;border-radius:19px}
+#gfs-root #gfs-banner .image-container {height:100% !important;max-height:100% !important}
+#gfs-root #gfs-banner img {width:100% !important;height:100% !important;max-height:none !important;object-fit:cover;object-position:center 47%;border-radius:19px;display:block}
+#gfs-root #gfs-category-grid,#gfs-root #gfs-category-grid-bottom {gap:12px;align-items:stretch}
+#gfs-root #gfs-category-grid-bottom {margin-top:1px}
+#gfs-root #gfs-category-grid > *,#gfs-root #gfs-category-grid-bottom > * {min-width:0}
+#gfs-root #gfs-category-video,#gfs-root #gfs-category-image,#gfs-root #gfs-category-audio,#gfs-root #gfs-category-3d {min-height:184px;border:0;border-radius:15px;font-size:20px;font-weight:850;letter-spacing:-.032em;line-height:1.45;white-space:pre-line;text-align:left;padding:21px 23px;color:#fff;text-shadow:0 2px 7px rgba(0,0,0,.65);box-shadow:0 5px 14px rgba(9,20,35,.13);background-position:right 67%;background-size:cover;background-repeat:no-repeat;overflow:hidden;transition:transform .16s ease,box-shadow .16s ease}
 #gfs-root #gfs-category-video {background:radial-gradient(circle at 90% 17%,rgba(133,194,232,.29),transparent 38%),linear-gradient(145deg,#315982,#162e51);color:#fff;border-color:#6483a2}
 #gfs-root #gfs-category-image {background:radial-gradient(circle at 91% 22%,rgba(247,192,221,.27),transparent 38%),linear-gradient(145deg,#875a79,#553a62);color:#fff;border-color:#aa7896}
 #gfs-root #gfs-category-audio {background:radial-gradient(circle at 90% 20%,rgba(147,235,209,.25),transparent 38%),linear-gradient(145deg,#277e7a,#1b515c);color:#fff;border-color:#5b9f97}
 #gfs-root #gfs-category-3d {background:radial-gradient(circle at 90% 20%,rgba(242,194,127,.32),transparent 38%),linear-gradient(145deg,#96714f,#61422f);color:#fff;border-color:#b28b6d}
-#gfs-root #gfs-category-video:hover,#gfs-root #gfs-category-image:hover,#gfs-root #gfs-category-audio:hover,#gfs-root #gfs-category-3d:hover {transform:translateY(-2px);box-shadow:0 12px 23px rgba(12,22,42,.25)}
+@media (hover:hover) {#gfs-root #gfs-category-video:hover,#gfs-root #gfs-category-image:hover,#gfs-root #gfs-category-audio:hover,#gfs-root #gfs-category-3d:hover {transform:translateY(-2px);box-shadow:0 9px 20px rgba(12,22,42,.22)}}
 @media (prefers-reduced-motion:reduce) {#gfs-root #gfs-category-video,#gfs-root #gfs-category-image,#gfs-root #gfs-category-audio,#gfs-root #gfs-category-3d {transition:none}}
-#gfs-root #gfs-launch {min-height:49px;border-radius:13px;font-weight:800}
+#gfs-root #gfs-launch {min-height:48px;border:0;border-radius:13px;font-weight:800;background:linear-gradient(110deg,#245b68,#236a69);color:#fff6e8;box-shadow:0 4px 12px rgba(17,53,64,.13)}
+#gfs-root #gfs-task-guide {font-size:14px;line-height:1.5;margin:3px 0}
 #gfs-root #gfs-preflight-panel {border:0;border-radius:14px;background:rgba(64,112,119,.10);margin-top:5px}
 #gfs-root #gfs-preflight-check,#gfs-root #gfs-preflight-hardware {border:0;border-radius:11px;min-height:43px;font-weight:750}
 #gfs-root #gfs-preflight-result textarea {font-size:13px;line-height:1.6}
@@ -91,32 +100,35 @@ STUDIO_STYLE = """
 #gfs-root #gfs-example {border-radius:12px;font-weight:750;border:1px solid rgba(210,154,99,.42);background:linear-gradient(135deg,rgba(239,182,111,.19),rgba(97,151,151,.14))}
 #gfs-root #gfs-compose {min-height:44px;background:linear-gradient(130deg,#2b746f,#205f68);color:#fff;border-radius:12px;font-weight:800}
 #gfs-root #gfs-prompt-box textarea {line-height:1.55;font-size:14px}
-#gfs-root .gfs-workshop {padding:14px 17px;border-radius:16px;border:1px solid rgba(122,151,153,.25);background:linear-gradient(125deg,rgba(66,125,129,.15),rgba(235,163,103,.12))}
+#gfs-root .gfs-workshop {padding:14px 17px;border-radius:16px;border:0;background:linear-gradient(125deg,rgba(66,125,129,.15),rgba(235,163,103,.12))}
 #gfs-root .gfs-workshop h3 {font-size:18px;margin:0 0 4px}
 #gfs-root .gfs-workshop p {margin:0;opacity:.85}
 
 #gfs-root #gfs-queue-refresh,#gfs-root #gfs-model-inspect {border-radius:12px;font-weight:750}
-#gfs-root .gfs-status {padding:14px 16px;border-radius:14px;border:1px solid rgba(105,152,148,.28);background:linear-gradient(120deg,rgba(53,112,123,.15),rgba(236,171,106,.09))}
+#gfs-root .gfs-status {padding:14px 16px;border-radius:14px;border:0;background:linear-gradient(120deg,rgba(53,112,123,.15),rgba(236,171,106,.09))}
 #gfs-root .gfs-status strong {color:var(--gfs-gold)}
 #gfs-root .gfs-muted {font-size:12px;opacity:.75}
 @media (max-width:740px) {
-  #gfs-root #gfs-banner img {max-height:122px;border-radius:15px}
-  #gfs-root #gfs-brand-row {gap:7px}
-  #gfs-root #gfs-brand-icon {max-width:50px;flex:0 0 48px}
-  #gfs-root #gfs-brand-icon img {width:48px;height:48px}
+  #gfs-root #gfs-banner {height:112px !important;border-radius:14px}
+  #gfs-root #gfs-banner img {border-radius:14px}
+  #gfs-root #gfs-brand-row {gap:7px;margin-top:5px}
+  #gfs-root #gfs-brand-icon {width:47px !important;height:47px !important;max-width:47px;flex:0 0 47px}
+  #gfs-root #gfs-brand-row h1 {font-size:21px}
   #gfs-root .gfs-kicker {font-size:10px;letter-spacing:.06em}
   #gfs-root .gfs-intro {font-size:13px;line-height:1.4}
   #gfs-root .gfs-chip {font-size:10px;padding:4px 7px;margin:3px 4px 3px 0}
-  #gfs-root .gfs-panel {padding:11px 12px;border-radius:13px}
+  #gfs-root .gfs-panel {padding:10px 12px;border-radius:12px}
   #gfs-root .gfs-panel h3 {font-size:16px}
-  #gfs-root .gfs-steps {font-size:12px}
-  #gfs-root #gfs-category-grid {gap:7px}
-  #gfs-root #gfs-category-video,#gfs-root #gfs-category-image,#gfs-root #gfs-category-audio,#gfs-root #gfs-category-3d {min-height:106px;font-size:14px;padding:13px;border-radius:12px}
+  #gfs-root .gfs-steps {font-size:12px;line-height:1.4}
+  #gfs-root #gfs-category-grid,#gfs-root #gfs-category-grid-bottom {gap:7px}
+  #gfs-root #gfs-category-video,#gfs-root #gfs-category-image,#gfs-root #gfs-category-audio,#gfs-root #gfs-category-3d {min-height:112px;font-size:14px;padding:13px;border-radius:12px}
+  #gfs-root #gfs-task-guide {font-size:12px}
 }
 @media (max-width:740px) and (max-height:740px) {
-  #gfs-root #gfs-banner img {max-height:92px}
-  #gfs-root #gfs-brand-icon img {width:40px;height:40px}
-  #gfs-root #gfs-category-video,#gfs-root #gfs-category-image,#gfs-root #gfs-category-audio,#gfs-root #gfs-category-3d {min-height:89px}
+  #gfs-root #gfs-banner {height:89px !important}
+  #gfs-root #gfs-brand-icon {width:40px !important;height:40px !important;max-width:40px;flex:0 0 40px}
+  #gfs-root #gfs-brand-row h1 {font-size:18px}
+  #gfs-root #gfs-category-video,#gfs-root #gfs-category-image,#gfs-root #gfs-category-audio,#gfs-root #gfs-category-3d {min-height:96px}
 }
 </style>
 """
@@ -126,8 +138,8 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.14.0-dev"
-        self.description = "전용 원화·시작 점검·저사양 첫 제작 순서가 있는 무료 로컬 제작실 · GPT 선택"
+        self.version = "0.16.0-dev"
+        self.description = "전용 원화·반응형 시작 화면·저사양 첫 제작 순서가 있는 무료 로컬 제작실 · GPT 선택"
 
     def setup_ui(self):
         self.request_component("state")
@@ -177,7 +189,7 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
             gr.HTML(STUDIO_STYLE + category_art_css())
             if HERO_FILE.is_file():
                 gr.Image(
-                    value=str(HERO_FILE), height=225, interactive=False,
+                    value=str(HERO_FILE), height=184, interactive=False,
                     show_label=False, show_download_button=False,
                     show_fullscreen_button=False, container=False,
                     elem_id="gfs-banner",
@@ -185,7 +197,7 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
             with gr.Row(elem_id="gfs-brand-row"):
                 if ICON_FILE.is_file():
                     gr.Image(
-                        value=str(ICON_FILE), height=78, width=78,
+                        value=str(ICON_FILE), height=68, width=68,
                         interactive=False, show_label=False,
                         show_download_button=False, show_fullscreen_button=False,
                         container=False, elem_id="gfs-brand-icon",
@@ -212,10 +224,13 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                     with gr.Row(equal_height=True, elem_id="gfs-category-grid"):
                         video_button = gr.Button("영상 제작\n움직이는 장면", elem_id="gfs-category-video")
                         image_button = gr.Button("이미지 제작\n사진과 그림", elem_id="gfs-category-image")
-                    with gr.Row(equal_height=True):
+                    with gr.Row(equal_height=True, elem_id="gfs-category-grid-bottom"):
                         audio_button = gr.Button("음성 · 음악\n소리 만들기", elem_id="gfs-category-audio")
                         model3d_button = gr.Button("3D · 월드\n입체와 장면", elem_id="gfs-category-3d")
-                    task_guide = gr.Markdown(value=render_guide("처음 시작"))
+                    task_guide = gr.Markdown(
+                        value="**카드를 하나 선택해 보세요.** 해당 분야의 간단한 사용 순서가 이곳에 표시됩니다.",
+                        elem_id="gfs-task-guide",
+                    )
                     open_generator = gr.Button(
                         "원본 WanGP 무료 제작 화면 열기", variant="primary", elem_id="gfs-launch"
                     )

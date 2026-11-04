@@ -100,7 +100,7 @@ class StudioDashboardTests(unittest.TestCase):
             self.assertIn(token, SOURCE)
 
     def test_plugin_metadata_matches(self):
-        self.assertEqual(META["version"], "0.14.0-dev")
+        self.assertEqual(META["version"], "0.16.0-dev")
         self.assertIn("GomFoxStudio", META["app_tab"])
 
     def test_read_only_preflight_is_optional(self):
@@ -116,6 +116,30 @@ class StudioDashboardTests(unittest.TestCase):
         html = preview.read_text(encoding="utf-8")
         for category in ("video", "image", "audio", "3d"):
             self.assertIn(f"category-{category}.webp", html)
+        self.assertNotIn("<svg", html.casefold())
+        self.assertNotIn("https://", html)
+
+    def test_v016_design_rows_and_nonintrusive_compact_guide(self):
+        for token in (
+            'elem_id="gfs-category-grid-bottom"',
+            '#gfs-root #gfs-category-grid,#gfs-root #gfs-category-grid-bottom {gap:12px',
+            'background-position:right 67% !important',
+            '#gfs-root #gfs-banner {height:184px !important',
+            '#gfs-root #gfs-banner {height:112px !important',
+            '카드를 하나 선택해 보세요',
+            'gfs-task-guide',
+        ):
+            self.assertIn(token, SOURCE)
+        self.assertIn('video_button.click(fn=lambda: render_guide("짧은 영상")', SOURCE)
+
+    def test_v016_visual_preview_matches_local_art_and_mobile_layout(self):
+        preview = ROOT / "docs" / "V016_VISUAL_PREVIEW.html"
+        html = preview.read_text(encoding="utf-8")
+        for category in ("video", "image", "audio", "3d"):
+            self.assertIn(f"category-{category}.webp", html)
+        self.assertIn("@media(max-width:740px)", html)
+        self.assertIn("height:112px", html)
+        self.assertIn("grid-template-columns:repeat(2,minmax(0,1fr))", html)
         self.assertNotIn("<svg", html.casefold())
         self.assertNotIn("https://", html)
 
