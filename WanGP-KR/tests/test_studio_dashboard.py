@@ -34,6 +34,7 @@ class StudioDashboardTests(unittest.TestCase):
             self.assertLess(art.stat().st_size, 160_000)
         self.assertIn("data:image/webp;base64,", SOURCE)
         self.assertIn("category_art_css()", SOURCE)
+        self.assertIn('payload[8:12] != b"WEBP"', SOURCE)
         for forbidden in ("<svg", "data:image/svg", "cdn.jsdelivr"):
             self.assertNotIn(forbidden, SOURCE.casefold())
 
@@ -99,8 +100,15 @@ class StudioDashboardTests(unittest.TestCase):
             self.assertIn(token, SOURCE)
 
     def test_plugin_metadata_matches(self):
-        self.assertEqual(META["version"], "0.12.0-dev")
+        self.assertEqual(META["version"], "0.13.0-dev")
         self.assertIn("GomFoxStudio", META["app_tab"])
+
+    def test_read_only_preflight_is_optional(self):
+        for token in (
+            "gr.Accordion(", "open=False", "format_studio_readiness(api_session)",
+            "preflight_check.click(", "preflight_hardware.click(",
+        ):
+            self.assertIn(token, SOURCE)
 
     def test_offline_design_preview_keeps_four_local_assets(self):
         preview = ROOT / "docs" / "V012_VISUAL_PREVIEW.html"

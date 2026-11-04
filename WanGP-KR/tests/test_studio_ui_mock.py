@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+import tempfile
 import types
 import unittest
 from pathlib import Path
@@ -35,7 +36,7 @@ class UiEventMockTests(unittest.TestCase):
 
         gr = types.ModuleType("gradio")
         for name in (
-            "Column", "Tabs", "Tab", "Row", "Image", "HTML", "Markdown",
+            "Column", "Tabs", "Tab", "Row", "Accordion", "Image", "HTML", "Markdown",
             "Dropdown", "Button", "Textbox", "Checkbox", "Number",
         ):
             setattr(gr, name, Widget)
@@ -73,6 +74,7 @@ class UiEventMockTests(unittest.TestCase):
                 "TOPICS": ("처음 시작", "저사양 설정"),
                 "render_guide": lambda topic: str(topic),
             },
+            "studio_check": {"format_studio_readiness": lambda session: "check"},
         }.items():
             mod = types.ModuleType("gomfox_test." + name)
             mod.__dict__.update(contents)
@@ -94,12 +96,19 @@ class UiEventMockTests(unittest.TestCase):
             self.assertEqual(art_css.count("data:image/webp;base64,"), 4)
             self.assertLess(len(art_css), 400_000)
             self.assertNotIn("<svg", art_css.casefold())
+            with tempfile.TemporaryDirectory() as scratch:
+                bad = Path(scratch) / "category-video.webp"
+                bad.write_bytes(b"not an image")
+                original = plugin_module.CATEGORY_ART["video"]
+                plugin_module.CATEGORY_ART["video"] = bad
+                self.assertEqual(plugin_module.category_art_css().count("data:image/webp;base64,"), 3)
+                plugin_module.CATEGORY_ART["video"] = original
 
             app = plugin_module.GomFoxStudioPlugin()
             app.setup_ui()
             app.create_ui()
 
-        self.assertGreaterEqual(len(events), 18)
+        self.assertGreaterEqual(len(events), 20)
         self.assertEqual(app.requests, ["state", "main_tabs", "GomFoxStudio"])
         self.assertEqual(
             sum("navigator.clipboard.writeText" in e[1].get("js", "") for e in events),

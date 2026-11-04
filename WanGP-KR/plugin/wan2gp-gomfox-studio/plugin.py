@@ -17,6 +17,7 @@ from .catalog import format_model_catalog, format_model_details, format_queue_st
 from .hardware import read_hardware_report
 from .help_content import TOPICS, render_guide
 from .prompt_assistant import TASK_KINDS, STYLES, PROFILES, build_prompt, fill_example
+from .studio_check import format_studio_readiness
 
 
 APP_TITLE = "곰같은여우의 AI 스튜디오"
@@ -35,9 +36,16 @@ def category_art_css() -> str:
     """Embed only our four small, local WebP cards; no network or file URL needed."""
     rules = []
     for category, artwork in CATEGORY_ART.items():
-        if not artwork.is_file():
-            continue  # Existing gradient remains as an offline fallback.
-        content = base64.b64encode(artwork.read_bytes()).decode("ascii")
+        try:
+            # Guard UI rendering from a missing, damaged or unexpectedly large asset.
+            if not artwork.is_file() or not 0 < artwork.stat().st_size < 512_000:
+                continue
+            payload = artwork.read_bytes()
+            if payload[:4] != b"RIFF" or payload[8:12] != b"WEBP":
+                continue
+        except OSError:
+            continue  # Existing gradients remain as an offline fallback.
+        content = base64.b64encode(payload).decode("ascii")
         rules.append(
             f"#gfs-root #gfs-category-{category} {{"
             f"background-image:linear-gradient(90deg,rgba(7,17,31,.24),transparent 80%),"
@@ -76,6 +84,9 @@ STUDIO_STYLE = """
 #gfs-root #gfs-category-video:hover,#gfs-root #gfs-category-image:hover,#gfs-root #gfs-category-audio:hover,#gfs-root #gfs-category-3d:hover {transform:translateY(-2px);box-shadow:0 12px 23px rgba(12,22,42,.25)}
 @media (prefers-reduced-motion:reduce) {#gfs-root #gfs-category-video,#gfs-root #gfs-category-image,#gfs-root #gfs-category-audio,#gfs-root #gfs-category-3d {transition:none}}
 #gfs-root #gfs-launch {min-height:49px;border-radius:13px;font-weight:800}
+#gfs-root #gfs-preflight-panel {border:0;border-radius:14px;background:rgba(64,112,119,.10);margin-top:5px}
+#gfs-root #gfs-preflight-check,#gfs-root #gfs-preflight-hardware {border:0;border-radius:11px;min-height:43px;font-weight:750}
+#gfs-root #gfs-preflight-result textarea {font-size:13px;line-height:1.6}
 #gfs-root #gfs-copy {border-radius:12px;font-weight:750}
 #gfs-root #gfs-example {border-radius:12px;font-weight:750;border:1px solid rgba(210,154,99,.42);background:linear-gradient(135deg,rgba(239,182,111,.19),rgba(97,151,151,.14))}
 #gfs-root #gfs-compose {min-height:44px;background:linear-gradient(130deg,#2b746f,#205f68);color:#fff;border-radius:12px;font-weight:800}
@@ -115,8 +126,8 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.12.0-dev"
-        self.description = "네 분야 전용 원화와 쉬운 첫 실행 흐름을 갖춘 무료 로컬 제작실 · GPT 선택"
+        self.version = "0.13.0-dev"
+        self.description = "전용 원화·읽기 전용 시작 점검이 있는 무료 로컬 제작실 · GPT 선택"
 
     def setup_ui(self):
         self.request_component("state")
@@ -213,6 +224,23 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                         "모든 모델을 저사양 PC에서 실행할 수 있는 것은 아닙니다. "
                         "원본 **작업 큐·갤러리·Media Flow·Showrunner·LoRA**는 그대로 유지됩니다."
                     )
+                    with gr.Accordion(
+                        "시작 전 확인 · 처음이라면 눌러 보세요 (선택)",
+                        open=False, elem_id="gfs-preflight-panel",
+                    ):
+                        gr.Markdown("파일과 원본 연결·PC 사양을 **읽기만** 합니다. 모델 다운로드·생성·GPT 연결은 시작하지 않습니다.")
+                        with gr.Row():
+                            preflight_check = gr.Button(
+                                "스튜디오 준비 상태 확인", elem_id="gfs-preflight-check"
+                            )
+                            preflight_hardware = gr.Button(
+                                "내 PC RAM·GPU 확인", elem_id="gfs-preflight-hardware"
+                            )
+                        preflight_result = gr.Textbox(
+                            label="확인 결과", lines=8, interactive=False,
+                            value="위 버튼 중 하나를 누르면 안전한 읽기 전용 결과가 나타납니다.",
+                            elem_id="gfs-preflight-result",
+                        )
 
                 with gr.Tab("처음 실행 · 따라 하기"):
                     gr.HTML(
@@ -411,6 +439,12 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
         model3d_button.click(fn=lambda: render_guide("3D 만들기"), inputs=[], outputs=[task_guide])
         open_generator.click(
             fn=self.goto_media_tab, inputs=[self.state], outputs=[self.main_tabs]
+        )
+        preflight_check.click(
+            fn=lambda: format_studio_readiness(api_session), inputs=[], outputs=[preflight_result]
+        )
+        preflight_hardware.click(
+            fn=read_hardware_report, inputs=[], outputs=[preflight_result]
         )
         prompt_example.click(
             fn=fill_example,
