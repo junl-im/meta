@@ -13,6 +13,7 @@ import {Sha256Stream, sha256BlobInChunks, HASH_CHUNK_BYTES} from "../src/sha256_
 import {hashFileInWorker} from "../src/sha256_worker_client.mjs";
 import {createSyntheticAddModel,SYNTHETIC_FEEDS} from "../src/synthetic_onnx.mjs";
 import {runSyntheticWasmInference,ORT_WEB_VERSION,ORT_CDN_DIST} from "../src/onnx_probe.mjs";
+import {benchmarkSyntheticWasmInference,summarizeInferenceTimings,browserDeviceHints,BENCHMARK_DEFAULTS} from "../src/synthetic_benchmark.mjs";
 
 
 const base = new URL("../", import.meta.url);
@@ -445,4 +446,93 @@ test("browser ONNX runtime is explicit opt-in and separates computation from fac
   assert.match(runtime,/ort\.wasm\.min\.js/);
   assert.match(runtime,/executionProviders:\["wasm"\]/);
   assert.doesNotMatch(app+runtime, /<svg\b|data:image\/svg/i);
+});
+
+test("numeric WASM benchmark sample statistics use deterministic p50/p95",()=>{
+  assert.deepEqual(BENCHMARK_DEFAULTS,{warmups:4,runs:24});
+  assert.deepEqual(summarizeInferenceTimings([10,1,4,3,2]),{
+    runs:5,p50Ms:3,p95Ms:10,minMs:1,maxMs:10,meanMs:4,totalInferenceMs:20
+  });
+  assert.throws(()=>summarizeInferenceTimings([]),/올바르지/);
+  assert.throws(()=>summarizeInferenceTimings([1,Infinity]),/올바르지/);
+  assert.throws(()=>summarizeInferenceTimings([-1]),/올바르지/);
+});
+
+test("WASM benchmark performs real session calls, skips warmups and always releases",async()=>{
+  let clock=0,runs=0,releases=0;
+  const progress=[];
+  const Tensor=class {constructor(type,data,dims){this.type=type;this.data=data;this.dims=dims;}};
+  const ort={Tensor,InferenceSession:{create:async(model,opts)=>{
+    assert.ok(model.byteLength>50);
+    assert.deepEqual(opts.executionProviders,["wasm"]);
+    clock+=4;
+    return{
+      run:async(feeds)=>{
+        assert.equal(feeds.a.data[0],2);
+        assert.equal(feeds.b.data[0],3);
+        clock+=++runs;
+        return{sum:{data:Float32Array.of(5)}};
+      },
+      release:async()=>{releases++;}
+    };
+  }}};
+  const result=await benchmarkSyntheticWasmInference(ort,{
+    runs:4,warmups:1,now:()=>clock,yieldControl:async()=>{},
+    onProgress:p=>progress.push(p)
+  });
+  assert.equal(result.sessionInitMs,4);
+  assert.equal(result.runs,4);
+  assert.equal(result.p50Ms,3);
+  assert.equal(result.p95Ms,5);
+  assert.equal(result.meanMs,3.5);
+  assert.equal(result.identitySwapCompleted,false);
+  assert.equal(result.mediaUploaded,false);
+  assert.equal(runs,5);
+  assert.equal(releases,1);
+  assert.deepEqual(progress.at(-1),{completed:5,total:5,measured:4});
+  await assert.rejects(benchmarkSyntheticWasmInference(ort,{runs:101}),RangeError);
+});
+
+test("WASM benchmark obeys reset cancellation, rejects wrong arithmetic and releases",async()=>{
+  const aborter=new AbortController();
+  let releases=0,calls=0;
+  const Tensor=class {constructor(type,data,dims){this.data=data;this.dims=dims;}};
+  const fakeOrt={Tensor,InferenceSession:{create:async()=>({
+    run:async()=>{
+      calls++;
+      if(calls===2)aborter.abort();
+      return{sum:{data:Float32Array.of(5)}};
+    },
+    release:async()=>{releases++;}
+  })}};
+  await assert.rejects(benchmarkSyntheticWasmInference(fakeOrt,{
+    runs:8,warmups:0,signal:aborter.signal,yieldControl:async()=>{}
+  }),{name:"AbortError"});
+  assert.equal(calls,2);
+  assert.equal(releases,1);
+  const broken={...fakeOrt,InferenceSession:{create:async()=>({
+    run:async()=>({sum:{data:Float32Array.of(6)}}),
+    release:async()=>{releases++;}
+  })}};
+  await assert.rejects(benchmarkSyntheticWasmInference(broken,{runs:1,warmups:0}),/결과가 5와 달라/);
+  assert.equal(releases,2);
+});
+
+test("browser memory is only a coarse optional hint; benchmark never claims swap FPS",()=>{
+  assert.deepEqual(browserDeviceHints({deviceMemory:8,hardwareConcurrency:4},true),{
+    approximateDeviceMemoryGiB:8,reportedLogicalProcessors:4,crossOriginIsolated:true
+  });
+  assert.deepEqual(browserDeviceHints({deviceMemory:Infinity,hardwareConcurrency:0},undefined),{
+    approximateDeviceMemoryGiB:null,reportedLogicalProcessors:null,crossOriginIsolated:false
+  });
+  const html=read("index.html");
+  const app=read("src/onnx_lab.mjs");
+  const core=read("src/synthetic_benchmark.mjs");
+  assert.match(html,/id="onnx-benchmark-button"[^>]*disabled/);
+  assert.match(html,/id="onnx-benchmark-export"[^>]*disabled/);
+  assert.match(html,/실제 얼굴 교체 FPS/);
+  assert.match(app,/lastReport/);
+  assert.match(app,/consent\.checked/);
+  assert.match(core,/executionProviders:\["wasm"\]/);
+  assert.doesNotMatch(html+app+core,/<svg\b|data:image\/svg/i);
 });
