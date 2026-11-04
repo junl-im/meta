@@ -12,7 +12,7 @@ from pathlib import Path
 
 SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "install_studio_full_windows.cmd"
 PLUGIN_DIR = SCRIPT_PATH.parents[1] / "plugin" / "wan2gp-gomfox-studio"
-PINNED_COMMIT = "86e3390dface72de8fdb9939161913afe97569c1"
+PINNED_COMMIT = "11f2c8d94e0408329df5eedd194d4418c0b2d97f"
 REQUIRED_FILES = (
     "__init__.py", "plugin.py", "plugin_info.json", "catalog.py",
     "help_content.py", "hardware.py", "studio_check.py", "prompt_assistant.py",
@@ -40,6 +40,21 @@ class TestFullInstallerSafety(unittest.TestCase):
         self.assertIn('if exist "%PLUGIN_DEST%" goto plugin_exists', self.script)
         self.assertLess(self.script.index('if exist "%PLUGIN_DEST%" goto plugin_exists'), self.script.index("robocopy"))
         self.assertIn("goto original_not_installed", self.lower)
+
+    def test_confirmed_existing_wangp_can_skip_manager_only_by_choice(self):
+        self.assertIn('if not exist "%WANGP_DIR%\\wgp.py" goto manager_download', self.script)
+        self.assertIn('if not exist "%WANGP_DIR%\\plugins\\" goto manager_download', self.script)
+        self.assertIn('choice /C YN /M "원본 설치 관리자를 건너뛰고 한글 스튜디오 연결로 이동할까요?"', self.script)
+        self.assertIn('if errorlevel 2 goto manager_download', self.script)
+        self.assertIn('goto connect_plugin', self.script)
+        self.assertLess(self.script.index(':manager_download'), self.script.index(':connect_plugin'))
+        self.assertIn('if exist "%PLUGIN_DEST%" goto plugin_exists', self.script)
+
+    def test_failed_install_explains_safe_retry_without_cache_reuse(self):
+        self.assertIn("검증하지 않은 이전 다운로드 파일을 자동 재사용하지 않습니다", self.script)
+        self.assertIn("검증 과정을 건너뛰지 말고", self.script)
+        self.assertIn("이 도우미는 자동 업데이트 프로그램이 아닙니다", self.script)
+        self.assertIn("임시 폴더를 자동 삭제하지 않습니다", self.script)
 
     def test_staged_copy_keeps_partial_plugin_outside_plugins(self):
         self.assertIn('set "PLUGIN_STAGE=%WANGP_DIR%\\_gomfox_staging_', self.script)

@@ -8,8 +8,8 @@ echo ===================================================
 echo       곰같은여우의 AI 스튜디오 - 전체 설치
 echo ===================================================
 echo.
-echo 한글 작업실 v0.13 개발판 - 4개 전용 일러스트와 시작 전 확인 포함
-echo 이 도구는 공식 WanGP Manager를 다운로드하고,
+echo 한글 작업실 v0.14 개발판 - 안전 재시도와 저사양 첫 제작 안내 포함
+echo 이 도구는 필요할 때 공식 WanGP Manager를 다운로드하고,
 echo 원본 WanGP 설치가 끝나면 한국어 스튜디오를 추가합니다.
 echo 원본 출처: https://github.com/deepbeepmeep/WanGP
 echo.
@@ -36,7 +36,7 @@ powershell.exe -NoProfile -NonInteractive -Command "$ErrorActionPreference='Sile
 echo 모델 파일마다 필요한 저장 공간이 다르니 공식 설치 관리자에서 확인해 주세요.
 echo.
 
-echo [1/4] 공식 설치 관리자 다운로드를 준비합니다.
+echo [1/4] 검증된 설치 파일을 준비합니다.
 set "SETUP_DIR=%TEMP%\GomFoxAIStudioSetup_%RANDOM%_%RANDOM%"
 mkdir "%SETUP_DIR%" >nul 2>nul
 if not exist "%SETUP_DIR%\" goto temp_error
@@ -46,22 +46,22 @@ echo 설치 스크립트 옆의 미검증 로컬 파일은 자동으로 재사�
 
 :download_plugin
 echo 고정된 GitHub 코드 버전의 필수 14개 파일을 받습니다.
-echo GitHub 원본 버전: 86e3390dface72de8fdb9939161913afe97569c1
+echo GitHub 원본 버전: 11f2c8d94e0408329df5eedd194d4418c0b2d97f
 set "PLUGIN_SOURCE=%SETUP_DIR%\wan2gp-gomfox-studio"
 mkdir "%PLUGIN_SOURCE%" >nul 2>nul
 if not exist "%PLUGIN_SOURCE%\" goto plugin_download_error
-set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/86e3390dface72de8fdb9939161913afe97569c1/WanGP-KR/plugin/wan2gp-gomfox-studio"
+set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/11f2c8d94e0408329df5eedd194d4418c0b2d97f/WanGP-KR/plugin/wan2gp-gomfox-studio"
 call :fetch_plugin_file "__init__.py" "754b7e9e5046f2450c5fd4ea0a53d40b6ceb8671acbb6e7ddd8932a52de80066"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin.py" "fd5a14b9494fa3b40b05530ff44034b20f80aa78ac1fe846f75a042776d90b43"
+call :fetch_plugin_file "plugin.py" "b5ef98ec2f67edc51c40fd0a93329b9abdfc968697438e78fcfcf520c4dd7c84"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin_info.json" "a2eb205512e07e19bcd7853f5df7cf81687a2cf719af0d172e4e0b50875a8872"
+call :fetch_plugin_file "plugin_info.json" "9fbb42e19b33c0fa13c6ac7a58b13466f0e1b96b9f3a6888da57323d1698fca9"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "catalog.py" "995f6d12271bff59da0a64318133e788ffbc08560bfeb0bede2aa8fc14e20b9d"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "help_content.py" "d7cb8e51d6049d128b9e62c1ff775c9228af0d8d035de4fcd4ccce5fb7ee2fcb"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "hardware.py" "f6a4eb010ae10b5a6529d54a10d78c9da314caad656b65fc0411f4bb9f0824bb"
+call :fetch_plugin_file "hardware.py" "65048b0d8a7e19a0d702337b991ea54e86ef4114904a227bc01c34cf68bb24f4"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "studio_check.py" "60f256bd29061b27580d0e7bbd48a75ab3696072343e70484b0b9659ac080360"
 if errorlevel 1 goto plugin_download_error
@@ -85,6 +85,20 @@ rem Signature PNG is one of the pinned-and-verified plugin files.
 echo 한글 플러그인 준비가 끝났습니다.
 echo.
 
+rem A confirmed existing installation may skip the official Manager UI by choice.
+rem Neither the original installation nor any existing plugin is upgraded here.
+set "WANGP_DIR=%DEFAULT_WANGP%"
+if not exist "%WANGP_DIR%\wgp.py" goto manager_download
+if not exist "%WANGP_DIR%\plugins\" goto manager_download
+echo [기존 설치 확인] 기본 폴더에 원본 WanGP가 있습니다.
+echo "%WANGP_DIR%"
+echo 이미 설치된 원본을 유지하는 경우 공식 Manager 설치 단계를 생략할 수 있습니다.
+choice /C YN /M "원본 설치 관리자를 건너뛰고 한글 스튜디오 연결로 이동할까요?"
+if errorlevel 2 goto manager_download
+echo [선택] 기존 WanGP를 그대로 두고 한글 스튜디오 연결을 확인합니다.
+goto connect_plugin
+
+:manager_download
 set "GOMFOX_MANAGER_EXE=%SETUP_DIR%\WanGPManager.exe"
 set "GOMFOX_CHECK_FILE=%SETUP_DIR%\WanGPManager.exe.sha256"
 set "OFFICIAL_RELEASE=https://github.com/deepbeepmeep/WanGP/releases/latest/download"
@@ -119,6 +133,7 @@ if errorlevel 2 goto cancelled
 
 start "" /wait "%GOMFOX_MANAGER_EXE%"
 
+:connect_plugin
 echo.
 echo [4/4] 원본 설치를 찾고 한글 스튜디오를 연결합니다.
 set "WANGP_DIR=%DEFAULT_WANGP%"
@@ -228,6 +243,7 @@ echo.
 echo GPT나 Claude 로그인은 기본 생성에 필요하지 않습니다.
 echo GPU 모델에 따라 일부 모델은 실행되지 않을 수 있습니다.
 echo 첫 화면에서 영상/이미지/음악/3D 원화 카드를 누르면 분야별 안내가 나옵니다.
+echo RAM 16GB 환경이라면 첫 화면에서 사양을 확인하고 작은 이미지 1장부터 시험하세요.
 echo.
 pause
 exit /b 0
@@ -235,6 +251,8 @@ exit /b 0
 :plugin_download_error
 echo [안전 중단] 한글 플러그인을 다운로드하거나 SHA-256 검증하지 못했습니다.
 echo 확인되지 않은 코드는 설치하지 않았습니다.
+echo 인터넷 연결을 확인하고 이 설치 도우미를 다시 실행하세요.
+echo 다음 실행에서도 검증하지 않은 이전 다운로드 파일을 자동 재사용하지 않습니다.
 goto finish_error
 
 :need_64bit
@@ -253,23 +271,27 @@ goto finish_error
 :download_error
 echo [중단] 공식 WanGP Manager 또는 체크섬 다운로드에 실패했습니다.
 echo 네트워크와 https://github.com/deepbeepmeep/WanGP/releases 를 확인하세요.
+echo 공식 배포 파일 또는 체크섬이 없을 때는 우회 설치하지 않고 나중에 다시 실행하세요.
 goto finish_error
 
 :checksum_error
 echo [안전 중단] 다운로드한 파일의 SHA-256 검증에 실패했습니다.
 echo 검증하지 못한 설치 관리자는 실행하지 않았습니다.
+echo 검증 과정을 건너뛰지 말고, 공식 배포 상태 확인 후 처음부터 다시 시도하세요.
 goto finish_error
 
 :original_not_installed
 echo [중단] 원본 WanGP가 설치된 폴더를 확인하지 못했습니다.
 echo Manager에서 설치를 완료한 후 다시 실행해 주세요.
 echo 임의의 위치에 플러그인을 설치하지 않았습니다.
+echo 기본 폴더에 정상 설치되어 있다면 다음 실행에서 Manager 단계를 생략할 수 있습니다.
 goto finish_error
 
 :plugin_exists
 echo [안전 중단] 해당 위치에 한글 플러그인이 이미 있습니다.
 echo "%PLUGIN_DEST%"
 echo 기존 파일을 덮어쓰거나 삭제하지 않았습니다.
+echo 기존 설치를 유지하세요. 이 도우미는 자동 업데이트 프로그램이 아닙니다.
 goto finish_error
 
 :plugin_stage_collision
@@ -280,6 +302,7 @@ goto finish_error
 echo [중단] 한글 스튜디오의 임시 복사·확인·폴더 이동 단계에서 문제가 발생했습니다.
 echo WanGP의 기존 플러그인 폴더는 덮어쓰지 않았습니다.
 echo 임시 작업 폴더가 남았다면 사용자 확인 후 정리하세요: "%PLUGIN_STAGE%"
+echo 임시 폴더를 자동 삭제하지 않습니다. 상태 확인 후 다시 실행하세요.
 goto finish_error
 
 :cancelled
