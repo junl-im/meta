@@ -35,3 +35,12 @@
 .runtime-lab{flex-shrink:0;margin-top:12px;padding:14px;border:1px solid #39505a;border-radius:12px;background:#101e28}
 .runtime-lab .section-heading h2{font-size:16px}
 @media(max-width:650px){.runtime-lab{padding:10px;margin-top:8px}}
+
+/* v0.7.9 numeric WASM benchmark — stays within the internal scroll panel. */
+.onnx-benchmark-actions{display:flex;flex-wrap:wrap;gap:8px;margin:9px 0}
+.onnx-benchmark-actions .button{flex:1 1 160px;min-width:0;font-size:11px;padding:10px 12px}
+.onnx-benchmark-summary{padding:10px 11px;border-radius:9px;background:#14262e;margin-top:9px}
+.onnx-benchmark-summary .lab-description{margin:0 0 8px}
+.onnx-benchmark-summary .device-note{margin:7px 0 0;line-height:1.6}
+#onnx-benchmark-export{margin-top:6px;font-size:11px}
+@media(max-width:650px){.onnx-benchmark-actions{gap:6px}.onnx-benchmark-actions .button{flex-basis:128px;padding:9px 7px;font-size:10px}.onnx-benchmark-summary{padding:9px}}
