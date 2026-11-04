@@ -33,3 +33,19 @@ The in-memory ONNX graph uses ModelProto IR version 8, opset 13, inputs `a` and 
 [ONNX Runtime Web's official documentation](https://onnxruntime.ai/docs/tutorials/web/) differentiates WASM and WebGPU backends. Its [browser support matrix](https://onnxruntime.ai/docs/get-started/with-javascript/web.html) does not imply arbitrary swap model operator compatibility. [Upstream WebKit memory discussion #33516](https://github.com/microsoft/onnxruntime/issues/33516) concerns high memory for a general/JSEP bundle; we selected `ort.wasm.min.js` to avoid requesting that broader bundle, but **have not measured** the memory demand on low-end hardware.
 
 A real commercial identity-swap deployment still requires a complete rights-cleared detection + facial identity encoding + swap generation chain with verified weight license, independent commercial permissions, ONNX operator/backend tests, mobile CPU/GPU memory constraints, film preservation rules (product/logo/text/hands), original-audio correctness and explicit user rights. Neither a passing `2+3` proof nor a successful SHA-256 check satisfies those requirements.
+
+## 2026-11-04 — v0.7.9 synthetic timing measurement
+
+The v0.7.8 numerical proof remains the reference. v0.7.9 adds a separate **opt-in** microbenchmark around exactly the same original, face-free ONNX model. Its `src/synthetic_benchmark.mjs` builds a fresh single-thread WASM session and measures:
+
+- `sessionInitMs`: duration of `InferenceSession.create`, excluding CDN JavaScript/WASM download and any user media.
+- `warmups: 4`: four calls excluded from latency statistics.
+- `runs: 24`: individual `session.run` wall-clock measurements around verified `2+3=5` results.
+- `p50Ms`, `p95Ms`, `meanMs`, `minMs`, `maxMs`, `totalInferenceMs`: sampled timing with nearest-rank percentiles. Timing precision is browser dependent.
+- Optional `navigator.deviceMemory` and `navigator.hardwareConcurrency` values are only approximate/rounded browser hints. See [MDN Device Memory API](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/deviceMemory) for its limited availability and privacy rounding. They do **not** measure process RSS, peak WebAssembly heap or actual device RAM.
+
+Consent withdrawal and Reset invalidate the output and request a cooperative stop at the next measurement boundary. A currently running `session.run` or an already-started optional CDN request is not forcibly aborted. Session release takes place in `finally` even on error/cancellation. UI rendering yields periodically so low-end browsers may process cancel events.
+
+The optional JSON download is local only; it excludes the user video, portrait, user checkpoint, identity, filenames, IP, browser user-agent and third-party rights evidence. No report is submitted to the app backend.
+
+This is intentionally a **synthetic operator timing probe**, not a device-qualification or face-swap FPS benchmark. A tiny float32 Add has no detector/encoder/generator weights, expensive convolution, media decoding, occlusion masks, frame compositing or mux. [ONNX Runtime Web performance guide](https://onnxruntime.ai/docs/tutorials/web/performance-diagnosis.html) recommends provider/thread and model-specific tuning. Real performance claims require a rights-cleared actual pipeline plus physical Windows 16GB/low-GPU, Android and iOS measurements, including memory/energy, full-frame output, long-form playback and original audio.
