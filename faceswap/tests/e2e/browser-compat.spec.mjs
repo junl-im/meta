@@ -1,7 +1,7 @@
 import {test, expect} from "@playwright/test";
 import {createHash} from "node:crypto";
 import {fileURLToPath} from "node:url";
-import {statSync} from "node:fs";
+import {statSync,readFileSync} from "node:fs";
 import {execFileSync} from "node:child_process";
 
 const videoFile = fileURLToPath(new URL("../fixtures/source.webm", import.meta.url));
@@ -222,7 +222,23 @@ test("explicit opt-in runs a real face-free ONNX WASM Add model from local QA as
   expect(externalRequests).toEqual([]);
   expect(errors).toEqual([]);
   console.log(`ONNX_SYNTHETIC ${testInfo.project.name}: true WASM Add inference 2+3=5, no external requests`);
+  await page.locator("#onnx-benchmark-button").click();
+  await expect(page.locator("#onnx-benchmark-status")).toContainText("합성 ONNX 24회 완료",{timeout:90000});
+  await expect(page.locator("#onnx-benchmark-status")).toContainText("실제 얼굴 교체 FPS");
+  await expect(page.locator("#onnx-benchmark-export")).toBeEnabled();
+  const reportDownload=page.waitForEvent("download");
+  await page.locator("#onnx-benchmark-export").click();
+  const report=JSON.parse(readFileSync(await (await reportDownload).path(),"utf8"));
+  expect(report.runs).toBe(24);
+  expect(report.warmups).toBe(4);
+  expect(report.p95Ms).toBeGreaterThanOrEqual(report.p50Ms);
+  expect(report.actualInferenceCompleted).toBe(true);
+  expect(report.identitySwapCompleted).toBe(false);
+  expect(report.mediaUploaded).toBe(false);
+  expect(externalRequests).toEqual([]);
+  console.log(`ONNX_BENCHMARK ${testInfo.project.name}: 24 actual WASM Add calls, no external requests`);
   await page.locator("#reset-button").click();
+  await expect(page.locator("#onnx-benchmark-export")).toBeDisabled();
   await expect(page.locator("#onnx-runtime-consent")).not.toBeChecked();
   await expect(page.locator("#onnx-probe-button")).toBeDisabled();
   await expect(page.locator("#onnx-probe-status")).toContainText("실행 전");
