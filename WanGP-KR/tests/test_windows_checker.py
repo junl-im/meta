@@ -1,4 +1,4 @@
-"""v0.18 Windows 설치 점검 도우미의 정적 안전·무결성 기준 검사.
+"""v0.19 Windows 설치 점검 도우미의 정적 안전·무결성 기준 검사.
 
 Linux에서 CMD 스크립트를 실제 실행하지 않으며 파일 자체의 계약만 확인한다.
 """
@@ -67,7 +67,7 @@ class TestWindowsReadOnlyChecker(unittest.TestCase):
             "[실기기 검수 2]",
             "[실기기 검수 3]",
             "[실기기 검수 4]",
-            "V018_TROUBLESHOOTING_QA_KO.md",
+            "V019_VISUAL_QA_KO.md",
             "검사 결과는 설치 준비 상태일 뿐, 실제 생성 성공 판정이 아닙니다",
         ):
             self.assertIn(phrase, self.script)
