@@ -1,9 +1,9 @@
 {
   "name": "actor-swap-studio-web",
   "private": true,
-  "version": "0.7.8-synthetic-wasm-inference",
+  "version": "0.7.9-synthetic-wasm-benchmark",
   "type": "module",
-  "description": "Local browser video lab and synthetic ONNX WASM inference; AI identity swapping not implemented",
+  "description": "Local browser video lab and measured synthetic ONNX WASM inference; AI identity swapping not implemented",
   "scripts": {
     "test": "node --test tests/smoke.mjs",
     "test:browser": "playwright test"
