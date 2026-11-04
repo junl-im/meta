@@ -130,6 +130,38 @@ def _recommend_vram(vram_gib: float | None) -> str:
     )
 
 
+def format_first_run_plan(info: dict[str, Any]) -> str:
+    """지원 모델을 추측하거나 설정을 바꾸지 않는 저사양 첫 제작 순서."""
+    devices = info.get("gpu_devices") or []
+    vram_values = [
+        float(device["vram_gib"])
+        for device in devices
+        if isinstance(device, dict)
+        and isinstance(device.get("vram_gib"), (int, float))
+        and 0 < device["vram_gib"] < float("inf")
+    ]
+    vram = max(vram_values) if vram_values else None
+    ram = info.get("ram_gib")
+    rows = ["첫 무료 제작 · 권장 확인 순서 (원본 설정을 자동 변경하지 않음)"]
+    if vram is None:
+        rows.append("① Windows 작업 관리자에서 전용 GPU 메모리를 확인하세요. GPU 지원 여부는 아직 미확인입니다.")
+    elif vram < 4:
+        rows.append("① 전용 VRAM이 적습니다. 무거운 영상·3D 모델 다운로드 전 공식 모델 요구 사양을 먼저 확인하세요.")
+    else:
+        rows.append("① 원본 모델 목록에서 이미지 모델의 GPU·VRAM 최소 요구 사항과 설치 용량을 확인하세요.")
+    rows.append("② 요구 사양이 맞는 모델이 확인될 때만 원본 Media Generator에서 작은 이미지 1장을 생성해 보세요.")
+    if vram is None or vram < 6:
+        rows.append("③ 영상·3D는 바로 실행하지 말고, 원본 지원 정보 및 실제 여유 메모리를 확인한 후 선택하세요.")
+    else:
+        rows.append("③ 이미지가 정상 저장되면 원본의 지원 영상 모델에서 짧고 낮은 해상도 작업을 검토하세요.")
+    rows.append("④ 결과 파일·작업 시간·GPU 메모리 사용량을 확인하고 다음 작업 크기를 결정하세요.")
+    if isinstance(ram, (int, float)) and 0 < ram <= 16.5:
+        rows.append("RAM 16GB급: 영상 모델과 로컬 감독 LLM을 동시에 실행하는 것은 피하세요.")
+    rows.append("GPT 로그인·유료 API 연결은 이 순서의 어느 단계에도 필요하지 않습니다.")
+    rows.append("이것은 실행 성공 보증이나 자동 모델 선택이 아닌 안내입니다.")
+    return "\n".join(rows)
+
+
 def format_hardware_report(info: dict[str, Any]) -> str:
     """시스템 정보만으로 조심스러운 한국어 안내를 만든다. 원본 설정을 변경하지 않는다."""
     system = str(info.get("operating_system") or "확인 불가")
@@ -160,6 +192,7 @@ def format_hardware_report(info: dict[str, Any]) -> str:
     ]
     if isinstance(ram, (int, float)) and ram <= 16.5:
         lines.append("RAM 16GB급 환경에서는 대형 영상 모델과 로컬 감독 LLM의 동시 실행을 피하는 편이 좋습니다.")
+    lines.extend(["", format_first_run_plan(info)])
     lines.extend(
         [
             "",

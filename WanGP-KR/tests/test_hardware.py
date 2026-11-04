@@ -67,6 +67,30 @@ class TestHardwareGuidance(unittest.TestCase):
         hardware.format_hardware_report(original)
         self.assertEqual(original, snapshot)
 
+    def test_16gb_low_vram_first_run_plan_keeps_video_optional(self):
+        plan = hardware.format_first_run_plan({
+            "ram_gib": 16, "gpu_devices": [{"name": "Example", "vram_gib": 3}],
+        })
+        self.assertIn("무거운 영상·3D 모델 다운로드 전", plan)
+        self.assertIn("작은 이미지 1장", plan)
+        self.assertIn("원본 Media Generator", plan)
+        self.assertIn("RAM 16GB급", plan)
+        self.assertIn("GPT 로그인·유료 API 연결", plan)
+
+    def test_unknown_gpu_warns_without_asserting_cpu_support(self):
+        plan = hardware.format_first_run_plan({"ram_gib": None, "gpu_devices": [], "gpu_names": []})
+        self.assertIn("GPU 지원 여부는 아직 미확인", plan)
+        self.assertIn("요구 사양이 맞는 모델이 확인될 때만", plan)
+        self.assertNotIn("CPU만으로 생성 가능", plan)
+
+    def test_high_vram_remains_conditional_not_a_guarantee(self):
+        plan = hardware.format_first_run_plan({
+            "ram_gib": 32, "gpu_devices": [{"name": "Example", "vram_gib": 12}],
+        })
+        self.assertIn("지원 영상 모델", plan)
+        self.assertIn("실행 성공 보증", plan)
+        self.assertNotIn("RAM 16GB급", plan)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -126,8 +126,8 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.13.0-dev"
-        self.description = "전용 원화·읽기 전용 시작 점검이 있는 무료 로컬 제작실 · GPT 선택"
+        self.version = "0.14.0-dev"
+        self.description = "전용 원화·시작 점검·저사양 첫 제작 순서가 있는 무료 로컬 제작실 · GPT 선택"
 
     def setup_ui(self):
         self.request_component("state")
