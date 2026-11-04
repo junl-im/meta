@@ -8,7 +8,7 @@ echo ===================================================
 echo       곰같은여우의 AI 스튜디오 - 전체 설치
 echo ===================================================
 echo.
-echo 한글 작업실 v0.12 개발판 - 4개 전용 일러스트 카드 포함
+echo 한글 작업실 v0.13 개발판 - 4개 전용 일러스트와 시작 전 확인 포함
 echo 이 도구는 공식 WanGP Manager를 다운로드하고,
 echo 원본 WanGP 설치가 끝나면 한국어 스튜디오를 추가합니다.
 echo 원본 출처: https://github.com/deepbeepmeep/WanGP
@@ -45,23 +45,25 @@ echo [준비] 모든 PC에서 같은 검증된 한글 스튜디오 파일을 사
 echo 설치 스크립트 옆의 미검증 로컬 파일은 자동으로 재사용하지 않습니다.
 
 :download_plugin
-echo 고정된 GitHub 코드 버전의 필수 13개 파일을 받습니다.
-echo GitHub 원본 버전: 6bf6caa2660d0a1567a0834ece3e2a5c8e34ae85
+echo 고정된 GitHub 코드 버전의 필수 14개 파일을 받습니다.
+echo GitHub 원본 버전: 86e3390dface72de8fdb9939161913afe97569c1
 set "PLUGIN_SOURCE=%SETUP_DIR%\wan2gp-gomfox-studio"
 mkdir "%PLUGIN_SOURCE%" >nul 2>nul
 if not exist "%PLUGIN_SOURCE%\" goto plugin_download_error
-set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/6bf6caa2660d0a1567a0834ece3e2a5c8e34ae85/WanGP-KR/plugin/wan2gp-gomfox-studio"
+set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/86e3390dface72de8fdb9939161913afe97569c1/WanGP-KR/plugin/wan2gp-gomfox-studio"
 call :fetch_plugin_file "__init__.py" "754b7e9e5046f2450c5fd4ea0a53d40b6ceb8671acbb6e7ddd8932a52de80066"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin.py" "305e6bfafa2a80ec53677baeddc7b7c24e962cf9fa127e9bb85a9b063507690e"
+call :fetch_plugin_file "plugin.py" "fd5a14b9494fa3b40b05530ff44034b20f80aa78ac1fe846f75a042776d90b43"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin_info.json" "321e39fe1d98c3f4fdef835871783a9632e12f188a31e728c4ae1faa02d76327"
+call :fetch_plugin_file "plugin_info.json" "a2eb205512e07e19bcd7853f5df7cf81687a2cf719af0d172e4e0b50875a8872"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "catalog.py" "995f6d12271bff59da0a64318133e788ffbc08560bfeb0bede2aa8fc14e20b9d"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "help_content.py" "d7cb8e51d6049d128b9e62c1ff775c9228af0d8d035de4fcd4ccce5fb7ee2fcb"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "hardware.py" "f6a4eb010ae10b5a6529d54a10d78c9da314caad656b65fc0411f4bb9f0824bb"
+if errorlevel 1 goto plugin_download_error
+call :fetch_plugin_file "studio_check.py" "60f256bd29061b27580d0e7bbd48a75ab3696072343e70484b0b9659ac080360"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "prompt_assistant.py" "555295c725610b2882d8f6efbc8e43b4da9bee25a6aa71294cb505feb3c70b1b"
 if errorlevel 1 goto plugin_download_error
@@ -157,6 +159,7 @@ if not exist "%PLUGIN_STAGE%\plugin_info.json" goto plugin_copy_error
 if not exist "%PLUGIN_STAGE%\catalog.py" goto plugin_copy_error
 if not exist "%PLUGIN_STAGE%\help_content.py" goto plugin_copy_error
 if not exist "%PLUGIN_STAGE%\hardware.py" goto plugin_copy_error
+if not exist "%PLUGIN_STAGE%\studio_check.py" goto plugin_copy_error
 if not exist "%PLUGIN_STAGE%\prompt_assistant.py" goto plugin_copy_error
 if not exist "%PLUGIN_STAGE%\studio-hero.png" goto plugin_copy_error
 if not exist "%PLUGIN_STAGE%\gomfox-studio-icon.png" goto plugin_copy_error
