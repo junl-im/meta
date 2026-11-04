@@ -45,10 +45,10 @@ class StudioDashboardTests(unittest.TestCase):
         ):
             self.assertIn(text, SOURCE)
         self.assertIn("fn=self.goto_media_tab", SOURCE)
-        self.assertIn('render_guide("짧은 영상")', SOURCE)
-        self.assertIn('render_guide("사진·그림")', SOURCE)
-        self.assertIn('render_guide("목소리·음악")', SOURCE)
-        self.assertIn('render_guide("3D 만들기")', SOURCE)
+        self.assertIn('render_card_summary("짧은 영상")', SOURCE)
+        self.assertIn('render_card_summary("사진·그림")', SOURCE)
+        self.assertIn('render_card_summary("목소리·음악")', SOURCE)
+        self.assertIn('render_card_summary("3D 만들기")', SOURCE)
         self.assertLess(SOURCE.index('with gr.Tab("무료 제작 · 시작")'), SOURCE.index('with gr.Tab("처음 실행 · 따라 하기")'))
 
     def test_guide_explorer_hardware_and_optin_gpt(self):
@@ -93,7 +93,7 @@ class StudioDashboardTests(unittest.TestCase):
 
     def test_queue_monitor_and_model_details_are_read_only(self):
         for token in (
-            "작업 현황 · 갤러리", "format_queue_status", "format_model_details",
+            "작업 현황 · 갤러리", "format_queue_dashboard", "format_model_details",
             "model_inspect.click(", "queue_refresh.click(", "gallery_open.click(",
         ):
             self.assertIn(token, SOURCE)
@@ -111,7 +111,7 @@ class StudioDashboardTests(unittest.TestCase):
             self.assertIn(token, SOURCE)
 
     def test_plugin_metadata_matches(self):
-        self.assertEqual(META["version"], "0.18.0-dev")
+        self.assertEqual(META["version"], "0.19.0-dev")
         self.assertIn("GomFoxStudio", META["app_tab"])
 
     def test_read_only_preflight_is_optional(self):
@@ -134,14 +134,43 @@ class StudioDashboardTests(unittest.TestCase):
         for token in (
             'elem_id="gfs-category-grid-bottom"',
             '#gfs-root #gfs-category-grid,#gfs-root #gfs-category-grid-bottom {gap:12px',
-            'background-position:right 67% !important',
+            'background-position:left center,right center !important',
             '#gfs-root #gfs-banner {height:184px !important',
             '#gfs-root #gfs-banner {height:112px !important',
-            '카드를 하나 선택해 보세요',
+            'render_card_summary("")',
             'gfs-task-guide',
         ):
             self.assertIn(token, SOURCE)
-        self.assertIn('video_button.click(fn=lambda: render_guide("짧은 영상")', SOURCE)
+        self.assertIn('video_button.click(fn=lambda: render_card_summary("짧은 영상")', SOURCE)
+
+    def test_v019_crops_no_illustrations_and_queue_summary_is_separate(self):
+        for token in (
+            "background-size:100% 100%,auto 100% !important",
+            "background-repeat:no-repeat,no-repeat !important",
+            "#gfs-root #gfs-queue-overview",
+            "#gfs-root #gfs-queue-result textarea",
+            "queue_overview = gr.Markdown(",
+            "outputs=[queue_overview, queue_result]",
+            "@media (max-width:420px)",
+        ):
+            self.assertIn(token, SOURCE)
+        self.assertNotIn("background-size:cover !important", SOURCE)
+
+    def test_v019_offline_preview_keeps_raster_art_and_distinguishes_mock_queue(self):
+        preview = ROOT / "docs" / "V019_VISUAL_PREVIEW.html"
+        html = preview.read_text(encoding="utf-8")
+        for category in ("video", "image", "audio", "3d"):
+            self.assertIn(f"category-{category}.webp", html)
+        for token in (
+            "background-size:100% 100%,auto 100%",
+            "@media(max-width:420px)",
+            "aria-live=\"polite\"",
+            "예시 데이터",
+            "오프라인 시각 배치 미리보기",
+        ):
+            self.assertIn(token, html)
+        self.assertNotIn("<svg", html.casefold())
+        self.assertNotIn("https://", html)
 
     def test_v016_visual_preview_matches_local_art_and_mobile_layout(self):
         preview = ROOT / "docs" / "V016_VISUAL_PREVIEW.html"

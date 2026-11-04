@@ -13,9 +13,11 @@ import gradio as gr
 
 from shared.utils.plugins import WAN2GPPlugin
 
-from .catalog import format_model_catalog, format_model_details, format_queue_status
+from .catalog import format_model_catalog, format_model_details, format_queue_dashboard
 from .hardware import read_hardware_report
-from .help_content import TOPICS, TROUBLESHOOT_TOPICS, render_guide, render_troubleshooting
+from .help_content import (
+    TOPICS, TROUBLESHOOT_TOPICS, render_card_summary, render_guide, render_troubleshooting,
+)
 from .prompt_assistant import TASK_KINDS, STYLES, PROFILES, build_prompt, fill_example
 from .studio_check import format_studio_readiness
 
@@ -48,10 +50,11 @@ def category_art_css() -> str:
         content = base64.b64encode(payload).decode("ascii")
         rules.append(
             f"#gfs-root #gfs-category-{category} {{"
-            f"background-image:linear-gradient(90deg,rgba(7,17,31,.48),rgba(7,17,31,.07) 69%,transparent 88%),"
+            f"background-image:linear-gradient(90deg,rgba(7,17,31,.67),rgba(7,17,31,.18) 60%,transparent 90%),"
             f"url('data:image/webp;base64,{content}') !important;"
-            "background-position:right 67% !important;background-size:cover !important;"
-            "background-repeat:no-repeat !important;}"
+            "background-position:left center,right center !important;"
+            "background-size:100% 100%,auto 100% !important;"
+            "background-repeat:no-repeat,no-repeat !important;}"
         )
     return "<style>" + "".join(rules) + "</style>" if rules else ""
 
@@ -84,15 +87,17 @@ STUDIO_STYLE = """
 #gfs-root #gfs-category-grid,#gfs-root #gfs-category-grid-bottom {gap:12px;align-items:stretch}
 #gfs-root #gfs-category-grid-bottom {margin-top:1px}
 #gfs-root #gfs-category-grid > *,#gfs-root #gfs-category-grid-bottom > * {min-width:0}
-#gfs-root #gfs-category-video,#gfs-root #gfs-category-image,#gfs-root #gfs-category-audio,#gfs-root #gfs-category-3d {min-height:184px;border:0;border-radius:15px;font-size:20px;font-weight:850;letter-spacing:-.032em;line-height:1.45;white-space:pre-line;text-align:left;padding:21px 23px;color:#fff;text-shadow:0 2px 7px rgba(0,0,0,.65);box-shadow:0 5px 14px rgba(9,20,35,.13);background-position:right 67%;background-size:cover;background-repeat:no-repeat;overflow:hidden;transition:transform .16s ease,box-shadow .16s ease}
-#gfs-root #gfs-category-video {background:radial-gradient(circle at 90% 17%,rgba(133,194,232,.29),transparent 38%),linear-gradient(145deg,#315982,#162e51);color:#fff;border-color:#6483a2}
-#gfs-root #gfs-category-image {background:radial-gradient(circle at 91% 22%,rgba(247,192,221,.27),transparent 38%),linear-gradient(145deg,#875a79,#553a62);color:#fff;border-color:#aa7896}
-#gfs-root #gfs-category-audio {background:radial-gradient(circle at 90% 20%,rgba(147,235,209,.25),transparent 38%),linear-gradient(145deg,#277e7a,#1b515c);color:#fff;border-color:#5b9f97}
-#gfs-root #gfs-category-3d {background:radial-gradient(circle at 90% 20%,rgba(242,194,127,.32),transparent 38%),linear-gradient(145deg,#96714f,#61422f);color:#fff;border-color:#b28b6d}
+#gfs-root #gfs-category-video,#gfs-root #gfs-category-image,#gfs-root #gfs-category-audio,#gfs-root #gfs-category-3d {min-height:184px;border:0;border-radius:15px;font-size:20px;font-weight:850;letter-spacing:-.032em;line-height:1.45;white-space:pre-line;text-align:left;padding:21px 23px;color:#fff;text-shadow:0 2px 7px rgba(0,0,0,.65);box-shadow:0 5px 14px rgba(9,20,35,.13);background-position:right center;background-size:auto 100%;background-repeat:no-repeat;overflow:hidden;transition:transform .16s ease,box-shadow .16s ease}
+#gfs-root #gfs-category-video {background:radial-gradient(circle at 90% 17%,rgba(133,194,232,.29),transparent 38%),linear-gradient(145deg,#315982,#162e51);background-color:#162e51;color:#fff}
+#gfs-root #gfs-category-image {background:radial-gradient(circle at 91% 22%,rgba(247,192,221,.27),transparent 38%),linear-gradient(145deg,#875a79,#553a62);background-color:#553a62;color:#fff}
+#gfs-root #gfs-category-audio {background:radial-gradient(circle at 90% 20%,rgba(147,235,209,.25),transparent 38%),linear-gradient(145deg,#277e7a,#1b515c);background-color:#1b515c;color:#fff}
+#gfs-root #gfs-category-3d {background:radial-gradient(circle at 90% 20%,rgba(242,194,127,.32),transparent 38%),linear-gradient(145deg,#96714f,#61422f);background-color:#61422f;color:#fff}
 @media (hover:hover) {#gfs-root #gfs-category-video:hover,#gfs-root #gfs-category-image:hover,#gfs-root #gfs-category-audio:hover,#gfs-root #gfs-category-3d:hover {transform:translateY(-2px);box-shadow:0 9px 20px rgba(12,22,42,.22)}}
 @media (prefers-reduced-motion:reduce) {#gfs-root #gfs-category-video,#gfs-root #gfs-category-image,#gfs-root #gfs-category-audio,#gfs-root #gfs-category-3d {transition:none}}
 #gfs-root #gfs-launch {min-height:48px;border:0;border-radius:13px;font-weight:800;background:linear-gradient(110deg,#245b68,#236a69);color:#fff6e8;box-shadow:0 4px 12px rgba(17,53,64,.13)}
-#gfs-root #gfs-task-guide {font-size:14px;line-height:1.5;margin:3px 0}
+#gfs-root #gfs-task-guide {font-size:14px;line-height:1.55;margin:3px 0;padding:10px 15px;border:0;border-radius:13px;background:linear-gradient(110deg,rgba(53,113,125,.12),rgba(232,156,100,.085))}
+#gfs-root #gfs-task-guide h3 {font-size:17px;line-height:1.4;margin:0 0 5px}
+#gfs-root #gfs-task-guide p {margin:4px 0}
 #gfs-root #gfs-preflight-panel {border:0;border-radius:14px;background:rgba(64,112,119,.10);margin-top:5px}
 #gfs-root #gfs-preflight-check,#gfs-root #gfs-preflight-hardware {border:0;border-radius:11px;min-height:43px;font-weight:750}
 #gfs-root #gfs-preflight-result textarea {font-size:13px;line-height:1.6}
@@ -105,6 +110,9 @@ STUDIO_STYLE = """
 #gfs-root .gfs-workshop p {margin:0;opacity:.85}
 
 #gfs-root #gfs-queue-refresh,#gfs-root #gfs-model-inspect {border-radius:12px;font-weight:750}
+#gfs-root #gfs-queue-overview {padding:10px 15px;border:0;border-radius:12px;background:linear-gradient(115deg,rgba(51,124,125,.18),rgba(231,167,93,.11));font-size:14px;line-height:1.6}
+#gfs-root #gfs-queue-overview p {margin:0}
+#gfs-root #gfs-queue-result textarea {line-height:1.65;font-size:13px}
 #gfs-root .gfs-status {padding:14px 16px;border-radius:14px;border:0;background:linear-gradient(120deg,rgba(53,112,123,.15),rgba(236,171,106,.09))}
 #gfs-root .gfs-status strong {color:var(--gfs-gold)}
 #gfs-root .gfs-muted {font-size:12px;opacity:.75}
@@ -122,7 +130,12 @@ STUDIO_STYLE = """
   #gfs-root .gfs-steps {font-size:12px;line-height:1.4}
   #gfs-root #gfs-category-grid,#gfs-root #gfs-category-grid-bottom {gap:7px}
   #gfs-root #gfs-category-video,#gfs-root #gfs-category-image,#gfs-root #gfs-category-audio,#gfs-root #gfs-category-3d {min-height:112px;font-size:14px;padding:13px;border-radius:12px}
-  #gfs-root #gfs-task-guide {font-size:12px}
+  #gfs-root #gfs-task-guide {font-size:12px;padding:9px 11px}
+  #gfs-root #gfs-task-guide h3 {font-size:14px}
+  #gfs-root #gfs-queue-overview {padding:8px 10px;font-size:12px}
+}
+@media (max-width:420px) {
+  #gfs-root #gfs-category-video,#gfs-root #gfs-category-image,#gfs-root #gfs-category-audio,#gfs-root #gfs-category-3d {padding:11px 10px;font-size:clamp(12px,3.4vw,14px)}
 }
 @media (max-width:740px) and (max-height:740px) {
   #gfs-root #gfs-banner {height:89px !important}
@@ -138,7 +151,7 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.18.0-dev"
+        self.version = "0.19.0-dev"
         self.description = "전용 원화·반응형 시작 화면·저사양 첫 제작 순서가 있는 무료 로컬 제작실 · GPT 선택"
 
     def setup_ui(self):
@@ -228,7 +241,7 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                         audio_button = gr.Button("음성 · 음악\n소리 만들기", elem_id="gfs-category-audio")
                         model3d_button = gr.Button("3D · 월드\n입체와 장면", elem_id="gfs-category-3d")
                     task_guide = gr.Markdown(
-                        value="**카드를 하나 선택해 보세요.** 해당 분야의 간단한 사용 순서가 이곳에 표시됩니다.",
+                        value=render_card_summary(""),
                         elem_id="gfs-task-guide",
                     )
                     open_generator = gr.Button(
@@ -402,9 +415,14 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                     queue_refresh = gr.Button(
                         "현재 작업 상태 새로고침", elem_id="gfs-queue-refresh"
                     )
+                    queue_overview = gr.Markdown(
+                        value="**조회 전** · 새로고침을 누르면 전체·실행 중·대기 작업을 알려 드려요.",
+                        elem_id="gfs-queue-overview",
+                    )
                     queue_result = gr.Textbox(
                         label="원본 큐 현황 (읽기 전용)", lines=10, interactive=False,
                         value="현재 작업 상태 새로고침을 눌러 주세요.",
+                        elem_id="gfs-queue-result",
                     )
                     gallery_open = gr.Button(
                         "원본 WanGP 제작·갤러리 화면으로 이동", variant="primary"
@@ -467,10 +485,10 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
         )
         welcome_hardware.click(fn=read_hardware_report, inputs=[], outputs=[welcome_report])
         welcome_start.click(fn=self.goto_media_tab, inputs=[self.state], outputs=[self.main_tabs])
-        video_button.click(fn=lambda: render_guide("짧은 영상"), inputs=[], outputs=[task_guide])
-        image_button.click(fn=lambda: render_guide("사진·그림"), inputs=[], outputs=[task_guide])
-        audio_button.click(fn=lambda: render_guide("목소리·음악"), inputs=[], outputs=[task_guide])
-        model3d_button.click(fn=lambda: render_guide("3D 만들기"), inputs=[], outputs=[task_guide])
+        video_button.click(fn=lambda: render_card_summary("짧은 영상"), inputs=[], outputs=[task_guide])
+        image_button.click(fn=lambda: render_card_summary("사진·그림"), inputs=[], outputs=[task_guide])
+        audio_button.click(fn=lambda: render_card_summary("목소리·음악"), inputs=[], outputs=[task_guide])
+        model3d_button.click(fn=lambda: render_card_summary("3D 만들기"), inputs=[], outputs=[task_guide])
         open_generator.click(
             fn=self.goto_media_tab, inputs=[self.state], outputs=[self.main_tabs]
         )
@@ -517,8 +535,8 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
             inputs=[model_id_input], outputs=[model_detail],
         )
         queue_refresh.click(
-            fn=lambda show: format_queue_status(api_session, show),
-            inputs=[queue_prompts], outputs=[queue_result],
+            fn=lambda show: format_queue_dashboard(api_session, show),
+            inputs=[queue_prompts], outputs=[queue_overview, queue_result],
         )
         gallery_open.click(
             fn=self.goto_media_tab, inputs=[self.state], outputs=[self.main_tabs]

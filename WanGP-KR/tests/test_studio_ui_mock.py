@@ -67,12 +67,13 @@ class UiEventMockTests(unittest.TestCase):
             "catalog": {
                 "format_model_catalog": lambda *args: "catalog",
                 "format_model_details": lambda *args: "details",
-                "format_queue_status": lambda *args: "queue",
+                "format_queue_dashboard": lambda *args: ("summary", "queue"),
             },
             "hardware": {"read_hardware_report": lambda: "report"},
             "help_content": {
                 "TOPICS": ("처음 시작", "저사양 설정"),
                 "render_guide": lambda topic: str(topic),
+                "render_card_summary": lambda topic: "card: " + str(topic),
                 "TROUBLESHOOT_TOPICS": ("원본 WanGP가 열리지 않아요", "GPT 없이 무료로 만들고 싶어요"),
                 "render_troubleshooting": lambda topic: "문제 해결: " + str(topic),
             },
@@ -97,6 +98,7 @@ class UiEventMockTests(unittest.TestCase):
             art_css = plugin_module.category_art_css()
             self.assertEqual(art_css.count("data:image/webp;base64,"), 4)
             self.assertLess(len(art_css), 400_000)
+            self.assertEqual(art_css.count("background-size:100% 100%,auto 100%"), 4)
             self.assertNotIn("<svg", art_css.casefold())
             with tempfile.TemporaryDirectory() as scratch:
                 bad = Path(scratch) / "category-video.webp"
@@ -118,6 +120,11 @@ class UiEventMockTests(unittest.TestCase):
         )
         self.assertTrue(any(e[1].get("fn") is prompt.build_prompt for e in events))
         self.assertTrue(any(e[1].get("fn") is prompt.fill_example for e in events))
+        self.assertTrue(any(
+            e[0] == "click" and [getattr(widget, "kwargs", {}).get("elem_id") for widget in e[1].get("outputs", [])]
+            == ["gfs-queue-overview", "gfs-queue-result"]
+            for e in events
+        ))
         self.assertTrue(any(
             e[0] == "change" and e[1].get("fn") is modules["gomfox_test.help_content"].render_troubleshooting
             for e in events

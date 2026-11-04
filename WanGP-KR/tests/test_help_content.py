@@ -70,6 +70,16 @@ class TestHelpContent(unittest.TestCase):
         )
         self.assertNotIn(hostile, help_content.render_troubleshooting(hostile))
 
+    def test_v019_card_guides_are_compact_and_cover_four_illustrations(self):
+        self.assertEqual(len(help_content.CARD_SUMMARIES), 4)
+        for topic, content in help_content.CARD_SUMMARIES.items():
+            self.assertIn("###", help_content.render_card_summary(topic))
+            self.assertIn("다음 행동", content)
+            self.assertLess(len(content), 250)
+            self.assertLess(len(content), len(help_content.render_guide(topic)))
+        self.assertIn("카드를 하나 선택해 보세요", help_content.render_card_summary("<svg"))
+        self.assertNotIn("<svg", help_content.render_card_summary("<svg"))
+
 
 if __name__ == "__main__":
     unittest.main()

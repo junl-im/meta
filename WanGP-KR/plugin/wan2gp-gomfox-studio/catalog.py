@@ -169,16 +169,25 @@ def format_model_details(session: Any, model_type: str = "") -> str:
     return "\n".join(rows)
 
 
-def format_queue_status(session: Any, show_prompts: bool = False) -> str:
-    """WanGP가 관리하는 현재 공용 큐를 읽는다. 취소·재실행·파일 접근 없음."""
+def format_queue_dashboard(session: Any, show_prompts: bool = False) -> tuple[str, str]:
+    """원본 큐를 한 번 읽어 간단한 상태 요약과 기존 상세 내역을 함께 반환한다."""
     if session is None or not callable(getattr(session, "list_queue", None)):
-        return "원본 큐 상태 API를 이용할 수 없습니다. WanGP 원본 제작 화면에서 확인해 주세요."
+        return (
+            "**연결 확인 필요** · 원본 WanGP 큐를 조회할 수 없어요.",
+            "원본 큐 상태 API를 이용할 수 없습니다. WanGP 원본 제작 화면에서 확인해 주세요.",
+        )
     try:
         queue = session.list_queue()
     except Exception as exc:
-        return f"작업 상태 조회 실패: {type(exc).__name__}: {exc}"
+        return (
+            "**조회 실패** · 원본 WanGP의 큐 상태를 확인해 주세요.",
+            f"작업 상태 조회 실패: {type(exc).__name__}: {exc}",
+        )
     if not isinstance(queue, dict):
-        return "원본 큐가 예상한 형식으로 응답하지 않았습니다."
+        return (
+            "**응답 확인 필요** · 원본 WanGP에서 직접 확인해 주세요.",
+            "원본 큐가 예상한 형식으로 응답하지 않았습니다.",
+        )
 
     def count(label: str) -> str:
         raw = queue.get(label, 0)
@@ -187,14 +196,19 @@ def format_queue_status(session: Any, show_prompts: bool = False) -> str:
         except (ValueError, TypeError, OverflowError):
             return "?"
 
+    total, running, queued = count("total_count"), count("running_count"), count("queued_count")
+    summary = (
+        f"**전체 {total}개**　·　**실행 중 {running}개**　·　**대기 {queued}개**  \n"
+        "*원본 큐 조회 시점 기준 · 자동 새로고침 아님*"
+    )
     rows = [
-        f"전체 {count('total_count')}개 · 실행 중 {count('running_count')}개 · 대기 {count('queued_count')}개",
+        f"전체 {total}개 · 실행 중 {running}개 · 대기 {queued}개",
         "이 숫자는 조회 시점의 현재 큐 상태이며 자동 새로고침되지 않습니다.",
         "",
     ]
     tasks = queue.get("tasks") or []
     if not isinstance(tasks, (list, tuple)):
-        return "\n".join(rows + ["원본 작업 목록 형식이 올바르지 않습니다."])
+        return summary, "\n".join(rows + ["원본 작업 목록 형식이 올바르지 않습니다."])
     status_labels = {"queued": "대기", "running": "실행 중", "cancelling": "취소 처리 중"}
     if not tasks:
         rows.append("현재 원본 큐에 대기 중이거나 실행 중인 작업이 없습니다.")
@@ -215,4 +229,9 @@ def format_queue_status(session: Any, show_prompts: bool = False) -> str:
         "개별 작업의 실시간 진행률(%)은 이 목록 API에 포함되지 않습니다.",
         "완료한 결과물은 원본 WanGP의 갤러리에서 확인하세요.",
     ])
-    return "\n".join(rows)
+    return summary, "\n".join(rows)
+
+
+def format_queue_status(session: Any, show_prompts: bool = False) -> str:
+    """기존 단일 텍스트 API 호환 유지. 원본 큐 변경·GPU 작업 없음."""
+    return format_queue_dashboard(session, show_prompts)[1]

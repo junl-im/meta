@@ -72,6 +72,26 @@ class WorkflowStatusTests(unittest.TestCase):
         self.assertIn("개인적인 프롬프트", visible)
         self.assertEqual(session.queue_calls, 2)
 
+    def test_v019_queue_dashboard_returns_summary_and_details_from_one_read(self):
+        session = FakeSession()
+        summary, details = catalog.format_queue_dashboard(session)
+        self.assertIn("**전체 2개**", summary)
+        self.assertIn("**실행 중 1개**", summary)
+        self.assertIn("**대기 1개**", summary)
+        self.assertIn("전체 2개", details)
+        self.assertNotIn("개인적인 프롬프트", summary + details)
+        self.assertEqual(session.queue_calls, 1)
+
+        summary2, details2 = catalog.format_queue_dashboard(session, True)
+        self.assertEqual(summary2, summary)
+        self.assertIn("개인적인 프롬프트", details2)
+        self.assertEqual(session.queue_calls, 2)
+
+    def test_v019_unavailable_queue_has_matching_safe_summary(self):
+        summary, details = catalog.format_queue_dashboard(None)
+        self.assertIn("연결 확인 필요", summary)
+        self.assertIn("원본 큐 상태 API", details)
+
     def test_missing_api_does_not_generate_or_mutate(self):
         self.assertIn("이용할 수 없습니다", catalog.format_queue_status(None))
         self.assertIn("연결할 수 없습니다", catalog.format_model_details(None, "mock_image"))
