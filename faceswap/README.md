@@ -1,10 +1,16 @@
-# Actor Swap Studio WEB — v0.7.8 synthetic ONNX WASM browser proof
+# Actor Swap Studio WEB — v0.7.9 synthetic ONNX WASM timing lab
 
 Independent web-first workspace inside the `junl-im/meta` repository.
 
-## Status (2026-11-01)
+## Status (2026-11-04)
 
 **Browser lab, not AI face swap.** The UI now includes a 3-second labeled picture-over-video recording test, optional MediaPipe face **location** detection, and a downloadable file (MP4 or WebM, chosen by browser capability). The photo overlay is not an identity replacement or realistic face-swap inference. The browser uses a reusable local Web Audio capture bridge when available, with native captureStream as a fallback. An audio-start timeout prevents Firefox from hanging indefinitely on a suspended AudioContext. A bounded EBML metadata pass adds missing WebM Duration on supported MediaRecorder output without transcoding or network access. Unsupported recorder APIs are explained in a separate UI status line. Chromium E2E checks the recorded synthetic 440 Hz tone is actually non-silent; absence of an audio track is explicitly labeled silent, but source-audio fidelity and lip synchronization are not yet proven. No user footage or portrait is uploaded by our application.
+
+## v0.7.9 — local synthetic WASM timing lab (NOT face-swap FPS)
+
+An additional consent-gated **WASM 성능 진단 24회** button starts a fresh ONNX Runtime Web CPU session on the same original, non-personal `Add(2,3)=5` graph. It performs four untimed warmups and 24 measured `session.run` calls; every result must equal five. It reports the p50/p95/min/mean/max call latency and ONNX session initialization time, then releases the session. The measured latency **does not include the optional CDN download** and does **not** represent face-swap FPS, real model VRAM/RAM consumption or usable frame throughput.
+
+Reset or consent withdrawal requests cancellation between inference calls, discards stale results and prevents a new measurement without opt-in. A running single `session.run` or already-started download cannot be force-aborted. User-triggered JSON export contains only timestamp, numeric summaries, the pinned runtime version and coarse optional `navigator.deviceMemory`/`hardwareConcurrency` hints—no selected media, filename, identity or browser user-agent. The memory hint is rounded and missing in some browsers, **not an actual memory measurement**. The app does not upload this report. See [benchmark details](docs/ONNX_RUNTIME_PROBE.md).
 
 ## v0.7.8 on-device synthetic ONNX execution (NOT face swap)
 
@@ -41,6 +47,7 @@ Open `faceswap/index.html` through a local web server, or publish the folder as 
 - `src/model_preflight.mjs` and `src/model_lab.mjs` — inert ONNX/ORT SHA-256, model-weights license self-declaration, local-only browser controls, progress/cancel.
 - `src/sha256_stream.mjs`, `src/sha256_worker.mjs` and `src/sha256_worker_client.mjs` — chunked independent SHA-256 core, same-origin module Worker and abort-safe bridge.
 - `src/synthetic_onnx.mjs` — original in-memory ONNX Add graph fixture; no likeness model or media.
+- `src/synthetic_benchmark.mjs` — warmup/measured inference, percentile summaries, resource cleanup, cancellation and optional coarse device hints.
 - `src/onnx_probe.mjs` and `src/onnx_lab.mjs` — opt-in CPU WASM runtime loader, actual numeric session and status UI.
 - `docs/ONNX_RUNTIME_PROBE.md` — runtime asset boundary, exact test assertion and limitations.
 - `docs/LOCAL_MODEL_PACKAGE.md` — model manifest format, current memory caps, and future inference gates.
@@ -74,6 +81,6 @@ Chromium E2E independently validates a synthetic 440 Hz tone's non-silent output
 4. Optionally acknowledge the SDK/model-network notice and click **얼굴 위치 자동 검출** to use automatic placement. This requires network for first load.
 5. Preview/download the output. A recording result is a **visual-composition test**, not an AI swap. Playback/encoding/audio support differs by browser.
 
-## Next milestone after v0.7.8
+## Next milestone after v0.7.9
 
-The local user-supplied model registry and SHA-256 still do not validate the user's model operators or execute that user model. The separate original synthetic numeric ONNX Add model now exercises the WASM inference path, but does not make any pretrained swap checkpoint rights-cleared or implement face swapping. Next work is a fully rights-cleared **detector + identity encoder + swap generator** chain, verified browser operator support and physical low-end-device benchmarks. The research log marks GHOST as a promising generator but not a rights-cleared full stack because its ArcFace dependency and third-party license concerns still require resolution. No public release is approved by this prototype.
+The local user-supplied model registry and SHA-256 still do not validate the user's model operators or execute that user model. The separate original synthetic numeric ONNX Add model now exercises the WASM inference path and tiny-operator timing; neither proves real swap model performance, makes any pretrained swap checkpoint rights-cleared nor implements face swapping. Next work is a fully rights-cleared **detector + identity encoder + swap generator** chain, verified browser operator support and physical low-end-device benchmarks. The research log marks GHOST as a promising generator but not a rights-cleared full stack because its ArcFace dependency and third-party license concerns still require resolution. No public release is approved by this prototype.
