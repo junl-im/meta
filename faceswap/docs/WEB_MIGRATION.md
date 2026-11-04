@@ -73,6 +73,15 @@ Target: `junl-im/meta/faceswap/` (one repository, independent subproject)
 - [x] [Actions 41314891674](https://github.com/junl-im/meta/actions/runs/41314891674): Node 27/27; desktop+mobile-emulated Chromium 8/8; Firefox+Linux WebKit 12/12; total 20/20 browser PASS. Four browser tests execute real WASM numeric ONNX on all three engines, with QA-local runtime assets and no external requests. Physical-device resource measurements remain future work.
 - [ ] Review all third-party runtime assets for final supply chain and offline redistribution; production currently loads jsDelivr only on permission.
 
+### M0.9 — locally measured synthetic WASM latency (v0.7.9, NOT swap FPS)
+
+- [x] Reuse the pinned opt-in CPU WASM runtime and original face-free Add fixture to run 4 warmup + 24 independently checked numeric inferences, with p50/p95/min/mean/max sample timing and session initialization timing.
+- [x] Support cooperative cancellation and reset/consent invalidation with session cleanup. A currently executing native WASM run/CDN request is not forcibly abortable.
+- [x] Let users explicitly export a local-only JSON summary with optional coarse device RAM/core hints, not selected user media or model files. Do not collect device fingerprints or upload diagnostic results.
+- [x] Extend Node and three-engine Playwright browser tests to verify numeric output, honest claims, JSON export and zero external test network calls.
+- [ ] Measure real 16GB Windows/low-GPU PC, physical Android Chrome and iOS Safari heap/energy/latency. Browser-reported device memory is imprecise or absent; this Add benchmark is not real face-swap FPS.
+- [ ] Audit a complete rights-cleared detector + identity encoder + swap generator model operator set and memory requirements.
+
 ### M1 — legally usable 3-second proof
 
 - [ ] Choose and document a distributable ONNX swap model with a clear weights license.
