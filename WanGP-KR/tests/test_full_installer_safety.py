@@ -12,7 +12,7 @@ from pathlib import Path
 
 SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "install_studio_full_windows.cmd"
 PLUGIN_DIR = SCRIPT_PATH.parents[1] / "plugin" / "wan2gp-gomfox-studio"
-PINNED_COMMIT = "11f2c8d94e0408329df5eedd194d4418c0b2d97f"
+PINNED_COMMIT = "6a47ee876b1d6134dc15fe1cf73e8b7ce3868e28"
 REQUIRED_FILES = (
     "__init__.py", "plugin.py", "plugin_info.json", "catalog.py",
     "help_content.py", "hardware.py", "studio_check.py", "prompt_assistant.py",

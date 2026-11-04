@@ -5,10 +5,10 @@ title 곰같은여우의 AI 스튜디오 - 설치 후 읽기 전용 점검
 
 echo.
 echo =====================================================
-echo   곰같은여우의 AI 스튜디오 v0.15 - Windows 설치 점검
+echo   곰같은여우의 AI 스튜디오 v0.16 - Windows 설치 점검
 echo =====================================================
 echo.
-echo [안내] 이 도구는 설치 여부와 v0.14 기준 파일 무결성만 검사합니다.
+echo [안내] 이 도구는 설치 여부와 v0.16 기준 파일 무결성만 검사합니다.
 echo 프로그램 실행, 모델 다운로드, 이미지 생성, 파일 수정은 하지 않습니다.
 echo 원본 WanGP가 지원하는 모든 모델의 실행 성공을 보장하지 않습니다.
 echo.
@@ -32,14 +32,14 @@ echo [정상] 원본 WanGP 기본 구조 확인
 set "GOMFOX_PLUGIN_DIR=%GOMFOX_CHECK_DIR%\plugins\wan2gp-gomfox-studio"
 if not exist "%GOMFOX_PLUGIN_DIR%\" goto missing_plugin
 echo [확인] 한글 스튜디오 파일 SHA-256 대조 중...
-echo 소스 기준: 11f2c8d94e0408329df5eedd194d4418c0b2d97f
+echo 소스 기준: 6a47ee876b1d6134dc15fe1cf73e8b7ce3868e28
 set "GOMFOX_ISSUES=0"
 
 call :verify_file "__init__.py" "754b7e9e5046f2450c5fd4ea0a53d40b6ceb8671acbb6e7ddd8932a52de80066"
 if errorlevel 1 set "GOMFOX_ISSUES=1"
-call :verify_file "plugin.py" "b5ef98ec2f67edc51c40fd0a93329b9abdfc968697438e78fcfcf520c4dd7c84"
+call :verify_file "plugin.py" "dd5f3a15a01ba412c117e59e7a3150646ce7ce4387d732c5eb059467a7db0834"
 if errorlevel 1 set "GOMFOX_ISSUES=1"
-call :verify_file "plugin_info.json" "9fbb42e19b33c0fa13c6ac7a58b13466f0e1b96b9f3a6888da57323d1698fca9"
+call :verify_file "plugin_info.json" "9ef5f8d44cb080a343abb754cbc1a60df0836e2426e369c2e70b9c386030ae94"
 if errorlevel 1 set "GOMFOX_ISSUES=1"
 call :verify_file "catalog.py" "995f6d12271bff59da0a64318133e788ffbc08560bfeb0bede2aa8fc14e20b9d"
 if errorlevel 1 set "GOMFOX_ISSUES=1"
@@ -78,7 +78,7 @@ if exist "%GOMFOX_CHECK_DIR%\scripts\run.bat" (
 
 if "%GOMFOX_ISSUES%"=="1" goto integrity_failed
 echo.
-echo [검사 통과] 원본 구조와 한글 스튜디오 필수 파일 14개가 v0.14 기준과 일치합니다.
+echo [검사 통과] 원본 구조와 한글 스튜디오 필수 파일 14개가 v0.16 기준과 일치합니다.
 echo [미검증] 실제 실행, 브라우저 화면, GPU 생성, 결과 저장은 아직 확인하지 않았습니다.
 echo 다음 단계: WanGP Manager에서 실행 후 원본이 지원하는 작은 이미지 1장을 직접 생성해 보세요.
 echo GPT 로그인이나 유료 API는 기본 생성에 필요하지 않습니다.

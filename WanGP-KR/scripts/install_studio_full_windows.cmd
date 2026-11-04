@@ -8,7 +8,7 @@ echo ===================================================
 echo       곰같은여우의 AI 스튜디오 - 전체 설치
 echo ===================================================
 echo.
-echo 한글 작업실 v0.14 개발판 - 안전 재시도와 저사양 첫 제작 안내 포함
+echo 한글 작업실 v0.16 개발판 - 원화 카드와 반응형 첫 화면 보강
 echo 이 도구는 필요할 때 공식 WanGP Manager를 다운로드하고,
 echo 원본 WanGP 설치가 끝나면 한국어 스튜디오를 추가합니다.
 echo 원본 출처: https://github.com/deepbeepmeep/WanGP
@@ -46,16 +46,16 @@ echo 설치 스크립트 옆의 미검증 로컬 파일은 자동으로 재사�
 
 :download_plugin
 echo 고정된 GitHub 코드 버전의 필수 14개 파일을 받습니다.
-echo GitHub 원본 버전: 11f2c8d94e0408329df5eedd194d4418c0b2d97f
+echo GitHub 원본 버전: 6a47ee876b1d6134dc15fe1cf73e8b7ce3868e28
 set "PLUGIN_SOURCE=%SETUP_DIR%\wan2gp-gomfox-studio"
 mkdir "%PLUGIN_SOURCE%" >nul 2>nul
 if not exist "%PLUGIN_SOURCE%\" goto plugin_download_error
-set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/11f2c8d94e0408329df5eedd194d4418c0b2d97f/WanGP-KR/plugin/wan2gp-gomfox-studio"
+set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/6a47ee876b1d6134dc15fe1cf73e8b7ce3868e28/WanGP-KR/plugin/wan2gp-gomfox-studio"
 call :fetch_plugin_file "__init__.py" "754b7e9e5046f2450c5fd4ea0a53d40b6ceb8671acbb6e7ddd8932a52de80066"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin.py" "b5ef98ec2f67edc51c40fd0a93329b9abdfc968697438e78fcfcf520c4dd7c84"
+call :fetch_plugin_file "plugin.py" "dd5f3a15a01ba412c117e59e7a3150646ce7ce4387d732c5eb059467a7db0834"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin_info.json" "9fbb42e19b33c0fa13c6ac7a58b13466f0e1b96b9f3a6888da57323d1698fca9"
+call :fetch_plugin_file "plugin_info.json" "9ef5f8d44cb080a343abb754cbc1a60df0836e2426e369c2e70b9c386030ae94"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "catalog.py" "995f6d12271bff59da0a64318133e788ffbc08560bfeb0bede2aa8fc14e20b9d"
 if errorlevel 1 goto plugin_download_error
