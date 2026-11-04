@@ -1,8 +1,8 @@
 {
   "name": "곰같은여우의 AI 스튜디오",
   "author": "곰같은여우",
-  "version": "0.16.0-dev",
-  "description": "분야별 WebP 원화의 반응형 배치, 읽기 전용 시작 점검과 저사양 첫 무료 제작 순서, 원본 큐·갤러리, 한국어 도움말, 선택형 GPT 감독.",
+  "version": "0.18.0-dev",
+  "description": "분야별 WebP 원화, 처음 실행 3단계, 증상별 읽기 전용 문제 해결, 원본 큐·갤러리, 무료 로컬 제작, 선택형 GPT 감독.",
   "type": "app",
   "app_tab": "GomFoxStudio",
   "app_url": "/gomfox-studio",

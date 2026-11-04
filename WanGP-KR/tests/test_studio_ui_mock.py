@@ -73,6 +73,8 @@ class UiEventMockTests(unittest.TestCase):
             "help_content": {
                 "TOPICS": ("처음 시작", "저사양 설정"),
                 "render_guide": lambda topic: str(topic),
+                "TROUBLESHOOT_TOPICS": ("원본 WanGP가 열리지 않아요", "GPT 없이 무료로 만들고 싶어요"),
+                "render_troubleshooting": lambda topic: "문제 해결: " + str(topic),
             },
             "studio_check": {"format_studio_readiness": lambda session: "check"},
         }.items():
@@ -116,6 +118,10 @@ class UiEventMockTests(unittest.TestCase):
         )
         self.assertTrue(any(e[1].get("fn") is prompt.build_prompt for e in events))
         self.assertTrue(any(e[1].get("fn") is prompt.fill_example for e in events))
+        self.assertTrue(any(
+            e[0] == "change" and e[1].get("fn") is modules["gomfox_test.help_content"].render_troubleshooting
+            for e in events
+        ))
         self.assertFalse(any("prompt" in name for name in app.requests))
 
 

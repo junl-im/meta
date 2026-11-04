@@ -50,6 +50,26 @@ class TestHelpContent(unittest.TestCase):
             help_content.render_guide("처음 시작"),
         )
 
+    def test_troubleshooting_has_six_specific_safe_paths(self):
+        self.assertEqual(len(help_content.TROUBLESHOOT_TOPICS), 6)
+        for topic in help_content.TROUBLESHOOT_TOPICS:
+            guide = help_content.render_troubleshooting(topic)
+            self.assertIn("###", guide)
+            self.assertGreater(len(guide), 180)
+            self.assertIn("1.", guide)
+        self.assertIn("Apps & PlugIn Manager", help_content.render_troubleshooting("한글 스튜디오 탭이 안 보여요"))
+        self.assertIn("SHA-256", help_content.render_troubleshooting("그림 카드가 비거나 잘려 보여요"))
+        self.assertIn("GPT나 유료 서비스로 자동 전환하지 않습니다", help_content.render_troubleshooting("모델 다운로드·생성이 멈춘 것 같아요"))
+        self.assertIn("GPT 연결·외부 전송·유료 GPU는 기본 작업에 필수가 아닙니다", help_content.render_troubleshooting("GPT 없이 무료로 만들고 싶어요"))
+
+    def test_unknown_problem_never_echoes_input_or_generates_commands(self):
+        hostile = "<script>alert(1)</script>"
+        self.assertEqual(
+            help_content.render_troubleshooting(hostile),
+            help_content.render_troubleshooting(help_content.TROUBLESHOOT_TOPICS[0]),
+        )
+        self.assertNotIn(hostile, help_content.render_troubleshooting(hostile))
+
 
 if __name__ == "__main__":
     unittest.main()

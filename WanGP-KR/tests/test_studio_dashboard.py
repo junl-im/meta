@@ -66,6 +66,17 @@ class StudioDashboardTests(unittest.TestCase):
         self.assertIn("fn=self.goto_media_tab", SOURCE)
         self.assertNotIn("torch.cuda.set_device", SOURCE)
 
+    def test_v018_recovery_help_is_optional_and_read_only(self):
+        for token in (
+            "문제가 생겼나요? 단계별 해결",
+            'open=False, elem_id="gfs-recovery"',
+            "TROUBLESHOOT_TOPICS", "render_troubleshooting",
+            "problem_topic.change(",
+            "암호·API 키·개인 사진",
+        ):
+            self.assertIn(token, SOURCE)
+        self.assertLess(SOURCE.index('with gr.Tab("처음 실행 · 따라 하기")'), SOURCE.index("problem_topic.change("))
+
     def test_offline_prompt_workshop_is_copy_only(self):
         for token in (
             "프롬프트 작업실", "prompt_compose.click(", "fn=build_prompt",
@@ -100,7 +111,7 @@ class StudioDashboardTests(unittest.TestCase):
             self.assertIn(token, SOURCE)
 
     def test_plugin_metadata_matches(self):
-        self.assertEqual(META["version"], "0.16.0-dev")
+        self.assertEqual(META["version"], "0.18.0-dev")
         self.assertIn("GomFoxStudio", META["app_tab"])
 
     def test_read_only_preflight_is_optional(self):

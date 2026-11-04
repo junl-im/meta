@@ -15,7 +15,7 @@ from shared.utils.plugins import WAN2GPPlugin
 
 from .catalog import format_model_catalog, format_model_details, format_queue_status
 from .hardware import read_hardware_report
-from .help_content import TOPICS, render_guide
+from .help_content import TOPICS, TROUBLESHOOT_TOPICS, render_guide, render_troubleshooting
 from .prompt_assistant import TASK_KINDS, STYLES, PROFILES, build_prompt, fill_example
 from .studio_check import format_studio_readiness
 
@@ -138,7 +138,7 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.16.0-dev"
+        self.version = "0.18.0-dev"
         self.description = "전용 원화·반응형 시작 화면·저사양 첫 제작 순서가 있는 무료 로컬 제작실 · GPT 선택"
 
     def setup_ui(self):
@@ -282,6 +282,22 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                         "모델 다운로드·생성은 원본 WanGP에서 직접 선택합니다. "
                         "이 안내 화면은 PC 설정을 자동 변경하지 않습니다."
                     )
+                    with gr.Accordion(
+                        "문제가 생겼나요? 단계별 해결", open=False, elem_id="gfs-recovery"
+                    ):
+                        problem_topic = gr.Dropdown(
+                            choices=list(TROUBLESHOOT_TOPICS),
+                            value=TROUBLESHOOT_TOPICS[0],
+                            label="어떤 문제가 있나요?",
+                        )
+                        problem_guide = gr.Markdown(
+                            value=render_troubleshooting(TROUBLESHOOT_TOPICS[0])
+                        )
+                        gr.Markdown(
+                            "도움이 더 필요하면 **오류 문장·Windows 버전·GPU 이름·선택 모델**을 "
+                            "기록해 주세요. **암호·API 키·개인 사진**은 공개 공간에 올리지 마세요. "
+                            "이 안내는 설정이나 파일을 바꾸지 않습니다."
+                        )
 
                 with gr.Tab("프롬프트 작업실"):
                     gr.HTML(
@@ -446,6 +462,9 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
             )
 
         welcome_topic.change(fn=render_guide, inputs=[welcome_topic], outputs=[welcome_guide])
+        problem_topic.change(
+            fn=render_troubleshooting, inputs=[problem_topic], outputs=[problem_guide]
+        )
         welcome_hardware.click(fn=read_hardware_report, inputs=[], outputs=[welcome_report])
         welcome_start.click(fn=self.goto_media_tab, inputs=[self.state], outputs=[self.main_tabs])
         video_button.click(fn=lambda: render_guide("짧은 영상"), inputs=[], outputs=[task_guide])
