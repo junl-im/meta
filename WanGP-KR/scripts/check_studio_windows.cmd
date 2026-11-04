@@ -5,14 +5,16 @@ title 곰같은여우의 AI 스튜디오 - 설치 후 읽기 전용 점검
 
 echo.
 echo =====================================================
-echo   곰같은여우의 AI 스튜디오 v0.16 - Windows 설치 점검
+echo   곰같은여우의 AI 스튜디오 v0.17 - Windows 설치 점검
 echo =====================================================
 echo.
 echo [안내] 이 도구는 설치 여부와 v0.16 기준 파일 무결성만 검사합니다.
 echo 프로그램 실행, 모델 다운로드, 이미지 생성, 파일 수정은 하지 않습니다.
 echo 원본 WanGP가 지원하는 모든 모델의 실행 성공을 보장하지 않습니다.
+echo 검사 결과는 설치 준비 상태일 뿐, 실제 생성 성공 판정이 아닙니다.
 echo.
 
+echo [1/3] 원본 WanGP 설치 폴더 확인
 set "GOMFOX_CHECK_DIR=%LOCALAPPDATA%\GomFoxAIStudio\WanGP"
 if exist "%GOMFOX_CHECK_DIR%\wgp.py" if exist "%GOMFOX_CHECK_DIR%\plugins\" goto original_found
 
@@ -29,6 +31,8 @@ if not exist "%GOMFOX_CHECK_DIR%\wgp.py" goto missing_original
 if not exist "%GOMFOX_CHECK_DIR%\plugins\" goto missing_original
 echo [정상] 원본 WanGP 기본 구조 확인
 
+echo.
+echo [2/3] 한글 스튜디오 14개 파일 확인
 set "GOMFOX_PLUGIN_DIR=%GOMFOX_CHECK_DIR%\plugins\wan2gp-gomfox-studio"
 if not exist "%GOMFOX_PLUGIN_DIR%\" goto missing_plugin
 echo [확인] 한글 스튜디오 파일 SHA-256 대조 중...
@@ -65,8 +69,9 @@ call :verify_file "category-3d.webp" "9827269c0b33accb16c3dd95f250d9cd70429f9bed
 if errorlevel 1 set "GOMFOX_ISSUES=1"
 
 echo.
-echo [읽기 전용] RAM과 GPU 이름:
-powershell.exe -NoProfile -NonInteractive -Command "$ErrorActionPreference='SilentlyContinue'; $pc=Get-CimInstance Win32_ComputerSystem; if ($pc -and $pc.TotalPhysicalMemory) { Write-Output ('RAM: '+[math]::Round($pc.TotalPhysicalMemory/1GB,1)+' GB') }; Get-CimInstance Win32_VideoController | ForEach-Object { Write-Output ('GPU: '+$_.Name) }"
+echo [3/3] Windows 및 RAM/GPU 읽기 전용 조회
+powershell.exe -NoProfile -NonInteractive -Command "$ErrorActionPreference='SilentlyContinue'; Get-CimInstance Win32_OperatingSystem | ForEach-Object { Write-Output ('Windows: '+$_.Caption+' / Build '+$_.BuildNumber) }; $pc=Get-CimInstance Win32_ComputerSystem; if ($pc -and $pc.TotalPhysicalMemory) { Write-Output ('RAM: '+[math]::Round($pc.TotalPhysicalMemory/1GB,1)+' GB') }; Get-CimInstance Win32_VideoController | ForEach-Object { Write-Output ('GPU: '+$_.Name) }"
+echo 조회 결과가 비어 있다면 Windows 권한이나 WMI 상태를 확인하세요. 비어 있는 정보는 합격으로 간주하지 않습니다.
 echo 전용 VRAM은 Windows 작업 관리자 - 성능 - GPU에서 직접 확인하세요.
 echo AdapterRAM은 일부 GPU에서 부정확하므로 합격 판정에 사용하지 않습니다.
 echo.
@@ -80,24 +85,34 @@ if "%GOMFOX_ISSUES%"=="1" goto integrity_failed
 echo.
 echo [검사 통과] 원본 구조와 한글 스튜디오 필수 파일 14개가 v0.16 기준과 일치합니다.
 echo [미검증] 실제 실행, 브라우저 화면, GPU 생성, 결과 저장은 아직 확인하지 않았습니다.
-echo 다음 단계: WanGP Manager에서 실행 후 원본이 지원하는 작은 이미지 1장을 직접 생성해 보세요.
+echo [실기기 검수 1] WanGP Manager에서 Start WanGP를 눌러 원본 실행 확인
+echo [실기기 검수 2] 브라우저에서 한글 스튜디오 탭과 네 분야 원화 표시 확인
+echo [실기기 검수 3] 원본에서 지원하는 작은 이미지 1장을 직접 생성 후 저장 확인
+echo [실기기 검수 4] 실제 GPU VRAM, 모델명, 생성 시간과 오류를 따로 기록
 echo GPT 로그인이나 유료 API는 기본 생성에 필요하지 않습니다.
+echo 검수 기록 방법: WanGP-KR\docs\V017_FIRST_RUN_WINDOWS_KO.md
 pause
 exit /b 0
 
 :missing_original
 echo [점검 불가] 원본 WanGP의 wgp.py 또는 plugins 폴더를 확인하지 못했습니다.
 echo 설치 도우미로 원본을 설치하고 다시 점검하세요. 파일은 변경하지 않았습니다.
+echo 원본을 다른 드라이브에 설치했다면 원본 WanGP의 실제 폴더를 다시 입력하세요.
+echo 공식 Manager 설치가 아직 끝나지 않았다면 먼저 설치를 완료하세요.
 goto failed
 
 :missing_plugin
 echo [점검 불가] 한글 스튜디오 폴더를 확인하지 못했습니다.
 echo 한글 플러그인이 없거나 다른 위치에 설치됐을 수 있습니다. 파일은 변경하지 않았습니다.
+echo 원본 plugins 폴더 안의 wan2gp-gomfox-studio 이름을 확인하세요.
+echo 기존 폴더를 지우지 말고 설치 도우미와 현재 버전을 먼저 대조하세요.
 goto failed
 
 :integrity_failed
 echo [점검 필요] 필수 파일의 누락 또는 SHA-256 불일치가 발견됐습니다.
 echo 원본과 기존 플러그인을 자동 교체하지 않았습니다. 버전을 먼저 확인하세요.
+echo 이번 검사 기준은 v0.16 고정 소스이며 이전 버전 정상 파일도 불일치할 수 있습니다.
+echo 어떤 파일에서 누락 또는 불일치가 났는지 확인하고 수동 삭제 없이 보고해 주세요.
 goto failed
 
 :failed

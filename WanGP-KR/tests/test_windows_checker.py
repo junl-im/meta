@@ -1,4 +1,4 @@
-"""v0.15 Windows 설치 점검 도우미의 정적 안전·무결성 기준 검사.
+"""v0.17 Windows 설치 점검 도우미의 정적 안전·무결성 기준 검사.
 
 Linux에서 CMD 스크립트를 실제 실행하지 않으며 파일 자체의 계약만 확인한다.
 """
@@ -57,6 +57,26 @@ class TestWindowsReadOnlyChecker(unittest.TestCase):
         self.assertIn("실제 실행, 브라우저 화면, GPU 생성, 결과 저장은 아직 확인하지 않았습니다", self.script)
         self.assertIn("AdapterRAM은 일부 GPU에서 부정확", self.script)
         self.assertIn("파일은 변경하지 않았습니다", self.script)
+
+    def test_guides_first_run_without_claiming_a_real_render(self):
+        for phrase in (
+            "[1/3] 원본 WanGP 설치 폴더 확인",
+            "[2/3] 한글 스튜디오 14개 파일 확인",
+            "[3/3] Windows 및 RAM/GPU 읽기 전용 조회",
+            "[실기기 검수 1]",
+            "[실기기 검수 2]",
+            "[실기기 검수 3]",
+            "[실기기 검수 4]",
+            "V017_FIRST_RUN_WINDOWS_KO.md",
+            "검사 결과는 설치 준비 상태일 뿐, 실제 생성 성공 판정이 아닙니다",
+        ):
+            self.assertIn(phrase, self.script)
+
+    def test_failure_branches_offer_non_destructive_recovery_guidance(self):
+        self.assertIn("원본을 다른 드라이브에 설치했다면", self.script)
+        self.assertIn("기존 폴더를 지우지 말고", self.script)
+        self.assertIn("수동 삭제 없이 보고해 주세요", self.script)
+        self.assertIn("Get-CimInstance Win32_OperatingSystem", self.script)
 
 
 if __name__ == "__main__":
