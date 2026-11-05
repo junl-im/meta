@@ -19,7 +19,7 @@ from .help_content import (
     TOPICS, TROUBLESHOOT_TOPICS, render_card_summary, render_guide, render_troubleshooting,
 )
 from .prompt_assistant import TASK_KINDS, STYLES, PROFILES, build_prompt, fill_example
-from .studio_check import format_error_diagnosis, format_studio_readiness
+from .studio_check import clear_error_diagnosis, format_error_diagnosis, format_studio_readiness
 
 
 APP_TITLE = "곰같은여우의 AI 스튜디오"
@@ -101,6 +101,14 @@ STUDIO_STYLE = """
 #gfs-root #gfs-preflight-panel {border:0;border-radius:14px;background:rgba(64,112,119,.10);margin-top:5px}
 #gfs-root #gfs-preflight-check,#gfs-root #gfs-preflight-hardware {border:0;border-radius:11px;min-height:43px;font-weight:750}
 #gfs-root #gfs-preflight-result textarea {font-size:13px;line-height:1.6}
+#gfs-root #gfs-recovery {border:0;border-radius:14px;background:rgba(57,111,120,.09)}
+#gfs-root #gfs-error-input textarea {font-size:13px;line-height:1.6;overflow-wrap:anywhere;min-width:0}
+#gfs-root #gfs-error-advice {min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:keep-all;padding:10px 13px;background:rgba(42,122,125,.12);border:0;border-radius:12px;line-height:1.65}
+#gfs-root #gfs-error-advice h3 {font-size:16px;line-height:1.45;margin:0 0 6px}
+#gfs-root #gfs-error-actions {gap:8px;flex-wrap:wrap;min-width:0}
+#gfs-root #gfs-error-diagnose {min-height:43px;border:0;border-radius:11px;font-weight:800;background:linear-gradient(120deg,#246c74,#23625e);color:#fff}
+#gfs-root #gfs-error-clear,#gfs-root #gfs-connection-check {min-height:43px;border:0;border-radius:11px;font-weight:700}
+#gfs-root #gfs-connection-result textarea {font-size:12px;line-height:1.7;overflow-wrap:anywhere;min-width:0}
 #gfs-root #gfs-copy {border-radius:12px;font-weight:750}
 #gfs-root #gfs-example {border-radius:12px;font-weight:750;border:1px solid rgba(210,154,99,.42);background:linear-gradient(135deg,rgba(239,182,111,.19),rgba(97,151,151,.14))}
 #gfs-root #gfs-compose {min-height:44px;background:linear-gradient(130deg,#2b746f,#205f68);color:#fff;border-radius:12px;font-weight:800}
@@ -133,6 +141,10 @@ STUDIO_STYLE = """
   #gfs-root #gfs-task-guide {font-size:12px;padding:9px 11px}
   #gfs-root #gfs-task-guide h3 {font-size:14px}
   #gfs-root #gfs-queue-overview {padding:8px 10px;font-size:12px}
+  #gfs-root #gfs-error-input textarea,#gfs-root #gfs-error-advice {font-size:12px;line-height:1.6}
+  #gfs-root #gfs-error-advice {padding:9px 11px}
+  #gfs-root #gfs-error-advice h3 {font-size:14px}
+  #gfs-root #gfs-error-actions > * {flex:1 1 135px;min-width:0}
 }
 @media (max-width:420px) {
   #gfs-root #gfs-category-video,#gfs-root #gfs-category-image,#gfs-root #gfs-category-audio,#gfs-root #gfs-category-3d {padding:11px 10px;font-size:clamp(12px,3.4vw,14px)}
@@ -151,8 +163,8 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.23.0-dev"
-        self.description = "전용 원화·반응형 시작 화면·읽기 전용 한국어 오류 진단 · 무료 로컬 기본 · GPT 선택"
+        self.version = "0.24.0-dev"
+        self.description = "전용 원화·모바일 오류 진단·원본 연결 단계별 확인 · 무료 로컬 기본 · GPT 선택"
 
     def setup_ui(self):
         self.request_component("state")
@@ -321,12 +333,29 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                             placeholder="예: RuntimeError: CUDA out of memory",
                             elem_id="gfs-error-input",
                         )
-                        error_diagnose = gr.Button(
-                            "한국어 진단 보기", elem_id="gfs-error-diagnose"
-                        )
+                        with gr.Row(elem_id="gfs-error-actions"):
+                            error_diagnose = gr.Button(
+                                "한국어 진단 보기", elem_id="gfs-error-diagnose"
+                            )
+                            error_clear = gr.Button(
+                                "입력 지우기", elem_id="gfs-error-clear"
+                            )
                         error_advice = gr.Markdown(
                             value="오류 문장을 입력하고 버튼을 눌러 주세요.",
                             elem_id="gfs-error-advice",
+                        )
+                        gr.Markdown(
+                            "**원본 연결이 의심될 때** · 아래 버튼은 한글 UI·모델 목록 API·실제 생성 여부를 구분해 알려줍니다. "
+                            "원본 작업 큐를 실행하거나 모델을 다운로드하지 않습니다."
+                        )
+                        connection_check = gr.Button(
+                            "원본 연결 단계 확인 (읽기 전용)", elem_id="gfs-connection-check"
+                        )
+                        connection_result = gr.Textbox(
+                            label="한글 화면 · 원본 모델 API · 생성 검증 단계",
+                            lines=7, interactive=False,
+                            value="버튼을 누르면 연결 단계를 점검합니다. 모델 실행까지 자동 확인하지는 않습니다.",
+                            elem_id="gfs-connection-result",
                         )
 
                 with gr.Tab("프롬프트 작업실"):
@@ -502,6 +531,10 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
         )
         error_diagnose.click(
             fn=format_error_diagnosis, inputs=[error_text], outputs=[error_advice]
+        )
+        error_clear.click(fn=clear_error_diagnosis, inputs=[], outputs=[error_text, error_advice])
+        connection_check.click(
+            fn=lambda: format_studio_readiness(api_session), inputs=[], outputs=[connection_result]
         )
         welcome_hardware.click(fn=read_hardware_report, inputs=[], outputs=[welcome_report])
         welcome_start.click(fn=self.goto_media_tab, inputs=[self.state], outputs=[self.main_tabs])

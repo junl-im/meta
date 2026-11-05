@@ -110,8 +110,21 @@ class StudioDashboardTests(unittest.TestCase):
         ):
             self.assertIn(token, SOURCE)
 
+    def test_v024_recovery_panel_is_compact_and_has_clear_and_connection_controls(self):
+        for token in (
+            '#gfs-root #gfs-error-advice {min-width:0;max-width:100%',
+            '#gfs-root #gfs-error-actions {gap:8px;flex-wrap:wrap',
+            '#gfs-root #gfs-error-actions > * {flex:1 1 135px;min-width:0}',
+            'elem_id="gfs-error-clear"',
+            'elem_id="gfs-connection-result"',
+            'fn=clear_error_diagnosis',
+            '원본 연결 단계 확인 (읽기 전용)',
+        ):
+            self.assertIn(token, SOURCE)
+        self.assertNotIn('url("data:image/svg', SOURCE.casefold())
+
     def test_plugin_metadata_matches(self):
-        self.assertEqual(META["version"], "0.23.0-dev")
+        self.assertEqual(META["version"], "0.24.0-dev")
         self.assertIn("GomFoxStudio", META["app_tab"])
 
     def test_read_only_preflight_is_optional(self):

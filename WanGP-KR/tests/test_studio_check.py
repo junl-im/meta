@@ -22,6 +22,9 @@ class ReadinessTests(unittest.TestCase):
         self.assertIn("4/4개", report)
         self.assertIn("연결 확인 불가", report)
         self.assertIn("외부 전송은 수행하지 않았습니다", report)
+        self.assertIn("1단계 · 한글 화면", report)
+        self.assertIn("2단계 · 원본 연결", report)
+        self.assertIn("3단계 · 실제 생성: 미검증", report)
 
     def test_session_queries_metadata_once_without_submitting(self):
         class SafeSession:
@@ -38,6 +41,8 @@ class ReadinessTests(unittest.TestCase):
         report = check.format_studio_readiness(session)
         self.assertIn("메타데이터 2개", report)
         self.assertIn("작업 큐: 조회 API 있음", report)
+        self.assertIn("원본 모델 목록 조회 API가 응답했습니다", report)
+        self.assertIn("작업 내용을 읽지 않았습니다", report)
         self.assertEqual(session.calls, 1)
 
     def test_broken_art_does_not_crash(self):
@@ -56,9 +61,54 @@ class ReadinessTests(unittest.TestCase):
         report = check.format_studio_readiness(BadSession())
         self.assertIn("조회 실패 (RuntimeError)", report)
         self.assertNotIn("credential", report)
+        self.assertIn("조회 중 오류가 발생했습니다", report)
+
+    def test_connection_triage_does_not_confuse_empty_or_invalid_metadata_with_success(self):
+        class EmptySession:
+            def list_model_metadata(self):
+                return []
+
+        class WrongShapeSession:
+            def list_model_metadata(self):
+                return {"models": ["a"]}
+
+        empty = check.format_studio_readiness(EmptySession())
+        invalid = check.format_studio_readiness(WrongShapeSession())
+        self.assertIn("원본 모델 목록 응답은 받았지만 메타데이터가 비었습니다", empty)
+        self.assertIn("예상과 다릅니다", invalid)
+        self.assertIn("3단계 · 실제 생성: 미검증", empty)
+        self.assertIn("3단계 · 실제 생성: 미검증", invalid)
+
+        class WrongItemsSession:
+            def list_model_metadata(self):
+                return [{"model_type": "a"}, "broken-record"]
+
+        mixed = check.format_studio_readiness(WrongItemsSession())
+        self.assertIn("예상과 다른 항목", mixed)
+        self.assertNotIn("메타데이터 1개", mixed)
+
+    def test_connection_check_recovers_from_property_errors_without_leaking_details(self):
+        class BrokenProperties:
+            @property
+            def list_model_metadata(self):
+                raise RuntimeError("PRIVATE_TOKEN_IN_PROPERTY")
+
+            @property
+            def list_queue(self):
+                raise RuntimeError("PRIVATE_TOKEN_IN_QUEUE")
+
+        result = check.format_studio_readiness(BrokenProperties())
+        self.assertIn("원본 API 세션 또는 모델 목록 함수가 제공되지 않았습니다", result)
+        self.assertIn("원본 작업 큐: 연결 확인 불가", result)
+        self.assertNotIn("PRIVATE_TOKEN", result)
 
 
 class ErrorDiagnosisTests(unittest.TestCase):
+    def test_clear_pasted_log_does_not_echo_or_retry_it(self):
+        value, hint = check.clear_error_diagnosis()
+        self.assertEqual(value, "")
+        self.assertIn("입력란을 비웠습니다", hint)
+
     def test_known_errors_are_classified_without_echoing_user_log(self):
         samples = {
             "RuntimeError: CUDA out of memory": "GPU 또는 시스템 메모리 부족",

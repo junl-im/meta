@@ -80,6 +80,7 @@ class UiEventMockTests(unittest.TestCase):
             "studio_check": {
                 "format_studio_readiness": lambda session: "check",
                 "format_error_diagnosis": lambda message: "진단: " + str(message),
+                "clear_error_diagnosis": lambda: ("", "지웠습니다"),
             },
         }.items():
             mod = types.ModuleType("gomfox_test." + name)
@@ -139,6 +140,19 @@ class UiEventMockTests(unittest.TestCase):
             == ["gfs-error-input"]
             and [getattr(widget, "kwargs", {}).get("elem_id") for widget in e[1].get("outputs", [])]
             == ["gfs-error-advice"]
+            for e in events
+        ))
+        self.assertTrue(any(
+            e[0] == "click"
+            and e[1].get("fn") is modules["gomfox_test.studio_check"].clear_error_diagnosis
+            and [getattr(widget, "kwargs", {}).get("elem_id") for widget in e[1].get("outputs", [])]
+            == ["gfs-error-input", "gfs-error-advice"]
+            for e in events
+        ))
+        self.assertTrue(any(
+            e[0] == "click"
+            and [getattr(widget, "kwargs", {}).get("elem_id") for widget in e[1].get("outputs", [])]
+            == ["gfs-connection-result"]
             for e in events
         ))
         self.assertFalse(any("prompt" in name for name in app.requests))

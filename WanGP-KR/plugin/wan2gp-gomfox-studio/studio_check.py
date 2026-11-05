@@ -106,6 +106,11 @@ def format_error_diagnosis(error_text: str | None) -> str:
     )
 
 
+def clear_error_diagnosis() -> tuple[str, str]:
+    """Clear the visible pasted log without triggering another diagnosis."""
+    return "", "오류 입력란을 비웠습니다. 새로운 오류가 있다면 개인정보를 가린 뒤 입력해 주세요."
+
+
 def _raster_ok(path: Path) -> bool:
     """Tiny signature check; the installer separately performs real SHA-256 checks."""
     try:
@@ -133,6 +138,7 @@ def format_studio_readiness(session: Any, plugin_root: Path | None = None) -> st
 
     rows = [
         "곰같은여우의 AI 스튜디오 · 시작 점검 (읽기 전용)",
+        "- 1단계 · 한글 화면: 점검 버튼이 표시되어 이 함수가 실행됐습니다. 원본 생성 성공과는 별개입니다.",
         f"- 분야별 WebP 원화: {available_art}/4개 파일 형식 확인",
     ]
     if available_art != 4:
@@ -142,24 +148,44 @@ def format_studio_readiness(session: Any, plugin_root: Path | None = None) -> st
     else:
         rows.append("- 기본 화면 파일: 배너·아이콘·플러그인 정보 존재")
 
-    metadata = getattr(session, "list_model_metadata", None) if session is not None else None
+    try:
+        metadata = getattr(session, "list_model_metadata", None) if session is not None else None
+    except Exception:
+        metadata = None
+    model_status = "원본 모델 API 확인 불가"
     if not callable(metadata):
         rows.append("- 원본 모델 API: 연결 확인 불가 · WanGP 원본 화면에서 직접 확인")
+        model_status = "원본 API 세션 또는 모델 목록 함수가 제공되지 않았습니다. 원본을 다시 실행하고 Apps & PlugIn Manager의 활성화 상태를 확인하세요."
     else:
         try:
             records = metadata()
             if not isinstance(records, (list, tuple)):
                 rows.append("- 원본 모델 API: 예상과 다른 응답 형식")
+                model_status = "원본 모델 목록 응답 형식이 예상과 다릅니다. 원본/플러그인 버전을 확인하고 출력 형태를 기록하세요."
+            elif any(not isinstance(item, dict) for item in records):
+                rows.append("- 원본 모델 API: 목록에 예상과 다른 항목이 있습니다")
+                model_status = "원본 모델 목록의 일부 항목 형식이 예상과 다릅니다. 목록이 표시된다고 호환성을 확정할 수 없습니다."
             else:
-                count = sum(isinstance(item, dict) for item in records)
+                count = len(records)
                 rows.append(f"- 원본 모델 API: 응답 확인 · 메타데이터 {count}개")
+                model_status = "원본 모델 목록 조회 API가 응답했습니다. 이는 모델 파일 다운로드 완료나 생성 성공을 의미하지 않습니다."
                 if count == 0:
                     rows.append("  모델 메타데이터가 비어 있습니다. 원본 WanGP 설치 상태를 확인하세요.")
+                    model_status = "원본 모델 목록 응답은 받았지만 메타데이터가 비었습니다. 원본 모델 탐색기와 설치 상태를 직접 확인하세요."
         except Exception as exc:
             rows.append(f"- 원본 모델 API: 조회 실패 ({type(exc).__name__})")
+            model_status = "원본 모델 목록 조회 중 오류가 발생했습니다. 원본 실행 창의 오류를 확인하고 위의 한국어 진단에 개인정보를 가린 문장만 입력하세요."
 
-    queue = getattr(session, "list_queue", None) if session is not None else None
+    try:
+        queue = getattr(session, "list_queue", None) if session is not None else None
+    except Exception:
+        queue = None
     rows.append("- 원본 작업 큐: 조회 API 있음" if callable(queue) else "- 원본 작업 큐: 연결 확인 불가")
+    rows.extend([
+        "- 2단계 · 원본 연결: " + model_status,
+        "- 3단계 · 실제 생성: 미검증 · 원본에서 직접 이미지 한 장을 생성하고 저장해야만 확인할 수 있습니다.",
+        "  작업 큐 API는 존재 여부만 살폈으며 실행하거나 작업 내용을 읽지 않았습니다.",
+    ])
 
     rows.extend([
         "",
