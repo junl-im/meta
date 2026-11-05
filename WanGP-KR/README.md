@@ -1,6 +1,6 @@
 # 곰같은여우의 AI 스튜디오 — WanGP 한국어 개인 작업실 (개발판)
 
-> **현재 단계: v0.26 모델 사전 점검과 첫 작품 분야 연동 (한글 플러그인 0.26.0-dev).** 이 폴더는 원본 WanGP 엔진을 복제하거나 교체한 구현물이 아니라, **원본을 사용하기 위한 설계·연동 작업 공간**입니다. 실제 Windows 설치·실행·GPU 성능 검증은 아직 하지 않았습니다.
+> **현재 단계: v0.27 Windows 실기기 정보 수집 도우미 (한글 플러그인 0.26.0-dev 유지).** 이 폴더는 원본 WanGP 엔진을 복제하거나 교체한 구현물이 아니라, **원본을 사용하기 위한 설계·연동 작업 공간**입니다. 실제 Windows 설치·실행·GPU 성능 검증은 아직 하지 않았습니다.
 
 ## 목표
 
@@ -72,6 +72,7 @@ python WanGP-KR/scripts/bring_upstream.py
 25. [v0.24 모바일 오류 화면·원본 연결 3단계 검수표](docs/V024_CONNECTION_MOBILE_QA_KO.md)
 26. [v0.25 첫 무료 작품 4단계·Windows 실기기 검수표](docs/V025_FIRST_CREATION_QA_KO.md)
 27. [v0.26 모델 준비·메모리 정보 사전 점검 및 실기기 검수표](docs/V026_MODEL_PREFLIGHT_QA_KO.md)
+28. [v0.27 Windows 실기기 진단·보고서 사용 안내](docs/V027_WINDOWS_EVIDENCE_QA_KO.md)
 
 ## 2026-11-01 디자인 대시보드 개발
 
@@ -156,6 +157,14 @@ python WanGP-KR/scripts/bring_upstream.py
 - [v0.17 최초 실행·오류별 안전 복구 검수표](docs/V017_FIRST_RUN_WINDOWS_KO.md)를 제공하며, Linux 코드·CMD 정적 테스트 **64개 통과**를 Windows 실구동 성공으로 해석하지 않습니다.
 
 ## 진척
+
+### 2026-11-05 v0.27 Windows 실기기 정보 수집 도우미
+
+- [단일 Windows 진단 도우미](scripts/collect_studio_windows_qa.cmd)를 추가했습니다. 실행한 PC에서 Windows 빌드·시스템 메모리·GPU 이름과 드라이버를 읽기 전용으로 확인하며, 가능하면 NVIDIA `nvidia-smi`의 **GPU별 총 전용 메모리** 보고를 함께 출력합니다.
+- **사용자가 동의했을 때에만** 같은 폴더에 `gomfox-v027-windows-qa.txt` 생성을 시도하고 기존 파일은 덮어쓰지 않습니다. 컴퓨터 계정·개인 파일 경로·프롬프트·로그 원문·인증키는 수집하지 않도록 수집 항목을 제한했습니다.
+- 원본 폴더와 한글 플러그인이 있는지 조회할 수 있지만, 실제 WanGP 프로그램 실행·모델 파일 준비·GPU 이미지 생성·결과 저장은 전부 **미검증**으로 남깁니다. 14개 파일의 SHA-256은 기존 [설치 점검 도우미](scripts/check_studio_windows.cmd)로 별도 확인합니다.
+- 한글 플러그인 및 설치용 14개 고정 파일은 **v0.26 그대로 유지**합니다. 원본 엔진·모델·기존 설치 파일 자동 변경 없음. [v0.27 실기기 검수 안내](docs/V027_WINDOWS_EVIDENCE_QA_KO.md)에 사용자 진행 순서를 추가했습니다.
+- Linux 정적 자동 시험은 실제 Windows CIM·NVIDIA 드라이버와 같은 환경이 아니므로 **실기기 진단 성공이나 모델 생성 성공을 보증하지 않습니다**.
 
 ### 2026-11-05 v0.26 모델 사전 점검·첫 작품 분야 연결
 
