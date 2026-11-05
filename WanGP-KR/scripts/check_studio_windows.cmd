@@ -91,6 +91,9 @@ echo [실기기 검수 3] 원본에서 지원하는 작은 이미지 1장을 직
 echo [실기기 검수 4] 실제 GPU VRAM, 모델명, 생성 시간과 오류를 따로 기록
 echo GPT 로그인이나 유료 API는 기본 생성에 필요하지 않습니다.
 echo 검수 기록 방법: WanGP-KR\docs\V019_VISUAL_QA_KO.md
+echo [추가] v0.20 오프라인 실기기 기록장: WanGP-KR\docs\V020_WINDOWS_SMOKE_WORKBOOK.html
+echo 이 기록장은 모델 생성 없이 측정 시간과 직접 확인한 결과를 TXT로 정리합니다.
+echo 설치 점검 통과와 실제 무료 생성 성공은 별개입니다.
 pause
 exit /b 0
 

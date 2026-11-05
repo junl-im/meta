@@ -68,6 +68,7 @@ class TestWindowsReadOnlyChecker(unittest.TestCase):
             "[실기기 검수 3]",
             "[실기기 검수 4]",
             "V019_VISUAL_QA_KO.md",
+            "V020_WINDOWS_SMOKE_WORKBOOK.html",
             "검사 결과는 설치 준비 상태일 뿐, 실제 생성 성공 판정이 아닙니다",
         ):
             self.assertIn(phrase, self.script)

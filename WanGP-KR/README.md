@@ -1,6 +1,6 @@
 # 곰같은여우의 AI 스튜디오 — WanGP 한국어 개인 작업실 (개발판)
 
-> **현재 단계: v0.19 원화 카드·작업 현황 디자인 정리 (한글 플러그인 0.19.0-dev).** 이 폴더는 원본 WanGP 엔진을 복제하거나 교체한 구현물이 아니라, **원본을 사용하기 위한 설계·연동 작업 공간**입니다. 실제 Windows 설치·실행·GPU 성능 검증은 아직 하지 않았습니다.
+> **현재 단계: v0.20 Windows 첫 무료 생성 검수 도구 준비 (한글 플러그인은 0.19.0-dev 유지).** 이 폴더는 원본 WanGP 엔진을 복제하거나 교체한 구현물이 아니라, **원본을 사용하기 위한 설계·연동 작업 공간**입니다. 실제 Windows 설치·실행·GPU 성능 검증은 아직 하지 않았습니다.
 
 ## 목표
 
@@ -64,6 +64,8 @@ python WanGP-KR/scripts/bring_upstream.py
 17. [v0.18 처음 실행 상황별 문제 해결·안전 설치 검수표](docs/V018_TROUBLESHOOTING_QA_KO.md)
 18. [v0.19 PC·모바일 오프라인 화면 미리보기](docs/V019_VISUAL_PREVIEW.html)
 19. [v0.19 원화·선택 안내·작업 큐 역검수표](docs/V019_VISUAL_QA_KO.md)
+20. [v0.20 Windows 실기기 기록용 오프라인 HTML](docs/V020_WINDOWS_SMOKE_WORKBOOK.html)
+21. [v0.20 실제 무료 생성·성능 기록 가이드](docs/V020_WINDOWS_FIRST_GENERATION_KO.md)
 
 ## 2026-11-01 디자인 대시보드 개발
 
@@ -148,6 +150,13 @@ python WanGP-KR/scripts/bring_upstream.py
 - [v0.17 최초 실행·오류별 안전 복구 검수표](docs/V017_FIRST_RUN_WINDOWS_KO.md)를 제공하며, Linux 코드·CMD 정적 테스트 **64개 통과**를 Windows 실구동 성공으로 해석하지 않습니다.
 
 ## 진척
+
+### 2026-11-05 v0.20 Windows 실제 첫 생성 검수 준비
+
+- 원본 설치 후 **PC 사양 → 실행 확인 → GPT 없는 작은 이미지 1장 생성·타이머 → 결과 TXT 내보내기** 4단계를 단계별로 기록할 수 있는 [오프라인 검수 화면](docs/V020_WINDOWS_SMOKE_WORKBOOK.html)을 추가했습니다.
+- 기록장에서는 사용자 입력을 서버로 전송하지 않고, 프롬프트·인증키·파일 경로를 요구하지 않습니다. 사용자가 TXT 저장 버튼을 누를 때에만 로컬 다운로드를 요청합니다.
+- 기존 [읽기 전용 Windows 점검 CMD](scripts/check_studio_windows.cmd)에 기록장 경로와 생성 성능은 별도 확인이라는 설명을 덧붙였습니다. **원본 WanGP, v0.19 한글 플러그인 및 설치 소스 고정 파일은 바꾸지 않았습니다.**
+- 기록장의 버튼·타이머·내보내기는 Linux 기반 구조·문법 검사 대상입니다. **실제 Windows 16GB PC에서 Manager·Gradio·무료 GPU 이미지 생성은 여전히 미검증**입니다. [검수 안내](docs/V020_WINDOWS_FIRST_GENERATION_KO.md).
 
 ### 2026-11-04 v0.19 시각적 연결성과 큐 상태 정리
 
