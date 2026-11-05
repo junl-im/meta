@@ -19,7 +19,7 @@ from .help_content import (
     TOPICS, TROUBLESHOOT_TOPICS, render_card_summary, render_guide, render_troubleshooting,
 )
 from .prompt_assistant import TASK_KINDS, STYLES, PROFILES, build_prompt, fill_example
-from .studio_check import format_studio_readiness
+from .studio_check import format_error_diagnosis, format_studio_readiness
 
 
 APP_TITLE = "곰같은여우의 AI 스튜디오"
@@ -151,8 +151,8 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.21.0-dev"
-        self.description = "전용 원화·반응형 시작 화면·오검출을 차단한 저사양 첫 제작 안내 · 무료 로컬 기본 · GPT 선택"
+        self.version = "0.23.0-dev"
+        self.description = "전용 원화·반응형 시작 화면·읽기 전용 한국어 오류 진단 · 무료 로컬 기본 · GPT 선택"
 
     def setup_ui(self):
         self.request_component("state")
@@ -310,6 +310,23 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                             "도움이 더 필요하면 **오류 문장·Windows 버전·GPU 이름·선택 모델**을 "
                             "기록해 주세요. **암호·API 키·개인 사진**은 공개 공간에 올리지 마세요. "
                             "이 안내는 설정이나 파일을 바꾸지 않습니다."
+                        )
+                        gr.Markdown(
+                            "**오류 문장 간단 진단 · 선택** — 원본 실행 창의 오류 부분을 붙여넣으세요. "
+                            "암호·토큰·개인정보·파일 경로는 입력 전에 가려 주세요. "
+                            "진단은 이 화면의 문자열 비교만 수행하며 원본 로그를 자동 수집하지 않습니다."
+                        )
+                        error_text = gr.Textbox(
+                            label="오류 메시지 붙여넣기 (선택)", lines=3,
+                            placeholder="예: RuntimeError: CUDA out of memory",
+                            elem_id="gfs-error-input",
+                        )
+                        error_diagnose = gr.Button(
+                            "한국어 진단 보기", elem_id="gfs-error-diagnose"
+                        )
+                        error_advice = gr.Markdown(
+                            value="오류 문장을 입력하고 버튼을 눌러 주세요.",
+                            elem_id="gfs-error-advice",
                         )
 
                 with gr.Tab("프롬프트 작업실"):
@@ -482,6 +499,9 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
         welcome_topic.change(fn=render_guide, inputs=[welcome_topic], outputs=[welcome_guide])
         problem_topic.change(
             fn=render_troubleshooting, inputs=[problem_topic], outputs=[problem_guide]
+        )
+        error_diagnose.click(
+            fn=format_error_diagnosis, inputs=[error_text], outputs=[error_advice]
         )
         welcome_hardware.click(fn=read_hardware_report, inputs=[], outputs=[welcome_report])
         welcome_start.click(fn=self.goto_media_tab, inputs=[self.state], outputs=[self.main_tabs])

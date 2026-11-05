@@ -58,5 +58,41 @@ class ReadinessTests(unittest.TestCase):
         self.assertNotIn("credential", report)
 
 
+class ErrorDiagnosisTests(unittest.TestCase):
+    def test_known_errors_are_classified_without_echoing_user_log(self):
+        samples = {
+            "RuntimeError: CUDA out of memory": "GPU 또는 시스템 메모리 부족",
+            "OSError: [WinError 112] Not enough space": "저장 공간 부족",
+            "RuntimeError: CUDA driver version is insufficient": "GPU 드라이버·CUDA 호환성",
+            "Failed to load plugin wan2gp-gomfox-studio": "한글 플러그인 로딩",
+            "ModuleNotFoundError: No module named 'gradio'": "Python 모듈",
+            "HTTP 403 download model failed": "모델 다운로드·네트워크",
+            "OSError: [WinError 10048] address already in use": "실행 포트",
+            "FileNotFoundError: C:\\Users\\Name\\model.safetensors": "필수 파일 경로",
+        }
+        for error, expected in samples.items():
+            with self.subTest(error=error):
+                output = check.format_error_diagnosis(error + "\nSECRET_TOKEN_981")
+                self.assertIn(expected, output)
+                self.assertIn("실제 원인이나 GPU 호환성을 자동 확인한 것은 아닙니다", output)
+                self.assertNotIn("SECRET_TOKEN_981", output)
+                self.assertNotIn(error, output)
+
+    def test_disk_full_is_more_specific_than_memory_message(self):
+        report = check.format_error_diagnosis("CUDA out of memory\nNo space left on device")
+        self.assertIn("저장 공간 부족", report)
+
+    def test_unknown_or_empty_does_not_invent_a_successful_diagnosis(self):
+        self.assertIn("원인을 아직 구분할 수 없습니다", check.format_error_diagnosis("hello world"))
+        self.assertIn("오류 문장을 입력", check.format_error_diagnosis(""))
+        self.assertIn("오류 문장을 입력", check.format_error_diagnosis(None))
+
+    def test_long_untrusted_input_is_bounded_to_last_twenty_thousand_characters(self):
+        long_message = "x" * 50000 + "\nCUDA out of memory"
+        output = check.format_error_diagnosis(long_message)
+        self.assertIn("메모리 부족", output)
+        self.assertLess(len(output), 900)
+
+
 if __name__ == "__main__":
     unittest.main()

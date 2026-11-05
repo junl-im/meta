@@ -77,7 +77,10 @@ class UiEventMockTests(unittest.TestCase):
                 "TROUBLESHOOT_TOPICS": ("원본 WanGP가 열리지 않아요", "GPT 없이 무료로 만들고 싶어요"),
                 "render_troubleshooting": lambda topic: "문제 해결: " + str(topic),
             },
-            "studio_check": {"format_studio_readiness": lambda session: "check"},
+            "studio_check": {
+                "format_studio_readiness": lambda session: "check",
+                "format_error_diagnosis": lambda message: "진단: " + str(message),
+            },
         }.items():
             mod = types.ModuleType("gomfox_test." + name)
             mod.__dict__.update(contents)
@@ -127,6 +130,15 @@ class UiEventMockTests(unittest.TestCase):
         ))
         self.assertTrue(any(
             e[0] == "change" and e[1].get("fn") is modules["gomfox_test.help_content"].render_troubleshooting
+            for e in events
+        ))
+        self.assertTrue(any(
+            e[0] == "click"
+            and e[1].get("fn") is modules["gomfox_test.studio_check"].format_error_diagnosis
+            and [getattr(widget, "kwargs", {}).get("elem_id") for widget in e[1].get("inputs", [])]
+            == ["gfs-error-input"]
+            and [getattr(widget, "kwargs", {}).get("elem_id") for widget in e[1].get("outputs", [])]
+            == ["gfs-error-advice"]
             for e in events
         ))
         self.assertFalse(any("prompt" in name for name in app.requests))
