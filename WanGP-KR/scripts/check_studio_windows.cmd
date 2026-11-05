@@ -5,10 +5,10 @@ title 곰같은여우의 AI 스튜디오 - 설치 후 읽기 전용 점검
 
 echo.
 echo =====================================================
-echo   곰같은여우의 AI 스튜디오 v0.25 - Windows 설치 점검
+echo   곰같은여우의 AI 스튜디오 v0.26 - Windows 설치 점검
 echo =====================================================
 echo.
-echo [안내] 이 도구는 설치 여부와 v0.25 기준 파일 무결성만 검사합니다.
+echo [안내] 이 도구는 설치 여부와 v0.26 기준 파일 무결성만 검사합니다.
 echo 프로그램 실행, 모델 다운로드, 이미지 생성, 파일 수정은 하지 않습니다.
 echo 원본 WanGP가 지원하는 모든 모델의 실행 성공을 보장하지 않습니다.
 echo 검사 결과는 설치 준비 상태일 뿐, 실제 생성 성공 판정이 아닙니다.
@@ -36,18 +36,18 @@ echo [2/3] 한글 스튜디오 14개 파일 확인
 set "GOMFOX_PLUGIN_DIR=%GOMFOX_CHECK_DIR%\plugins\wan2gp-gomfox-studio"
 if not exist "%GOMFOX_PLUGIN_DIR%\" goto missing_plugin
 echo [확인] 한글 스튜디오 파일 SHA-256 대조 중...
-echo 소스 기준: f9bcaed6cb4fb9de6b496e92ae49d34462f785d3
+echo 소스 기준: f866f33ef281ad897df012c208ea1c113d637d7f
 set "GOMFOX_ISSUES=0"
 
 call :verify_file "__init__.py" "754b7e9e5046f2450c5fd4ea0a53d40b6ceb8671acbb6e7ddd8932a52de80066"
 if errorlevel 1 set "GOMFOX_ISSUES=1"
-call :verify_file "plugin.py" "5f02e9cdeed180a752c38e164b69ba504e427ca9b875c5c106e5bbd519db7506"
+call :verify_file "plugin.py" "b58735e3def599758fa93a7621728ea156c2ab648f751baccf1118f8c40a1410"
 if errorlevel 1 set "GOMFOX_ISSUES=1"
-call :verify_file "plugin_info.json" "c4a6da503355b080cac97c3f5a5c5d31c8a927abcde1e724fdf21530ffd36b0f"
+call :verify_file "plugin_info.json" "cf79549f6a29d008ac767b3005b638573557b0b928a0d8a176626d5e847605dc"
 if errorlevel 1 set "GOMFOX_ISSUES=1"
-call :verify_file "catalog.py" "39cb365029369a6cd86d65f60a88ac4de424fd47960c0a41030d223dfb8d7de7"
+call :verify_file "catalog.py" "8cccd472df2f33bca91fde3231b53cade7a0de9522b164d8f49a7d9875815f05"
 if errorlevel 1 set "GOMFOX_ISSUES=1"
-call :verify_file "help_content.py" "dcbc8d3604efad87087cca5d33453b3ad5301924a3dfd771386db5012be3c1b3"
+call :verify_file "help_content.py" "0f96b6657342735165dc56b1e8f9296ab2093eca7daa827a47ce406a0c63059e"
 if errorlevel 1 set "GOMFOX_ISSUES=1"
 call :verify_file "hardware.py" "04f3ff1a05714f22f43340190cf75b1c85d4d443c6feccad34c4a6487bae66bf"
 if errorlevel 1 set "GOMFOX_ISSUES=1"
@@ -83,7 +83,7 @@ if exist "%GOMFOX_CHECK_DIR%\scripts\run.bat" (
 
 if "%GOMFOX_ISSUES%"=="1" goto integrity_failed
 echo.
-echo [검사 통과] 원본 구조와 한글 스튜디오 필수 파일 14개가 v0.25 기준과 일치합니다.
+echo [검사 통과] 원본 구조와 한글 스튜디오 필수 파일 14개가 v0.26 기준과 일치합니다.
 echo [미검증] 실제 실행, 브라우저 화면, GPU 생성, 결과 저장은 아직 확인하지 않았습니다.
 echo [실기기 검수 1] WanGP Manager에서 Start WanGP를 눌러 원본 실행 확인
 echo [실기기 검수 2] 브라우저에서 한글 스튜디오 탭과 네 분야 원화 표시 확인
