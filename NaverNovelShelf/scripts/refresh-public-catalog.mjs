@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import vm from 'node:vm';
 import {fileURLToPath} from 'node:url';
+import {publicCatalogStatus} from './public-catalog-status.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const authors=['[곰같은여우]','[여우같은곰]','고양이와사비','[ZERO]','닥터X'];
@@ -34,7 +35,7 @@ function parse(html,league){
     return {id,league:cardLeague,
       title:field(markup,/<span class="title">([^<]+)<\/span>/,'title'),
       author:field(markup,/<span class="author"><strong>([^<]+)<\/strong>/,'author'),
-      image:field(markup,/<img src="([^"]+)"/,'cover'),
+      image:field(markup,/<img src="([^"]+)"/,'cover'), status:publicCatalogStatus(markup),
       tags:decode(markup.match(/<span class="tag">([^<]*)<\/span>/)?.[1]??'')};
   });
   return{count,rows,html};
@@ -83,19 +84,19 @@ if(unique.size!==collected.length)throw Error('Duplicate public search result');
 const previousById=new Map(previous.map(row=>[row.id,row]));
 const next=[...unique.values()].map(row=>{
   const old=previousById.get(row.id);
-  return{title:row.title,author:row.author,id:row.id,league:row.league,image:row.image,genre:genre(row.tags,old?.genre),url:`https://m.novel.naver.com/${row.league}/list?novelId=${row.id}`};
+  return{title:row.title,author:row.author,id:row.id,league:row.league,image:row.image,genre:genre(row.tags,old?.genre),status:row.status,url:`https://m.novel.naver.com/${row.league}/list?novelId=${row.id}`};
 }).sort((a,b)=>{
   const oldA=previous.findIndex(row=>row.id===a.id),oldB=previous.findIndex(row=>row.id===b.id);
   return(oldA<0?Infinity:oldA)-(oldB<0?Infinity:oldB)||Number(b.id)-Number(a.id);
 });
 if(next.some(row=>!row.genre))throw Error('A new work has no verified genre');
-const signature=rows=>JSON.stringify(rows.map(({title,author,id,league,image,genre})=>[title,author,id,league,image,genre]));
+const signature=rows=>JSON.stringify(rows.map(({title,author,id,league,image,genre,status})=>[title,author,id,league,image,genre,status]));
 if(signature(next)===signature(previous)){console.log(`No catalog changes (${next.length} works)`);process.exit(0)}
 const checked=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-const tuples=next.map(({title,author,id,league,image,genre})=>`  ${JSON.stringify([title,author,id,league,image,genre])}`).join(',\n');
-await fs.writeFile(source,`/* Public Naver Web Novel work metadata, verified ${checked}.\n   Only titles, author pen names, official cover thumbnail URLs and links.\n   No story text or reader data is reproduced. */\nwindow.NOVEL_CATALOG = [\n${tuples}\n].map(([title,author,id,league,image,genre])=>({\n  title, author, id, league, image, genre,\n  url: \`https://m.novel.naver.com/\${league}/list?novelId=\${id}\`\n}));\nwindow.NOVEL_CATALOG_LAST_CHECK = ${JSON.stringify(checked)};\n`);
+const tuples=next.map(({title,author,id,league,image,genre,status})=>`  ${JSON.stringify([title,author,id,league,image,genre,status])}`).join(',\n');
+await fs.writeFile(source,`/* Public Naver Web Novel work metadata, verified ${checked}.\n   Only titles, author pen names, official cover thumbnail URLs, status and links.\n   No story text or reader data is reproduced. */\nwindow.NOVEL_CATALOG = [\n${tuples}\n].map(([title,author,id,league,image,genre,status])=>({\n  title, author, id, league, image, genre, status,\n  url: \`https://m.novel.naver.com/\${league}/list?novelId=\${id}\`\n}));\nwindow.NOVEL_CATALOG_LAST_CHECK = ${JSON.stringify(checked)};\n`);
 const original=JSON.parse(await fs.readFile(integration,'utf8'));
-const output={...original,catalog_last_verified:checked,works:next.map(row=>({id:row.id,title:row.title,author_search_identity:row.author,league:row.league,genre:row.genre,official_url:row.url,cover_thumbnail_url:row.image}))};
+const output={...original,catalog_last_verified:checked,works:next.map(row=>({id:row.id,title:row.title,author_search_identity:row.author,league:row.league,genre:row.genre,publication_status:row.status,official_url:row.url,cover_thumbnail_url:row.image}))};
 const json=JSON.stringify(output,null,2)+'\n';
 await fs.writeFile(integration,json);
 await fs.writeFile(feed,json);

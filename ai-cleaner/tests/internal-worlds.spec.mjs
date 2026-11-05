@@ -59,3 +59,37 @@ test('shelf keeps its bundled works when the feed is unavailable',async({page})=
   await expect(page.locator('#hero-total')).toHaveText(String(catalogCount));
   await expect(page.locator('.novel-card[data-open-novel="1250566"]')).toBeVisible();
 });
+
+for (const width of [320, 1280]) test(`shelf groups verified completion states by league at ${width}px`,async({page})=>{
+  await page.setViewportSize({width,height:width===320?568:800});
+  const response=await page.request.get(new URL('../NaverNovelShelf/site/catalog-feed.json',home).href);
+  const feed=await response.json();
+  const best=feed.works.filter(work=>work.league==='best');
+  const challenge=feed.works.filter(work=>work.league==='challenge');
+  expect(best.length).toBeGreaterThanOrEqual(2);expect(challenge.length).toBeGreaterThanOrEqual(1);
+  for(const work of feed.works)work.publication_status='ongoing';
+  best[0].publication_status='completed';
+  await page.route('**/NaverNovelShelf/site/catalog-feed.json',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(feed)}));
+  await page.goto(new URL('../NaverNovelShelf/site/',home).href);
+  await expect(page.locator('[aria-label="베스트리그 완결"] .novel-card')).toHaveCount(1);
+  await expect(page.locator('[aria-label="베스트리그 완결"] .novel-card')).toHaveAttribute('data-open-novel',best[0].id);
+  await expect(page.locator('[aria-label="베스트리그 연재중"] .novel-card')).toHaveCount(best.length-1);
+  await expect(page.locator('[aria-label="챌린지리그 완결"]')).toHaveCount(0);
+  await expect(page.locator('[aria-label="챌린지리그 연재중"] .novel-card')).toHaveCount(challenge.length);
+  await page.locator('[data-league="challenge"]').click();
+  await expect(page.locator('[aria-label="베스트리그 연재중"]')).toHaveCount(0);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  if(width===320)expect(await page.locator('.novel-grid').first().evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(' ').length)).toBe(3);
+});
+
+test('older feed without status keeps verified bundled states and labels new works unknown',async({page})=>{
+  const response=await page.request.get(new URL('../NaverNovelShelf/site/catalog-feed.json',home).href);
+  const feed=await response.json();const completed=feed.works.find(work=>work.publication_status==='completed');
+  expect(completed).toBeTruthy();
+  for(const work of feed.works)delete work.publication_status;
+  feed.works.push({id:'9999999',title:'상태 확인 작품',author_search_identity:'닥터X',league:'challenge',genre:'판타지',official_url:'https://m.novel.naver.com/challenge/list?novelId=9999999',cover_thumbnail_url:feed.works[0].cover_thumbnail_url});
+  await page.route('**/NaverNovelShelf/site/catalog-feed.json',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(feed)}));
+  await page.goto(new URL('../NaverNovelShelf/site/',home).href);
+  await expect(page.locator(`[aria-label="베스트리그 완결"] [data-open-novel="${completed.id}"]`)).toBeVisible();
+  await expect(page.locator('[aria-label="챌린지리그 상태 확인 중"] [data-open-novel="9999999"]')).toBeVisible();
+});

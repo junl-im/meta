@@ -125,6 +125,7 @@ jobs:
           node NaverNovelShelf/scripts/test-language-segments.mjs
           node NaverNovelShelf/scripts/test-model-cache.mjs
           node --test NaverNovelShelf/scripts/test-public-reader.cjs
+          node --test NaverNovelShelf/scripts/test-public-catalog-status.mjs
       - name: Static checks
         run: node ai-cleaner/tests/static-check.mjs
 
