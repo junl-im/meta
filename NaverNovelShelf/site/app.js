@@ -17,6 +17,7 @@
   let lastReadId=null;
   let toastTimer=null;
   let lastFeedFetch=0;
+  let lastVerified=window.NOVEL_CATALOG_LAST_CHECK||"";
   try { lastReadId=localStorage.getItem(LAST_KEY); } catch {}
   const findLast = () => works.find(w=>w.id===lastReadId);
   async function refreshCatalog() {
@@ -26,7 +27,8 @@
       if(!response.ok) return;
       const feed=await response.json();
       if(feed.schema_version!==1||!Array.isArray(feed.works)||!/^\d{4}-\d{2}-\d{2}$/.test(feed.catalog_last_verified||""))return;
-      if(feed.catalog_last_verified<(window.NOVEL_CATALOG_LAST_CHECK||""))return;
+      if(feed.catalog_last_verified<lastVerified)return;
+      if(!feed.works.length&&works.length)return;
       const knownStatus=new Map(works.map(w=>[w.league+":"+w.id,w.status]));
       const next=feed.works.map(row=>({
         title:row.title,author:row.author_search_identity,id:String(row.id),
@@ -46,6 +48,7 @@
         works=next;
         renderWorks();renderResumeButtons();
       }
+      lastVerified=feed.catalog_last_verified;
     } catch { /* Keep the verified bundled catalog when the feed is unavailable. */ }
   }
   function toast(message) {
@@ -92,7 +95,7 @@
     byId("league-groups").innerHTML=leagues.filter(league=>selectedLeague==="all"||league.value===selectedLeague).map(league=>{
       const groupRows=rows.filter(w=>w.league===league.value);
       if(!groupRows.length)return "";
-      const statusGroups=[{value:"ongoing",label:"연재중"},{value:"completed",label:"완결"},{value:"unknown",label:"상태 확인 중"}];
+      const statusGroups=[{value:"completed",label:"완결"},{value:"ongoing",label:"연재중"},{value:"unknown",label:"상태 확인 중"}];
       const sections=statusGroups.map(status=>{
         const entries=groupRows.filter(w=>w.status===status.value);
         if(!entries.length)return "";

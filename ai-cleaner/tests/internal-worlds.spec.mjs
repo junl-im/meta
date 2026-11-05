@@ -74,6 +74,9 @@ for (const width of [320, 1280]) test(`shelf groups verified completion states b
   await expect(page.locator('[aria-label="베스트리그 완결"] .novel-card')).toHaveCount(1);
   await expect(page.locator('[aria-label="베스트리그 완결"] .novel-card')).toHaveAttribute('data-open-novel',best[0].id);
   await expect(page.locator('[aria-label="베스트리그 연재중"] .novel-card')).toHaveCount(best.length-1);
+  const bestGroups=page.locator('.league-section[aria-label="베스트리그"] .publication-group');
+  await expect(bestGroups.nth(0)).toHaveAttribute('aria-label','베스트리그 완결');
+  await expect(bestGroups.nth(1)).toHaveAttribute('aria-label','베스트리그 연재중');
   await expect(page.locator('[aria-label="챌린지리그 완결"]')).toHaveCount(0);
   await expect(page.locator('[aria-label="챌린지리그 연재중"] .novel-card')).toHaveCount(challenge.length);
   await page.locator('[data-league="challenge"]').click();
@@ -92,4 +95,22 @@ test('older feed without status keeps verified bundled states and labels new wor
   await page.goto(new URL('../NaverNovelShelf/site/',home).href);
   await expect(page.locator(`[aria-label="베스트리그 완결"] [data-open-novel="${completed.id}"]`)).toBeVisible();
   await expect(page.locator('[aria-label="챌린지리그 상태 확인 중"] [data-open-novel="9999999"]')).toBeVisible();
+});
+
+for(const kind of ['empty','stale']) test(`shelf retains current works when a ${kind} feed arrives later`,async({page})=>{
+  const response=await page.request.get(new URL('../NaverNovelShelf/site/catalog-feed.json',home).href);
+  const feed=await response.json();
+  const newer=structuredClone(feed);newer.catalog_last_verified='9999-12-31';
+  newer.works.push({id:'9999998',title:'확인된 최신 작품',author_search_identity:'닥터X',league:'challenge',genre:'판타지',publication_status:'ongoing',official_url:'https://m.novel.naver.com/challenge/list?novelId=9999998',cover_thumbnail_url:feed.works[0].cover_thumbnail_url});
+  const later=structuredClone(feed);later.catalog_last_verified=kind==='empty'?'9999-12-31':'9999-01-01';
+  if(kind==='empty')later.works=[];
+  let calls=0;
+  await page.addInitScript(()=>{const now=Date.now.bind(Date);window.__timeOffset=0;Date.now=()=>now()+window.__timeOffset;});
+  await page.route('**/NaverNovelShelf/site/catalog-feed.json',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(++calls===1?newer:later)}));
+  await page.goto(new URL('../NaverNovelShelf/site/',home).href);
+  await expect(page.locator('[data-open-novel="9999998"]')).toBeVisible();
+  await page.evaluate(()=>{window.__timeOffset=8*60*60*1000;document.dispatchEvent(new Event('visibilitychange'));});
+  await expect.poll(()=>calls).toBe(2);
+  await expect(page.locator('[data-open-novel="9999998"]')).toBeVisible();
+  await expect(page.locator('#hero-total')).toHaveText(String(newer.works.length));
 });
