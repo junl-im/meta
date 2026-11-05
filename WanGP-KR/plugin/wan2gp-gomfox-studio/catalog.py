@@ -57,23 +57,23 @@ def _page_number(raw: object) -> int:
         return 1
 
 
-def format_model_catalog(
+def format_model_catalog_page(
     session: Any,
     category: str = "전체",
     query: str = "",
     page: object = 1,
-) -> str:
-    """원본 API의 전체 목록을 페이지별로 출력한다. 알 수 없는 신모델도 '전체'에 포함된다."""
+) -> tuple[str, list[tuple[str, str]]]:
+    """같은 API 조회로 목록 텍스트와 수동 선택 메뉴를 만든다. 다운로드/생성 없음."""
     if session is None:
-        return "원본 모델 API 연결을 확인할 수 없습니다. WanGP 원본 제작 화면을 이용해 주세요."
+        return "원본 모델 API 연결을 확인할 수 없습니다. WanGP 원본 제작 화면을 이용해 주세요.", []
 
     try:
         original_records = session.list_model_metadata()
     except Exception:
-        return "원본 모델 목록 조회에 실패했습니다. WanGP 원본에서 연결 상태를 확인하세요."
+        return "원본 모델 목록 조회에 실패했습니다. WanGP 원본에서 연결 상태를 확인하세요.", []
 
     if not isinstance(original_records, (list, tuple)):
-        return "원본 모델 목록의 응답 형식이 예상과 다릅니다. WanGP 원본에서 확인하세요."
+        return "원본 모델 목록의 응답 형식이 예상과 다릅니다. WanGP 원본에서 확인하세요.", []
 
     search = _one_line(query or "", 200).casefold()
     matches = []
@@ -93,7 +93,7 @@ def format_model_catalog(
     total_pages = max(1, (total + PAGE_SIZE - 1) // PAGE_SIZE)
 
     if page_no > total_pages:
-        return f"{category}: 검색 결과 {total}개. {page_no}페이지는 없습니다. 마지막 페이지는 {total_pages}입니다."
+        return f"{category}: 검색 결과 {total}개. {page_no}페이지는 없습니다. 마지막 페이지는 {total_pages}입니다.", []
 
     start = (page_no - 1) * PAGE_SIZE
     subset = matches[start : start + PAGE_SIZE]
@@ -107,7 +107,15 @@ def format_model_catalog(
             roles = ", ".join(outputs) if outputs else "미분류"
             rows.append(f"{index}. {name} [{model_type}] / 출력: {roles}")
 
-    return "\n".join(rows)
+    options = [(f"{name} [{model_type}]", model_type) for name, model_type, _ in subset if model_type]
+    return "\n".join(rows), options
+
+
+def format_model_catalog(
+    session: Any, category: str = "전체", query: str = "", page: object = 1,
+) -> str:
+    """기존 호출자용 텍스트 조회 API 호환 유지."""
+    return format_model_catalog_page(session, category, query, page)[0]
 
 
 def format_model_details(session: Any, model_type: str = "") -> str:

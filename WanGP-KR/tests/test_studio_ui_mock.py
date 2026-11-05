@@ -41,6 +41,7 @@ class UiEventMockTests(unittest.TestCase):
         ):
             setattr(gr, name, Widget)
         gr.Error = Exception
+        gr.update = lambda **kwargs: {"__type__": "update", **kwargs}
 
         class StubPlugin:
             def __init__(self):
@@ -66,6 +67,7 @@ class UiEventMockTests(unittest.TestCase):
         for name, contents in {
             "catalog": {
                 "format_model_catalog": lambda *args: "catalog",
+                "format_model_catalog_page": lambda *args: ("catalog", [("Mock image [img1]", "img1")]),
                 "format_model_details": lambda *args: "details",
                 "format_model_preflight": lambda *args: "preflight",
                 "format_queue_dashboard": lambda *args: ("summary", "queue"),
@@ -120,6 +122,47 @@ class UiEventMockTests(unittest.TestCase):
             app.setup_ui()
             app.create_ui()
 
+            class Deepy:
+                unavailable_reason = "secret-token-from-deepy"
+                deepy_type = "prime"
+
+            app.deepy = Deepy()
+            with self.assertRaises(Exception) as unavailable:
+                app._send_optional_director_request("test", True)
+            self.assertNotIn("secret-token", str(unavailable.exception))
+
+            class Job:
+                def __enter__(self):
+                    return self
+
+                def __exit__(self, *_):
+                    return False
+
+                def events(self):
+                    return []
+
+                def result(self):
+                    return types.SimpleNamespace(status="error", cancelled=False, error="secret-token-in-error")
+
+            class RunningDeepy:
+                unavailable_reason = None
+                deepy_type = "prime"
+
+                def run(self, prompt, workspace):
+                    return Job()
+
+            app.deepy = RunningDeepy()
+            with self.assertRaises(Exception) as failed:
+                app._send_optional_director_request("test", True)
+            self.assertNotIn("secret-token", str(failed.exception))
+
+            Job.result = lambda self: types.SimpleNamespace(
+                status="ok", cancelled=False, outputs=[{"name": r"C:\\Users\\private\\secret-token"}]
+            )
+            completed = app._send_optional_director_request("test", True)
+            self.assertIn("갤러리", completed)
+            self.assertNotIn("secret-token", completed)
+
         self.assertGreaterEqual(len(events), 20)
         self.assertEqual(app.requests, ["state", "main_tabs", "GomFoxStudio"])
         self.assertEqual(
@@ -133,6 +176,21 @@ class UiEventMockTests(unittest.TestCase):
             == ["gfs-queue-overview", "gfs-queue-result"]
             for e in events
         ))
+        picker_refresh = next(
+            e[1] for e in events if e[0] == "click"
+            and len(e[1].get("outputs", [])) == 3
+            and getattr(e[1]["outputs"][1], "kwargs", {}).get("elem_id") == "gfs-model-pick"
+        )
+        report, update, cleared = picker_refresh["fn"]("이미지", "", 1)
+        self.assertEqual(report, "catalog")
+        self.assertEqual(update["choices"], [("Mock image [img1]", "img1")])
+        self.assertIsNone(update["value"])
+        self.assertEqual(cleared, "")
+        picker_change = next(
+            e[1] for e in events if e[0] == "change"
+            and getattr(e[1].get("inputs", [None])[0], "kwargs", {}).get("elem_id") == "gfs-model-pick"
+        )
+        self.assertEqual(picker_change["fn"]("img1"), "img1")
         self.assertTrue(any(
             e[0] == "change" and e[1].get("fn") is modules["gomfox_test.help_content"].render_troubleshooting
             for e in events

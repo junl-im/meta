@@ -91,6 +91,18 @@ class StudioDashboardTests(unittest.TestCase):
             self.assertIn(token, SOURCE)
         self.assertNotIn("submit_generation", SOURCE)
 
+    def test_v029_model_selection_is_manual_and_does_not_start_generation(self):
+        for token in (
+            "format_model_catalog_page",
+            'elem_id="gfs-model-pick"',
+            "model_pick.change(",
+            "refresh_catalog_with_picker",
+            "outputs=[catalog_output, model_pick, model_id_input]",
+            'gr.update(choices=choices, value=None)',
+        ):
+            self.assertIn(token, SOURCE)
+        self.assertNotIn("submit_generation", SOURCE)
+
     def test_v018_recovery_help_is_optional_and_read_only(self):
         for token in (
             "문제가 생겼나요? 단계별 해결",
@@ -149,7 +161,7 @@ class StudioDashboardTests(unittest.TestCase):
         self.assertNotIn('url("data:image/svg', SOURCE.casefold())
 
     def test_plugin_metadata_matches(self):
-        self.assertEqual(META["version"], "0.28.0-dev")
+        self.assertEqual(META["version"], "0.29.0-dev")
         self.assertIn("GomFoxStudio", META["app_tab"])
 
     def test_read_only_preflight_is_optional(self):

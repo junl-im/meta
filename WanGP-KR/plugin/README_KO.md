@@ -1,6 +1,6 @@
 # 곰같은여우의 AI 스튜디오 — 초기 한국어 플러그인
 
-**개발 버전 0.28.0-dev. 실제 Windows/WanGP 구동 환경에서 미검증.**
+**개발 버전 0.29.0-dev. 실제 Windows/WanGP 구동 환경에서 미검증.**
 
 **v0.27 보조 도구:** 플러그인 버전은 변경하지 않고 [Windows 환경 진단 CMD](../scripts/collect_studio_windows_qa.cmd)와 [검수 안내](../docs/V027_WINDOWS_EVIDENCE_QA_KO.md)를 추가했습니다. Windows에서 출력한 실제 PC 정보를 바탕으로 원본 지원 모델·메모리 조건을 검토하기 위한 자료이며, 자동 다운로드·렌더링은 하지 않습니다.
 

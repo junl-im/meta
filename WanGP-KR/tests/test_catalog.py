@@ -70,6 +70,25 @@ class TestModelCatalog(unittest.TestCase):
         self.assertIn("복합 모델", result)
         self.assertIn("검색 결과: 1개", result)
 
+    def test_v029_model_picker_uses_one_read_and_matches_visible_page(self):
+        report, options = catalog.format_model_catalog_page(self.session, "영상", "MULTI1")
+        self.assertIn("검색 결과: 1개", report)
+        self.assertEqual(options, [("복합 모델 [multi1]", "multi1")])
+        self.assertEqual(self.session.calls, 1)
+
+    def test_v029_model_picker_resets_on_errors_and_out_of_range_page(self):
+        class Broken(FakeSession):
+            def list_model_metadata(self):
+                raise RuntimeError("secret-path")
+
+        text, options = catalog.format_model_catalog_page(Broken([]))
+        self.assertIn("조회에 실패", text)
+        self.assertEqual(options, [])
+        self.assertNotIn("secret-path", text)
+        text, options = catalog.format_model_catalog_page(self.session, "전체", "", 5)
+        self.assertIn("페이지는 없습니다", text)
+        self.assertEqual(options, [])
+
     def test_pagination_and_invalid_page(self):
         session = FakeSession([
             {"name": f"모델 {i:03}", "model_type": str(i), "main_output": "video"}
@@ -82,6 +101,9 @@ class TestModelCatalog(unittest.TestCase):
         self.assertNotIn("모델 000", second)
         self.assertIn("마지막 페이지는 2", catalog.format_model_catalog(session, "전체", "", 3))
         self.assertIn("1 / 2페이지", catalog.format_model_catalog(session, "전체", "", float("nan")))
+        _report, options = catalog.format_model_catalog_page(session, "전체", "", 2)
+        self.assertEqual(len(options), 3)
+        self.assertEqual(options[0][1], "40")
 
     def test_missing_api_is_safe(self):
         self.assertIn("연결을 확인할 수 없습니다", catalog.format_model_catalog(None))

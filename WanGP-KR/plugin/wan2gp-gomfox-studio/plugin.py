@@ -13,7 +13,7 @@ import gradio as gr
 
 from shared.utils.plugins import WAN2GPPlugin
 
-from .catalog import format_model_catalog, format_model_details, format_model_preflight, format_queue_dashboard
+from .catalog import format_model_catalog_page, format_model_details, format_model_preflight, format_queue_dashboard
 from .hardware import detect_hardware, read_hardware_report
 from .help_content import (
     FIRST_CREATION_STAGES, TOPICS, TROUBLESHOOT_TOPICS, connected_creation_choices, render_card_summary,
@@ -173,8 +173,8 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.28.0-dev"
-        self.description = "저사양 모델 사전 점검·첫 제작 분야 연결 · 무료 로컬 기본 · GPT 선택"
+        self.version = "0.29.0-dev"
+        self.description = "원본 모델 목록에서 수동 선택·안전한 감독 오류 안내 · 무료 로컬 기본 · GPT 선택"
 
     def setup_ui(self):
         self.request_component("state")
@@ -190,34 +190,32 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
 
         try:
             deepy = self.deepy
-        except RuntimeError as error:
-            raise gr.Error(f"감독 연결을 사용할 수 없습니다: {error}") from error
-        if deepy.unavailable_reason:
-            raise gr.Error(str(deepy.unavailable_reason))
-        if deepy.deepy_type != "prime":
+            unavailable = deepy.unavailable_reason
+            director_type = deepy.deepy_type
+        except Exception:
+            raise gr.Error("감독 연결 상태를 읽지 못했습니다. 원본 Deepy 설정을 확인해 주세요.") from None
+        if unavailable:
+            raise gr.Error("감독 연결이 준비되지 않았습니다. 원본 Deepy 설정에서 상태를 확인해 주세요.")
+        if director_type != "prime":
             raise gr.Error("감독 기능에는 Deepy Prime이 필요합니다. 원본 설정을 확인해 주세요.")
 
-        with deepy.run(prompt, workspace="current") as job:
-            for _ in job.events():
-                pass
-            result = job.result()
+        try:
+            with deepy.run(prompt, workspace="current") as job:
+                for _ in job.events():
+                    pass
+                result = job.result()
+            status = result.status
+            cancelled = result.cancelled
+        except Exception:
+            raise gr.Error("감독 작업을 확인하지 못했습니다. 원본 Deepy 화면에서 오류 상태를 확인해 주세요.") from None
 
-        if result.status == "error":
-            raise gr.Error(str(result.error or "감독 작업 중 오류가 발생했습니다."))
-        if result.cancelled:
+        if status == "error":
+            raise gr.Error("감독 작업 중 오류가 발생했습니다. 자세한 내용은 원본 Deepy 화면에서 확인해 주세요.")
+        if cancelled:
             return "감독 작업이 중단됐습니다. 무료 로컬 제작은 그대로 사용할 수 있습니다."
 
-        generated = []
-        for item in (result.outputs or []):
-            if isinstance(item, dict):
-                name = str(item.get("name") or "").strip()
-                if name:
-                    generated.append(name)
-        if generated:
-            return "감독 작업이 완료됐습니다. 원본 WanGP 갤러리에서 결과를 확인하세요.\n" + "\n".join(
-                f"- {name}" for name in generated[:10]
-            )
-        return "감독 작업이 완료됐습니다. 세부 진행 내역은 원본 Deepy 대화에서 확인해 주세요."
+        # 원본 출력 이름은 로컬 경로나 사용자 정보를 포함할 수 있어 표시하지 않는다.
+        return "감독 작업이 완료됐습니다. 결과는 원본 WanGP 갤러리 또는 Deepy 화면에서 확인해 주세요."
 
     def create_ui(self, api_session=None):
         with gr.Column(elem_id="gfs-root"):
@@ -459,8 +457,12 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                         value="버튼을 누르면 설치된 WanGP의 원본 모델 목록을 읽습니다.",
                     )
                     gr.Markdown(
-                        "**모델 상세 보기:** 위 목록에 표시된 대괄호 안의 원본 모델 ID를 입력하세요. "
-                        "지원 기능과 파일 준비 상태를 원본에서 조회합니다."
+                        "**모델 상세 보기:** 목록 조회 후 아래에서 모델을 선택하면 원본 ID가 자동으로 채워집니다. "
+                        "직접 입력해도 됩니다. 모델 선택만으로 다운로드나 생성이 시작되지 않습니다."
+                    )
+                    model_pick = gr.Dropdown(
+                        choices=[], value=None, label="조회한 목록에서 모델 선택 (선택)",
+                        elem_id="gfs-model-pick",
                     )
                     with gr.Row():
                         model_id_input = gr.Textbox(
@@ -639,10 +641,16 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
         )
         guide_topic.change(fn=render_guide, inputs=[guide_topic], outputs=[guide_display])
         hardware_check.click(fn=read_hardware_report, inputs=[], outputs=[hardware_result])
+        def refresh_catalog_with_picker(kind, query, page):
+            report, choices = format_model_catalog_page(api_session, kind, query, page)
+            return report, gr.update(choices=choices, value=None), ""
+
         catalog_refresh.click(
-            fn=lambda kind, query, page: format_model_catalog(api_session, kind, query, page),
-            inputs=[kind_choice, name_query, page_choice], outputs=[catalog_output],
+            fn=refresh_catalog_with_picker,
+            inputs=[kind_choice, name_query, page_choice],
+            outputs=[catalog_output, model_pick, model_id_input],
         )
+        model_pick.change(fn=lambda chosen: chosen or "", inputs=[model_pick], outputs=[model_id_input])
         model_inspect.click(
             fn=lambda model_id: format_model_details(api_session, model_id),
             inputs=[model_id_input], outputs=[model_detail],
