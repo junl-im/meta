@@ -76,6 +76,8 @@ class UiEventMockTests(unittest.TestCase):
                 "render_card_summary": lambda topic: "card: " + str(topic),
                 "TROUBLESHOOT_TOPICS": ("원본 WanGP가 열리지 않아요", "GPT 없이 무료로 만들고 싶어요"),
                 "render_troubleshooting": lambda topic: "문제 해결: " + str(topic),
+                "FIRST_CREATION_STAGES": ("① 원본 실행 확인", "② 모델과 준비물", "③ 무료 생성하기", "④ 결과 확인·저장"),
+                "render_first_creation_step": lambda topic, stage: "안내: " + str(topic) + str(stage),
             },
             "studio_check": {
                 "format_studio_readiness": lambda session: "check",
@@ -133,6 +135,10 @@ class UiEventMockTests(unittest.TestCase):
             e[0] == "change" and e[1].get("fn") is modules["gomfox_test.help_content"].render_troubleshooting
             for e in events
         ))
+        self.assertEqual(
+            sum(e[0] == "change" and e[1].get("fn") is modules["gomfox_test.help_content"].render_first_creation_step for e in events),
+            2,
+        )
         self.assertTrue(any(
             e[0] == "click"
             and e[1].get("fn") is modules["gomfox_test.studio_check"].format_error_diagnosis

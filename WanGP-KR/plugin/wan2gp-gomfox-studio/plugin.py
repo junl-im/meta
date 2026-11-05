@@ -16,7 +16,8 @@ from shared.utils.plugins import WAN2GPPlugin
 from .catalog import format_model_catalog, format_model_details, format_queue_dashboard
 from .hardware import read_hardware_report
 from .help_content import (
-    TOPICS, TROUBLESHOOT_TOPICS, render_card_summary, render_guide, render_troubleshooting,
+    FIRST_CREATION_STAGES, TOPICS, TROUBLESHOOT_TOPICS, render_card_summary,
+    render_first_creation_step, render_guide, render_troubleshooting,
 )
 from .prompt_assistant import TASK_KINDS, STYLES, PROFILES, build_prompt, fill_example
 from .studio_check import clear_error_diagnosis, format_error_diagnosis, format_studio_readiness
@@ -102,6 +103,10 @@ STUDIO_STYLE = """
 #gfs-root #gfs-preflight-check,#gfs-root #gfs-preflight-hardware {border:0;border-radius:11px;min-height:43px;font-weight:750}
 #gfs-root #gfs-preflight-result textarea {font-size:13px;line-height:1.6}
 #gfs-root #gfs-recovery {border:0;border-radius:14px;background:rgba(57,111,120,.09)}
+#gfs-root #gfs-first-creation {border:0;border-radius:14px;background:linear-gradient(120deg,rgba(45,118,119,.12),rgba(223,157,98,.08))}
+#gfs-root #gfs-first-creation-guide {padding:9px 13px;background:rgba(41,111,113,.09);border:0;border-radius:12px;font-size:14px;line-height:1.62}
+#gfs-root #gfs-first-creation-guide h3 {font-size:17px;margin:0 0 6px}
+#gfs-root #gfs-first-creation-guide p {margin:6px 0}
 #gfs-root #gfs-error-input textarea {font-size:13px;line-height:1.6;overflow-wrap:anywhere;min-width:0}
 #gfs-root #gfs-error-advice {min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:keep-all;padding:10px 13px;background:rgba(42,122,125,.12);border:0;border-radius:12px;line-height:1.65}
 #gfs-root #gfs-error-advice h3 {font-size:16px;line-height:1.45;margin:0 0 6px}
@@ -144,6 +149,8 @@ STUDIO_STYLE = """
   #gfs-root #gfs-error-input textarea,#gfs-root #gfs-error-advice {font-size:12px;line-height:1.6}
   #gfs-root #gfs-error-advice {padding:9px 11px}
   #gfs-root #gfs-error-advice h3 {font-size:14px}
+  #gfs-root #gfs-first-creation-guide {font-size:12px;line-height:1.5;padding:8px 10px}
+  #gfs-root #gfs-first-creation-guide h3 {font-size:14px}
   #gfs-root #gfs-error-actions > * {flex:1 1 135px;min-width:0}
 }
 @media (max-width:420px) {
@@ -163,8 +170,8 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.24.0-dev"
-        self.description = "전용 원화·모바일 오류 진단·원본 연결 단계별 확인 · 무료 로컬 기본 · GPT 선택"
+        self.version = "0.25.0-dev"
+        self.description = "첫 무료 작품 4단계 안내·원본 연결 진단 · 무료 로컬 기본 · GPT 선택"
 
     def setup_ui(self):
         self.request_component("state")
@@ -287,20 +294,36 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                         '<div class="gfs-panel"><h3>반가워요! 첫 작품을 함께 만들어 봐요.</h3>'
                         '<p>원본 WanGP를 처음 설치한 분을 위한 안내예요. '
                         '무료 로컬 기능부터 시작하고, GPT 연결은 건너뛰어도 됩니다.</p>'
-                        '<div class="gfs-steps">① 작업 고르기　② PC 사양 확인　③ 원본 제작 시작</div></div>'
+                        '<div class="gfs-steps">① 작업 고르기　② 네 단계 따라 하기　③ 원본에서 직접 생성</div></div>'
                     )
                     welcome_topic = gr.Dropdown(
                         choices=["처음 시작", "사진·그림", "짧은 영상", "목소리·음악", "3D 만들기"],
                         value="처음 시작", label="1단계 · 어떤 작품을 만들까요?",
                     )
-                    welcome_guide = gr.Markdown(value=render_guide("처음 시작"))
-                    welcome_hardware = gr.Button("2단계 · 내 PC 사양 살펴보기 (읽기 전용)")
+                    with gr.Accordion("분야별 자세한 도움말 (선택)", open=False):
+                        welcome_guide = gr.Markdown(value=render_guide("처음 시작"))
+                    with gr.Accordion("첫 무료 작품 · 단계별 따라 하기", open=True, elem_id="gfs-first-creation"):
+                        gr.Markdown(
+                            "아래 단계를 하나씩 골라 확인하세요. **자동으로 다음 단계에 넘어가거나 "
+                            "모델·설정을 바꾸지 않습니다.**"
+                        )
+                        first_creation_stage = gr.Dropdown(
+                            choices=list(FIRST_CREATION_STAGES),
+                            value=FIRST_CREATION_STAGES[0],
+                            label="지금 확인할 단계 (직접 선택)",
+                            elem_id="gfs-first-creation-stage",
+                        )
+                        first_creation_guide = gr.Markdown(
+                            value=render_first_creation_step("처음 시작", FIRST_CREATION_STAGES[0]),
+                            elem_id="gfs-first-creation-guide",
+                        )
+                    welcome_hardware = gr.Button("내 PC 사양 살펴보기 (선택 · 읽기 전용)")
                     welcome_report = gr.Textbox(
                         label="이 컴퓨터의 RAM · GPU 안내", lines=7, interactive=False,
                         value="원하면 위 버튼을 누르세요. 확인을 건너뛰어도 무료 제작을 시작할 수 있습니다.",
                     )
                     welcome_start = gr.Button(
-                        "3단계 · 무료 제작 화면으로 이동", variant="primary", elem_id="gfs-welcome-start"
+                        "원본 무료 제작 화면 열기", variant="primary", elem_id="gfs-welcome-start"
                     )
                     gr.Markdown(
                         "처음에는 **이미지 한 장 또는 짧은 저해상도 영상**부터 시험해 보세요. "
@@ -526,6 +549,14 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
             )
 
         welcome_topic.change(fn=render_guide, inputs=[welcome_topic], outputs=[welcome_guide])
+        welcome_topic.change(
+            fn=render_first_creation_step,
+            inputs=[welcome_topic, first_creation_stage], outputs=[first_creation_guide],
+        )
+        first_creation_stage.change(
+            fn=render_first_creation_step,
+            inputs=[welcome_topic, first_creation_stage], outputs=[first_creation_guide],
+        )
         problem_topic.change(
             fn=render_troubleshooting, inputs=[problem_topic], outputs=[problem_guide]
         )

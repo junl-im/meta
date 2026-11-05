@@ -66,6 +66,20 @@ class StudioDashboardTests(unittest.TestCase):
         self.assertIn("fn=self.goto_media_tab", SOURCE)
         self.assertNotIn("torch.cuda.set_device", SOURCE)
 
+    def test_v025_first_generation_is_manual_and_mobile_compact(self):
+        for token in (
+            'FIRST_CREATION_STAGES',
+            'render_first_creation_step',
+            'first_creation_stage.change(',
+            'welcome_topic.change(',
+            'elem_id="gfs-first-creation"',
+            'elem_id="gfs-first-creation-guide"',
+            '직접 선택',
+            '#gfs-root #gfs-first-creation-guide {font-size:12px',
+        ):
+            self.assertIn(token, SOURCE)
+        self.assertIn('with gr.Accordion("분야별 자세한 도움말 (선택)", open=False)', SOURCE)
+
     def test_v018_recovery_help_is_optional_and_read_only(self):
         for token in (
             "문제가 생겼나요? 단계별 해결",
@@ -124,7 +138,7 @@ class StudioDashboardTests(unittest.TestCase):
         self.assertNotIn('url("data:image/svg', SOURCE.casefold())
 
     def test_plugin_metadata_matches(self):
-        self.assertEqual(META["version"], "0.24.0-dev")
+        self.assertEqual(META["version"], "0.25.0-dev")
         self.assertIn("GomFoxStudio", META["app_tab"])
 
     def test_read_only_preflight_is_optional(self):

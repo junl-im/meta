@@ -50,6 +50,25 @@ class TestHelpContent(unittest.TestCase):
             help_content.render_guide("처음 시작"),
         )
 
+    def test_v025_first_generation_guides_have_four_explicit_safe_steps(self):
+        self.assertEqual(len(help_content.FIRST_CREATION_STAGES), 4)
+        self.assertEqual(len(help_content.FIRST_CREATION_TRACKS), 5)
+        for topic in help_content.FIRST_CREATION_TRACKS:
+            for stage in help_content.FIRST_CREATION_STAGES:
+                output = help_content.render_first_creation_step(topic, stage)
+                self.assertIn(stage, output)
+                self.assertIn("자동 모델 선택·다운로드·생성·파일 변경은 하지 않습니다", output)
+                self.assertGreater(len(output), 155)
+        self.assertIn("GPT 감독은 꺼진 상태", help_content.render_first_creation_step("짧은 영상", "③ 무료 생성하기"))
+        self.assertIn("RAM 16GB", help_content.render_first_creation_step("3D 만들기", "③ 무료 생성하기"))
+        self.assertIn("갤러리", help_content.render_first_creation_step("목소리·음악", "④ 결과 확인·저장"))
+
+    def test_v025_guide_does_not_echo_untrusted_selection(self):
+        unknown = "<svg/onload=alert(1)>"
+        actual = help_content.render_first_creation_step(unknown, unknown)
+        self.assertEqual(actual, help_content.render_first_creation_step("처음 시작", help_content.FIRST_CREATION_STAGES[0]))
+        self.assertNotIn(unknown, actual)
+
     def test_troubleshooting_has_six_specific_safe_paths(self):
         self.assertEqual(len(help_content.TROUBLESHOOT_TOPICS), 6)
         for topic in help_content.TROUBLESHOOT_TOPICS:
