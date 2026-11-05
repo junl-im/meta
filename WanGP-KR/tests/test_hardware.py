@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import math
 import unittest
 from pathlib import Path
 
@@ -59,7 +60,55 @@ class TestHardwareGuidance(unittest.TestCase):
         })
         self.assertIn("12.0GB", result)
         self.assertIn("GPU B", result)
+        self.assertIn("CUDA GPU 0: GPU A · 2GB", result)
+        self.assertIn("CUDA GPU 1: GPU B · 12GB", result)
+        self.assertIn("원본 WanGP가 그 GPU를 사용한다는 의미는 아닙니다", result)
         self.assertNotIn("RAM 16GB급", result)
+
+    def test_invalid_vram_values_are_never_mistaken_for_large_gpu(self):
+        for invalid in (math.nan, math.inf, -math.inf, -1, 0, True, 99999, "16"):
+            with self.subTest(invalid=invalid):
+                info = {"operating_system": "Windows", "ram_gib": 16,
+                        "gpu_devices": [{"name": "Invalid GPU", "vram_gib": invalid}]}
+                report = hardware.format_hardware_report(info)
+                plan = hardware.format_first_run_plan(info)
+                self.assertIn("전용 VRAM: 자동 확인 실패", report)
+                self.assertIn("용량 확인 불가", report)
+                self.assertIn("GPU 지원 여부는 아직 미확인", plan)
+                self.assertIn("전용 GPU 메모리", hardware._recommend_vram(invalid))
+
+    def test_invalid_ram_does_not_claim_sixteen_gb_limit(self):
+        for invalid in (math.nan, math.inf, -8, 0, True, 99999, "16"):
+            with self.subTest(invalid=invalid):
+                report = hardware.format_hardware_report({
+                    "operating_system": "Windows", "ram_gib": invalid, "gpu_devices": [],
+                    "gpu_names": []})
+                self.assertIn("시스템 RAM: 확인 불가", report)
+                self.assertNotIn("RAM 16GB급 환경", report)
+
+    def test_unknown_windows_gpu_names_do_not_imply_measured_vram(self):
+        report = hardware.format_hardware_report({
+            "operating_system": "Windows", "ram_gib": 32,
+            "gpu_devices": [], "gpu_names": ["Integrated Graphics"]})
+        self.assertIn("GPU 이름만 확인", report)
+        self.assertIn("전용 VRAM과 실제 생성 지원은 확인되지 않았습니다", report)
+
+    def test_mixed_valid_invalid_gpu_uses_only_observed_capacity(self):
+        report = hardware.format_hardware_report({
+            "operating_system": "Windows", "ram_gib": 16,
+            "gpu_devices": [
+                {"name": "Bad GPU", "vram_gib": math.inf},
+                {"name": "Small GPU", "vram_gib": 3.5},
+            ]})
+        self.assertIn("전용 VRAM: 3.5GB", report)
+        self.assertIn("Bad GPU · 용량 확인 불가", report)
+        self.assertIn("전용 VRAM이 적습니다", report)
+
+    def test_low_memory_guidance_does_not_change_original_settings(self):
+        plan = hardware.format_first_run_plan({"ram_gib": 16, "gpu_devices": []})
+        self.assertIn("다른 GPU 사용 프로그램을 종료", plan)
+        self.assertIn("공식 지원하는 더 작은 모델을 직접 골라", plan)
+        self.assertIn("원본 설정을 자동 변경하지 않음", plan)
 
     def test_report_does_not_mutate_input(self):
         original = {"operating_system": "Windows", "ram_gib": 16, "gpu_devices": [], "gpu_names": []}
