@@ -169,6 +169,115 @@ def format_model_details(session: Any, model_type: str = "") -> str:
     return "\n".join(rows)
 
 
+def _validated_gib(value: object) -> float | None:
+    """사용자 입력이나 장치 정보의 비정상 수치를 실제 GPU 용량으로 취급하지 않는다."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    try:
+        number = float(value)
+    except (OverflowError, TypeError, ValueError):
+        return None
+    return number if math.isfinite(number) and 0 < number <= 1024 else None
+
+
+def format_model_preflight(
+    session: Any, model_type: str, hardware_info: dict[str, Any] | None,
+    manual_vram_gib: object = None,
+) -> str:
+    """선택 모델과 현재 PC의 '확인된 사실'만 표시하는 수동 사전 점검.
+
+    원본 읽기 API 두 개 외에 모델 다운로드·생성·설정 변경을 수행하지 않는다.
+    정확한 GPU 최소 요구량은 원본이 명시하지 않는 한 추정하지 않는다.
+    """
+    key = str(model_type or "").strip()
+    if not key or len(key) > 120:
+        return "먼저 모델 찾아보기 목록에서 정확한 원본 모델 ID를 입력해 주세요."
+    if session is None or not callable(getattr(session, "list_model_metadata", None)):
+        return "원본 모델 API 연결을 확인할 수 없습니다. WanGP 원본 화면에서 모델을 확인하세요."
+    try:
+        records = session.list_model_metadata()
+    except Exception:
+        return "원본 모델 목록 조회에 실패했습니다. 원본 WanGP에서 연결 상태를 확인하세요."
+    if not isinstance(records, (list, tuple)):
+        return "원본 모델 목록이 예상한 형식이 아닙니다. 원본 화면에서 확인하세요."
+    match = next(
+        (record for record in records if isinstance(record, dict)
+         and str(record.get("model_type") or "").casefold() == key.casefold()),
+        None,
+    )
+    if match is None:
+        return "입력한 모델 ID를 찾지 못했습니다. 모델 목록을 다시 조회하고 정확한 ID를 선택하세요."
+
+    exact_id = str(match.get("model_type") or "").replace("\n", " ")[:120]
+    name = str(match.get("name") or exact_id).replace("\n", " ")[:120]
+    roles = set(_output_names(match))
+    rows = [f"원본 모델 사전 점검 · {name}", f"원본 모델 ID: {exact_id}", ""]
+    rows.append("① 원본 모델 파일 상태 (읽기 전용)")
+    method = getattr(session, "get_model_availability", None)
+    if not callable(method):
+        rows.append("- 이 원본 API에서 파일 상태 조회 기능을 확인하지 못했습니다.")
+    else:
+        try:
+            availability = method(str(match.get("model_type") or ""))
+        except Exception:
+            rows.append("- 파일 준비 상태 조회에 실패했습니다. 원본 모델 선택 화면을 확인하세요.")
+        else:
+            ready = availability.get("files_ready") if isinstance(availability, dict) else None
+            if ready is True:
+                rows.append("- 원본 보고: 필수 모델 파일 준비됨. 추가 파일·GPU 실행 성공까지 보장하지 않습니다.")
+            elif ready is False:
+                rows.append("- 원본 보고: 필수 모델 파일이 아직 준비되지 않았습니다. 다운로드는 원본에서 직접 선택하세요.")
+            else:
+                rows.append("- 준비 여부 미확인: 원본 모델 선택 화면의 파일 상태 표시를 직접 확인하세요.")
+
+    info = hardware_info if isinstance(hardware_info, dict) else {}
+    ram = _validated_gib(info.get("ram_gib"))
+    measured_devices = [
+        _validated_gib(item.get("vram_gib"))
+        for item in (info.get("gpu_devices") or [])
+        if isinstance(item, dict)
+    ] if isinstance(info.get("gpu_devices") or [], (list, tuple)) else []
+    observed = [size for size in measured_devices if size is not None]
+    maximum = max(observed) if observed else None
+    manual = _validated_gib(manual_vram_gib)
+    rows.extend(["", "② 내 PC 메모리 (안내용)"])
+    rows.append(f"- 시스템 RAM: {ram:g}GB" if ram is not None else "- 시스템 RAM: 확인되지 않음")
+    if maximum is not None:
+        rows.append(f"- 감지한 GPU 중 최대 전용 VRAM: {maximum:g}GB (원본이 사용하는 GPU인지는 미확인)")
+    else:
+        rows.append("- 자동 감지한 전용 VRAM: 확인되지 않음")
+    if manual is not None:
+        rows.append(f"- 사용자가 직접 확인했다고 입력한 전용 VRAM: {manual:g}GB (실측 검증 아님)")
+    elif manual_vram_gib is not None:
+        rows.append("- 직접 입력한 VRAM 값이 유효하지 않아 비교에 사용하지 않았습니다.")
+
+    effective = manual if manual is not None else maximum
+    rows.extend(["", "③ 다음에 할 일 (실행 가능 판정 아님)"])
+    if effective is None:
+        rows.append("- Windows 작업 관리자 → 성능 → GPU에서 전용 VRAM을 직접 확인하세요.")
+    elif effective < 4:
+        rows.append("- 전용 VRAM이 적습니다. 영상·3D 모델은 특히 신중히 검토하고 작은 이미지 작업부터 확인하세요.")
+    elif effective < 6:
+        rows.append("- VRAM이 낮은 편입니다. 원본의 경량 모델과 최소 해상도·길이를 직접 확인하세요.")
+    else:
+        rows.append("- 메모리가 감지되어도 원본 모델의 실제 최소 요구 VRAM과 다른 실행 조건을 확인하세요.")
+    if "video" in roles or "3d" in roles or "world" in roles:
+        rows.append("- 선택 모델은 영상·3D·월드 분야입니다. 첫 생성 전에 공식 모델별 요구 사양을 확인하세요.")
+    elif "image" in roles:
+        rows.append("- 이미지 모델입니다. 원본이 허용하는 작은 해상도와 배치 1개부터 검토하세요.")
+    elif "audio" in roles:
+        rows.append("- 음성 모델입니다. 원본 지원 여부와 필요한 자원을 확인한 후 짧은 작업부터 검토하세요.")
+    else:
+        rows.append("- 모델 출력 분야가 명확하지 않습니다. 원본에서 지원 작업을 확인하세요.")
+    if ram is not None and ram <= 16.5:
+        rows.append("- RAM 16GB급: 대형 모델과 로컬 감독 LLM을 동시에 실행하지 않는 편이 좋습니다.")
+    rows.extend([
+        "", "원본 메타데이터의 파일 준비 상태와 PC 사양만으로 실행 성공·속도·화질을 예측할 수 없습니다.",
+        "이 점검은 모델 자동 선택·다운로드·GPU 생성·파일 저장·GPT 요청을 하지 않습니다.",
+    ])
+    return "\n".join(rows)
+
+
 def format_queue_dashboard(session: Any, show_prompts: bool = False) -> tuple[str, str]:
     """원본 큐를 한 번 읽어 간단한 상태 요약과 기존 상세 내역을 함께 반환한다."""
     if session is None or not callable(getattr(session, "list_queue", None)):

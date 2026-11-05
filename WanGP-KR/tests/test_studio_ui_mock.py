@@ -67,9 +67,10 @@ class UiEventMockTests(unittest.TestCase):
             "catalog": {
                 "format_model_catalog": lambda *args: "catalog",
                 "format_model_details": lambda *args: "details",
+                "format_model_preflight": lambda *args: "preflight",
                 "format_queue_dashboard": lambda *args: ("summary", "queue"),
             },
-            "hardware": {"read_hardware_report": lambda: "report"},
+            "hardware": {"read_hardware_report": lambda: "report", "detect_hardware": lambda: {}},
             "help_content": {
                 "TOPICS": ("처음 시작", "저사양 설정"),
                 "render_guide": lambda topic: str(topic),
@@ -78,6 +79,7 @@ class UiEventMockTests(unittest.TestCase):
                 "render_troubleshooting": lambda topic: "문제 해결: " + str(topic),
                 "FIRST_CREATION_STAGES": ("① 원본 실행 확인", "② 모델과 준비물", "③ 무료 생성하기", "④ 결과 확인·저장"),
                 "render_first_creation_step": lambda topic, stage: "안내: " + str(topic) + str(stage),
+                "connected_creation_choices": lambda topic: ("이미지", "이미지"),
             },
             "studio_check": {
                 "format_studio_readiness": lambda session: "check",
@@ -139,6 +141,15 @@ class UiEventMockTests(unittest.TestCase):
             sum(e[0] == "change" and e[1].get("fn") is modules["gomfox_test.help_content"].render_first_creation_step for e in events),
             2,
         )
+        self.assertTrue(any(
+            e[0] == "change" and e[1].get("fn") is modules["gomfox_test.help_content"].connected_creation_choices
+            for e in events
+        ))
+        self.assertTrue(any(
+            e[0] == "click" and [getattr(widget, "kwargs", {}).get("elem_id") for widget in e[1].get("outputs", [])]
+            == ["gfs-model-preflight-result"]
+            for e in events
+        ))
         self.assertTrue(any(
             e[0] == "click"
             and e[1].get("fn") is modules["gomfox_test.studio_check"].format_error_diagnosis

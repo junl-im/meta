@@ -86,6 +86,66 @@ class TestModelCatalog(unittest.TestCase):
     def test_missing_api_is_safe(self):
         self.assertIn("연결을 확인할 수 없습니다", catalog.format_model_catalog(None))
 
+    def test_v026_preflight_distinguishes_model_files_from_gpu_execution(self):
+        class ModelSession(FakeSession):
+            def __init__(self, records, ready):
+                super().__init__(records)
+                self.ready = ready
+                self.availability_calls = 0
+
+            def get_model_availability(self, model_type):
+                self.availability_calls += 1
+                self.last_id = model_type
+                return self.ready
+
+        session = ModelSession([
+            {"name": "Mock Video", "model_type": "video-one", "main_output": ["video"]}
+        ], {"files_ready": False})
+        report = catalog.format_model_preflight(session, "video-one", {
+            "ram_gib": 16, "gpu_devices": [{"name": "A", "vram_gib": 3.5}]
+        })
+        self.assertIn("아직 준비되지 않았습니다", report)
+        self.assertIn("3.5GB", report)
+        self.assertIn("RAM 16GB급", report)
+        self.assertIn("영상·3D·월드", report)
+        self.assertIn("실행 성공·속도·화질을 예측할 수 없습니다", report)
+        self.assertEqual(session.calls, 1)
+        self.assertEqual(session.availability_calls, 1)
+        self.assertEqual(session.last_id, "video-one")
+
+        session.ready = {"files_ready": True}
+        report = catalog.format_model_preflight(session, "video-one", {
+            "ram_gib": 16, "gpu_devices": []
+        }, 6)
+        self.assertIn("필수 모델 파일 준비됨", report)
+        self.assertIn("사용자가 직접 확인했다고 입력한 전용 VRAM: 6GB", report)
+        self.assertIn("실측 검증 아님", report)
+        self.assertNotIn("실행 가능합니다", report)
+
+    def test_v026_preflight_does_not_guess_vram_or_accept_bad_numbers(self):
+        session = FakeSession([{"name": "Mock Image", "model_type": "img1", "main_output": "image"}])
+        for value in (float("nan"), float("inf"), -1, 0, True, "4096", 10000):
+            with self.subTest(value=value):
+                report = catalog.format_model_preflight(session, "img1", {
+                    "ram_gib": 16, "gpu_devices": [{"name": "Broken", "vram_gib": value}]
+                }, value)
+                self.assertIn("자동 감지한 전용 VRAM: 확인되지 않음", report)
+                self.assertIn("유효하지 않아 비교에 사용하지 않았습니다", report)
+                self.assertIn("작업 관리자", report)
+
+    def test_v026_preflight_handles_missing_and_odd_upstream_data_without_echo(self):
+        self.assertIn("모델 ID를 입력", catalog.format_model_preflight(None, "", None))
+        self.assertIn("연결을 확인할 수 없습니다", catalog.format_model_preflight(None, "id", None))
+        self.assertIn("정확한 ID", catalog.format_model_preflight(FakeSession([]), "bad-id", None))
+        self.assertIn("예상한 형식", catalog.format_model_preflight(FakeSession("wrong"), "id", None))
+
+        class Leaky(FakeSession):
+            def list_model_metadata(self):
+                raise RuntimeError("secret-token-from-upstream")
+        result = catalog.format_model_preflight(Leaky([]), "id", None)
+        self.assertIn("조회에 실패했습니다", result)
+        self.assertNotIn("secret-token", result)
+
 
 if __name__ == "__main__":
     unittest.main()

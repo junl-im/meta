@@ -13,10 +13,10 @@ import gradio as gr
 
 from shared.utils.plugins import WAN2GPPlugin
 
-from .catalog import format_model_catalog, format_model_details, format_queue_dashboard
-from .hardware import read_hardware_report
+from .catalog import format_model_catalog, format_model_details, format_model_preflight, format_queue_dashboard
+from .hardware import detect_hardware, read_hardware_report
 from .help_content import (
-    FIRST_CREATION_STAGES, TOPICS, TROUBLESHOOT_TOPICS, render_card_summary,
+    FIRST_CREATION_STAGES, TOPICS, TROUBLESHOOT_TOPICS, connected_creation_choices, render_card_summary,
     render_first_creation_step, render_guide, render_troubleshooting,
 )
 from .prompt_assistant import TASK_KINDS, STYLES, PROFILES, build_prompt, fill_example
@@ -123,6 +123,9 @@ STUDIO_STYLE = """
 #gfs-root .gfs-workshop p {margin:0;opacity:.85}
 
 #gfs-root #gfs-queue-refresh,#gfs-root #gfs-model-inspect {border-radius:12px;font-weight:750}
+#gfs-root #gfs-model-preflight {border:0;border-radius:12px;background:rgba(49,121,121,.13)}
+#gfs-root #gfs-model-preflight-run {border:0;border-radius:11px;font-weight:750;min-height:44px}
+#gfs-root #gfs-model-preflight-result textarea {line-height:1.6;font-size:13px;overflow-wrap:anywhere}
 #gfs-root #gfs-queue-overview {padding:10px 15px;border:0;border-radius:12px;background:linear-gradient(115deg,rgba(51,124,125,.18),rgba(231,167,93,.11));font-size:14px;line-height:1.6}
 #gfs-root #gfs-queue-overview p {margin:0}
 #gfs-root #gfs-queue-result textarea {line-height:1.65;font-size:13px}
@@ -170,8 +173,8 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.25.0-dev"
-        self.description = "첫 무료 작품 4단계 안내·원본 연결 진단 · 무료 로컬 기본 · GPT 선택"
+        self.version = "0.26.0-dev"
+        self.description = "저사양 모델 사전 점검·첫 제작 분야 연결 · 무료 로컬 기본 · GPT 선택"
 
     def setup_ui(self):
         self.request_component("state")
@@ -471,6 +474,28 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                         lines=9, interactive=False,
                         value="모델 ID를 입력한 뒤 모델 정보 확인을 눌러 주세요.",
                     )
+                    with gr.Accordion(
+                        "이 모델, 내 PC에서 시작해도 될까요? · 사전 점검 (선택)",
+                        open=False, elem_id="gfs-model-preflight",
+                    ):
+                        gr.Markdown(
+                            "위에 입력한 **원본 모델 ID**를 그대로 사용합니다. "
+                            "PC의 RAM·GPU 정보와 원본 모델 파일 상태를 **읽기만** 하며, "
+                            "실제 실행 가능 여부는 판단할 수 없습니다."
+                        )
+                        manual_vram = gr.Number(
+                            label="전용 VRAM 직접 확인값(GB) · 모를 때는 비워 두기",
+                            value=None, precision=1,
+                        )
+                        model_preflight_run = gr.Button(
+                            "이 모델의 첫 실행 확인표 보기", elem_id="gfs-model-preflight-run"
+                        )
+                        model_preflight_result = gr.Textbox(
+                            label="파일 준비 · 내 PC 메모리 · 다음 행동 (읽기 전용)",
+                            lines=12, interactive=False,
+                            value="원본 모델 ID를 입력한 뒤 위 버튼을 눌러 주세요. 실제 GPU 생성은 실행하지 않습니다.",
+                            elem_id="gfs-model-preflight-result",
+                        )
 
                 with gr.Tab("작업 현황 · 갤러리"):
                     gr.HTML(
@@ -550,6 +575,10 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
 
         welcome_topic.change(fn=render_guide, inputs=[welcome_topic], outputs=[welcome_guide])
         welcome_topic.change(
+            fn=connected_creation_choices, inputs=[welcome_topic],
+            outputs=[kind_choice, prompt_kind],
+        )
+        welcome_topic.change(
             fn=render_first_creation_step,
             inputs=[welcome_topic, first_creation_stage], outputs=[first_creation_guide],
         )
@@ -617,6 +646,12 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
         model_inspect.click(
             fn=lambda model_id: format_model_details(api_session, model_id),
             inputs=[model_id_input], outputs=[model_detail],
+        )
+        model_preflight_run.click(
+            fn=lambda model_id, vram: format_model_preflight(
+                api_session, model_id, detect_hardware(), vram,
+            ),
+            inputs=[model_id_input, manual_vram], outputs=[model_preflight_result],
         )
         queue_refresh.click(
             fn=lambda show: format_queue_dashboard(api_session, show),

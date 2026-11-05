@@ -69,6 +69,14 @@ class TestHelpContent(unittest.TestCase):
         self.assertEqual(actual, help_content.render_first_creation_step("처음 시작", help_content.FIRST_CREATION_STAGES[0]))
         self.assertNotIn(unknown, actual)
 
+    def test_v026_first_creation_choice_links_model_and_prompt_filters_only(self):
+        self.assertEqual(help_content.connected_creation_choices("처음 시작"), ("이미지", "이미지"))
+        self.assertEqual(help_content.connected_creation_choices("사진·그림"), ("이미지", "이미지"))
+        self.assertEqual(help_content.connected_creation_choices("짧은 영상"), ("영상", "영상"))
+        self.assertEqual(help_content.connected_creation_choices("목소리·음악"), ("음성", "음성·음악"))
+        self.assertEqual(help_content.connected_creation_choices("3D 만들기"), ("3D", "3D"))
+        self.assertEqual(help_content.connected_creation_choices("<script>"), ("이미지", "이미지"))
+
     def test_troubleshooting_has_six_specific_safe_paths(self):
         self.assertEqual(len(help_content.TROUBLESHOOT_TOPICS), 6)
         for topic in help_content.TROUBLESHOOT_TOPICS:
