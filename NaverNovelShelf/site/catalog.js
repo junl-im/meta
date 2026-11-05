@@ -4,7 +4,7 @@
 window.NOVEL_CATALOG = [
   ["섀도 닥터","[곰같은여우]","1249028","best","https://novel-phinf.pstatic.net/20261020_49/novel_1792475165311swk8z_PNG/1.png?type=f280_224_2","현판","ongoing"],
   ["내 남편을 죽인 범인과 결혼했다","[곰같은여우]","1244916","best","https://novel-phinf.pstatic.net/20260929_276/novel_1790661757423nG4oy_JPEG/400.jpg?type=f280_224_2","로판","ongoing"],
-  ["내 학생 아빠가 첫사랑이었다","[곰같은여우]","1248094","best","https://novel-phinf.pstatic.net/20261020_257/novel_1792475086048LYr20_PNG/1.png?type=f280_224_2","로맨스","ongoing"],
+  ["내 학생 아빠가 첫사랑이었다","[곰같은여우]","1248094","best","https://novel-phinf.pstatic.net/20261020_257/novel_1792475086048LYr20_PNG/1.png?type=f280_224_2","로맨스","completed"],
   ["기사들이 집착하는 힐러가 되었다","[곰같은여우]","1247301","best","https://novel-phinf.pstatic.net/20261006_41/novel_1791261296018Fysve_JPEG/400x500.jpg?type=f280_224_2","판타지","completed"],
   ["회귀한 천마는 죽일수록 약해진다","[곰같은여우]","1245426","best","https://novel-phinf.pstatic.net/20260922_5/novel_1790055988142o7T0q_JPEG/400.jpg?type=f280_224_2","무협","ongoing"],
   ["회귀 7회차 악녀는 착하게 살기를 그만두었다","[곰같은여우]","1243166","best","https://novel-phinf.pstatic.net/20260902_198/novel_1788317225295Wj4L2_JPEG/60x40.jpg?type=f280_224_2","로판","ongoing"],
