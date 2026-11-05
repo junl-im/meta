@@ -1,6 +1,6 @@
 # 곰같은여우의 AI 스튜디오 — WanGP 한국어 개인 작업실 (개발판)
 
-> **현재 단계: v0.27 Windows 실기기 정보 수집 도우미 (한글 플러그인 0.26.0-dev 유지).** 이 폴더는 원본 WanGP 엔진을 복제하거나 교체한 구현물이 아니라, **원본을 사용하기 위한 설계·연동 작업 공간**입니다. 실제 Windows 설치·실행·GPU 성능 검증은 아직 하지 않았습니다.
+> **현재 단계: v0.28 원본 API 응답 최소 노출·화면 안정화 (한글 플러그인 0.28.0-dev).** 이 폴더는 원본 WanGP 엔진을 복제하거나 교체한 구현물이 아니라, **원본을 사용하기 위한 설계·연동 작업 공간**입니다. 실제 Windows 설치·실행·GPU 성능 검증은 아직 하지 않았습니다.
 
 ## 목표
 
@@ -73,6 +73,7 @@ python WanGP-KR/scripts/bring_upstream.py
 26. [v0.25 첫 무료 작품 4단계·Windows 실기기 검수표](docs/V025_FIRST_CREATION_QA_KO.md)
 27. [v0.26 모델 준비·메모리 정보 사전 점검 및 실기기 검수표](docs/V026_MODEL_PREFLIGHT_QA_KO.md)
 28. [v0.27 Windows 실기기 진단·보고서 사용 안내](docs/V027_WINDOWS_EVIDENCE_QA_KO.md)
+29. [v0.28 모델 상태·작업 큐 응답 보호 및 역검수표](docs/V028_API_DISPLAY_SAFETY_QA_KO.md)
 
 ## 2026-11-01 디자인 대시보드 개발
 

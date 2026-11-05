@@ -86,6 +86,26 @@ class TestModelCatalog(unittest.TestCase):
     def test_missing_api_is_safe(self):
         self.assertIn("연결을 확인할 수 없습니다", catalog.format_model_catalog(None))
 
+    def test_v028_catalog_hides_upstream_errors_and_rejects_malformed_records(self):
+        class Leaky(FakeSession):
+            def list_model_metadata(self):
+                raise RuntimeError(r"access denied C:\Users\private\secret-token")
+
+        failed = catalog.format_model_catalog(Leaky([]))
+        self.assertIn("조회에 실패했습니다", failed)
+        self.assertNotIn("secret-token", failed)
+        self.assertNotIn("C:\\Users", failed)
+        malformed = catalog.format_model_catalog(FakeSession({"not": "records"}))
+        self.assertIn("응답 형식", malformed)
+
+    def test_v028_catalog_limits_line_breaks_from_upstream_metadata(self):
+        session = FakeSession([{
+            "name": "정상 모델\n임의 출력", "model_type": "id\nsecond", "main_output": ["image\nvideo"]
+        }])
+        report = catalog.format_model_catalog(session)
+        self.assertIn("정상 모델 임의 출력 [id second]", report)
+        self.assertNotIn("\n임의 출력", report)
+
     def test_v026_preflight_distinguishes_model_files_from_gpu_execution(self):
         class ModelSession(FakeSession):
             def __init__(self, records, ready):

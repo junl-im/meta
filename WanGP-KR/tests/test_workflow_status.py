@@ -102,6 +102,49 @@ class WorkflowStatusTests(unittest.TestCase):
                 return {"total_count": "unknown", "tasks": "wrong"}
         self.assertIn("형식이 올바르지 않습니다", catalog.format_queue_status(Odd()))
 
+    def test_v028_model_details_does_not_reveal_paths_tokens_or_exception_text(self):
+        class Sensitive(FakeSession):
+            def get_model_availability(self, model_type):
+                return {"files_ready": False, "local_path": r"C:\Users\private\model", "api_key": "secret-token"}
+
+        report = catalog.format_model_details(Sensitive(), "mock_image")
+        self.assertIn('"files_ready": false', report)
+        self.assertNotIn("private", report)
+        self.assertNotIn("secret-token", report)
+
+        class Broken(Sensitive):
+            def get_model_availability(self, model_type):
+                raise RuntimeError("secret-token-from-model-api")
+
+        failed = catalog.format_model_details(Broken(), "mock_image")
+        self.assertIn("상태 조회에 실패했습니다", failed)
+        self.assertNotIn("secret-token", failed)
+
+        class BrokenCatalog(Sensitive):
+            def list_model_metadata(self):
+                raise OSError("secret-token-from-list")
+
+        failed_catalog = catalog.format_model_details(BrokenCatalog(), "mock_image")
+        self.assertIn("목록 조회에 실패했습니다", failed_catalog)
+        self.assertNotIn("secret-token", failed_catalog)
+
+    def test_v028_queue_errors_hidden_and_status_single_line(self):
+        class Broken:
+            def list_queue(self):
+                raise RuntimeError("secret-token-from-queue")
+
+        summary, details = catalog.format_queue_dashboard(Broken())
+        self.assertIn("조회 실패", summary)
+        self.assertNotIn("secret-token", details)
+
+        class Odd:
+            def list_queue(self):
+                return {"tasks": [{"status": "custom\nnew row", "model_type": "id\nnew row"}]}
+
+        _summary, report = catalog.format_queue_dashboard(Odd())
+        self.assertIn("custom new row · id new row", report)
+        self.assertNotIn("\nnew row", report)
+
 
 if __name__ == "__main__":
     unittest.main()

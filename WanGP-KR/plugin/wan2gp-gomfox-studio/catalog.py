@@ -7,6 +7,7 @@ GPU 생성·가중치 다운로드·외부 네트워크 호출을 하지 않는�
 from __future__ import annotations
 
 import math
+import json
 from typing import Any
 
 
@@ -21,13 +22,20 @@ CATEGORY_OUTPUTS = {
 KNOWN_OUTPUTS = frozenset(CATEGORY_OUTPUTS.values())
 
 
+def _one_line(value: object, limit: int = 120) -> str:
+    """원본 API 값 중 짧은 단일 행으로 표현 가능한 기본 타입만 노출한다."""
+    if not isinstance(value, (str, int, float)) or isinstance(value, bool):
+        return ""
+    return " ".join(str(value).split())[:limit]
+
+
 def _output_names(record: dict[str, Any]) -> list[str]:
     raw = record.get("main_output") or record.get("outputs") or []
     if isinstance(raw, str):
         raw = [raw]
     elif not isinstance(raw, (list, tuple, set)):
         raw = []
-    return [str(value).strip().casefold() for value in raw if str(value).strip()]
+    return [name.casefold() for value in raw if (name := _one_line(value, 40))]
 
 
 def _match_category(record: dict[str, Any], category: str) -> bool:
@@ -61,17 +69,20 @@ def format_model_catalog(
 
     try:
         original_records = session.list_model_metadata()
-    except Exception as exc:
-        return f"원본 모델 목록을 읽지 못했습니다: {type(exc).__name__}: {exc}"
+    except Exception:
+        return "원본 모델 목록 조회에 실패했습니다. WanGP 원본에서 연결 상태를 확인하세요."
 
-    search = (query or "").strip().casefold()
+    if not isinstance(original_records, (list, tuple)):
+        return "원본 모델 목록의 응답 형식이 예상과 다릅니다. WanGP 원본에서 확인하세요."
+
+    search = _one_line(query or "", 200).casefold()
     matches = []
     for record in original_records or []:
         if not isinstance(record, dict) or not _match_category(record, category):
             continue
-        name = str(record.get("name") or record.get("model_type") or "이름 없음")
-        model_type = str(record.get("model_type") or "")
-        family = str(record.get("family_label") or record.get("family") or "")
+        name = _one_line(record.get("name") or record.get("model_type")) or "이름 없음"
+        model_type = _one_line(record.get("model_type"))
+        family = _one_line(record.get("family_label") or record.get("family"))
         if search and search not in " ".join((name, model_type, family)).casefold():
             continue
         matches.append((name, model_type, _output_names(record)))
@@ -101,7 +112,7 @@ def format_model_catalog(
 
 def format_model_details(session: Any, model_type: str = "") -> str:
     """원본 WanGP API가 제공하는 모델 정보만 표시한다. 다운로드/설정 변경 없음."""
-    key = str(model_type or "").strip()
+    key = _one_line(model_type or "", 120)
     if not key:
         return "모델 탐색 결과에서 모델 ID를 확인하고 입력해 주세요."
     if session is None:
@@ -109,8 +120,10 @@ def format_model_details(session: Any, model_type: str = "") -> str:
 
     try:
         candidates = session.list_model_metadata()
-    except Exception as exc:
-        return f"모델 목록을 읽지 못했습니다: {type(exc).__name__}: {exc}"
+    except Exception:
+        return "모델 목록 조회에 실패했습니다. WanGP 원본에서 연결 상태를 확인하세요."
+    if not isinstance(candidates, (list, tuple)):
+        return "모델 목록의 응답 형식이 예상과 다릅니다. WanGP 원본에서 확인하세요."
 
     match = next(
         (item for item in (candidates or [])
@@ -122,12 +135,12 @@ def format_model_details(session: Any, model_type: str = "") -> str:
         return "일치하는 모델 ID가 없습니다. 먼저 원본 모델 목록을 새로 조회해 주세요."
 
     exact_id = str(match["model_type"])
-    name = str(match.get("name") or exact_id)
-    family = str(match.get("family_label") or match.get("family") or "정보 없음")
+    name = _one_line(match.get("name") or exact_id) or "이름 없음"
+    family = _one_line(match.get("family_label") or match.get("family")) or "정보 없음"
     roles = ", ".join(_output_names(match)) or "미분류"
     rows = [
         f"모델: {name}",
-        f"원본 ID: {exact_id}",
+        f"원본 ID: {_one_line(exact_id)}",
         f"계열: {family}",
         f"출력 종류: {roles}",
         "",
@@ -139,27 +152,31 @@ def format_model_details(session: Any, model_type: str = "") -> str:
             if isinstance(inputs, str):
                 inputs = [inputs]
             if isinstance(inputs, (list, tuple)):
-                rows.append("입력 종류: " + (", ".join(map(str, inputs)) or "정보 없음"))
+                rows.append("입력 종류: " + (", ".join(filter(None, (_one_line(v, 50) for v in inputs[:20]))) or "정보 없음"))
             caps = schema.get("capabilities") or {}
             if isinstance(caps, dict):
-                enabled = [str(k) for k, v in caps.items() if v is True]
+                enabled = [_one_line(k, 60) for k, v in caps.items() if v is True]
                 if enabled:
-                    rows.append("지원 기능: " + ", ".join(enabled[:12]))
-    except Exception as exc:
-        rows.append(f"지원 기능 조회 실패: {type(exc).__name__}")
+                    rows.append("지원 기능: " + ", ".join(filter(None, enabled[:12])))
+    except Exception:
+        rows.append("지원 기능 조회에 실패했습니다. 원본에서 확인하세요.")
 
     try:
         availability = session.get_model_availability(exact_id)
         if isinstance(availability, dict):
-            import json
-            summary = json.dumps(availability, ensure_ascii=False, default=str, sort_keys=True)
             rows.append("")
             rows.append("원본 모델 파일 상태 (WanGP 보고):")
-            rows.append(summary[:1800] + ("…" if len(summary) > 1800 else ""))
+            # 원본 응답에는 로컬 파일 경로 등 내부 정보가 섞일 수 있으므로
+            # 검증 가능한 준비 여부만 최소 허용 목록으로 노출한다.
+            ready = availability.get("files_ready")
+            if isinstance(ready, bool):
+                rows.append(json.dumps({"files_ready": ready}, ensure_ascii=False))
+            else:
+                rows.append("파일 준비 여부 미확인 · 원본 WanGP에서 직접 확인해 주세요.")
         else:
             rows.append("원본 모델 파일 상태 정보 없음")
-    except Exception as exc:
-        rows.append(f"모델 파일 상태 조회 실패: {type(exc).__name__}")
+    except Exception:
+        rows.append("모델 파일 상태 조회에 실패했습니다. 원본에서 확인하세요.")
 
     rows.extend([
         "",
@@ -287,10 +304,10 @@ def format_queue_dashboard(session: Any, show_prompts: bool = False) -> tuple[st
         )
     try:
         queue = session.list_queue()
-    except Exception as exc:
+    except Exception:
         return (
             "**조회 실패** · 원본 WanGP의 큐 상태를 확인해 주세요.",
-            f"작업 상태 조회 실패: {type(exc).__name__}: {exc}",
+            "작업 상태 조회에 실패했습니다. WanGP 원본에서 연결 상태를 확인하세요.",
         )
     if not isinstance(queue, dict):
         return (
@@ -324,8 +341,8 @@ def format_queue_dashboard(session: Any, show_prompts: bool = False) -> tuple[st
     for index, item in enumerate(tasks[:20], start=1):
         if not isinstance(item, dict):
             continue
-        status = str(item.get("status") or "")
-        model = str(item.get("model_type") or "모델 미표시").replace("\n", " ")[:100]
+        status = _one_line(item.get("status"), 60)
+        model = _one_line(item.get("model_type"), 100) or "모델 미표시"
         rows.append(f"{index}. {status_labels.get(status, status or '상태 미표시')} · {model}")
         if show_prompts:
             prompt = " ".join(str(item.get("prompt") or "").split())[:180]

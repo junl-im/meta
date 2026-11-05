@@ -173,7 +173,7 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.26.0-dev"
+        self.version = "0.28.0-dev"
         self.description = "저사양 모델 사전 점검·첫 제작 분야 연결 · 무료 로컬 기본 · GPT 선택"
 
     def setup_ui(self):
