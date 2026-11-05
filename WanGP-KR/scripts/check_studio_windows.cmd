@@ -5,10 +5,10 @@ title 곰같은여우의 AI 스튜디오 - 설치 후 읽기 전용 점검
 
 echo.
 echo =====================================================
-echo   곰같은여우의 AI 스튜디오 v0.26 - Windows 설치 점검
+echo   곰같은여우의 AI 스튜디오 v0.28 - Windows 설치 점검
 echo =====================================================
 echo.
-echo [안내] 이 도구는 설치 여부와 v0.26 기준 파일 무결성만 검사합니다.
+echo [안내] 이 도구는 설치 여부와 v0.28 기준 파일 무결성만 검사합니다.
 echo 프로그램 실행, 모델 다운로드, 이미지 생성, 파일 수정은 하지 않습니다.
 echo 원본 WanGP가 지원하는 모든 모델의 실행 성공을 보장하지 않습니다.
 echo 검사 결과는 설치 준비 상태일 뿐, 실제 생성 성공 판정이 아닙니다.
@@ -36,16 +36,16 @@ echo [2/3] 한글 스튜디오 14개 파일 확인
 set "GOMFOX_PLUGIN_DIR=%GOMFOX_CHECK_DIR%\plugins\wan2gp-gomfox-studio"
 if not exist "%GOMFOX_PLUGIN_DIR%\" goto missing_plugin
 echo [확인] 한글 스튜디오 파일 SHA-256 대조 중...
-echo 소스 기준: f866f33ef281ad897df012c208ea1c113d637d7f
+echo 소스 기준: 81bf05b0d416ceab090c5e7a1916fa67c4f6d2b2
 set "GOMFOX_ISSUES=0"
 
 call :verify_file "__init__.py" "754b7e9e5046f2450c5fd4ea0a53d40b6ceb8671acbb6e7ddd8932a52de80066"
 if errorlevel 1 set "GOMFOX_ISSUES=1"
-call :verify_file "plugin.py" "b58735e3def599758fa93a7621728ea156c2ab648f751baccf1118f8c40a1410"
+call :verify_file "plugin.py" "c5b8ab62b954fe808d003d6767d56e5bf2dcbc92c79b3221a495c3c778cb3a8b"
 if errorlevel 1 set "GOMFOX_ISSUES=1"
-call :verify_file "plugin_info.json" "cf79549f6a29d008ac767b3005b638573557b0b928a0d8a176626d5e847605dc"
+call :verify_file "plugin_info.json" "61b6d5f7f3e8a780204b58d749e9225e71d75516f474819bf277eade38608c3d"
 if errorlevel 1 set "GOMFOX_ISSUES=1"
-call :verify_file "catalog.py" "8cccd472df2f33bca91fde3231b53cade7a0de9522b164d8f49a7d9875815f05"
+call :verify_file "catalog.py" "28c9fe5403e29c55c47c5412c15aa4b48038145e57bfa21a14c0b80e4e172872"
 if errorlevel 1 set "GOMFOX_ISSUES=1"
 call :verify_file "help_content.py" "0f96b6657342735165dc56b1e8f9296ab2093eca7daa827a47ce406a0c63059e"
 if errorlevel 1 set "GOMFOX_ISSUES=1"
@@ -83,7 +83,7 @@ if exist "%GOMFOX_CHECK_DIR%\scripts\run.bat" (
 
 if "%GOMFOX_ISSUES%"=="1" goto integrity_failed
 echo.
-echo [검사 통과] 원본 구조와 한글 스튜디오 필수 파일 14개가 v0.26 기준과 일치합니다.
+echo [검사 통과] 원본 구조와 한글 스튜디오 필수 파일 14개가 v0.28 기준과 일치합니다.
 echo [미검증] 실제 실행, 브라우저 화면, GPU 생성, 결과 저장은 아직 확인하지 않았습니다.
 echo [실기기 검수 1] WanGP Manager에서 Start WanGP를 눌러 원본 실행 확인
 echo [실기기 검수 2] 브라우저에서 한글 스튜디오 탭과 네 분야 원화 표시 확인
@@ -114,7 +114,7 @@ goto failed
 :integrity_failed
 echo [점검 필요] 필수 파일의 누락 또는 SHA-256 불일치가 발견됐습니다.
 echo 원본과 기존 플러그인을 자동 교체하지 않았습니다. 버전을 먼저 확인하세요.
-echo 이번 검사 기준은 v0.26 고정 소스이며 이전 버전 정상 파일도 불일치할 수 있습니다.
+echo 이번 검사 기준은 v0.28 고정 소스이며 이전 버전 정상 파일도 불일치할 수 있습니다.
 echo 어떤 파일에서 누락 또는 불일치가 났는지 확인하고 수동 삭제 없이 보고해 주세요.
 goto failed
 

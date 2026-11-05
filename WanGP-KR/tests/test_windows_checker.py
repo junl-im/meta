@@ -1,4 +1,4 @@
-"""v0.26 Windows 설치 점검 도우미의 정적 안전·무결성 기준 검사.
+"""v0.28 Windows 설치 점검 도우미의 정적 안전·무결성 기준 검사.
 
 Linux에서 CMD 스크립트를 실제 실행하지 않으며 파일 자체의 계약만 확인한다.
 """
@@ -33,10 +33,10 @@ class TestWindowsReadOnlyChecker(unittest.TestCase):
             self.assertEqual(hashlib.sha256((PLUGIN_DIR / filename).read_bytes()).hexdigest(), sha256)
 
     def test_installer_and_checker_pin_same_immutable_source_commit(self):
-        commit = "f866f33ef281ad897df012c208ea1c113d637d7f"
+        commit = "81bf05b0d416ceab090c5e7a1916fa67c4f6d2b2"
         self.assertIn("https://raw.githubusercontent.com/junl-im/meta/" + commit, self.installer)
         self.assertIn("소스 기준: " + commit, self.script)
-        self.assertIn("v0.26 기준 파일 무결성", self.script)
+        self.assertIn("v0.28 기준 파일 무결성", self.script)
 
     def test_checks_original_and_plugin_before_hashing(self):
         self.assertIn(r'if not exist "%GOMFOX_CHECK_DIR%\wgp.py" goto missing_original', self.script)
