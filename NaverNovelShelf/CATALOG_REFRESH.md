@@ -13,7 +13,7 @@ re-host chapter text. Never add SVG assets or inline vector markup.
   - `닥터X`
 - Source search pattern: `https://m.novel.naver.com/search?keyword=<encoded_author>&section=<best|challenge>&target=author`.
 - Include all public pages of each Best League and Challenge League search result, not merely the three preview items in the all-results tab.
-- On each search result, collect exact pen name, work title, `novelId`, league, publicly served `novel-phinf.pstatic.net` image URL, and genre if present.
+- On each search result, collect exact pen name, work title, `novelId`, league, publicly served `novel-phinf.pstatic.net` image URL, genre, and the official thumbnail's `icon_comp` completion marker. A card without the marker is shown as 연재중; this includes works Naver does not mark as completed, including possible hiatuses.
 - Only exact-author matches and official `/best/list?novelId=` or `/challenge/list?novelId=` links are allowed. Deduplicate by `league:novelId`.
 - Do not use private endpoints, logins, CAPTCHA bypass, anti-bot evasion, or broad crawling. If Naver prevents access, retain the last verified catalog.
 
@@ -21,7 +21,7 @@ re-host chapter text. Never add SVG assets or inline vector markup.
 
 1. Read `site/catalog.js`, `site/app.js`, `site/index.html`, and the current hosting manifest.
 2. Re-check all five pen names and both leagues from the official public search pages.
-3. Compare with `window.NOVEL_CATALOG`. If there are additions, removals, title changes, cover changes, or league changes, update only the catalog records, preserving the 6-field tuple format and existing site design.
+3. Compare with `window.NOVEL_CATALOG`. If there are additions, removals, title changes, cover changes, league changes, or verified publication-status changes, update the catalog records and preserve the existing site design. Tuples include the verified status as a seventh field; older six-field tuples remain readable as unknown.
 4. When catalog records change, update `window.NOVEL_CATALOG_LAST_CHECK` with the date of successful verification. If nothing changed, do not modify source just to record the check date. Retain records if any source check was incomplete.
 5. Validate that all `id` values are numeric, `author` is one of the 5 names, `league` is `best` or `challenge`, images use HTTPS `novel-phinf.pstatic.net`, and no records are duplicated.
 6. Preserve public site access, all hand-painted WebP assets, SVG prohibition, and the distinct Best League and Challenge League presentation. The visible Korean labels are `베스트리그` and `챌린지리그`; never relabel Challenge League as General League. Mobile cards must remain in 3 columns.

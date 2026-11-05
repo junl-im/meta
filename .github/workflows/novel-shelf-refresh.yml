@@ -40,6 +40,7 @@ jobs:
           node --check NaverNovelShelf/site/catalog.js
           node --check NaverNovelShelf/site/app.js
           node --check NaverNovelShelf/scripts/refresh-public-catalog.mjs
+          node --test NaverNovelShelf/scripts/test-public-catalog-status.mjs
           if ! git diff --quiet -- NaverNovelShelf/site/catalog.js NaverNovelShelf/site/catalog-feed.json NaverNovelShelf/integration/catalog.v1.json; then
             echo 'changed=true' >> "$GITHUB_OUTPUT"
           elif curl -fsSL --max-time 15 'https://junl-im.github.io/meta/NaverNovelShelf/site/catalog-feed.json' -o /tmp/published-novel-catalog.json; then

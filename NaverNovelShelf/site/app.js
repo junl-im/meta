@@ -11,6 +11,7 @@
   let works = (Array.isArray(window.NOVEL_CATALOG)?window.NOVEL_CATALOG:[])
     .filter(w=>AUTHORS.includes(w.author) && /^\d+$/.test(w.id) && ["best","challenge"].includes(w.league))
     .filter(w=>w.url === "https://m.novel.naver.com/"+w.league+"/list?novelId="+w.id)
+    .map(w=>({...w,status:["ongoing","completed"].includes(w.status)?w.status:"unknown"}))
     .sort((a,b)=>Number(b.id)-Number(a.id));
   let selectedLeague="all";
   let lastReadId=null;
@@ -26,9 +27,11 @@
       const feed=await response.json();
       if(feed.schema_version!==1||!Array.isArray(feed.works)||!/^\d{4}-\d{2}-\d{2}$/.test(feed.catalog_last_verified||""))return;
       if(feed.catalog_last_verified<(window.NOVEL_CATALOG_LAST_CHECK||""))return;
+      const knownStatus=new Map(works.map(w=>[w.league+":"+w.id,w.status]));
       const next=feed.works.map(row=>({
         title:row.title,author:row.author_search_identity,id:String(row.id),
-        league:row.league,image:row.cover_thumbnail_url,genre:row.genre,url:row.official_url
+        league:row.league,image:row.cover_thumbnail_url,genre:row.genre,url:row.official_url,
+        status:["ongoing","completed"].includes(row.publication_status)?row.publication_status:(knownStatus.get(row.league+":"+String(row.id))||"unknown")
       }));
       const ids=new Set();
       if(next.some(row=>{
@@ -89,11 +92,20 @@
     byId("league-groups").innerHTML=leagues.filter(league=>selectedLeague==="all"||league.value===selectedLeague).map(league=>{
       const groupRows=rows.filter(w=>w.league===league.value);
       if(!groupRows.length)return "";
+      const statusGroups=[{value:"ongoing",label:"연재중"},{value:"completed",label:"완결"},{value:"unknown",label:"상태 확인 중"}];
+      const sections=statusGroups.map(status=>{
+        const entries=groupRows.filter(w=>w.status===status.value);
+        if(!entries.length)return "";
+        return `<section class="publication-group" aria-label="${league.label} ${status.label}">
+          <h4 class="publication-heading"><span>${status.label}</span><span class="publication-count">${entries.length}</span></h4>
+          <div class="novel-grid">${entries.map(makeCard).join("")}</div>
+        </section>`;
+      }).join("");
       return `<section class="league-section" aria-label="${league.label}">
         <div class="league-section-heading"><span class="asset-icon ${league.icon}" aria-hidden="true"></span>
           <div><small>${league.caption}</small><h3>${league.label} <span class="count-pill">${groupRows.length}</span></h3></div>
         </div>
-        <div class="novel-grid">${groupRows.map(makeCard).join("")}</div>
+        ${sections}
       </section>`;
     }).join("");
     byId("league-groups").querySelectorAll("[data-open-novel]").forEach(el=>el.addEventListener("click",()=>{
