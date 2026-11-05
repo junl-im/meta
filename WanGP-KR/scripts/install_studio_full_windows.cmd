@@ -8,7 +8,7 @@ echo ===================================================
 echo       곰같은여우의 AI 스튜디오 - 전체 설치
 echo ===================================================
 echo.
-echo 한글 작업실 v0.21 개발판 - 저사양 사양 오검출 방지와 첫 제작 안내
+echo 한글 작업실 v0.22 개발판 - 설치 전후 무결성 이중 확인
 echo 이 도구는 필요할 때 공식 WanGP Manager를 다운로드하고,
 echo 원본 WanGP 설치가 끝나면 한국어 스튜디오를 추가합니다.
 echo 원본 출처: https://github.com/deepbeepmeep/WanGP
@@ -183,6 +183,38 @@ if not exist "%PLUGIN_STAGE%\category-image.webp" goto plugin_copy_error
 if not exist "%PLUGIN_STAGE%\category-audio.webp" goto plugin_copy_error
 if not exist "%PLUGIN_STAGE%\category-3d.webp" goto plugin_copy_error
 
+rem Recheck staged bytes after robocopy; a successful download does not prove a sound copy.
+echo [검증] 임시 복사된 14개 파일의 SHA-256을 다시 확인합니다.
+call :verify_stage_file "__init__.py" "754b7e9e5046f2450c5fd4ea0a53d40b6ceb8671acbb6e7ddd8932a52de80066"
+if errorlevel 1 goto plugin_stage_integrity_error
+call :verify_stage_file "plugin.py" "b04219ae969e40601c4904c70545fc0e8755be2a975b9b4fa13899f205d314e7"
+if errorlevel 1 goto plugin_stage_integrity_error
+call :verify_stage_file "plugin_info.json" "cf743199cf93a210b8c1de9e5e34301b6d94a1fedaaf3173a7c15c424150dde9"
+if errorlevel 1 goto plugin_stage_integrity_error
+call :verify_stage_file "catalog.py" "39cb365029369a6cd86d65f60a88ac4de424fd47960c0a41030d223dfb8d7de7"
+if errorlevel 1 goto plugin_stage_integrity_error
+call :verify_stage_file "help_content.py" "67ce4cd46e76b475d43d5da239431b61f8a7ebca8482aa0db07dbc16d65e376a"
+if errorlevel 1 goto plugin_stage_integrity_error
+call :verify_stage_file "hardware.py" "04f3ff1a05714f22f43340190cf75b1c85d4d443c6feccad34c4a6487bae66bf"
+if errorlevel 1 goto plugin_stage_integrity_error
+call :verify_stage_file "studio_check.py" "60f256bd29061b27580d0e7bbd48a75ab3696072343e70484b0b9659ac080360"
+if errorlevel 1 goto plugin_stage_integrity_error
+call :verify_stage_file "prompt_assistant.py" "555295c725610b2882d8f6efbc8e43b4da9bee25a6aa71294cb505feb3c70b1b"
+if errorlevel 1 goto plugin_stage_integrity_error
+call :verify_stage_file "studio-hero.png" "68ed79eb62f1fa81e089a52f85a689eabb73db964fc84d63daf85bd87c264b66"
+if errorlevel 1 goto plugin_stage_integrity_error
+call :verify_stage_file "gomfox-studio-icon.png" "ee1ccd2694f9495084e57defe3b5ddee61b13377f78a43dce819fc8fa9c2e365"
+if errorlevel 1 goto plugin_stage_integrity_error
+call :verify_stage_file "category-video.webp" "922b041aa952592fdaf7304702425383debf442103834334581d955a08bbdbb6"
+if errorlevel 1 goto plugin_stage_integrity_error
+call :verify_stage_file "category-image.webp" "9a92e1f873943c1e96b58dd1dea37644fe596fc040e40800e25688b86c7ca8ca"
+if errorlevel 1 goto plugin_stage_integrity_error
+call :verify_stage_file "category-audio.webp" "77f253cefebcf8ac929d982367fc1dffd90f4ae9dffaf2652b08b87240056326"
+if errorlevel 1 goto plugin_stage_integrity_error
+call :verify_stage_file "category-3d.webp" "9827269c0b33accb16c3dd95f250d9cd70429f9bed97ae47f6663febba208697"
+if errorlevel 1 goto plugin_stage_integrity_error
+echo [확인] 임시 복사 14개 파일의 무결성이 모두 일치합니다.
+
 rem Avoid overwriting even if another installer created the destination meanwhile.
 if exist "%PLUGIN_DEST%" goto plugin_exists
 move "%PLUGIN_STAGE%" "%PLUGIN_DEST%" >nul
@@ -305,6 +337,14 @@ echo 임시 작업 폴더가 남았다면 사용자 확인 후 정리하세요: 
 echo 임시 폴더를 자동 삭제하지 않습니다. 상태 확인 후 다시 실행하세요.
 goto finish_error
 
+:plugin_stage_integrity_error
+echo [안전 중단] 복사된 플러그인 파일의 SHA-256이 원본 검증값과 일치하지 않습니다.
+echo 원본 plugins 폴더에 플러그인을 연결하지 않았습니다.
+echo 검증을 건너뛰거나 기존 파일을 교체하지 마세요.
+echo 문제가 난 임시 작업 폴더를 확인해 주세요: "%PLUGIN_STAGE%"
+echo 임시 폴더는 자동 삭제하지 않습니다. 내려받기부터 다시 시도하세요.
+goto finish_error
+
 :cancelled
 echo 사용자가 설치를 취소했습니다.
 pause
@@ -326,4 +366,17 @@ if errorlevel 1 exit /b 1
 if not exist "%GOMFOX_FILE_PATH%" exit /b 1
 powershell.exe -NoProfile -NonInteractive -Command "$actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $env:GOMFOX_FILE_PATH).Hash; if ($actual -ne $env:GOMFOX_EXPECTED_SHA) { exit 5 }"
 if errorlevel 1 exit /b 1
+exit /b 0
+
+:verify_stage_file
+set "GOMFOX_STAGE_NAME=%~1"
+set "GOMFOX_STAGE_EXPECTED_SHA=%~2"
+set "GOMFOX_STAGE_CHECK_PATH=%PLUGIN_STAGE%\%GOMFOX_STAGE_NAME%"
+if not exist "%GOMFOX_STAGE_CHECK_PATH%" exit /b 1
+powershell.exe -NoProfile -NonInteractive -Command "try { $actual=(Get-FileHash -Algorithm SHA256 -LiteralPath $env:GOMFOX_STAGE_CHECK_PATH -ErrorAction Stop).Hash; if ($actual -ieq $env:GOMFOX_STAGE_EXPECTED_SHA) { exit 0 } else { exit 5 } } catch { exit 6 }"
+if errorlevel 1 (
+  echo [불일치] %GOMFOX_STAGE_NAME%
+  exit /b 1
+)
+echo [일치] %GOMFOX_STAGE_NAME%
 exit /b 0

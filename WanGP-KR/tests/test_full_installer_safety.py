@@ -6,6 +6,7 @@ Windows 프로세스를 실제 실행하지 않으며 Linux/Python에서도 검�
 from __future__ import annotations
 
 import hashlib
+import re
 import unittest
 from pathlib import Path
 
@@ -64,6 +65,27 @@ class TestFullInstallerSafety(unittest.TestCase):
         self.assertLess(self.script.index('if exist "%PLUGIN_DEST%" goto plugin_exists'), self.script.index('move "%PLUGIN_STAGE%" "%PLUGIN_DEST%"'))
         for filename in REQUIRED_FILES:
             self.assertIn('if not exist "%PLUGIN_STAGE%\\' + filename + '" goto plugin_copy_error', self.script)
+
+    def test_staged_copy_is_rehashed_before_move(self):
+        """복사 손상이 있어도 plugins 폴더에 이동하기 전 중단해야 한다."""
+        downloaded = dict(re.findall(r'call :fetch_plugin_file "([^"]+)" "([a-f0-9]{64})"', self.script))
+        staged = dict(re.findall(r'call :verify_stage_file "([^"]+)" "([a-f0-9]{64})"', self.script))
+        self.assertEqual(set(downloaded), set(REQUIRED_FILES))
+        self.assertEqual(downloaded, staged)
+        self.assertLess(self.script.index('robocopy "%PLUGIN_SOURCE%"'), self.script.index('call :verify_stage_file "__init__.py"'))
+        self.assertLess(self.script.index('call :verify_stage_file "category-3d.webp"'), self.script.index('move "%PLUGIN_STAGE%" "%PLUGIN_DEST%"'))
+        self.assertIn('if errorlevel 1 goto plugin_stage_integrity_error', self.script)
+        self.assertIn('Get-FileHash -Algorithm SHA256 -LiteralPath $env:GOMFOX_STAGE_CHECK_PATH', self.script)
+        self.assertIn('if ($actual -ieq $env:GOMFOX_STAGE_EXPECTED_SHA)', self.script)
+
+    def test_staged_hash_failure_is_non_destructive(self):
+        start = self.script.index(':plugin_stage_integrity_error\n')
+        end = self.script.index(':cancelled\n', start)
+        failure = self.script[start:end].casefold()
+        self.assertIn('goto finish_error', failure)
+        self.assertIn('임시 폴더는 자동 삭제하지 않습니다', failure)
+        for forbidden in ('robocopy ', 'move ', 'rmdir ', 'del /', 'remove-item'):
+            self.assertNotIn(forbidden, failure)
 
     def test_no_destructive_or_policy_bypass_commands(self):
         for forbidden in (

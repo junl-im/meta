@@ -1,6 +1,6 @@
 # 곰같은여우의 AI 스튜디오 — WanGP 한국어 개인 작업실 (개발판)
 
-> **현재 단계: v0.21 저사양 PC 사양 진단 오검출 방지 (한글 플러그인은 0.21.0-dev).** 이 폴더는 원본 WanGP 엔진을 복제하거나 교체한 구현물이 아니라, **원본을 사용하기 위한 설계·연동 작업 공간**입니다. 실제 Windows 설치·실행·GPU 성능 검증은 아직 하지 않았습니다.
+> **현재 단계: v0.22 Windows 신규 설치 복사 무결성 이중 확인 (한글 플러그인은 0.21.0-dev 유지).** 이 폴더는 원본 WanGP 엔진을 복제하거나 교체한 구현물이 아니라, **원본을 사용하기 위한 설계·연동 작업 공간**입니다. 실제 Windows 설치·실행·GPU 성능 검증은 아직 하지 않았습니다.
 
 ## 목표
 
@@ -67,6 +67,7 @@ python WanGP-KR/scripts/bring_upstream.py
 20. [v0.20 Windows 실기기 기록용 오프라인 HTML](docs/V020_WINDOWS_SMOKE_WORKBOOK.html)
 21. [v0.20 실제 무료 생성·성능 기록 가이드](docs/V020_WINDOWS_FIRST_GENERATION_KO.md)
 22. [v0.21 저사양 GPU 메모리 진단 안전성·실기기 검수표](docs/V021_LOW_SPEC_GUIDANCE_QA_KO.md)
+23. [v0.22 Windows 설치 복사 무결성 및 무료 첫 생성 검수표](docs/V022_WINDOWS_INSTALL_INTEGRITY_QA_KO.md)
 
 ## 2026-11-01 디자인 대시보드 개발
 
@@ -151,6 +152,14 @@ python WanGP-KR/scripts/bring_upstream.py
 - [v0.17 최초 실행·오류별 안전 복구 검수표](docs/V017_FIRST_RUN_WINDOWS_KO.md)를 제공하며, Linux 코드·CMD 정적 테스트 **64개 통과**를 Windows 실구동 성공으로 해석하지 않습니다.
 
 ## 진척
+
+### 2026-11-05 v0.22 Windows 신규 설치 복사 무결성 이중 확인
+
+- 고정 커밋에서 14개 플러그인 파일을 다운로드해 SHA-256을 검사한 뒤, 임시 설치 폴더로 복사한 파일도 **같은 14개 SHA-256으로 다시 확인**하도록 설치 도우미를 보강했습니다.
+- 파일이 없거나 복사한 바이트가 일치하지 않으면 원본 `plugins` 디렉터리로 옮기기 **전에 중단**합니다. 실패 경로에 자동 삭제·강제 덮어쓰기·체크섬 우회는 없습니다.
+- 소스 고정 커밋 `53f9005`, 한글 플러그인 `0.21.0-dev`, 기존 PNG/WebP 독자 원화, GPT 선택형·무료 로컬 기본은 그대로 유지했습니다. 새 SVG 없음.
+- [v0.22 Windows 첫 설치 검수표](docs/V022_WINDOWS_INSTALL_INTEGRITY_QA_KO.md)에 Manager 설치·플러그인 해시·원본 실행·무료 이미지 1장 저장 및 오류 대응 순서를 정리했습니다.
+- 이 단계는 Linux 기반 코드·안전 검사로 검증하며 실제 Windows 16GB PC에서의 최초 설치·GPU 생성·Android 실기 성능은 **아직 미검증**입니다.
 
 ### 2026-11-05 v0.21 저사양 RAM·GPU 첫 제작 안내 안전성
 
