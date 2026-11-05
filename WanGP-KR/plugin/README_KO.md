@@ -1,6 +1,8 @@
 # 곰같은여우의 AI 스튜디오 — 초기 한국어 플러그인
 
-**개발 버전 0.19.0-dev. 실제 Windows/WanGP 구동 환경에서 미검증.**
+**개발 버전 0.21.0-dev. 실제 Windows/WanGP 구동 환경에서 미검증.**
+
+**v0.21 추가:** 사양 확인 버튼이 비정상 VRAM/RAM 값을 거부하고, 여러 CUDA GPU의 용량을 구분해 표시합니다. Windows에서 GPU 이름만 읽힌 경우 전용 VRAM을 추측하지 않습니다. [저사양 안전 검수 안내](../docs/V021_LOW_SPEC_GUIDANCE_QA_KO.md)를 참고하세요.
 
 ## 사용 목적
 

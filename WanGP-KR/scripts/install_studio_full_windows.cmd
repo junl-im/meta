@@ -8,7 +8,7 @@ echo ===================================================
 echo       곰같은여우의 AI 스튜디오 - 전체 설치
 echo ===================================================
 echo.
-echo 한글 작업실 v0.19 개발판 - 원화 비율과 작업 상태 화면 개선
+echo 한글 작업실 v0.21 개발판 - 저사양 사양 오검출 방지와 첫 제작 안내
 echo 이 도구는 필요할 때 공식 WanGP Manager를 다운로드하고,
 echo 원본 WanGP 설치가 끝나면 한국어 스튜디오를 추가합니다.
 echo 원본 출처: https://github.com/deepbeepmeep/WanGP
@@ -46,22 +46,22 @@ echo 설치 스크립트 옆의 미검증 로컬 파일은 자동으로 재사�
 
 :download_plugin
 echo 고정된 GitHub 코드 버전의 필수 14개 파일을 받습니다.
-echo GitHub 원본 버전: 1301ff4dbb4392ccff981d8686b49410c3d33359
+echo GitHub 원본 버전: 53f90051e4c1983fe9e5cbaa9f98bfead398d0c3
 set "PLUGIN_SOURCE=%SETUP_DIR%\wan2gp-gomfox-studio"
 mkdir "%PLUGIN_SOURCE%" >nul 2>nul
 if not exist "%PLUGIN_SOURCE%\" goto plugin_download_error
-set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/1301ff4dbb4392ccff981d8686b49410c3d33359/WanGP-KR/plugin/wan2gp-gomfox-studio"
+set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/53f90051e4c1983fe9e5cbaa9f98bfead398d0c3/WanGP-KR/plugin/wan2gp-gomfox-studio"
 call :fetch_plugin_file "__init__.py" "754b7e9e5046f2450c5fd4ea0a53d40b6ceb8671acbb6e7ddd8932a52de80066"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin.py" "9517170b6933b434a54aa8dad59817be441b520e0cca8493e901bea609925102"
+call :fetch_plugin_file "plugin.py" "b04219ae969e40601c4904c70545fc0e8755be2a975b9b4fa13899f205d314e7"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin_info.json" "1312b5f09be050d308af56e9cb46fbb7942129ab90e8c22065314e0959054979"
+call :fetch_plugin_file "plugin_info.json" "cf743199cf93a210b8c1de9e5e34301b6d94a1fedaaf3173a7c15c424150dde9"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "catalog.py" "39cb365029369a6cd86d65f60a88ac4de424fd47960c0a41030d223dfb8d7de7"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "help_content.py" "67ce4cd46e76b475d43d5da239431b61f8a7ebca8482aa0db07dbc16d65e376a"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "hardware.py" "65048b0d8a7e19a0d702337b991ea54e86ef4114904a227bc01c34cf68bb24f4"
+call :fetch_plugin_file "hardware.py" "04f3ff1a05714f22f43340190cf75b1c85d4d443c6feccad34c4a6487bae66bf"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "studio_check.py" "60f256bd29061b27580d0e7bbd48a75ab3696072343e70484b0b9659ac080360"
 if errorlevel 1 goto plugin_download_error

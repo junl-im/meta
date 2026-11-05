@@ -1,6 +1,6 @@
 # 곰같은여우의 AI 스튜디오 — WanGP 한국어 개인 작업실 (개발판)
 
-> **현재 단계: v0.20 Windows 첫 무료 생성 검수 도구 준비 (한글 플러그인은 0.19.0-dev 유지).** 이 폴더는 원본 WanGP 엔진을 복제하거나 교체한 구현물이 아니라, **원본을 사용하기 위한 설계·연동 작업 공간**입니다. 실제 Windows 설치·실행·GPU 성능 검증은 아직 하지 않았습니다.
+> **현재 단계: v0.21 저사양 PC 사양 진단 오검출 방지 (한글 플러그인은 0.21.0-dev).** 이 폴더는 원본 WanGP 엔진을 복제하거나 교체한 구현물이 아니라, **원본을 사용하기 위한 설계·연동 작업 공간**입니다. 실제 Windows 설치·실행·GPU 성능 검증은 아직 하지 않았습니다.
 
 ## 목표
 
@@ -66,6 +66,7 @@ python WanGP-KR/scripts/bring_upstream.py
 19. [v0.19 원화·선택 안내·작업 큐 역검수표](docs/V019_VISUAL_QA_KO.md)
 20. [v0.20 Windows 실기기 기록용 오프라인 HTML](docs/V020_WINDOWS_SMOKE_WORKBOOK.html)
 21. [v0.20 실제 무료 생성·성능 기록 가이드](docs/V020_WINDOWS_FIRST_GENERATION_KO.md)
+22. [v0.21 저사양 GPU 메모리 진단 안전성·실기기 검수표](docs/V021_LOW_SPEC_GUIDANCE_QA_KO.md)
 
 ## 2026-11-01 디자인 대시보드 개발
 
@@ -150,6 +151,15 @@ python WanGP-KR/scripts/bring_upstream.py
 - [v0.17 최초 실행·오류별 안전 복구 검수표](docs/V017_FIRST_RUN_WINDOWS_KO.md)를 제공하며, Linux 코드·CMD 정적 테스트 **64개 통과**를 Windows 실구동 성공으로 해석하지 않습니다.
 
 ## 진척
+
+### 2026-11-05 v0.21 저사양 RAM·GPU 첫 제작 안내 안전성
+
+- Windows 16GB·저사양 PC에서 진단 버튼을 직접 눌렀을 때 **비정상 수치(NaN·무한대·음수·0·상식 밖 메모리)**를 제외해 GPU를 과대평가하지 않도록 보정했습니다.
+- CUDA가 보고한 GPU별 전용 VRAM을 각각 표시하며 최대 수치는 **안내용**이라고 명시했습니다. Windows WMI에서 GPU 이름만 확인되는 경우 용량을 추측하지 않습니다.
+- 메모리 부족 시 다른 GPU 사용 프로그램 종료·원본에서 공식 지원하는 더 작은 모델 직접 선택을 추가했습니다. **GPU 설정·모델 변경은 자동 실행하지 않습니다.**
+- Windows 신규 설치 도우미/읽기 전용 점검 도우미를 **v0.21 소스 고정 커밋·14개 SHA-256** 기준으로 맞췄습니다. 기존 설치 자동 덮어쓰기·삭제는 없습니다.
+- [v0.21 실기기 검수표](docs/V021_LOW_SPEC_GUIDANCE_QA_KO.md)를 제공하며, [v0.20 오프라인 성능 기록장](docs/V020_WINDOWS_SMOKE_WORKBOOK.html)과 연결합니다.
+- Linux의 자동·모의 검사와 실제 Windows 16GB/Android/무료 GPU 생성 성능 검증을 구분합니다. **실제 GPU 성능·화질은 아직 미검증**입니다.
 
 ### 2026-11-05 v0.20 Windows 실제 첫 생성 검수 준비
 
