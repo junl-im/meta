@@ -13,12 +13,13 @@ from pathlib import Path
 
 SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "install_studio_full_windows.cmd"
 PLUGIN_DIR = SCRIPT_PATH.parents[1] / "plugin" / "wan2gp-gomfox-studio"
-PINNED_COMMIT = "eece96f64627b7933c64b48a0b01b2c763695a62"
+PINNED_COMMIT = "5ff6f69ca151ad9703d2a9493329dea5d6a2d5cc"
 REQUIRED_FILES = (
     "__init__.py", "plugin.py", "plugin_info.json", "catalog.py",
     "help_content.py", "hardware.py", "studio_check.py", "prompt_assistant.py",
     "studio-hero.png", "gomfox-studio-icon.png",
     "category-video.webp", "category-image.webp", "category-audio.webp", "category-3d.webp",
+    "first-run-helper-v036.webp",
 )
 
 
@@ -74,6 +75,7 @@ class TestFullInstallerSafety(unittest.TestCase):
         self.assertEqual(downloaded, staged)
         self.assertLess(self.script.index('robocopy "%PLUGIN_SOURCE%"'), self.script.index('call :verify_stage_file "__init__.py"'))
         self.assertLess(self.script.index('call :verify_stage_file "category-3d.webp"'), self.script.index('move "%PLUGIN_STAGE%" "%PLUGIN_DEST%"'))
+        self.assertLess(self.script.index('call :verify_stage_file "first-run-helper-v036.webp"'), self.script.index('move "%PLUGIN_STAGE%" "%PLUGIN_DEST%"'))
         self.assertIn('if errorlevel 1 goto plugin_stage_integrity_error', self.script)
         self.assertIn('Get-FileHash -Algorithm SHA256 -LiteralPath $env:GOMFOX_STAGE_CHECK_PATH', self.script)
         self.assertIn('if ($actual -ieq $env:GOMFOX_STAGE_EXPECTED_SHA)', self.script)

@@ -8,7 +8,7 @@ echo ===================================================
 echo       곰같은여우의 AI 스튜디오 - 전체 설치
 echo ===================================================
 echo.
-echo 한글 작업실 v0.35 개발판 - 첫 제작 단계 안내·무결성 이중 확인
+echo 한글 작업실 v0.36 개발판 - 첫 제작 여우·곰 원화·무결성 이중 확인
 echo 이 도구는 필요할 때 공식 WanGP Manager를 다운로드하고,
 echo 원본 WanGP 설치가 끝나면 한국어 스튜디오를 추가합니다.
 echo 원본 출처: https://github.com/deepbeepmeep/WanGP
@@ -45,25 +45,25 @@ echo [준비] 모든 PC에서 같은 검증된 한글 스튜디오 파일을 사
 echo 설치 스크립트 옆의 미검증 로컬 파일은 자동으로 재사용하지 않습니다.
 
 :download_plugin
-echo 고정된 GitHub 코드 버전의 필수 14개 파일을 받습니다.
-echo GitHub 원본 버전: eece96f64627b7933c64b48a0b01b2c763695a62
+echo 고정된 GitHub 코드 버전의 필수 15개 파일을 받습니다.
+echo GitHub 원본 버전: 5ff6f69ca151ad9703d2a9493329dea5d6a2d5cc
 set "PLUGIN_SOURCE=%SETUP_DIR%\wan2gp-gomfox-studio"
 mkdir "%PLUGIN_SOURCE%" >nul 2>nul
 if not exist "%PLUGIN_SOURCE%\" goto plugin_download_error
-set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/eece96f64627b7933c64b48a0b01b2c763695a62/WanGP-KR/plugin/wan2gp-gomfox-studio"
+set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/5ff6f69ca151ad9703d2a9493329dea5d6a2d5cc/WanGP-KR/plugin/wan2gp-gomfox-studio"
 call :fetch_plugin_file "__init__.py" "754b7e9e5046f2450c5fd4ea0a53d40b6ceb8671acbb6e7ddd8932a52de80066"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin.py" "119c39e16442ed8c4a3aecf7c5ed94dcf08fd1f32092bd49ba4f38ff6277bf42"
+call :fetch_plugin_file "plugin.py" "1384c8e014c759dc848071d1bd8f99b0817aba81cad445ca128a177826b6c26c"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin_info.json" "5f7200cb5159c66bfda881435439220b08b2af6373fbe21f902f422fb8d77804"
+call :fetch_plugin_file "plugin_info.json" "42b7a85e241d9328bdc35de2f4d00addeb50c1b7d391d0b9421f9d856a94af18"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "catalog.py" "462af34704a1a280884c9b63a559177e5cf5bd65241f9b1c1626c1eb9b1821c2"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "help_content.py" "038e521946ab47ee23d2f230d807e93d520cfca0044e372004336e7d9c3f2179"
+call :fetch_plugin_file "help_content.py" "bde676370e57d3af9cddd4a65d3bf392a882202168250275a717307725eac38c"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "hardware.py" "04f3ff1a05714f22f43340190cf75b1c85d4d443c6feccad34c4a6487bae66bf"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "studio_check.py" "df069c9edd7fa0f770c98b16286318284d61ff268d665ccda23230fffd532d1b"
+call :fetch_plugin_file "studio_check.py" "019c85badd72e4154f141099e2a2834722b215b8528187d17bbb13271e409d73"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "prompt_assistant.py" "555295c725610b2882d8f6efbc8e43b4da9bee25a6aa71294cb505feb3c70b1b"
 if errorlevel 1 goto plugin_download_error
@@ -78,6 +78,8 @@ if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "category-audio.webp" "77f253cefebcf8ac929d982367fc1dffd90f4ae9dffaf2652b08b87240056326"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "category-3d.webp" "9827269c0b33accb16c3dd95f250d9cd70429f9bed97ae47f6663febba208697"
+if errorlevel 1 goto plugin_download_error
+call :fetch_plugin_file "first-run-helper-v036.webp" "fc7d79cb284d3ad5737075f59750e58924e4bf17997300cf0c31164931efe06d"
 if errorlevel 1 goto plugin_download_error
 rem Signature PNG is one of the pinned-and-verified plugin files.
 
@@ -182,22 +184,23 @@ if not exist "%PLUGIN_STAGE%\category-video.webp" goto plugin_copy_error
 if not exist "%PLUGIN_STAGE%\category-image.webp" goto plugin_copy_error
 if not exist "%PLUGIN_STAGE%\category-audio.webp" goto plugin_copy_error
 if not exist "%PLUGIN_STAGE%\category-3d.webp" goto plugin_copy_error
+if not exist "%PLUGIN_STAGE%\first-run-helper-v036.webp" goto plugin_copy_error
 
 rem Recheck staged bytes after robocopy; a successful download does not prove a sound copy.
-echo [검증] 임시 복사된 14개 파일의 SHA-256을 다시 확인합니다.
+echo [검증] 임시 복사된 15개 파일의 SHA-256을 다시 확인합니다.
 call :verify_stage_file "__init__.py" "754b7e9e5046f2450c5fd4ea0a53d40b6ceb8671acbb6e7ddd8932a52de80066"
 if errorlevel 1 goto plugin_stage_integrity_error
-call :verify_stage_file "plugin.py" "119c39e16442ed8c4a3aecf7c5ed94dcf08fd1f32092bd49ba4f38ff6277bf42"
+call :verify_stage_file "plugin.py" "1384c8e014c759dc848071d1bd8f99b0817aba81cad445ca128a177826b6c26c"
 if errorlevel 1 goto plugin_stage_integrity_error
-call :verify_stage_file "plugin_info.json" "5f7200cb5159c66bfda881435439220b08b2af6373fbe21f902f422fb8d77804"
+call :verify_stage_file "plugin_info.json" "42b7a85e241d9328bdc35de2f4d00addeb50c1b7d391d0b9421f9d856a94af18"
 if errorlevel 1 goto plugin_stage_integrity_error
 call :verify_stage_file "catalog.py" "462af34704a1a280884c9b63a559177e5cf5bd65241f9b1c1626c1eb9b1821c2"
 if errorlevel 1 goto plugin_stage_integrity_error
-call :verify_stage_file "help_content.py" "038e521946ab47ee23d2f230d807e93d520cfca0044e372004336e7d9c3f2179"
+call :verify_stage_file "help_content.py" "bde676370e57d3af9cddd4a65d3bf392a882202168250275a717307725eac38c"
 if errorlevel 1 goto plugin_stage_integrity_error
 call :verify_stage_file "hardware.py" "04f3ff1a05714f22f43340190cf75b1c85d4d443c6feccad34c4a6487bae66bf"
 if errorlevel 1 goto plugin_stage_integrity_error
-call :verify_stage_file "studio_check.py" "df069c9edd7fa0f770c98b16286318284d61ff268d665ccda23230fffd532d1b"
+call :verify_stage_file "studio_check.py" "019c85badd72e4154f141099e2a2834722b215b8528187d17bbb13271e409d73"
 if errorlevel 1 goto plugin_stage_integrity_error
 call :verify_stage_file "prompt_assistant.py" "555295c725610b2882d8f6efbc8e43b4da9bee25a6aa71294cb505feb3c70b1b"
 if errorlevel 1 goto plugin_stage_integrity_error
@@ -213,7 +216,9 @@ call :verify_stage_file "category-audio.webp" "77f253cefebcf8ac929d982367fc1dffd
 if errorlevel 1 goto plugin_stage_integrity_error
 call :verify_stage_file "category-3d.webp" "9827269c0b33accb16c3dd95f250d9cd70429f9bed97ae47f6663febba208697"
 if errorlevel 1 goto plugin_stage_integrity_error
-echo [확인] 임시 복사 14개 파일의 무결성이 모두 일치합니다.
+call :verify_stage_file "first-run-helper-v036.webp" "fc7d79cb284d3ad5737075f59750e58924e4bf17997300cf0c31164931efe06d"
+if errorlevel 1 goto plugin_stage_integrity_error
+echo [확인] 임시 복사 15개 파일의 무결성이 모두 일치합니다.
 
 rem Avoid overwriting even if another installer created the destination meanwhile.
 if exist "%PLUGIN_DEST%" goto plugin_exists

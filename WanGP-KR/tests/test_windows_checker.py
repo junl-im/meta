@@ -1,4 +1,4 @@
-"""v0.35 Windows 설치 점검 도우미의 정적 안전·무결성 기준 검사.
+"""v0.36 Windows 설치 점검 도우미의 정적 안전·무결성 기준 검사.
 
 Linux에서 CMD 스크립트를 실제 실행하지 않으며 파일 자체의 계약만 확인한다.
 """
@@ -27,16 +27,16 @@ class TestWindowsReadOnlyChecker(unittest.TestCase):
     def test_checker_shas_match_all_pinned_installer_files(self):
         source_files = dict(re.findall(FILE_PATTERN.format(method="fetch_plugin_file"), self.installer))
         checked_files = dict(re.findall(FILE_PATTERN.format(method="verify_file"), self.script))
-        self.assertEqual(len(source_files), 14)
+        self.assertEqual(len(source_files), 15)
         self.assertEqual(checked_files, source_files)
         for filename, sha256 in source_files.items():
             self.assertEqual(hashlib.sha256((PLUGIN_DIR / filename).read_bytes()).hexdigest(), sha256)
 
     def test_installer_and_checker_pin_same_immutable_source_commit(self):
-        commit = "eece96f64627b7933c64b48a0b01b2c763695a62"
+        commit = "5ff6f69ca151ad9703d2a9493329dea5d6a2d5cc"
         self.assertIn("https://raw.githubusercontent.com/junl-im/meta/" + commit, self.installer)
         self.assertIn("소스 기준: " + commit, self.script)
-        self.assertIn("v0.35 기준 파일 무결성", self.script)
+        self.assertIn("v0.36 기준 파일 무결성", self.script)
 
     def test_checks_original_and_plugin_before_hashing(self):
         self.assertIn(r'if not exist "%GOMFOX_CHECK_DIR%\wgp.py" goto missing_original', self.script)
@@ -67,7 +67,7 @@ class TestWindowsReadOnlyChecker(unittest.TestCase):
     def test_guides_first_run_without_claiming_a_real_render(self):
         for phrase in (
             "[1/3] 원본 WanGP 설치 폴더 확인",
-            "[2/3] 한글 스튜디오 14개 파일 확인",
+            "[2/3] 한글 스튜디오 15개 파일 확인",
             "[3/3] Windows 및 RAM/GPU 읽기 전용 조회",
             "[실기기 검수 1]",
             "[실기기 검수 2]",

@@ -79,7 +79,7 @@ class TestWindowsQACollector(unittest.TestCase):
 
     def test_keeps_existing_checker_separate_and_unchanged(self):
         existing = CHECKER.read_text(encoding="utf-8")
-        self.assertIn("소스 기준: eece96f64627b7933c64b48a0b01b2c763695a62", existing)
+        self.assertIn("소스 기준: 5ff6f69ca151ad9703d2a9493329dea5d6a2d5cc", existing)
         self.assertIn("점검 파일 일치 여부는 기존 check_studio_windows.cmd", self.source)
 
 
