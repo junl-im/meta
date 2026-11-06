@@ -197,6 +197,39 @@ def render_first_creation_step(topic: str, stage: str) -> str:
     )
 
 
+def format_first_creation_handoff(
+    topic: str, original_opened: object, model_checked: object, input_checked: object,
+) -> str:
+    """첫 작품 준비를 사용자가 확인한 범위에서만 안내한다.
+
+    모델·GPU·다운로드·파일을 직접 검사하지 않으며 사용자가 입력한 문자열은 출력하지 않는다.
+    체크박스가 아닌 값은 확인되지 않은 것으로 취급한다.
+    """
+    track = FIRST_CREATION_TRACKS.get(topic, FIRST_CREATION_TRACKS["처음 시작"])
+    flags = (original_opened is True, model_checked is True, input_checked is True)
+    missing = (
+        "**① 원본 화면 확인:** WanGP Manager에서 원본을 실행하고 Media Generator 탭을 직접 열어 보세요.",
+        "**② 모델 파일 확인:** 원본에서 제작 분야에 맞는 모델을 고르고 파일 준비 상태를 직접 확인하세요. 이 화면의 모델 점검은 실행 가능 판정이 아닙니다.",
+        "**③ 첫 입력 확인:** 모델이 지원하는 입력을 준비하고 해상도·길이·프레임·배치를 작게 시작하세요. 원본 프롬프트와 설정은 직접 입력해야 합니다.",
+    )
+    heading = f"### 첫 작품 준비 확인 · {track['title']}\n\n"
+    if not all(flags):
+        items = "\n".join(f"- {text}" for flag, text in zip(flags, missing) if not flag)
+        return (
+            heading + f"**직접 확인한 항목: {sum(flags)}/3개** · 아직 확인할 항목이 있습니다.\n\n"
+            + items + "\n\n확인 전에는 생성 준비나 실행 성공을 확정하지 마세요. "
+            "무료 로컬 제작은 GPT 연결 없이 시작할 수 있습니다."
+        )
+    return (
+        heading + "**직접 확인한 항목: 3/3개** · 원본 무료 제작 화면에서 **직접 첫 생성을 시도**해 볼 차례입니다.\n\n"
+        "생성 시작, 모델 호환성, GPU 실행 가능 여부와 결과 저장은 아직 **미검증**입니다. "
+        "완료 여부는 원본 갤러리·오류 화면에서 확인하고 실제 파일을 열어 보세요. "
+        "오류가 보이면 아래 **문제가 생겼나요?**에서 상황을 선택하고, "
+        "개인정보를 가린 오류 문장만 한국어 진단에 넣으세요. "
+        "이 체크리스트는 모델 다운로드·생성·파일 변경·GPT 전송을 수행하지 않습니다."
+    )
+
+
 # 첫 화면 카드에는 짧은 다음 행동만 안내한다. 긴 설명은 도움말 탭에 유지한다.
 CARD_SUMMARIES = {
     "짧은 영상": """### 영상 제작 · 움직이는 장면

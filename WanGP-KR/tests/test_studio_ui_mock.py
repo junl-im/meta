@@ -86,6 +86,7 @@ class UiEventMockTests(unittest.TestCase):
                 "render_troubleshooting": lambda topic: "문제 해결: " + str(topic),
                 "FIRST_CREATION_STAGES": ("① 원본 실행 확인", "② 모델과 준비물", "③ 무료 생성하기", "④ 결과 확인·저장"),
                 "render_first_creation_step": lambda topic, stage: "안내: " + str(topic) + str(stage),
+                "format_first_creation_handoff": lambda topic, a, b, c: f"시작 점검: {topic} {a} {b} {c}",
                 "connected_creation_choices": lambda topic: ("이미지", "이미지"),
             },
             "studio_check": {
@@ -195,6 +196,30 @@ class UiEventMockTests(unittest.TestCase):
             e[0] == "click" and e[1].get("fn") is modules["gomfox_test.catalog"].format_gallery_confirmation
             for e in events
         ))
+        handoff = next(
+            e[1] for e in events if e[0] == "click"
+            and [getattr(w, "kwargs", {}).get("elem_id") for w in e[1].get("outputs", [])]
+            == ["gfs-first-handoff-result"]
+        )
+        self.assertEqual(
+            [w.kwargs.get("elem_id") for w in handoff["inputs"][1:]],
+            ["gfs-first-original-checked", "gfs-first-model-checked", "gfs-first-input-checked"],
+        )
+        self.assertEqual(handoff["fn"]("처음 시작", True, False, True), "시작 점검: 처음 시작 True False True")
+        resets = [
+            e[1] for e in events if e[0] == "change"
+            and [getattr(w, "kwargs", {}).get("elem_id") for w in e[1].get("outputs", [])]
+            == ["gfs-first-original-checked", "gfs-first-model-checked", "gfs-first-input-checked", "gfs-first-handoff-result"]
+        ]
+        self.assertEqual(len(resets), 1)
+        flags = resets[0]["fn"]("짧은 영상")
+        self.assertTrue(all(flag == {"__type__": "update", "value": False} for flag in flags[:3]))
+        self.assertIn("False False False", flags[3])
+        refreshes = [
+            e[1] for e in events if e[0] == "change"
+            and e[1].get("fn") is modules["gomfox_test.help_content"].format_first_creation_handoff
+        ]
+        self.assertEqual(len(refreshes), 3)
         picker_refresh = next(
             e[1] for e in events if e[0] == "click"
             and len(e[1].get("outputs", [])) == 3

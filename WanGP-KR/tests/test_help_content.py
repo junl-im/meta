@@ -82,6 +82,34 @@ class TestHelpContent(unittest.TestCase):
         result_help = help_content.render_troubleshooting("만든 파일을 찾지 못하겠어요")
         self.assertIn("큐가 비어 있다고 성공한 것은 아니", result_help)
 
+    def test_v033_first_creation_handoff_only_reports_manual_progress(self):
+        guide = help_content.format_first_creation_handoff
+        initial = guide("처음 시작", False, False, False)
+        self.assertIn("0/3개", initial)
+        self.assertIn("① 원본 화면 확인", initial)
+        self.assertIn("② 모델 파일 확인", initial)
+        self.assertIn("③ 첫 입력 확인", initial)
+        self.assertNotIn("직접 첫 생성을 시도", initial)
+
+        partial = guide("짧은 영상", True, False, True)
+        self.assertIn("2/3개", partial)
+        self.assertIn("② 모델 파일 확인", partial)
+        self.assertNotIn("① 원본 화면 확인", partial)
+        self.assertNotIn("③ 첫 입력 확인", partial)
+
+        all_checked = guide("사진·그림", True, True, True)
+        self.assertIn("3/3개", all_checked)
+        self.assertIn("직접 첫 생성을 시도", all_checked)
+        self.assertIn("미검증", all_checked)
+        self.assertIn("원본 갤러리·오류 화면", all_checked)
+        self.assertIn("모델 다운로드·생성·파일 변경·GPT 전송을 수행하지 않습니다", all_checked)
+        self.assertNotIn("생성 성공", all_checked)
+
+        self.assertIn("0/3개", guide("처음 시작", "true", 1, []))
+        untrusted = "<svg onload=alert('x')>"
+        self.assertEqual(guide(untrusted, False, False, False), initial)
+        self.assertNotIn(untrusted, guide(untrusted, True, True, True))
+
     def test_v025_guide_does_not_echo_untrusted_selection(self):
         unknown = "<svg/onload=alert(1)>"
         actual = help_content.render_first_creation_step(unknown, unknown)

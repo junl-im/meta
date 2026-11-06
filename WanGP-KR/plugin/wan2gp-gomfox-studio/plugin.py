@@ -20,7 +20,7 @@ from .catalog import (
 from .hardware import detect_hardware, read_hardware_report
 from .help_content import (
     FIRST_CREATION_STAGES, TOPICS, TROUBLESHOOT_TOPICS, connected_creation_choices, render_card_summary,
-    render_first_creation_step, render_guide, render_troubleshooting,
+    format_first_creation_handoff, render_first_creation_step, render_guide, render_troubleshooting,
 )
 from .prompt_assistant import TASK_KINDS, STYLES, PROFILES, build_prompt, fill_example
 from .studio_check import clear_error_diagnosis, format_error_diagnosis, format_studio_readiness
@@ -110,6 +110,10 @@ STUDIO_STYLE = """
 #gfs-root #gfs-first-creation-guide {padding:9px 13px;background:rgba(41,111,113,.09);border:0;border-radius:12px;font-size:14px;line-height:1.62}
 #gfs-root #gfs-first-creation-guide h3 {font-size:17px;margin:0 0 6px}
 #gfs-root #gfs-first-creation-guide p {margin:6px 0}
+#gfs-root #gfs-first-handoff {border:0;border-radius:14px;background:rgba(54,119,122,.1);min-width:0}
+#gfs-root #gfs-first-handoff-check {min-height:43px;border:0;border-radius:11px;font-weight:750}
+#gfs-root #gfs-first-handoff-result {padding:10px 13px;border:0;border-radius:12px;background:rgba(231,160,95,.09);font-size:13px;line-height:1.65;overflow-wrap:anywhere;word-break:keep-all}
+#gfs-root #gfs-first-handoff-result p {margin:0}
 #gfs-root #gfs-welcome-model-panel {border:0;border-radius:14px;background:rgba(55,120,120,.1)}
 #gfs-root #gfs-welcome-catalog-run,#gfs-root #gfs-welcome-model-check {border:0;border-radius:11px;min-height:43px;font-weight:750}
 #gfs-root #gfs-welcome-model-report textarea {font-size:13px;line-height:1.6;overflow-wrap:anywhere}
@@ -168,6 +172,7 @@ STUDIO_STYLE = """
   #gfs-root #gfs-error-advice h3 {font-size:14px}
   #gfs-root #gfs-first-creation-guide {font-size:12px;line-height:1.5;padding:8px 10px}
   #gfs-root #gfs-first-creation-guide h3 {font-size:14px}
+  #gfs-root #gfs-first-handoff-result {font-size:12px;padding:9px 11px}
   #gfs-root #gfs-error-actions > * {flex:1 1 135px;min-width:0}
 }
 @media (max-width:420px) {
@@ -187,8 +192,8 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.32.0-dev"
-        self.description = "작업 결과 수동 확인·안전한 갤러리 안내 · 무료 로컬 기본 · GPT 선택"
+        self.version = "0.33.0-dev"
+        self.description = "첫 무료 제작 준비 체크·안전한 결과 확인 · 무료 로컬 기본 · GPT 선택"
 
     def setup_ui(self):
         self.request_component("state")
@@ -367,6 +372,33 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                         label="이 컴퓨터의 RAM · GPU 안내", lines=7, interactive=False,
                         value="원하면 위 버튼을 누르세요. 확인을 건너뛰어도 무료 제작을 시작할 수 있습니다.",
                     )
+                    with gr.Accordion(
+                        "첫 무료 생성 · 지금 어디까지 확인했나요? (선택)",
+                        open=True, elem_id="gfs-first-handoff",
+                    ):
+                        gr.Markdown(
+                            "**내가 직접 확인한 것만** 체크하세요. 체크는 원본 GPU 실행·모델 준비 완료를 "
+                            "자동 확인하지 않으며 원본 설정도 바꾸지 않습니다."
+                        )
+                        first_original_checked = gr.Checkbox(
+                            label="원본 WanGP의 Media Generator 화면을 직접 열어 봤어요", value=False,
+                            elem_id="gfs-first-original-checked",
+                        )
+                        first_model_checked = gr.Checkbox(
+                            label="원본에서 제작 모델을 고르고 파일 준비 상태를 확인했어요", value=False,
+                            elem_id="gfs-first-model-checked",
+                        )
+                        first_input_checked = gr.Checkbox(
+                            label="프롬프트·필요한 입력과 가벼운 시작 설정을 확인했어요", value=False,
+                            elem_id="gfs-first-input-checked",
+                        )
+                        first_handoff_check = gr.Button(
+                            "아직 필요한 단계 확인", elem_id="gfs-first-handoff-check",
+                        )
+                        first_handoff_result = gr.Markdown(
+                            value=format_first_creation_handoff("처음 시작", False, False, False),
+                            elem_id="gfs-first-handoff-result",
+                        )
                     welcome_start = gr.Button(
                         "원본 무료 제작 화면 열기", variant="primary", elem_id="gfs-welcome-start"
                     )
@@ -672,6 +704,27 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
             fn=render_first_creation_step,
             inputs=[welcome_topic, first_creation_stage], outputs=[first_creation_guide],
         )
+        def reset_first_handoff(topic):
+            return (
+                gr.update(value=False), gr.update(value=False), gr.update(value=False),
+                format_first_creation_handoff(topic, False, False, False),
+            )
+
+        welcome_topic.change(
+            fn=reset_first_handoff, inputs=[welcome_topic],
+            outputs=[first_original_checked, first_model_checked, first_input_checked, first_handoff_result],
+        )
+        first_handoff_check.click(
+            fn=format_first_creation_handoff,
+            inputs=[welcome_topic, first_original_checked, first_model_checked, first_input_checked],
+            outputs=[first_handoff_result],
+        )
+        for first_checkbox in (first_original_checked, first_model_checked, first_input_checked):
+            first_checkbox.change(
+                fn=format_first_creation_handoff,
+                inputs=[welcome_topic, first_original_checked, first_model_checked, first_input_checked],
+                outputs=[first_handoff_result],
+            )
         first_creation_stage.change(
             fn=render_first_creation_step,
             inputs=[welcome_topic, first_creation_stage], outputs=[first_creation_guide],
