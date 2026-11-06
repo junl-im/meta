@@ -178,7 +178,7 @@ class StudioDashboardTests(unittest.TestCase):
         self.assertNotIn('url("data:image/svg', SOURCE.casefold())
 
     def test_plugin_metadata_matches(self):
-        self.assertEqual(META["version"], "0.31.0-dev")
+        self.assertEqual(META["version"], "0.32.0-dev")
         self.assertIn("GomFoxStudio", META["app_tab"])
 
     def test_read_only_preflight_is_optional(self):
@@ -217,19 +217,23 @@ class StudioDashboardTests(unittest.TestCase):
             "#gfs-root #gfs-queue-overview",
             "#gfs-root #gfs-queue-result textarea",
             "queue_overview = gr.Markdown(",
-            "outputs=[queue_overview, queue_result, queue_guidance]",
+            "outputs=[queue_overview, queue_result, queue_guidance,",
             "@media (max-width:420px)",
         ):
             self.assertIn(token, SOURCE)
         self.assertNotIn("background-size:cover !important", SOURCE)
 
-    def test_v031_queue_guidance_is_compact_read_only_and_has_three_outputs(self):
+    def test_v032_queue_guidance_reset_and_manual_gallery_review_are_read_only(self):
         for token in (
             '#gfs-root #gfs-queue-guidance',
             'elem_id="gfs-queue-guidance"',
             'queue_guidance = gr.Markdown(',
             'format_queue_dashboard_guided(api_session, show)',
-            'outputs=[queue_overview, queue_result, queue_guidance]',
+            'outputs=[queue_overview, queue_result, queue_guidance,',
+            'gallery_observed, gallery_file_opened, gallery_result]',
+            'gallery_check.click(',
+            'fn=format_gallery_confirmation',
+            'elem_id="gfs-gallery-result"',
         ):
             self.assertIn(token, SOURCE)
         self.assertNotIn('cancel_queue_task(', SOURCE)

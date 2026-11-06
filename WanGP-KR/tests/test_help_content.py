@@ -70,6 +70,18 @@ class TestHelpContent(unittest.TestCase):
         self.assertIn("원본 제작 화면에서 직접 선택", text)
         self.assertIn("실행 가능 판정이 아니", text)
 
+    def test_v032_result_guides_do_not_claim_queue_proves_success(self):
+        for topic in help_content.FIRST_CREATION_TRACKS:
+            text = help_content.render_first_creation_step(topic, "④ 결과 확인·저장")
+            self.assertIn("원본", text)
+            if topic == "3D 만들기":
+                self.assertIn("결과 화면", text)
+            else:
+                self.assertIn("갤러리", text)
+            self.assertNotIn("큐에서 완료", text)
+        result_help = help_content.render_troubleshooting("만든 파일을 찾지 못하겠어요")
+        self.assertIn("큐가 비어 있다고 성공한 것은 아니", result_help)
+
     def test_v025_guide_does_not_echo_untrusted_selection(self):
         unknown = "<svg/onload=alert(1)>"
         actual = help_content.render_first_creation_step(unknown, unknown)

@@ -164,6 +164,22 @@ class WorkflowStatusTests(unittest.TestCase):
         self.assertNotIn("secret", details)
         self.assertNotIn("token", details)
 
+    def test_v032_gallery_confirmation_is_user_report_not_api_success(self):
+        options = catalog.GALLERY_CONFIRM_CHOICES
+        self.assertEqual(len(options), 4)
+        self.assertIn("미확인", catalog.format_gallery_confirmation(options[0], False))
+        self.assertIn("파일 확인 남음", catalog.format_gallery_confirmation(options[1], False))
+        confirmed = catalog.format_gallery_confirmation(options[1], True)
+        self.assertIn("사용자가 직접 확인", confirmed)
+        self.assertIn("실제 파일", confirmed)
+        self.assertIn("오류 원인 확인", catalog.format_gallery_confirmation(options[2], False))
+        self.assertIn("결과 확인 필요", catalog.format_gallery_confirmation(options[3], False))
+        self.assertIn("서로 맞지", catalog.format_gallery_confirmation(options[2], True))
+        self.assertIn("서로 맞지", catalog.format_gallery_confirmation(options[0], True))
+        self.assertIn("미확정", catalog.format_gallery_confirmation("secret-token", False))
+        self.assertNotIn("secret-token", catalog.format_gallery_confirmation("secret-token", False))
+        self.assertIn("미확정", catalog.format_gallery_confirmation(options[1], "yes"))
+
     def test_missing_api_does_not_generate_or_mutate(self):
         self.assertIn("이용할 수 없습니다", catalog.format_queue_status(None))
         self.assertIn("연결할 수 없습니다", catalog.format_model_details(None, "mock_image"))

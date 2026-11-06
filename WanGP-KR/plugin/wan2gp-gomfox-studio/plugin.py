@@ -13,7 +13,10 @@ import gradio as gr
 
 from shared.utils.plugins import WAN2GPPlugin
 
-from .catalog import format_model_catalog_page, format_model_details, format_model_preflight, format_queue_dashboard_guided
+from .catalog import (
+    GALLERY_CONFIRM_CHOICES, format_gallery_confirmation, format_model_catalog_page,
+    format_model_details, format_model_preflight, format_queue_dashboard_guided,
+)
 from .hardware import detect_hardware, read_hardware_report
 from .help_content import (
     FIRST_CREATION_STAGES, TOPICS, TROUBLESHOOT_TOPICS, connected_creation_choices, render_card_summary,
@@ -133,6 +136,10 @@ STUDIO_STYLE = """
 #gfs-root #gfs-queue-overview p {margin:0}
 #gfs-root #gfs-queue-guidance {padding:10px 15px;border:0;border-radius:12px;background:rgba(225,157,91,.11);font-size:14px;line-height:1.65;overflow-wrap:anywhere;word-break:keep-all}
 #gfs-root #gfs-queue-guidance p {margin:0}
+#gfs-root #gfs-gallery-review {border:0;border-radius:13px;background:rgba(55,116,117,.09);min-width:0}
+#gfs-root #gfs-gallery-check {min-height:43px;border:0;border-radius:11px;font-weight:750}
+#gfs-root #gfs-gallery-result {border:0;border-radius:11px;padding:9px 13px;background:rgba(225,157,91,.10);font-size:13px;line-height:1.65;overflow-wrap:anywhere;word-break:keep-all}
+#gfs-root #gfs-gallery-result p {margin:0}
 #gfs-root #gfs-queue-result textarea {line-height:1.65;font-size:13px}
 #gfs-root .gfs-status {padding:14px 16px;border-radius:14px;border:0;background:linear-gradient(120deg,rgba(53,112,123,.15),rgba(236,171,106,.09))}
 #gfs-root .gfs-status strong {color:var(--gfs-gold)}
@@ -155,6 +162,7 @@ STUDIO_STYLE = """
   #gfs-root #gfs-task-guide h3 {font-size:14px}
   #gfs-root #gfs-queue-overview {padding:8px 10px;font-size:12px}
   #gfs-root #gfs-queue-guidance {padding:9px 11px;font-size:12px}
+  #gfs-root #gfs-gallery-result {font-size:12px;padding:8px 10px}
   #gfs-root #gfs-error-input textarea,#gfs-root #gfs-error-advice {font-size:12px;line-height:1.6}
   #gfs-root #gfs-error-advice {padding:9px 11px}
   #gfs-root #gfs-error-advice h3 {font-size:14px}
@@ -179,8 +187,8 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.31.0-dev"
-        self.description = "원본 작업 큐의 다음 행동 안내 · 무료 로컬 기본 · GPT 선택"
+        self.version = "0.32.0-dev"
+        self.description = "작업 결과 수동 확인·안전한 갤러리 안내 · 무료 로컬 기본 · GPT 선택"
 
     def setup_ui(self):
         self.request_component("state")
@@ -563,6 +571,29 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                     gallery_open = gr.Button(
                         "원본 WanGP 제작·갤러리 화면으로 이동", variant="primary"
                     )
+                    with gr.Accordion(
+                        "결과 확인 · 직접 점검 (선택)", open=False, elem_id="gfs-gallery-review"
+                    ):
+                        gr.Markdown(
+                            "원본 화면을 열어 **눈으로 확인한 사실만** 선택하세요. "
+                            "여기서는 결과 파일이나 오류 로그를 자동으로 읽지 않아요."
+                        )
+                        gallery_observed = gr.Dropdown(
+                            label="원본 갤러리에서 직접 확인한 결과",
+                            choices=list(GALLERY_CONFIRM_CHOICES), value=GALLERY_CONFIRM_CHOICES[0],
+                            elem_id="gfs-gallery-observed",
+                        )
+                        gallery_file_opened = gr.Checkbox(
+                            label="결과 파일을 내 PC에서 직접 열어 봤어요", value=False,
+                            elem_id="gfs-gallery-file-opened",
+                        )
+                        gallery_check = gr.Button(
+                            "내 확인 결과 안내 보기", elem_id="gfs-gallery-check",
+                        )
+                        gallery_result = gr.Markdown(
+                            value="**확인 전:** 원본 갤러리와 실제 저장 파일을 직접 확인해 주세요.",
+                            elem_id="gfs-gallery-result",
+                        )
                     gr.Markdown(
                         "이 화면에서는 **조회만** 합니다. 작업 삭제·중단·재실행을 하지 않습니다. "
                         "진행률(%)과 완료 결과 썸네일은 원본 WanGP의 제작·갤러리 화면에서 확인하세요. "
@@ -744,9 +775,22 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
             ),
             inputs=[model_id_input, manual_vram], outputs=[model_preflight_result],
         )
+        def refresh_queue_with_gallery_reset(show):
+            summary, details, guidance = format_queue_dashboard_guided(api_session, show)
+            return (
+                summary, details, guidance, gr.update(value=GALLERY_CONFIRM_CHOICES[0]),
+                gr.update(value=False),
+                "**새로 조회함:** 이전 수동 확인 선택을 초기화했어요. 원본 결과를 다시 확인해 주세요.",
+            )
+
         queue_refresh.click(
-            fn=lambda show: format_queue_dashboard_guided(api_session, show),
-            inputs=[queue_prompts], outputs=[queue_overview, queue_result, queue_guidance],
+            fn=refresh_queue_with_gallery_reset, inputs=[queue_prompts],
+            outputs=[queue_overview, queue_result, queue_guidance,
+                     gallery_observed, gallery_file_opened, gallery_result],
+        )
+        gallery_check.click(
+            fn=format_gallery_confirmation,
+            inputs=[gallery_observed, gallery_file_opened], outputs=[gallery_result],
         )
         gallery_open.click(
             fn=self.goto_media_tab, inputs=[self.state], outputs=[self.main_tabs]

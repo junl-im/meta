@@ -414,6 +414,51 @@ def format_queue_dashboard(session: Any, show_prompts: bool = False) -> tuple[st
     return summary, details
 
 
+GALLERY_CONFIRM_CHOICES = (
+    "아직 확인 전",
+    "원본 갤러리에 결과가 보임",
+    "원본에 오류가 표시됨",
+    "갤러리에 결과가 보이지 않음",
+)
+
+
+def format_gallery_confirmation(observed: str, local_opened: bool) -> str:
+    """사용자가 직접 선택한 확인 결과만 안내한다. 갤러리/디스크/API 조회는 하지 않는다."""
+    if observed not in GALLERY_CONFIRM_CHOICES or not isinstance(local_opened, bool):
+        return "**확인 내용 미확정:** 원본 갤러리에서 실제로 본 상태를 다시 선택해 주세요. 자동 성공 판정은 하지 않습니다."
+    if local_opened and observed != "원본 갤러리에 결과가 보임":
+        return (
+            "**확인 내용이 서로 맞지 않아요:** 로컬 파일을 열었다고 체크했지만 원본 갤러리의 결과는 "
+            "확인되지 않았습니다. 선택 내용을 다시 확인해 주세요."
+        )
+    if observed == "원본 갤러리에 결과가 보임":
+        if local_opened:
+            return (
+                "**사용자가 직접 확인한 항목:** 원본 갤러리 표시와 로컬 결과 파일 열기를 모두 확인했다고 선택했어요. "
+                "이것은 사용자 체크 기록 안내이며 스튜디오가 실제 파일·화질·생성 성공을 검사한 것은 아닙니다. "
+                "원본에서 원하는 결과가 맞는지 마지막으로 살펴보세요."
+            )
+        return (
+            "**갤러리 표시 확인 · 파일 확인 남음:** 원본에서 결과가 보인다면 저장·내보내기 기능으로 "
+            "파일을 저장하고, 내 PC에서 직접 열어 보세요. 저장 경로·파일 이름은 이 화면으로 전송하지 않습니다."
+        )
+    if observed == "원본에 오류가 표시됨":
+        return (
+            "**오류 원인 확인:** 원본 WanGP 오류 화면의 문구를 확인하고 **처음 실행 · 따라 하기 → "
+            "문제가 생겼나요?** 안내에서 증상별 방법을 찾아보세요. 이 확인표는 오류 로그를 자동 수집하거나 재시도하지 않습니다."
+        )
+    if observed == "갤러리에 결과가 보이지 않음":
+        return (
+            "**결과 확인 필요:** 원본 갤러리의 최신 항목과 출력 폴더 설정을 확인하세요. "
+            "**작업 현황 새로고침**은 현재 큐만 보여 주므로 작업 성공·실패를 증명하지 않습니다. "
+            "원본 오류 화면도 확인한 뒤 재실행 여부를 결정하세요. 중복 생성은 피하세요."
+        )
+    return (
+        "**먼저 원본에서 확인:** 원본 제작·갤러리 화면을 열고 결과 표시 여부를 직접 선택하세요. "
+        "결과 파일이 있다면 내 PC에서 열어 본 후 체크하세요. 현재는 성공·실패 모두 미확인입니다."
+    )
+
+
 def format_queue_status(session: Any, show_prompts: bool = False) -> str:
     """기존 단일 텍스트 API 호환 유지. 원본 큐 변경·GPU 작업 없음."""
     return format_queue_dashboard(session, show_prompts)[1]

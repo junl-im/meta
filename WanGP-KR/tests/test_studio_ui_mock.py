@@ -72,6 +72,10 @@ class UiEventMockTests(unittest.TestCase):
                 "format_model_preflight": lambda *args: "preflight",
                 "format_queue_dashboard": lambda *args: ("summary", "queue"),
                 "format_queue_dashboard_guided": lambda *args: ("summary", "queue", "guide"),
+                "GALLERY_CONFIRM_CHOICES": (
+                    "아직 확인 전", "원본 갤러리에 결과가 보임", "원본에 오류가 표시됨", "갤러리에 결과가 보이지 않음",
+                ),
+                "format_gallery_confirmation": lambda *args: "수동 결과 안내",
             },
             "hardware": {"read_hardware_report": lambda: "report", "detect_hardware": lambda: {}},
             "help_content": {
@@ -174,15 +178,23 @@ class UiEventMockTests(unittest.TestCase):
         self.assertTrue(any(e[1].get("fn") is prompt.fill_example for e in events))
         self.assertTrue(any(
             e[0] == "click" and [getattr(widget, "kwargs", {}).get("elem_id") for widget in e[1].get("outputs", [])]
-            == ["gfs-queue-overview", "gfs-queue-result", "gfs-queue-guidance"]
+            == ["gfs-queue-overview", "gfs-queue-result", "gfs-queue-guidance", "gfs-gallery-observed", "gfs-gallery-file-opened", "gfs-gallery-result"]
             for e in events
         ))
         guided_queue = next(
             e[1] for e in events if e[0] == "click"
             and [getattr(widget, "kwargs", {}).get("elem_id") for widget in e[1].get("outputs", [])]
-            == ["gfs-queue-overview", "gfs-queue-result", "gfs-queue-guidance"]
+            == ["gfs-queue-overview", "gfs-queue-result", "gfs-queue-guidance", "gfs-gallery-observed", "gfs-gallery-file-opened", "gfs-gallery-result"]
         )
-        self.assertEqual(guided_queue["fn"](False), ("summary", "queue", "guide"))
+        refreshed = guided_queue["fn"](False)
+        self.assertEqual(refreshed[:3], ("summary", "queue", "guide"))
+        self.assertEqual(refreshed[3], {"__type__": "update", "value": "아직 확인 전"})
+        self.assertEqual(refreshed[4], {"__type__": "update", "value": False})
+        self.assertIn("초기화", refreshed[5])
+        self.assertTrue(any(
+            e[0] == "click" and e[1].get("fn") is modules["gomfox_test.catalog"].format_gallery_confirmation
+            for e in events
+        ))
         picker_refresh = next(
             e[1] for e in events if e[0] == "click"
             and len(e[1].get("outputs", [])) == 3
