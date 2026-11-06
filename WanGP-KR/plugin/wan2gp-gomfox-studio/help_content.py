@@ -127,6 +127,33 @@ FIRST_CREATION_STAGES = (
 )
 
 
+FIRST_CREATION_BLOCKERS = (
+    "원본이 열리지 않거나 한글 탭이 없다면 아래 **문제가 생겼나요? 단계별 해결**의 '원본 WanGP가 열리지 않아요' 또는 '한글 스튜디오 탭이 안 보여요'를 확인하세요. 설치 파일을 지우지 마세요.",
+    "모델이 목록에 없거나 다운로드가 끝나지 않았다면 원본 **모델 탐색기와 파일 준비 상태**를 확인하세요. 아래 '모델 다운로드·생성이 멈춘 것 같아요' 도움말을 참고하고, 실행 가능으로 단정하지 마세요.",
+    "생성이 시작되지 않거나 메모리 오류가 나면 원본 **작업 큐·오류 화면**을 살펴보세요. 모델이 지원하는 더 작은 설정으로 다음 작업을 검토하고, 진행 중인 작업을 자동 취소하지 마세요.",
+    "결과가 보이지 않으면 큐가 비었다고 성공으로 판단하지 마세요. 원본 **갤러리·오류 화면**을 확인하고 아래 '만든 파일을 찾지 못하겠어요'를 참고하세요. 파일을 자동 이동·삭제하지 않습니다.",
+)
+
+
+def next_first_creation_stage(stage: str) -> str:
+    """사용자가 버튼을 누른 경우에만 다음 설명 단계로 이동한다. 마지막은 유지."""
+    if stage not in FIRST_CREATION_STAGES:
+        return FIRST_CREATION_STAGES[0]
+    index = FIRST_CREATION_STAGES.index(stage)
+    return FIRST_CREATION_STAGES[min(index + 1, len(FIRST_CREATION_STAGES) - 1)]
+
+
+def render_first_creation_blocker(stage: str) -> str:
+    """수동 단계별 고정 복구 도움말. 임의의 입력 내용은 그대로 표시하지 않는다."""
+    if stage not in FIRST_CREATION_STAGES:
+        stage = FIRST_CREATION_STAGES[0]
+    index = FIRST_CREATION_STAGES.index(stage)
+    return (
+        f"**{index + 1}/4단계에서 막혔나요?** {FIRST_CREATION_BLOCKERS[index]}\n\n"
+        "*이 안내는 진단·복구를 자동 실행하지 않습니다. GPT 연결이나 파일 변경도 없습니다.*"
+    )
+
+
 def connected_creation_choices(topic: str) -> tuple[str, str]:
     """처음 실행 분야를 원본 모델 탐색·로컬 프롬프트 작업실의 기본 필터에만 연결한다."""
     return {

@@ -70,6 +70,24 @@ class TestHelpContent(unittest.TestCase):
         self.assertIn("원본 제작 화면에서 직접 선택", text)
         self.assertIn("실행 가능 판정이 아니", text)
 
+    def test_v035_next_button_advances_only_the_guide_not_completion(self):
+        stages = help_content.FIRST_CREATION_STAGES
+        for i, stage in enumerate(stages):
+            self.assertEqual(help_content.next_first_creation_stage(stage), stages[min(i + 1, 3)])
+        self.assertEqual(help_content.next_first_creation_stage("<svg onload=evil>"), stages[0])
+
+    def test_v035_blocker_guide_is_stage_scoped_safe_and_fixed(self):
+        stages = help_content.FIRST_CREATION_STAGES
+        expected = ("원본", "다운로드", "메모리", "갤러리")
+        for i, stage in enumerate(stages):
+            message = help_content.render_first_creation_blocker(stage)
+            self.assertIn(f"{i+1}/4단계", message)
+            self.assertIn(expected[i], message)
+            self.assertIn("GPT 연결이나 파일 변경도 없습니다", message)
+        unknown = "<script>sendSecrets()</script>"
+        self.assertEqual(help_content.render_first_creation_blocker(unknown), help_content.render_first_creation_blocker(stages[0]))
+        self.assertNotIn(unknown, help_content.render_first_creation_blocker(unknown))
+
     def test_v032_result_guides_do_not_claim_queue_proves_success(self):
         for topic in help_content.FIRST_CREATION_TRACKS:
             text = help_content.render_first_creation_step(topic, "④ 결과 확인·저장")

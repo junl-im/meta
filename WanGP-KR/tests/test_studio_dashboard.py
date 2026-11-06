@@ -178,7 +178,21 @@ class StudioDashboardTests(unittest.TestCase):
         self.assertNotIn('url("data:image/svg', SOURCE.casefold())
 
     def test_plugin_metadata_matches(self):
-        self.assertEqual(META["version"], "0.34.0-dev")
+        self.assertEqual(META["version"], "0.35.0-dev")
+
+    def test_v035_first_run_is_stepwise_with_safe_inline_blockers(self):
+        for token in (
+            'elem_id="gfs-first-creation-next"',
+            'elem_id="gfs-first-creation-blocker"',
+            'next_first_creation_stage(stage)',
+            'fn=advance_first_creation_guide',
+            'fn=reset_first_creation_guide',
+            'render_first_creation_blocker(stage)',
+            'open=False, elem_id="gfs-welcome-model-panel"',
+            'open=False, elem_id="gfs-first-handoff"',
+        ):
+            self.assertIn(token, SOURCE)
+        self.assertNotIn('submit_generation(', SOURCE)
 
     def test_v034_mobile_recovery_and_inline_routing_are_bounded(self):
         for token in (

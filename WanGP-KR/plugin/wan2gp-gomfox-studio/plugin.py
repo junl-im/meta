@@ -20,7 +20,8 @@ from .catalog import (
 from .hardware import detect_hardware, read_hardware_report
 from .help_content import (
     FIRST_CREATION_STAGES, TOPICS, TROUBLESHOOT_TOPICS, connected_creation_choices, render_card_summary,
-    format_first_creation_handoff, render_first_creation_step, render_guide, render_troubleshooting,
+    format_first_creation_handoff, next_first_creation_stage, render_first_creation_blocker,
+    render_first_creation_step, render_guide, render_troubleshooting,
 )
 from .prompt_assistant import TASK_KINDS, STYLES, PROFILES, build_prompt, fill_example
 from .studio_check import (
@@ -115,6 +116,10 @@ STUDIO_STYLE = """
 #gfs-root #gfs-first-creation {border:0;border-radius:14px;background:linear-gradient(120deg,rgba(45,118,119,.12),rgba(223,157,98,.08))}
 #gfs-root #gfs-first-creation-guide {padding:9px 13px;background:rgba(41,111,113,.09);border:0;border-radius:12px;font-size:14px;line-height:1.62}
 #gfs-root #gfs-first-creation-guide h3 {font-size:17px;margin:0 0 6px}
+#gfs-root #gfs-first-creation-actions {min-width:0;gap:9px}
+#gfs-root #gfs-first-creation-next {min-height:43px;border:0;border-radius:11px;font-weight:750;background:linear-gradient(110deg,#24676e,#2b6861);color:#fff8ed}
+#gfs-root #gfs-first-creation-blocker {padding:9px 12px;background:rgba(222,151,89,.10);border:0;border-radius:10px;font-size:13px;line-height:1.55;overflow-wrap:anywhere;word-break:keep-all}
+#gfs-root #gfs-first-creation-blocker p {margin:4px 0}
 #gfs-root #gfs-first-creation-guide p {margin:6px 0}
 #gfs-root #gfs-first-handoff {border:0;border-radius:14px;background:rgba(54,119,122,.1);min-width:0}
 #gfs-root #gfs-first-handoff-check {min-height:43px;border:0;border-radius:11px;font-weight:750}
@@ -181,6 +186,8 @@ STUDIO_STYLE = """
   #gfs-root #gfs-recovery-guide h3 {font-size:14px}
   #gfs-root #gfs-first-creation-guide {font-size:12px;line-height:1.5;padding:8px 10px}
   #gfs-root #gfs-first-creation-guide h3 {font-size:14px}
+  #gfs-root #gfs-first-creation-blocker {font-size:12px;padding:8px 10px;line-height:1.5}
+  #gfs-root #gfs-first-creation-next {font-size:12px;min-height:42px;white-space:normal}
   #gfs-root #gfs-first-handoff-result {font-size:12px;padding:9px 11px}
   #gfs-root #gfs-error-actions > * {flex:1 1 135px;min-width:0}
 }
@@ -204,8 +211,8 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.34.0-dev"
-        self.description = "첫 무료 제작 오류별 복구 안내·모바일 정렬 · 무료 로컬 기본 · GPT 선택"
+        self.version = "0.35.0-dev"
+        self.description = "첫 무료 제작 단계별 다음 안내·빠른 복구 · 무료 로컬 기본 · GPT 선택"
 
     def setup_ui(self):
         self.request_component("state")
@@ -336,8 +343,8 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                         welcome_guide = gr.Markdown(value=render_guide("처음 시작"))
                     with gr.Accordion("첫 무료 작품 · 단계별 따라 하기", open=True, elem_id="gfs-first-creation"):
                         gr.Markdown(
-                            "아래 단계를 하나씩 골라 확인하세요. **자동으로 다음 단계에 넘어가거나 "
-                            "모델·설정을 바꾸지 않습니다.**"
+                            "아래에서 단계를 직접 고르거나 **다음 단계 설명 보기**를 눌러 이동하세요. "
+                            "안내 단계만 바뀌고 **완료 체크·모델·설정은 자동 변경하지 않습니다.**"
                         )
                         first_creation_stage = gr.Dropdown(
                             choices=list(FIRST_CREATION_STAGES),
@@ -349,7 +356,15 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                             value=render_first_creation_step("처음 시작", FIRST_CREATION_STAGES[0]),
                             elem_id="gfs-first-creation-guide",
                         )
-                    with gr.Accordion("첫 작품 모델 찾기 · 이 화면에서 확인", open=True, elem_id="gfs-welcome-model-panel"):
+                        with gr.Row(elem_id="gfs-first-creation-actions"):
+                            first_creation_next = gr.Button(
+                                "다음 단계 설명 보기 →", elem_id="gfs-first-creation-next",
+                            )
+                        first_creation_blocker = gr.Markdown(
+                            value=render_first_creation_blocker(FIRST_CREATION_STAGES[0]),
+                            elem_id="gfs-first-creation-blocker",
+                        )
+                    with gr.Accordion("② 첫 작품 모델 찾기 · 필요할 때 펼치기", open=False, elem_id="gfs-welcome-model-panel"):
                         gr.Markdown(
                             "현재 분야의 **원본 모델 목록을 읽기만** 합니다. 검색하고 모델을 직접 선택한 다음 "
                             "준비 상태를 확인하세요. **다운로드·생성·설정 변경은 하지 않습니다.**"
@@ -386,7 +401,7 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                     )
                     with gr.Accordion(
                         "첫 무료 생성 · 지금 어디까지 확인했나요? (선택)",
-                        open=True, elem_id="gfs-first-handoff",
+                        open=False, elem_id="gfs-first-handoff",
                     ):
                         gr.Markdown(
                             "**내가 직접 확인한 것만** 체크하세요. 체크는 원본 GPU 실행·모델 준비 완료를 "
@@ -714,9 +729,17 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
             inputs=[welcome_model_search],
             outputs=[welcome_model_pick, welcome_catalog_status, welcome_model_report],
         )
+        def render_first_creation_guides(topic, stage):
+            return render_first_creation_step(topic, stage), render_first_creation_blocker(stage)
+
+        def reset_first_creation_guide(topic):
+            stage = FIRST_CREATION_STAGES[0]
+            guide, blocker = render_first_creation_guides(topic, stage)
+            return gr.update(value=stage), guide, blocker
+
         welcome_topic.change(
-            fn=render_first_creation_step,
-            inputs=[welcome_topic, first_creation_stage], outputs=[first_creation_guide],
+            fn=reset_first_creation_guide, inputs=[welcome_topic],
+            outputs=[first_creation_stage, first_creation_guide, first_creation_blocker],
         )
         def reset_first_handoff(topic):
             return (
@@ -740,8 +763,17 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                 outputs=[first_handoff_result],
             )
         first_creation_stage.change(
-            fn=render_first_creation_step,
-            inputs=[welcome_topic, first_creation_stage], outputs=[first_creation_guide],
+            fn=render_first_creation_guides, inputs=[welcome_topic, first_creation_stage],
+            outputs=[first_creation_guide, first_creation_blocker],
+        )
+        def advance_first_creation_guide(topic, stage):
+            next_stage = next_first_creation_stage(stage)
+            guide, blocker = render_first_creation_guides(topic, next_stage)
+            return gr.update(value=next_stage), guide, blocker
+
+        first_creation_next.click(
+            fn=advance_first_creation_guide, inputs=[welcome_topic, first_creation_stage],
+            outputs=[first_creation_stage, first_creation_guide, first_creation_blocker],
         )
         def load_welcome_models(topic, query):
             category, _prompt_kind = connected_creation_choices(topic)

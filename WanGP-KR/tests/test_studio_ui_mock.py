@@ -89,6 +89,12 @@ class UiEventMockTests(unittest.TestCase):
                 "render_troubleshooting": lambda topic: "문제 해결: " + str(topic),
                 "FIRST_CREATION_STAGES": ("① 원본 실행 확인", "② 모델과 준비물", "③ 무료 생성하기", "④ 결과 확인·저장"),
                 "render_first_creation_step": lambda topic, stage: "안내: " + str(topic) + str(stage),
+                "render_first_creation_blocker": lambda stage: "막혔나요: " + str(stage),
+                "next_first_creation_stage": lambda stage: {
+                    "① 원본 실행 확인": "② 모델과 준비물",
+                    "② 모델과 준비물": "③ 무료 생성하기",
+                    "③ 무료 생성하기": "④ 결과 확인·저장",
+                }.get(stage, "④ 결과 확인·저장"),
                 "format_first_creation_handoff": lambda topic, a, b, c: f"시작 점검: {topic} {a} {b} {c}",
                 "connected_creation_choices": lambda topic: ("이미지", "이미지"),
             },
@@ -288,10 +294,29 @@ class UiEventMockTests(unittest.TestCase):
             e[0] == "change" and e[1].get("fn") is modules["gomfox_test.help_content"].render_troubleshooting
             for e in events
         ))
-        self.assertEqual(
-            sum(e[0] == "change" and e[1].get("fn") is modules["gomfox_test.help_content"].render_first_creation_step for e in events),
-            2,
+        stage_outputs = ["gfs-first-creation-guide", "gfs-first-creation-blocker"]
+        stage_change = next(
+            e[1] for e in events if e[0] == "change"
+            and [w.kwargs.get("elem_id") for w in e[1]["outputs"]] == stage_outputs
         )
+        self.assertEqual(stage_change["fn"]("짧은 영상", "② 모델과 준비물"),
+                         ("안내: 짧은 영상② 모델과 준비물", "막혔나요: ② 모델과 준비물"))
+        flow_outputs = ["gfs-first-creation-stage", *stage_outputs]
+        flow_events = [
+            e for e in events if [getattr(w, "kwargs", {}).get("elem_id") for w in e[1].get("outputs", [])] == flow_outputs
+        ]
+        self.assertEqual({e[0] for e in flow_events}, {"click", "change"})
+        reset = next(e[1] for e in flow_events if e[0] == "change")
+        update, guide, blocker = reset["fn"]("짧은 영상")
+        self.assertEqual(update["value"], "① 원본 실행 확인")
+        self.assertIn("짧은 영상① 원본 실행 확인", guide)
+        self.assertIn("① 원본 실행 확인", blocker)
+        advance = next(e[1] for e in flow_events if e[0] == "click")
+        update, guide, blocker = advance["fn"]("짧은 영상", "① 원본 실행 확인")
+        self.assertEqual(update["value"], "② 모델과 준비물")
+        self.assertIn("짧은 영상② 모델과 준비물", guide)
+        update, guide, blocker = advance["fn"]("처음 시작", "④ 결과 확인·저장")
+        self.assertEqual(update["value"], "④ 결과 확인·저장")
         self.assertTrue(any(
             e[0] == "change" and e[1].get("fn") is modules["gomfox_test.help_content"].connected_creation_choices
             for e in events
