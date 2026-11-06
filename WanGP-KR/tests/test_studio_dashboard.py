@@ -171,14 +171,26 @@ class StudioDashboardTests(unittest.TestCase):
             '#gfs-root #gfs-error-actions > * {flex:1 1 135px;min-width:0}',
             'elem_id="gfs-error-clear"',
             'elem_id="gfs-connection-result"',
-            'fn=clear_error_diagnosis',
+            'clear_error_diagnosis()',
             '원본 연결 단계 확인 (읽기 전용)',
         ):
             self.assertIn(token, SOURCE)
         self.assertNotIn('url("data:image/svg', SOURCE.casefold())
 
     def test_plugin_metadata_matches(self):
-        self.assertEqual(META["version"], "0.33.0-dev")
+        self.assertEqual(META["version"], "0.34.0-dev")
+
+    def test_v034_mobile_recovery_and_inline_routing_are_bounded(self):
+        for token in (
+            'elem_id="gfs-recovery-topic"',
+            'elem_id="gfs-recovery-guide"',
+            '#gfs-root #gfs-recovery-guide {min-width:0;max-width:100%',
+            '#gfs-root #gfs-error-actions > * {flex:1 1 calc(50% - 3px)',
+            'fn=diagnose_and_open_help',
+            'suggest_recovery_topic(log_text)',
+            'fn=clear_error_and_related_help',
+        ):
+            self.assertIn(token, SOURCE)
         self.assertIn("GomFoxStudio", META["app_tab"])
 
     def test_read_only_preflight_is_optional(self):

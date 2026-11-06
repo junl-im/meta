@@ -82,7 +82,10 @@ class UiEventMockTests(unittest.TestCase):
                 "TOPICS": ("처음 시작", "저사양 설정"),
                 "render_guide": lambda topic: str(topic),
                 "render_card_summary": lambda topic: "card: " + str(topic),
-                "TROUBLESHOOT_TOPICS": ("원본 WanGP가 열리지 않아요", "GPT 없이 무료로 만들고 싶어요"),
+                "TROUBLESHOOT_TOPICS": (
+                    "원본 WanGP가 열리지 않아요", "모델 다운로드·생성이 멈춘 것 같아요",
+                    "GPT 없이 무료로 만들고 싶어요",
+                ),
                 "render_troubleshooting": lambda topic: "문제 해결: " + str(topic),
                 "FIRST_CREATION_STAGES": ("① 원본 실행 확인", "② 모델과 준비물", "③ 무료 생성하기", "④ 결과 확인·저장"),
                 "render_first_creation_step": lambda topic, stage: "안내: " + str(topic) + str(stage),
@@ -92,6 +95,10 @@ class UiEventMockTests(unittest.TestCase):
             "studio_check": {
                 "format_studio_readiness": lambda session: "check",
                 "format_error_diagnosis": lambda message: "진단: " + str(message),
+                "suggest_recovery_topic": lambda message: (
+                    "모델 다운로드·생성이 멈춘 것 같아요" if message == "OOM"
+                    else "<unrecognized>" if message == "bad-proposal" else None
+                ),
                 "clear_error_diagnosis": lambda: ("", "지웠습니다"),
             },
         }.items():
@@ -294,22 +301,35 @@ class UiEventMockTests(unittest.TestCase):
             == ["gfs-model-preflight-result"]
             for e in events
         ))
-        self.assertTrue(any(
-            e[0] == "click"
-            and e[1].get("fn") is modules["gomfox_test.studio_check"].format_error_diagnosis
-            and [getattr(widget, "kwargs", {}).get("elem_id") for widget in e[1].get("inputs", [])]
-            == ["gfs-error-input"]
+        diagnoses = [
+            e[1] for e in events if e[0] == "click"
             and [getattr(widget, "kwargs", {}).get("elem_id") for widget in e[1].get("outputs", [])]
-            == ["gfs-error-advice"]
-            for e in events
-        ))
-        self.assertTrue(any(
-            e[0] == "click"
-            and e[1].get("fn") is modules["gomfox_test.studio_check"].clear_error_diagnosis
+            == ["gfs-error-advice", "gfs-recovery-topic", "gfs-recovery-guide"]
+        ]
+        self.assertEqual(len(diagnoses), 1)
+        self.assertEqual(
+            [getattr(widget, "kwargs", {}).get("elem_id") for widget in diagnoses[0]["inputs"]],
+            ["gfs-error-input", "gfs-recovery-topic"],
+        )
+        current = "원본 WanGP가 열리지 않아요"
+        diagnosis, selected, guide = diagnoses[0]["fn"]("OOM", current)
+        self.assertEqual(diagnosis, "진단: OOM")
+        self.assertEqual(selected["value"], "모델 다운로드·생성이 멈춘 것 같아요")
+        self.assertIn("모델 다운로드·생성이 멈춘 것 같아요", guide)
+        diagnosis, selected, guide = diagnoses[0]["fn"]("unknown", current)
+        self.assertEqual(selected["value"], current)
+        diagnosis, selected, guide = diagnoses[0]["fn"]("bad-proposal", current)
+        self.assertEqual(selected["value"], current)
+        clears = [
+            e[1] for e in events if e[0] == "click"
             and [getattr(widget, "kwargs", {}).get("elem_id") for widget in e[1].get("outputs", [])]
-            == ["gfs-error-input", "gfs-error-advice"]
-            for e in events
-        ))
+            == ["gfs-error-input", "gfs-error-advice", "gfs-recovery-topic", "gfs-recovery-guide"]
+        ]
+        self.assertEqual(len(clears), 1)
+        cleared, hint, selected, guide = clears[0]["fn"]()
+        self.assertEqual(cleared, "")
+        self.assertEqual(hint, "지웠습니다")
+        self.assertEqual(selected["value"], "원본 WanGP가 열리지 않아요")
         self.assertTrue(any(
             e[0] == "click"
             and [getattr(widget, "kwargs", {}).get("elem_id") for widget in e[1].get("outputs", [])]

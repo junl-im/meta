@@ -78,6 +78,36 @@ ERROR_HINTS = (
 )
 
 
+RECOVERY_TOPICS = {
+    "저장 공간 부족": "모델 다운로드·생성이 멈춘 것 같아요",
+    "GPU 또는 시스템 메모리 부족": "모델 다운로드·생성이 멈춘 것 같아요",
+    "GPU 드라이버·CUDA 호환성 확인": "모델 다운로드·생성이 멈춘 것 같아요",
+    "한글 플러그인 로딩 확인": "한글 스튜디오 탭이 안 보여요",
+    "Python 모듈 불러오기 실패": "원본 WanGP가 열리지 않아요",
+    "모델 다운로드·네트워크 연결 문제": "모델 다운로드·생성이 멈춘 것 같아요",
+    "실행 포트 사용 중": "원본 WanGP가 열리지 않아요",
+    "필수 파일 경로 확인": "원본 WanGP가 열리지 않아요",
+}
+
+
+def _find_error_hint(error_text: str | None) -> tuple[str, str, str] | None:
+    if not isinstance(error_text, str) or not error_text.strip():
+        return None
+    # 뒤쪽 2만 자만 검사하고, 사용자 로그를 표시하거나 저장하지 않는다.
+    sample = error_text[-20_000:]
+    return next(
+        (hint for hint in ERROR_HINTS
+         if re.search(hint[1], sample, flags=re.IGNORECASE | re.MULTILINE)),
+        None,
+    )
+
+
+def suggest_recovery_topic(error_text: str | None) -> str | None:
+    """오류 패턴에 연결된 고정 한국어 도움말 주제만 반환한다. 미확인은 None."""
+    matched = _find_error_hint(error_text)
+    return RECOVERY_TOPICS.get(matched[0]) if matched else None
+
+
 def format_error_diagnosis(error_text: str | None) -> str:
     """사용자가 붙여넣은 오류를 로컬 문자열 비교로만 분류한다.
 
@@ -86,18 +116,18 @@ def format_error_diagnosis(error_text: str | None) -> str:
     """
     if not isinstance(error_text, str) or not error_text.strip():
         return "오류 문장을 입력한 뒤 **한국어 진단 보기**를 눌러 주세요. 외부 서비스로 전송하거나 별도 파일로 저장하지 않습니다."
-    # Traceback의 마지막 줄에 실제 예외가 오는 경우가 많다. 길이 제한으로 처리 비용을 묶는다.
-    sample = error_text[-20_000:]
-    for title, pattern, advice in ERROR_HINTS:
-        if re.search(pattern, sample, flags=re.IGNORECASE | re.MULTILINE):
-            return (
-                f"### 가능한 문제: {title}\n\n"
-                "**판정 범위:** 붙여넣은 오류 문구와 알려진 유형이 일치합니다. "
-                "실제 원인이나 GPU 호환성을 자동 확인한 것은 아닙니다.\n\n"
-                f"**안전한 다음 행동:** {advice}\n\n"
-                "이 진단은 입력 로그를 다시 표시하거나 별도 저장·외부 서비스 전송하지 않으며 "
-                "파일 삭제·설정 변경·모델 다운로드를 수행하지 않습니다."
-            )
+    matched = _find_error_hint(error_text)
+    if matched:
+        title, _pattern, advice = matched
+        return (
+            f"### 가능한 문제: {title}\n\n"
+            "**판정 범위:** 붙여넣은 오류 문구와 알려진 유형이 일치합니다. "
+            "실제 원인이나 GPU 호환성을 자동 확인한 것은 아닙니다.\n\n"
+            f"**안전한 다음 행동:** {advice}\n\n"
+            "관련된 **상황별 해결 안내**를 함께 확인하고 원본에서 직접 점검하세요.\n\n"
+            "이 진단은 입력 로그를 다시 표시하거나 별도 저장·외부 서비스 전송하지 않으며 "
+            "파일 삭제·설정 변경·모델 다운로드를 수행하지 않습니다."
+        )
     return (
         "### 원인을 아직 구분할 수 없습니다\n\n"
         "입력 문구에서 알려진 오류 유형을 찾지 못했습니다. 원본 WanGP의 실행 창과 "

@@ -104,6 +104,29 @@ class ReadinessTests(unittest.TestCase):
 
 
 class ErrorDiagnosisTests(unittest.TestCase):
+    def test_v034_error_patterns_route_to_fixed_recovery_topics_without_log_leaks(self):
+        examples = {
+            "CUDA out of memory": "모델 다운로드·생성이 멈춘 것 같아요",
+            "No space left on device": "모델 다운로드·생성이 멈춘 것 같아요",
+            "RuntimeError: CUDA driver version is insufficient": "모델 다운로드·생성이 멈춘 것 같아요",
+            "Failed to load plugin wan2gp-gomfox-studio": "한글 스튜디오 탭이 안 보여요",
+            "ModuleNotFoundError: No module named gradio": "원본 WanGP가 열리지 않아요",
+            "HTTP 403 download failed": "모델 다운로드·생성이 멈춘 것 같아요",
+            "[WinError 10048] address already in use": "원본 WanGP가 열리지 않아요",
+            "FileNotFoundError: model not found": "원본 WanGP가 열리지 않아요",
+        }
+        for sample, target in examples.items():
+            with self.subTest(sample=sample):
+                self.assertEqual(check.suggest_recovery_topic(sample + "\nSECRET_TOKEN_981"), target)
+        self.assertIsNone(check.suggest_recovery_topic("unknown error SECRET_TOKEN_981"))
+        self.assertIsNone(check.suggest_recovery_topic(""))
+        self.assertIsNone(check.suggest_recovery_topic(None))
+        self.assertIsNone(check.suggest_recovery_topic(12345))
+        self.assertEqual(
+            check.suggest_recovery_topic("CUDA out of memory\nNo space left on device"),
+            "모델 다운로드·생성이 멈춘 것 같아요",
+        )
+
     def test_clear_pasted_log_does_not_echo_or_retry_it(self):
         value, hint = check.clear_error_diagnosis()
         self.assertEqual(value, "")
