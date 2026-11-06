@@ -129,6 +129,11 @@ class UiEventMockTests(unittest.TestCase):
             self.assertLess(len(art_css), 400_000)
             self.assertEqual(art_css.count("background-size:100% 100%,auto 100%"), 4)
             self.assertNotIn("<svg", art_css.casefold())
+            helper_css = plugin_module.first_run_art_css()
+            self.assertEqual(helper_css.count("data:image/webp;base64,"), 1)
+            self.assertLess(len(helper_css), 215_000)
+            self.assertIn(".gfs-first-run-intro", helper_css)
+            self.assertNotIn("<svg", helper_css.casefold())
             with tempfile.TemporaryDirectory() as scratch:
                 bad = Path(scratch) / "category-video.webp"
                 bad.write_bytes(b"not an image")
@@ -136,6 +141,10 @@ class UiEventMockTests(unittest.TestCase):
                 plugin_module.CATEGORY_ART["video"] = bad
                 self.assertEqual(plugin_module.category_art_css().count("data:image/webp;base64,"), 3)
                 plugin_module.CATEGORY_ART["video"] = original
+                helper_path = plugin_module.FIRST_RUN_ART_FILE
+                plugin_module.FIRST_RUN_ART_FILE = bad
+                self.assertEqual(plugin_module.first_run_art_css(), "")
+                plugin_module.FIRST_RUN_ART_FILE = helper_path
 
             app = plugin_module.GomFoxStudioPlugin()
             app.setup_ui()

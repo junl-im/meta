@@ -34,6 +34,7 @@ APP_TITLE = "곰같은여우의 AI 스튜디오"
 TAB_ID = "GomFoxStudio"
 HERO_FILE = Path(__file__).resolve().parent / "studio-hero.png"
 ICON_FILE = Path(__file__).resolve().parent / "gomfox-studio-icon.png"
+FIRST_RUN_ART_FILE = Path(__file__).resolve().parent / "first-run-helper-v036.webp"
 CATEGORY_ART = {
     "video": Path(__file__).resolve().parent / "category-video.webp",
     "image": Path(__file__).resolve().parent / "category-image.webp",
@@ -66,6 +67,27 @@ def category_art_css() -> str:
         )
     return "<style>" + "".join(rules) + "</style>" if rules else ""
 
+
+def first_run_art_css() -> str:
+    """Use a small, optional local decorative WebP; help text always remains available."""
+    try:
+        if not FIRST_RUN_ART_FILE.is_file() or not 0 < FIRST_RUN_ART_FILE.stat().st_size < 160_000:
+            return ""
+        payload = FIRST_RUN_ART_FILE.read_bytes()
+        if payload[:4] != b"RIFF" or payload[8:12] != b"WEBP":
+            return ""
+    except OSError:
+        return ""
+    content = base64.b64encode(payload).decode("ascii")
+    return (
+        "<style>#gfs-root .gfs-first-run-intro{"
+        "background-image:linear-gradient(90deg,rgba(35,88,101,.12),rgba(35,88,101,.04)),"
+        f"url('data:image/webp;base64,{content}');"
+        "background-position:center,right bottom;"
+        "background-size:100% 100%,auto 100%;"
+        "background-repeat:no-repeat,no-repeat;}</style>"
+    )
+
 # 새 UI 전용 CSS. SVG/외부 폰트/스크립트/원격 CDN에 의존하지 않는다.
 STUDIO_STYLE = """
 <style>
@@ -89,6 +111,8 @@ STUDIO_STYLE = """
 #gfs-root .gfs-panel h3 {margin:0 0 6px;font-size:19px}
 #gfs-root .gfs-panel p {margin:5px 0;line-height:1.6}
 #gfs-root .gfs-steps {font-size:14px;opacity:.88;line-height:1.7}
+#gfs-root .gfs-first-run-intro {min-height:137px;padding:18px 236px 17px 19px;overflow:hidden}
+#gfs-root .gfs-first-run-intro p {max-width:60ch;overflow-wrap:anywhere;word-break:keep-all}
 #gfs-root #gfs-banner {height:184px !important;min-height:0 !important;overflow:hidden;border-radius:19px}
 #gfs-root #gfs-banner .image-container {height:100% !important;max-height:100% !important}
 #gfs-root #gfs-banner img {width:100% !important;height:100% !important;max-height:none !important;object-fit:cover;object-position:center 47%;border-radius:19px;display:block}
@@ -161,6 +185,7 @@ STUDIO_STYLE = """
 #gfs-root .gfs-status strong {color:var(--gfs-gold)}
 #gfs-root .gfs-muted {font-size:12px;opacity:.75}
 @media (max-width:740px) {
+  #gfs-root .gfs-first-run-intro {min-height:116px;padding:11px 123px 10px 12px}
   #gfs-root #gfs-banner {height:112px !important;border-radius:14px}
   #gfs-root #gfs-banner img {border-radius:14px}
   #gfs-root #gfs-brand-row {gap:7px;margin-top:5px}
@@ -192,6 +217,9 @@ STUDIO_STYLE = """
   #gfs-root #gfs-error-actions > * {flex:1 1 135px;min-width:0}
 }
 @media (max-width:420px) {
+  #gfs-root .gfs-first-run-intro {padding-right:103px;min-height:112px}
+  #gfs-root .gfs-first-run-intro h3 {font-size:15px}
+  #gfs-root .gfs-first-run-intro p {font-size:12px;line-height:1.4}
   #gfs-root #gfs-category-video,#gfs-root #gfs-category-image,#gfs-root #gfs-category-audio,#gfs-root #gfs-category-3d {padding:11px 10px;font-size:clamp(12px,3.4vw,14px)}
   #gfs-root #gfs-error-actions {gap:6px}
   #gfs-root #gfs-error-actions > * {flex:1 1 calc(50% - 3px);min-width:0}
@@ -211,8 +239,8 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.35.0-dev"
-        self.description = "첫 무료 제작 단계별 다음 안내·빠른 복구 · 무료 로컬 기본 · GPT 선택"
+        self.version = "0.36.0-dev"
+        self.description = "첫 무료 제작 원화 안내·모바일 가독성 · 무료 로컬 기본 · GPT 선택"
 
     def setup_ui(self):
         self.request_component("state")
@@ -257,7 +285,7 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
 
     def create_ui(self, api_session=None):
         with gr.Column(elem_id="gfs-root"):
-            gr.HTML(STUDIO_STYLE + category_art_css())
+            gr.HTML(STUDIO_STYLE + category_art_css() + first_run_art_css())
             if HERO_FILE.is_file():
                 gr.Image(
                     value=str(HERO_FILE), height=184, interactive=False,
@@ -330,7 +358,7 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
 
                 with gr.Tab("처음 실행 · 따라 하기"):
                     gr.HTML(
-                        '<div class="gfs-panel"><h3>반가워요! 첫 작품을 함께 만들어 봐요.</h3>'
+                        '<div class="gfs-panel gfs-first-run-intro"><h3>반가워요! 첫 작품을 함께 만들어 봐요.</h3>'
                         '<p>원본 WanGP를 처음 설치한 분을 위한 안내예요. '
                         '무료 로컬 기능부터 시작하고, GPT 연결은 건너뛰어도 됩니다.</p>'
                         '<div class="gfs-steps">① 작업 고르기　② 네 단계 따라 하기　③ 원본에서 직접 생성</div></div>'

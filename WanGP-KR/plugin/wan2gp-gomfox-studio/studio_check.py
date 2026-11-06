@@ -49,7 +49,7 @@ ERROR_HINTS = (
         r"(?:failed|error|unable)\s+to\s+(?:load|import)\s+plugin|"
         r"(?:wan2gp-gomfox-studio|gomfox_studio).{0,100}(?:importerror|modulenotfounderror)",
         "원본 Apps & PlugIn Manager의 활성화 상태를 확인하고, "
-        "Windows 점검 도우미에서 한글 플러그인 14개 파일의 SHA-256을 검사하세요. "
+        "Windows 점검 도우미에서 한글 플러그인 v0.36 기준 15개 파일의 SHA-256을 검사하세요. "
         "버전이 다른 파일을 자동 덮어쓰지 마세요.",
     ),
     (

@@ -32,6 +32,11 @@ class StudioDashboardTests(unittest.TestCase):
             self.assertEqual(art.read_bytes()[:4], b"RIFF")
             self.assertEqual(art.read_bytes()[8:12], b"WEBP")
             self.assertLess(art.stat().st_size, 160_000)
+        helper = PLUGIN_DIR / "first-run-helper-v036.webp"
+        self.assertTrue(helper.is_file())
+        self.assertEqual(helper.read_bytes()[:4], b"RIFF")
+        self.assertEqual(helper.read_bytes()[8:12], b"WEBP")
+        self.assertLess(helper.stat().st_size, 160_000)
         self.assertIn("data:image/webp;base64,", SOURCE)
         self.assertIn("category_art_css()", SOURCE)
         self.assertIn('payload[8:12] != b"WEBP"', SOURCE)
@@ -178,7 +183,24 @@ class StudioDashboardTests(unittest.TestCase):
         self.assertNotIn('url("data:image/svg', SOURCE.casefold())
 
     def test_plugin_metadata_matches(self):
-        self.assertEqual(META["version"], "0.35.0-dev")
+        self.assertEqual(META["version"], "0.36.0-dev")
+
+    def test_v036_first_run_illustration_is_optional_and_mobile_text_has_room(self):
+        for token in (
+            'FIRST_RUN_ART_FILE', 'first_run_art_css()',
+            'gfs-first-run-intro', 'data:image/webp;base64,',
+            '.gfs-first-run-intro {padding-right:103px;',
+            'gfs-first-run-intro p {font-size:12px;',
+        ):
+            self.assertIn(token, SOURCE)
+        self.assertIn('STUDIO_STYLE + category_art_css() + first_run_art_css()', SOURCE)
+        preview = ROOT / 'docs' / 'V036_FIRST_RUN_VISUAL_PREVIEW.html'
+        html = preview.read_text(encoding='utf-8')
+        self.assertIn('first-run-helper-v036.webp', html)
+        self.assertIn('v0.36 디자인 배치 참고용 정적 미리보기', html)
+        self.assertIn('@media(max-width:420px)', html)
+        self.assertNotIn('<svg', html.casefold())
+        self.assertNotIn('https://', html)
 
     def test_v035_first_run_is_stepwise_with_safe_inline_blockers(self):
         for token in (

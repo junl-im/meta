@@ -1,8 +1,8 @@
 {
   "name": "곰같은여우의 AI 스튜디오",
   "author": "곰같은여우",
-  "version": "0.35.0-dev",
-  "description": "첫 무료 작품 4단계 안내·사용자 클릭형 다음 단계·단계별 안전 복구, WebP 원화, 읽기 전용 모델·큐와 갤러리 수동 점검, 무료 로컬 제작과 선택형 GPT 감독.",
+  "version": "0.36.0-dev",
+  "description": "첫 무료 작품 4단계 안내와 전용 여우·곰 WebP 원화, 모바일 가독성·단계별 안전 복구, 읽기 전용 모델·큐와 갤러리 수동 점검, 무료 로컬 제작과 선택형 GPT 감독.",
   "type": "app",
   "app_tab": "GomFoxStudio",
   "app_url": "/gomfox-studio",
