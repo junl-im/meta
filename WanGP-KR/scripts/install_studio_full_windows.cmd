@@ -8,7 +8,7 @@ echo ===================================================
 echo       곰같은여우의 AI 스튜디오 - 전체 설치
 echo ===================================================
 echo.
-echo 한글 작업실 v0.33 개발판 - 첫 무료 생성 준비 확인·무결성 이중 확인
+echo 한글 작업실 v0.34 개발판 - 오류별 복구 안내·무결성 이중 확인
 echo 이 도구는 필요할 때 공식 WanGP Manager를 다운로드하고,
 echo 원본 WanGP 설치가 끝나면 한국어 스튜디오를 추가합니다.
 echo 원본 출처: https://github.com/deepbeepmeep/WanGP
@@ -46,16 +46,16 @@ echo 설치 스크립트 옆의 미검증 로컬 파일은 자동으로 재사�
 
 :download_plugin
 echo 고정된 GitHub 코드 버전의 필수 14개 파일을 받습니다.
-echo GitHub 원본 버전: a7effa64a6ccdbc517a2af305577742b3ecaef60
+echo GitHub 원본 버전: 577b96c1229fe4aa7f68cace2f2a970017bc8b4d
 set "PLUGIN_SOURCE=%SETUP_DIR%\wan2gp-gomfox-studio"
 mkdir "%PLUGIN_SOURCE%" >nul 2>nul
 if not exist "%PLUGIN_SOURCE%\" goto plugin_download_error
-set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/a7effa64a6ccdbc517a2af305577742b3ecaef60/WanGP-KR/plugin/wan2gp-gomfox-studio"
+set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/577b96c1229fe4aa7f68cace2f2a970017bc8b4d/WanGP-KR/plugin/wan2gp-gomfox-studio"
 call :fetch_plugin_file "__init__.py" "754b7e9e5046f2450c5fd4ea0a53d40b6ceb8671acbb6e7ddd8932a52de80066"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin.py" "945ccfe02c38ffa4f189683e71618ad4fd33154bc54b34bc9bc4e24f36f974d1"
+call :fetch_plugin_file "plugin.py" "04e66be4f1077b18e6e5abf07109cefd262cadc29180a74cd852d3f56f630031"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin_info.json" "2a0c4f011ad770dcb11803b7360c863f4836f34462fc83cc5df999ced7593b22"
+call :fetch_plugin_file "plugin_info.json" "58d1da9684858596593aa6fad3711251760c604ad52e0e56083b9d580358ca8c"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "catalog.py" "462af34704a1a280884c9b63a559177e5cf5bd65241f9b1c1626c1eb9b1821c2"
 if errorlevel 1 goto plugin_download_error
@@ -63,7 +63,7 @@ call :fetch_plugin_file "help_content.py" "971fb2bd5c51e56152a96baf155076ed3b290
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "hardware.py" "04f3ff1a05714f22f43340190cf75b1c85d4d443c6feccad34c4a6487bae66bf"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "studio_check.py" "61feb6dbcb92e143e90472fd9b85d390ab2d7ec431f7906600e5a4e7eeb89040"
+call :fetch_plugin_file "studio_check.py" "df069c9edd7fa0f770c98b16286318284d61ff268d665ccda23230fffd532d1b"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "prompt_assistant.py" "555295c725610b2882d8f6efbc8e43b4da9bee25a6aa71294cb505feb3c70b1b"
 if errorlevel 1 goto plugin_download_error
@@ -187,9 +187,9 @@ rem Recheck staged bytes after robocopy; a successful download does not prove a 
 echo [검증] 임시 복사된 14개 파일의 SHA-256을 다시 확인합니다.
 call :verify_stage_file "__init__.py" "754b7e9e5046f2450c5fd4ea0a53d40b6ceb8671acbb6e7ddd8932a52de80066"
 if errorlevel 1 goto plugin_stage_integrity_error
-call :verify_stage_file "plugin.py" "945ccfe02c38ffa4f189683e71618ad4fd33154bc54b34bc9bc4e24f36f974d1"
+call :verify_stage_file "plugin.py" "04e66be4f1077b18e6e5abf07109cefd262cadc29180a74cd852d3f56f630031"
 if errorlevel 1 goto plugin_stage_integrity_error
-call :verify_stage_file "plugin_info.json" "2a0c4f011ad770dcb11803b7360c863f4836f34462fc83cc5df999ced7593b22"
+call :verify_stage_file "plugin_info.json" "58d1da9684858596593aa6fad3711251760c604ad52e0e56083b9d580358ca8c"
 if errorlevel 1 goto plugin_stage_integrity_error
 call :verify_stage_file "catalog.py" "462af34704a1a280884c9b63a559177e5cf5bd65241f9b1c1626c1eb9b1821c2"
 if errorlevel 1 goto plugin_stage_integrity_error
@@ -197,7 +197,7 @@ call :verify_stage_file "help_content.py" "971fb2bd5c51e56152a96baf155076ed3b290
 if errorlevel 1 goto plugin_stage_integrity_error
 call :verify_stage_file "hardware.py" "04f3ff1a05714f22f43340190cf75b1c85d4d443c6feccad34c4a6487bae66bf"
 if errorlevel 1 goto plugin_stage_integrity_error
-call :verify_stage_file "studio_check.py" "61feb6dbcb92e143e90472fd9b85d390ab2d7ec431f7906600e5a4e7eeb89040"
+call :verify_stage_file "studio_check.py" "df069c9edd7fa0f770c98b16286318284d61ff268d665ccda23230fffd532d1b"
 if errorlevel 1 goto plugin_stage_integrity_error
 call :verify_stage_file "prompt_assistant.py" "555295c725610b2882d8f6efbc8e43b4da9bee25a6aa71294cb505feb3c70b1b"
 if errorlevel 1 goto plugin_stage_integrity_error
