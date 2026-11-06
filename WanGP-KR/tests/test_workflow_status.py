@@ -92,6 +92,78 @@ class WorkflowStatusTests(unittest.TestCase):
         self.assertIn("연결 확인 필요", summary)
         self.assertIn("원본 큐 상태 API", details)
 
+    def test_v031_guided_running_queue_reads_once_and_never_guesses_progress(self):
+        session = FakeSession()
+        summary, details, guidance = catalog.format_queue_dashboard_guided(session)
+        self.assertIn("실행 중 1개", summary)
+        self.assertIn("다음 행동 · 실행 중", guidance)
+        self.assertIn("진행률(%)", details + guidance)
+        self.assertNotIn("개인적인 프롬프트", summary + details + guidance)
+        self.assertEqual(session.queue_calls, 1)
+
+    def test_v031_guided_statuses_cover_queued_cancelling_and_idle(self):
+        class Queue:
+            def __init__(self, data):
+                self.data = data
+                self.calls = 0
+
+            def list_queue(self):
+                self.calls += 1
+                return self.data
+
+        for status, expected in (
+            ("queued", "다음 행동 · 대기 중"),
+            ("cancelling", "다음 행동 · 취소 처리 중"),
+            ("idle", "다음 행동 · 현재 대기·실행 작업 없음"),
+        ):
+            with self.subTest(status=status):
+                tasks = [] if status == "idle" else [{"status": status, "model_type": "image"}]
+                session = Queue({"total_count": len(tasks), "running_count": 0,
+                                 "queued_count": 1 if status == "queued" else 0, "tasks": tasks})
+                _, details, guidance = catalog.format_queue_dashboard_guided(session)
+                self.assertIn(expected, guidance)
+                self.assertEqual(session.calls, 1)
+                if status == "idle":
+                    self.assertIn("성공·실패를 알 수 없습니다", guidance)
+                    self.assertIn("갤러리", details)
+
+    def test_v031_guided_unknown_counts_malformed_response_and_errors_are_safe(self):
+        class Response:
+            def __init__(self, data):
+                self.data = data
+
+            def list_queue(self):
+                return self.data
+
+        summary, details, guidance = catalog.format_queue_dashboard_guided(
+            Response({"total_count": "secret-token", "running_count": True,
+                      "queued_count": -1, "tasks": []})
+        )
+        self.assertIn("전체 ?개", summary)
+        self.assertIn("상태 미확인", guidance)
+        self.assertNotIn("secret-token", summary + details + guidance)
+        self.assertIn("목록 확인 필요", catalog.format_queue_dashboard_guided(Response({"tasks": "oops"}))[2])
+        self.assertIn("상태 미확인", catalog.format_queue_dashboard_guided(Response("not-a-dict"))[2])
+
+        class Broken:
+            def list_queue(self):
+                raise ValueError("secret-token")
+
+        self.assertIn("조회 실패", catalog.format_queue_dashboard_guided(Broken())[2])
+        self.assertNotIn("secret-token", " ".join(catalog.format_queue_dashboard_guided(Broken())))
+        self.assertIn("연결 확인", catalog.format_queue_dashboard_guided(None)[2])
+
+    def test_v031_guided_optional_prompt_is_one_line_and_never_prints_objects(self):
+        class Response:
+            def list_queue(self):
+                return {"total_count": 1, "running_count": 1, "queued_count": 0,
+                        "tasks": [{"status": "running", "model_type": "image",
+                                   "prompt": {"secret": "token"}}]}
+
+        _summary, details, _guidance = catalog.format_queue_dashboard_guided(Response(), True)
+        self.assertNotIn("secret", details)
+        self.assertNotIn("token", details)
+
     def test_missing_api_does_not_generate_or_mutate(self):
         self.assertIn("이용할 수 없습니다", catalog.format_queue_status(None))
         self.assertIn("연결할 수 없습니다", catalog.format_model_details(None, "mock_image"))

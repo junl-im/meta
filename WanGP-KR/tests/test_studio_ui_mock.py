@@ -71,6 +71,7 @@ class UiEventMockTests(unittest.TestCase):
                 "format_model_details": lambda *args: "details",
                 "format_model_preflight": lambda *args: "preflight",
                 "format_queue_dashboard": lambda *args: ("summary", "queue"),
+                "format_queue_dashboard_guided": lambda *args: ("summary", "queue", "guide"),
             },
             "hardware": {"read_hardware_report": lambda: "report", "detect_hardware": lambda: {}},
             "help_content": {
@@ -173,9 +174,15 @@ class UiEventMockTests(unittest.TestCase):
         self.assertTrue(any(e[1].get("fn") is prompt.fill_example for e in events))
         self.assertTrue(any(
             e[0] == "click" and [getattr(widget, "kwargs", {}).get("elem_id") for widget in e[1].get("outputs", [])]
-            == ["gfs-queue-overview", "gfs-queue-result"]
+            == ["gfs-queue-overview", "gfs-queue-result", "gfs-queue-guidance"]
             for e in events
         ))
+        guided_queue = next(
+            e[1] for e in events if e[0] == "click"
+            and [getattr(widget, "kwargs", {}).get("elem_id") for widget in e[1].get("outputs", [])]
+            == ["gfs-queue-overview", "gfs-queue-result", "gfs-queue-guidance"]
+        )
+        self.assertEqual(guided_queue["fn"](False), ("summary", "queue", "guide"))
         picker_refresh = next(
             e[1] for e in events if e[0] == "click"
             and len(e[1].get("outputs", [])) == 3

@@ -13,7 +13,7 @@ import gradio as gr
 
 from shared.utils.plugins import WAN2GPPlugin
 
-from .catalog import format_model_catalog_page, format_model_details, format_model_preflight, format_queue_dashboard
+from .catalog import format_model_catalog_page, format_model_details, format_model_preflight, format_queue_dashboard_guided
 from .hardware import detect_hardware, read_hardware_report
 from .help_content import (
     FIRST_CREATION_STAGES, TOPICS, TROUBLESHOOT_TOPICS, connected_creation_choices, render_card_summary,
@@ -131,6 +131,8 @@ STUDIO_STYLE = """
 #gfs-root #gfs-model-preflight-result textarea {line-height:1.6;font-size:13px;overflow-wrap:anywhere}
 #gfs-root #gfs-queue-overview {padding:10px 15px;border:0;border-radius:12px;background:linear-gradient(115deg,rgba(51,124,125,.18),rgba(231,167,93,.11));font-size:14px;line-height:1.6}
 #gfs-root #gfs-queue-overview p {margin:0}
+#gfs-root #gfs-queue-guidance {padding:10px 15px;border:0;border-radius:12px;background:rgba(225,157,91,.11);font-size:14px;line-height:1.65;overflow-wrap:anywhere;word-break:keep-all}
+#gfs-root #gfs-queue-guidance p {margin:0}
 #gfs-root #gfs-queue-result textarea {line-height:1.65;font-size:13px}
 #gfs-root .gfs-status {padding:14px 16px;border-radius:14px;border:0;background:linear-gradient(120deg,rgba(53,112,123,.15),rgba(236,171,106,.09))}
 #gfs-root .gfs-status strong {color:var(--gfs-gold)}
@@ -152,6 +154,7 @@ STUDIO_STYLE = """
   #gfs-root #gfs-task-guide {font-size:12px;padding:9px 11px}
   #gfs-root #gfs-task-guide h3 {font-size:14px}
   #gfs-root #gfs-queue-overview {padding:8px 10px;font-size:12px}
+  #gfs-root #gfs-queue-guidance {padding:9px 11px;font-size:12px}
   #gfs-root #gfs-error-input textarea,#gfs-root #gfs-error-advice {font-size:12px;line-height:1.6}
   #gfs-root #gfs-error-advice {padding:9px 11px}
   #gfs-root #gfs-error-advice h3 {font-size:14px}
@@ -176,8 +179,8 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.30.0-dev"
-        self.description = "첫 작품 분야별 모델 조회·읽기 전용 준비 확인 · 무료 로컬 기본 · GPT 선택"
+        self.version = "0.31.0-dev"
+        self.description = "원본 작업 큐의 다음 행동 안내 · 무료 로컬 기본 · GPT 선택"
 
     def setup_ui(self):
         self.request_component("state")
@@ -548,6 +551,10 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                         value="**조회 전** · 새로고침을 누르면 전체·실행 중·대기 작업을 알려 드려요.",
                         elem_id="gfs-queue-overview",
                     )
+                    queue_guidance = gr.Markdown(
+                        value="**다음 행동 · 조회 전:** 작업 현황을 확인하면 대기·실행·취소·오류 상황에 맞는 확인 방법을 알려 드려요.",
+                        elem_id="gfs-queue-guidance",
+                    )
                     queue_result = gr.Textbox(
                         label="원본 큐 현황 (읽기 전용)", lines=10, interactive=False,
                         value="현재 작업 상태 새로고침을 눌러 주세요.",
@@ -738,8 +745,8 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
             inputs=[model_id_input, manual_vram], outputs=[model_preflight_result],
         )
         queue_refresh.click(
-            fn=lambda show: format_queue_dashboard(api_session, show),
-            inputs=[queue_prompts], outputs=[queue_overview, queue_result],
+            fn=lambda show: format_queue_dashboard_guided(api_session, show),
+            inputs=[queue_prompts], outputs=[queue_overview, queue_result, queue_guidance],
         )
         gallery_open.click(
             fn=self.goto_media_tab, inputs=[self.state], outputs=[self.main_tabs]

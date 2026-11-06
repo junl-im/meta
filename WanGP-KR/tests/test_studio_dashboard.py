@@ -147,7 +147,7 @@ class StudioDashboardTests(unittest.TestCase):
 
     def test_queue_monitor_and_model_details_are_read_only(self):
         for token in (
-            "작업 현황 · 갤러리", "format_queue_dashboard", "format_model_details",
+            "작업 현황 · 갤러리", "format_queue_dashboard_guided", "format_model_details",
             "model_inspect.click(", "queue_refresh.click(", "gallery_open.click(",
         ):
             self.assertIn(token, SOURCE)
@@ -178,7 +178,7 @@ class StudioDashboardTests(unittest.TestCase):
         self.assertNotIn('url("data:image/svg', SOURCE.casefold())
 
     def test_plugin_metadata_matches(self):
-        self.assertEqual(META["version"], "0.30.0-dev")
+        self.assertEqual(META["version"], "0.31.0-dev")
         self.assertIn("GomFoxStudio", META["app_tab"])
 
     def test_read_only_preflight_is_optional(self):
@@ -217,11 +217,23 @@ class StudioDashboardTests(unittest.TestCase):
             "#gfs-root #gfs-queue-overview",
             "#gfs-root #gfs-queue-result textarea",
             "queue_overview = gr.Markdown(",
-            "outputs=[queue_overview, queue_result]",
+            "outputs=[queue_overview, queue_result, queue_guidance]",
             "@media (max-width:420px)",
         ):
             self.assertIn(token, SOURCE)
         self.assertNotIn("background-size:cover !important", SOURCE)
+
+    def test_v031_queue_guidance_is_compact_read_only_and_has_three_outputs(self):
+        for token in (
+            '#gfs-root #gfs-queue-guidance',
+            'elem_id="gfs-queue-guidance"',
+            'queue_guidance = gr.Markdown(',
+            'format_queue_dashboard_guided(api_session, show)',
+            'outputs=[queue_overview, queue_result, queue_guidance]',
+        ):
+            self.assertIn(token, SOURCE)
+        self.assertNotIn('cancel_queue_task(', SOURCE)
+        self.assertNotIn('submit_task(', SOURCE)
 
     def test_v019_offline_preview_keeps_raster_art_and_distinguishes_mock_queue(self):
         preview = ROOT / "docs" / "V019_VISUAL_PREVIEW.html"

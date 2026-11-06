@@ -1,7 +1,7 @@
 {
   "name": "곰같은여우의 AI 스튜디오",
   "author": "곰같은여우",
-  "version": "0.30.0-dev",
+  "version": "0.31.0-dev",
   "description": "첫 작품 분야별 모델 찾기·RAM/VRAM 준비 확인, 비율을 보존한 WebP 카드, 원본 큐 상태 요약, 무료 로컬 제작과 선택형 GPT 감독.",
   "type": "app",
   "app_tab": "GomFoxStudio",

@@ -303,12 +303,13 @@ def format_model_preflight(
     return "\n".join(rows)
 
 
-def format_queue_dashboard(session: Any, show_prompts: bool = False) -> tuple[str, str]:
-    """원본 큐를 한 번 읽어 간단한 상태 요약과 기존 상세 내역을 함께 반환한다."""
+def format_queue_dashboard_guided(session: Any, show_prompts: bool = False) -> tuple[str, str, str]:
+    """원본 큐 한 번 조회로 숫자·상세·초보자 다음 행동을 제공한다. 진행률은 추정하지 않는다."""
     if session is None or not callable(getattr(session, "list_queue", None)):
         return (
             "**연결 확인 필요** · 원본 WanGP 큐를 조회할 수 없어요.",
             "원본 큐 상태 API를 이용할 수 없습니다. WanGP 원본 제작 화면에서 확인해 주세요.",
+            "**다음 행동 · 연결 확인:** 원본 WanGP가 열려 있는지 확인하고, 원본 작업 큐에서 상태를 확인하세요. 재설치나 작업 삭제는 하지 마세요.",
         )
     try:
         queue = session.list_queue()
@@ -316,21 +317,30 @@ def format_queue_dashboard(session: Any, show_prompts: bool = False) -> tuple[st
         return (
             "**조회 실패** · 원본 WanGP의 큐 상태를 확인해 주세요.",
             "작업 상태 조회에 실패했습니다. WanGP 원본에서 연결 상태를 확인하세요.",
+            "**다음 행동 · 조회 실패:** 원본 화면이 동작하는지 확인한 후 다시 조회하세요. 실패 원인이 확인되기 전에는 같은 생성을 반복 제출하지 마세요.",
         )
     if not isinstance(queue, dict):
         return (
             "**응답 확인 필요** · 원본 WanGP에서 직접 확인해 주세요.",
             "원본 큐가 예상한 형식으로 응답하지 않았습니다.",
+            "**다음 행동 · 상태 미확인:** 원본 제작 화면의 큐 표시를 확인하세요. 이 화면만으로 작업 성공·실패를 판단할 수 없습니다.",
         )
 
-    def count(label: str) -> str:
-        raw = queue.get(label, 0)
-        try:
-            return str(max(0, int(raw)))
-        except (ValueError, TypeError, OverflowError):
-            return "?"
+    def count(label: str) -> tuple[str, int | None]:
+        raw = queue.get(label)
+        if isinstance(raw, bool):
+            return "?", None
+        if isinstance(raw, int) and 0 <= raw <= 1_000_000:
+            return str(raw), raw
+        if isinstance(raw, str) and raw.isascii() and raw.isdecimal() and len(raw) <= 7:
+            value = int(raw)
+            if value <= 1_000_000:
+                return str(value), value
+        return "?", None
 
-    total, running, queued = count("total_count"), count("running_count"), count("queued_count")
+    (total, _), (running, running_n), (queued, queued_n) = (
+        count("total_count"), count("running_count"), count("queued_count")
+    )
     summary = (
         f"**전체 {total}개**　·　**실행 중 {running}개**　·　**대기 {queued}개**  \n"
         "*원본 큐 조회 시점 기준 · 자동 새로고침 아님*"
@@ -342,7 +352,10 @@ def format_queue_dashboard(session: Any, show_prompts: bool = False) -> tuple[st
     ]
     tasks = queue.get("tasks") or []
     if not isinstance(tasks, (list, tuple)):
-        return summary, "\n".join(rows + ["원본 작업 목록 형식이 올바르지 않습니다."])
+        return (
+            summary, "\n".join(rows + ["원본 작업 목록 형식이 올바르지 않습니다."]),
+            "**다음 행동 · 목록 확인 필요:** 작업 수만으로 결과를 확정하지 마세요. 원본 WanGP에서 개별 큐 상태를 확인하세요.",
+        )
     status_labels = {"queued": "대기", "running": "실행 중", "cancelling": "취소 처리 중"}
     if not tasks:
         rows.append("현재 원본 큐에 대기 중이거나 실행 중인 작업이 없습니다.")
@@ -353,7 +366,7 @@ def format_queue_dashboard(session: Any, show_prompts: bool = False) -> tuple[st
         model = _one_line(item.get("model_type"), 100) or "모델 미표시"
         rows.append(f"{index}. {status_labels.get(status, status or '상태 미표시')} · {model}")
         if show_prompts:
-            prompt = " ".join(str(item.get("prompt") or "").split())[:180]
+            prompt = _one_line(item.get("prompt"), 180)
             if prompt:
                 rows.append(f"   내용: {prompt}")
     if len(tasks) > 20:
@@ -363,7 +376,42 @@ def format_queue_dashboard(session: Any, show_prompts: bool = False) -> tuple[st
         "개별 작업의 실시간 진행률(%)은 이 목록 API에 포함되지 않습니다.",
         "완료한 결과물은 원본 WanGP의 갤러리에서 확인하세요.",
     ])
-    return summary, "\n".join(rows)
+    statuses = {
+        _one_line(item.get("status"), 40).casefold()
+        for item in tasks if isinstance(item, dict)
+    }
+    if "cancelling" in statuses:
+        guidance = (
+            "**다음 행동 · 취소 처리 중:** 원본에서 취소 완료를 확인할 때까지 기다린 뒤 이 목록을 다시 조회하세요. "
+            "원본 작업이 완전히 정리되기 전에 같은 작업을 반복 제출하지 마세요."
+        )
+    elif running_n is not None and running_n > 0:
+        guidance = (
+            "**다음 행동 · 실행 중:** 원본 생성 화면에서 진행 상태를 확인하고 잠시 뒤 다시 조회하세요. "
+            "이 화면에는 실제 진행률(%)이 없으므로 완료 시간을 추정하지 않습니다."
+        )
+    elif queued_n is not None and queued_n > 0:
+        guidance = (
+            "**다음 행동 · 대기 중:** 작업이 순서를 기다리고 있습니다. 잠시 뒤 다시 조회하세요. "
+            "느리다고 생성 버튼을 반복 누르면 중복 작업이 생길 수 있습니다."
+        )
+    elif running_n == 0 and queued_n == 0:
+        guidance = (
+            "**다음 행동 · 현재 대기·실행 작업 없음:** 작업이 사라졌다는 사실만으로 성공·실패를 알 수 없습니다. "
+            "원본 갤러리에서 결과 저장 여부를, 원본 오류 화면에서 실패 여부를 확인하세요."
+        )
+    else:
+        guidance = (
+            "**다음 행동 · 상태 미확인:** 일부 작업 수를 신뢰할 수 없습니다. "
+            "원본 큐 화면에서 실제 상태를 확인하고 중복 생성을 피하세요."
+        )
+    return summary, "\n".join(rows), guidance
+
+
+def format_queue_dashboard(session: Any, show_prompts: bool = False) -> tuple[str, str]:
+    """기존 두 출력 호출자의 호환성을 보존한다."""
+    summary, details, _guidance = format_queue_dashboard_guided(session, show_prompts)
+    return summary, details
 
 
 def format_queue_status(session: Any, show_prompts: bool = False) -> str:
