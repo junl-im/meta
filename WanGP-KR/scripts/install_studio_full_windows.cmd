@@ -8,7 +8,7 @@ echo ===================================================
 echo       곰같은여우의 AI 스튜디오 - 전체 설치
 echo ===================================================
 echo.
-echo 한글 작업실 v0.31 개발판 - 작업 큐 다음 행동 안내·무결성 이중 확인
+echo 한글 작업실 v0.32 개발판 - 갤러리 결과 수동 확인·무결성 이중 확인
 echo 이 도구는 필요할 때 공식 WanGP Manager를 다운로드하고,
 echo 원본 WanGP 설치가 끝나면 한국어 스튜디오를 추가합니다.
 echo 원본 출처: https://github.com/deepbeepmeep/WanGP
@@ -46,20 +46,20 @@ echo 설치 스크립트 옆의 미검증 로컬 파일은 자동으로 재사�
 
 :download_plugin
 echo 고정된 GitHub 코드 버전의 필수 14개 파일을 받습니다.
-echo GitHub 원본 버전: 5ea45ba6561f93304d2c1b1b3bb47cfe7d180038
+echo GitHub 원본 버전: ac2e92b2e41d26a6d8b8da2ceaaad20693641c37
 set "PLUGIN_SOURCE=%SETUP_DIR%\wan2gp-gomfox-studio"
 mkdir "%PLUGIN_SOURCE%" >nul 2>nul
 if not exist "%PLUGIN_SOURCE%\" goto plugin_download_error
-set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/5ea45ba6561f93304d2c1b1b3bb47cfe7d180038/WanGP-KR/plugin/wan2gp-gomfox-studio"
+set "GOMFOX_PINNED_RAW=https://raw.githubusercontent.com/junl-im/meta/ac2e92b2e41d26a6d8b8da2ceaaad20693641c37/WanGP-KR/plugin/wan2gp-gomfox-studio"
 call :fetch_plugin_file "__init__.py" "754b7e9e5046f2450c5fd4ea0a53d40b6ceb8671acbb6e7ddd8932a52de80066"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin.py" "d08d4635315b5426a81e2f784712413cf2d738924a6b02a8e5c920ef7d586797"
+call :fetch_plugin_file "plugin.py" "ee4a7bfe0ce615ba10376fe6ee05e904ee7d266775dc923e8690d8e62427744d"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "plugin_info.json" "cd4c7cbf55059a362532c37ec5b20ed6bfd65f05cc616cbcbef4d18d295f7f97"
+call :fetch_plugin_file "plugin_info.json" "a8e89d64c1f9d18884adf0a61abc94f210c3b490d93ad74c0b69035d8394e123"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "catalog.py" "11de796b4fd6383451e6f342272a15f5d8138c8801d800641ca93dd15140ae38"
+call :fetch_plugin_file "catalog.py" "462af34704a1a280884c9b63a559177e5cf5bd65241f9b1c1626c1eb9b1821c2"
 if errorlevel 1 goto plugin_download_error
-call :fetch_plugin_file "help_content.py" "c9d48415eb6314e6e8f707d95f0dbc8ff7818f1ffcd3798275739a9096325d86"
+call :fetch_plugin_file "help_content.py" "385e929d5bbd047be9e73b3731759a7fb8d5a0fa54ce8e136871caec1f6e86b1"
 if errorlevel 1 goto plugin_download_error
 call :fetch_plugin_file "hardware.py" "04f3ff1a05714f22f43340190cf75b1c85d4d443c6feccad34c4a6487bae66bf"
 if errorlevel 1 goto plugin_download_error
@@ -187,13 +187,13 @@ rem Recheck staged bytes after robocopy; a successful download does not prove a 
 echo [검증] 임시 복사된 14개 파일의 SHA-256을 다시 확인합니다.
 call :verify_stage_file "__init__.py" "754b7e9e5046f2450c5fd4ea0a53d40b6ceb8671acbb6e7ddd8932a52de80066"
 if errorlevel 1 goto plugin_stage_integrity_error
-call :verify_stage_file "plugin.py" "d08d4635315b5426a81e2f784712413cf2d738924a6b02a8e5c920ef7d586797"
+call :verify_stage_file "plugin.py" "ee4a7bfe0ce615ba10376fe6ee05e904ee7d266775dc923e8690d8e62427744d"
 if errorlevel 1 goto plugin_stage_integrity_error
-call :verify_stage_file "plugin_info.json" "cd4c7cbf55059a362532c37ec5b20ed6bfd65f05cc616cbcbef4d18d295f7f97"
+call :verify_stage_file "plugin_info.json" "a8e89d64c1f9d18884adf0a61abc94f210c3b490d93ad74c0b69035d8394e123"
 if errorlevel 1 goto plugin_stage_integrity_error
-call :verify_stage_file "catalog.py" "11de796b4fd6383451e6f342272a15f5d8138c8801d800641ca93dd15140ae38"
+call :verify_stage_file "catalog.py" "462af34704a1a280884c9b63a559177e5cf5bd65241f9b1c1626c1eb9b1821c2"
 if errorlevel 1 goto plugin_stage_integrity_error
-call :verify_stage_file "help_content.py" "c9d48415eb6314e6e8f707d95f0dbc8ff7818f1ffcd3798275739a9096325d86"
+call :verify_stage_file "help_content.py" "385e929d5bbd047be9e73b3731759a7fb8d5a0fa54ce8e136871caec1f6e86b1"
 if errorlevel 1 goto plugin_stage_integrity_error
 call :verify_stage_file "hardware.py" "04f3ff1a05714f22f43340190cf75b1c85d4d443c6feccad34c4a6487bae66bf"
 if errorlevel 1 goto plugin_stage_integrity_error
