@@ -191,6 +191,48 @@ class UiEventMockTests(unittest.TestCase):
             and getattr(e[1].get("inputs", [None])[0], "kwargs", {}).get("elem_id") == "gfs-model-pick"
         )
         self.assertEqual(picker_change["fn"]("img1"), "img1")
+        beginner_lookup = next(
+            e[1] for e in events if e[0] == "click"
+            and [getattr(widget, "kwargs", {}).get("elem_id") for widget in e[1].get("outputs", [])]
+            == [None, "gfs-welcome-model-pick", "gfs-welcome-model-report"]
+        )
+        status, selected, readiness = beginner_lookup["fn"]("처음 시작", "Mock")
+        self.assertIn("조회 결과", status)
+        self.assertEqual(selected["choices"], [("Mock image [img1]", "img1")])
+        self.assertIsNone(selected["value"])
+        self.assertIn("준비 확인", readiness)
+        change_beginner_topic = next(
+            e[1] for e in events if e[0] == "change"
+            and [getattr(widget, "kwargs", {}).get("elem_id") for widget in e[1].get("outputs", [])]
+            == [None, "gfs-welcome-model-pick", None, "gfs-welcome-model-report"]
+        )
+        cleared_query, cleared_dropdown, message, cleared_result = change_beginner_topic["fn"]("짧은 영상")
+        self.assertEqual(cleared_query, "")
+        self.assertEqual(cleared_dropdown["choices"], [])
+        self.assertIsNone(cleared_dropdown["value"])
+        self.assertIn("다시 조회", message)
+        self.assertIn("지웠습니다", cleared_result)
+        change_query = next(
+            e[1] for e in events if e[0] == "change"
+            and len(e[1].get("outputs", [])) == 3
+            and getattr(e[1]["outputs"][0], "kwargs", {}).get("elem_id") == "gfs-welcome-model-pick"
+        )
+        search_dropdown, search_message, search_result = change_query["fn"]("Flux")
+        self.assertEqual(search_dropdown["choices"], [])
+        self.assertIn("다시 조회", search_message)
+        self.assertIn("이전 모델", search_result)
+        beginner_check = next(
+            e[1] for e in events if e[0] == "click"
+            and [getattr(widget, "kwargs", {}).get("elem_id") for widget in e[1].get("inputs", [])]
+            == ["gfs-welcome-model-pick"]
+        )
+        self.assertEqual(beginner_check["fn"]("img1"), "preflight")
+        change_model = next(
+            e[1] for e in events if e[0] == "change"
+            and [getattr(widget, "kwargs", {}).get("elem_id") for widget in e[1].get("inputs", [])]
+            == ["gfs-welcome-model-pick"]
+        )
+        self.assertIn("다시 눌러", change_model["fn"]("img1"))
         self.assertTrue(any(
             e[0] == "change" and e[1].get("fn") is modules["gomfox_test.help_content"].render_troubleshooting
             for e in events

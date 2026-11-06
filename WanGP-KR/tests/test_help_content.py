@@ -63,6 +63,13 @@ class TestHelpContent(unittest.TestCase):
         self.assertIn("RAM 16GB", help_content.render_first_creation_step("3D 만들기", "③ 무료 생성하기"))
         self.assertIn("갤러리", help_content.render_first_creation_step("목소리·음악", "④ 결과 확인·저장"))
 
+    def test_v030_beginner_step_explains_inline_model_lookup_and_manual_creation(self):
+        text = help_content.render_first_creation_step("처음 시작", "② 모델과 준비물")
+        self.assertIn("첫 작품 모델 찾기", text)
+        self.assertIn("선택 모델·내 PC 준비 확인", text)
+        self.assertIn("원본 제작 화면에서 직접 선택", text)
+        self.assertIn("실행 가능 판정이 아니", text)
+
     def test_v025_guide_does_not_echo_untrusted_selection(self):
         unknown = "<svg/onload=alert(1)>"
         actual = help_content.render_first_creation_step(unknown, unknown)

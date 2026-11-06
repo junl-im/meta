@@ -103,6 +103,23 @@ class StudioDashboardTests(unittest.TestCase):
             self.assertIn(token, SOURCE)
         self.assertNotIn("submit_generation", SOURCE)
 
+    def test_v030_first_creation_wizard_has_read_only_model_check(self):
+        for token in (
+            'elem_id="gfs-welcome-model-panel"',
+            'elem_id="gfs-welcome-model-pick"',
+            'elem_id="gfs-welcome-model-report"',
+            'welcome_catalog_run.click(',
+            'welcome_model_check.click(',
+            'welcome_model_search.change(',
+            'welcome_model_pick.change(',
+            'inputs=[welcome_topic, welcome_model_search]',
+            'inputs=[welcome_model_pick], outputs=[welcome_model_report]',
+            'gr.update(choices=[], value=None)',
+            '선택해도 **원본 Media Generator의 모델은 바뀌지 않습니다',
+        ):
+            self.assertIn(token, SOURCE)
+        self.assertNotIn("submit_generation", SOURCE)
+
     def test_v018_recovery_help_is_optional_and_read_only(self):
         for token in (
             "문제가 생겼나요? 단계별 해결",
@@ -161,7 +178,7 @@ class StudioDashboardTests(unittest.TestCase):
         self.assertNotIn('url("data:image/svg', SOURCE.casefold())
 
     def test_plugin_metadata_matches(self):
-        self.assertEqual(META["version"], "0.29.0-dev")
+        self.assertEqual(META["version"], "0.30.0-dev")
         self.assertIn("GomFoxStudio", META["app_tab"])
 
     def test_read_only_preflight_is_optional(self):

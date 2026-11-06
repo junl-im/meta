@@ -184,8 +184,9 @@ def render_first_creation_step(topic: str, stage: str) -> str:
     step = FIRST_CREATION_STAGES.index(stage)
     instructions = (
         "**원본 WanGP Manager → Start WanGP**로 실행했는지 확인하세요. 한글 탭이 없다면 원본 **Apps & PlugIn Manager**에서 플러그인 활성화를 확인하세요. **원본 연결 단계 확인** 버튼은 생성 대신 연결 여부만 조회합니다.",
-        f"{track['model']}\n\n원본 모델 목록을 조회하면 아래 **조회한 목록에서 모델 선택**으로 ID를 채울 수 있습니다. "
-        "모델 정보를 확인한 뒤 생성 모델은 원본 제작 화면에서 직접 선택하세요.\n\n"
+        f"{track['model']}\n\n이 화면의 **첫 작품 모델 찾기**에서 분야별 목록을 조회해 "
+        "원하는 모델을 선택하고 **선택 모델·내 PC 준비 확인**을 눌러 보세요. "
+        "이 점검은 실행 가능 판정이 아니며, 생성 모델은 원본 제작 화면에서 직접 선택하세요.\n\n"
         f"{track['input']}",
         f"{track['create']}\n\n작업 전에 GPU/VRAM과 모델 다운로드 용량을 확인하세요. **GPT 감독은 꺼진 상태 그대로** 두어도 됩니다.",
         f"{track['result']}\n\n완료 전에는 저장됐다고 판단하지 마세요. 오류라면 원본 큐에서 상태를 확인하고, **문제가 생겼나요? 단계별 해결**을 이용하세요.",

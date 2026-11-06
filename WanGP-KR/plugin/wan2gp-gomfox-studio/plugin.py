@@ -107,6 +107,9 @@ STUDIO_STYLE = """
 #gfs-root #gfs-first-creation-guide {padding:9px 13px;background:rgba(41,111,113,.09);border:0;border-radius:12px;font-size:14px;line-height:1.62}
 #gfs-root #gfs-first-creation-guide h3 {font-size:17px;margin:0 0 6px}
 #gfs-root #gfs-first-creation-guide p {margin:6px 0}
+#gfs-root #gfs-welcome-model-panel {border:0;border-radius:14px;background:rgba(55,120,120,.1)}
+#gfs-root #gfs-welcome-catalog-run,#gfs-root #gfs-welcome-model-check {border:0;border-radius:11px;min-height:43px;font-weight:750}
+#gfs-root #gfs-welcome-model-report textarea {font-size:13px;line-height:1.6;overflow-wrap:anywhere}
 #gfs-root #gfs-error-input textarea {font-size:13px;line-height:1.6;overflow-wrap:anywhere;min-width:0}
 #gfs-root #gfs-error-advice {min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:keep-all;padding:10px 13px;background:rgba(42,122,125,.12);border:0;border-radius:12px;line-height:1.65}
 #gfs-root #gfs-error-advice h3 {font-size:16px;line-height:1.45;margin:0 0 6px}
@@ -173,8 +176,8 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
     def __init__(self):
         super().__init__()
         self.name = APP_TITLE
-        self.version = "0.29.0-dev"
-        self.description = "원본 모델 목록에서 수동 선택·안전한 감독 오류 안내 · 무료 로컬 기본 · GPT 선택"
+        self.version = "0.30.0-dev"
+        self.description = "첫 작품 분야별 모델 조회·읽기 전용 준비 확인 · 무료 로컬 기본 · GPT 선택"
 
     def setup_ui(self):
         self.request_component("state")
@@ -317,6 +320,36 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
                         first_creation_guide = gr.Markdown(
                             value=render_first_creation_step("처음 시작", FIRST_CREATION_STAGES[0]),
                             elem_id="gfs-first-creation-guide",
+                        )
+                    with gr.Accordion("첫 작품 모델 찾기 · 이 화면에서 확인", open=True, elem_id="gfs-welcome-model-panel"):
+                        gr.Markdown(
+                            "현재 분야의 **원본 모델 목록을 읽기만** 합니다. 검색하고 모델을 직접 선택한 다음 "
+                            "준비 상태를 확인하세요. **다운로드·생성·설정 변경은 하지 않습니다.**"
+                        )
+                        welcome_model_search = gr.Textbox(
+                            label="모델 이름 검색 (선택)", placeholder="예: Flux, Qwen, Wan",
+                        )
+                        welcome_catalog_run = gr.Button(
+                            "이 분야 모델 찾아보기", elem_id="gfs-welcome-catalog-run",
+                        )
+                        welcome_catalog_status = gr.Markdown(
+                            value="**아직 조회 전** · 위 버튼을 누르면 선택 분야에서 최대 40개를 표시합니다."
+                        )
+                        welcome_model_pick = gr.Dropdown(
+                            choices=[], value=None, label="원본 모델 선택 (직접 선택)",
+                            elem_id="gfs-welcome-model-pick",
+                        )
+                        welcome_model_check = gr.Button(
+                            "선택 모델·내 PC 준비 확인", elem_id="gfs-welcome-model-check",
+                        )
+                        welcome_model_report = gr.Textbox(
+                            label="모델 파일·RAM·VRAM 읽기 전용 확인표", lines=9,
+                            interactive=False, elem_id="gfs-welcome-model-report",
+                            value="먼저 분야별 모델을 조회하고 한 개를 선택하세요.",
+                        )
+                        gr.Markdown(
+                            "여기서 선택해도 **원본 Media Generator의 모델은 바뀌지 않습니다.** "
+                            "실제 생성 모델과 해상도는 원본 무료 제작 화면에서 직접 선택하세요."
                         )
                     welcome_hardware = gr.Button("내 PC 사양 살펴보기 (선택 · 읽기 전용)")
                     welcome_report = gr.Textbox(
@@ -580,6 +613,23 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
             fn=connected_creation_choices, inputs=[welcome_topic],
             outputs=[kind_choice, prompt_kind],
         )
+        def clear_welcome_model_selection(_value):
+            return (
+                gr.update(choices=[], value=None),
+                "**선택 조건이 바뀌었습니다.** 모델을 다시 조회해 주세요.",
+                "이전 모델 확인표를 지웠습니다. 모델을 다시 선택해 주세요.",
+            )
+
+        welcome_topic.change(
+            fn=lambda topic: ("", *clear_welcome_model_selection(topic)),
+            inputs=[welcome_topic],
+            outputs=[welcome_model_search, welcome_model_pick, welcome_catalog_status, welcome_model_report],
+        )
+        welcome_model_search.change(
+            fn=clear_welcome_model_selection,
+            inputs=[welcome_model_search],
+            outputs=[welcome_model_pick, welcome_catalog_status, welcome_model_report],
+        )
         welcome_topic.change(
             fn=render_first_creation_step,
             inputs=[welcome_topic, first_creation_stage], outputs=[first_creation_guide],
@@ -587,6 +637,32 @@ class GomFoxStudioPlugin(WAN2GPPlugin):
         first_creation_stage.change(
             fn=render_first_creation_step,
             inputs=[welcome_topic, first_creation_stage], outputs=[first_creation_guide],
+        )
+        def load_welcome_models(topic, query):
+            category, _prompt_kind = connected_creation_choices(topic)
+            report, choices = format_model_catalog_page(api_session, category, query, 1)
+            summary = (report.splitlines() or ["원본 모델 목록 확인 필요"])[0]
+            return (
+                f"**조회 결과** · {summary}\n\n최대 40개씩 표시합니다. 원하는 모델이 없으면 검색어를 좁혀 주세요.",
+                gr.update(choices=choices, value=None),
+                "조회가 끝났습니다. 모델을 선택한 뒤 준비 확인을 눌러 주세요." if choices
+                else "표시할 모델이 없습니다. 원본 연결·분야·검색어를 확인해 주세요.",
+            )
+
+        welcome_catalog_run.click(
+            fn=load_welcome_models,
+            inputs=[welcome_topic, welcome_model_search],
+            outputs=[welcome_catalog_status, welcome_model_pick, welcome_model_report],
+        )
+        welcome_model_check.click(
+            fn=lambda model_id: format_model_preflight(
+                api_session, model_id, detect_hardware(),
+            ),
+            inputs=[welcome_model_pick], outputs=[welcome_model_report],
+        )
+        welcome_model_pick.change(
+            fn=lambda _model_id: "선택이 바뀌었습니다. 위 준비 확인 버튼을 다시 눌러 주세요.",
+            inputs=[welcome_model_pick], outputs=[welcome_model_report],
         )
         problem_topic.change(
             fn=render_troubleshooting, inputs=[problem_topic], outputs=[problem_guide]
