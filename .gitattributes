@@ -1,0 +1,6 @@
+# Keep generated web assets byte-stable on Windows and Linux.
+AIPlayground/WebtoonStudio/assets/*.js text eol=lf
+AIPlayground/WebtoonStudio/assets/*.css text eol=lf
+AIPlayground/DalbitUnse/dist/experience.js text eol=lf
+NaverNovelShelf/site/sorion-local-worker.js text eol=lf
+NaverNovelShelf/site/voice-runtime/*.mjs text eol=lf

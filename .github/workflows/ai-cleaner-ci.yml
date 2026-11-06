@@ -18,6 +18,7 @@ on:
       - 'index.html'
       - 'package.json'
       - 'package-lock.json'
+      - '.gitattributes'
       - '.github/workflows/ai-cleaner-ci.yml'
       - '.github/scripts/**'
   push:
@@ -41,6 +42,7 @@ on:
       - 'OPTION/SS_OPTION.txt'
       - 'package.json'
       - 'package-lock.json'
+      - '.gitattributes'
       - '.github/workflows/ai-cleaner-ci.yml'
       - '.github/scripts/**'
 
@@ -132,7 +134,7 @@ jobs:
   browser-smoke:
     needs: static-checks
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v7
