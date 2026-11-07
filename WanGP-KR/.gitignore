@@ -1,0 +1,13 @@
+# 공식 WanGP 소스와 실제 생성물은 메타 공개 Git 저장소에 올리지 않습니다.
+/runtime/
+/private/
+/outputs/
+/data/
+/models/
+/.env
+.env.*
+wgp_config.json
+*.key
+*.pem
+*.p12
+__pycache__/

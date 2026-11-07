@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>곰같은여우의 AI 스튜디오 | v0.20 실기기 검수 기록</title>
+  <style>
+    :root{font-family:"Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;color:#f1eee8;background:#111e2b}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 15% 0%,#284b53 0%,#152b39 46%,#101b29 100%);padding:20px 18px}
+    button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:default;opacity:.45}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #dbaa72;outline-offset:2px}
+    main{max-width:1080px;margin:auto}.eyebrow{font-size:11px;letter-spacing:.15em;font-weight:850;color:#e6b783}.hero{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 21px;border-radius:20px;background:linear-gradient(112deg,#193d47,#21384e 65%,#45382f)}
+    h1{font-size:clamp(22px,3.2vw,31px);letter-spacing:-.04em;margin:4px 0 5px;line-height:1.22}.sub{font-size:12px;line-height:1.5;color:#c3d9dc;margin:0;max-width:700px}.fox{flex:none;width:66px;height:66px;display:grid;place-items:center;font-size:35px;border-radius:22px;background:#e0a75c20}
+    .chips{display:flex;gap:7px;flex-wrap:wrap;margin:11px 0}.chip{font-size:11px;font-weight:750;background:#22434c;border-radius:25px;padding:6px 11px;color:#e6f3ed}.chip.warm{background:#48392f;color:#f8d7b0}
+    nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:8px 0 13px}nav button{background:#253c45;color:#cfdddf;border:0;padding:12px 8px;border-radius:12px;font-size:13px;font-weight:800;white-space:nowrap}nav button[aria-selected="true"]{background:#39706c;color:#fff3e0;box-shadow:inset 0 -3px #e0af79}
+    .layout{display:grid;grid-template-columns:minmax(0,1fr) 255px;gap:13px}.stage{background:linear-gradient(150deg,#203644,#20333e);border-radius:17px;padding:22px 24px;min-height:360px}.stage h2{font-size:21px;letter-spacing:-.035em;margin:0 0 7px}.stage p{font-size:13px;line-height:1.6;color:#c5d7dc;margin:0 0 13px}.stage p.important{background:#493b2c;color:#fbe0bd;padding:10px 12px;border-radius:11px}
+    .fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.field{display:grid;gap:5px;font-size:12px;font-weight:750;color:#e4edea}.field.wide{grid-column:1/-1}.field input,.field select{width:100%;border:1px solid #496371;border-radius:10px;padding:11px 12px;background:#142c3d;color:#fff;min-width:0}.field input::placeholder{color:#93a8b1}.checks{display:grid;gap:10px;margin:14px 0}.checks label{display:flex;align-items:start;gap:10px;font-size:13px;line-height:1.45;cursor:pointer}.checks input{accent-color:#e3b27d;width:18px;height:18px;flex:none;margin:1px 0}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.primary,.secondary{border:0;border-radius:11px;padding:12px 16px;font-size:13px;font-weight:850}.primary{background:linear-gradient(115deg,#dcaf74,#bb8155);color:#172638}.secondary{background:#345363;color:#f2f0e9}.timer{font-size:34px;font-weight:850;letter-spacing:.04em;font-variant-numeric:tabular-nums;margin:13px 0 1px;color:#f4c993}.hint{font-size:11px!important;color:#a9c3c8!important;margin:8px 0!important}
+    .side{background:#152d3b;border-radius:16px;padding:16px;align-self:start}.side h3{font-size:15px;margin:0 0 10px}.side ul{list-style:none;padding:0;margin:0;display:grid;gap:10px}.side li{display:flex;align-items:center;gap:8px;font-size:12px;color:#bfd4d5}.dot{width:9px;height:9px;border-radius:50%;background:#657d86;flex:none}.dot.done{background:#86c7a4}.dot.fail{background:#e6a47a}.status{background:#284b50;border-radius:12px;padding:12px;margin-top:15px;font-size:13px;font-weight:750;line-height:1.5}.status small{display:block;font-size:11px;color:#c0d8d8;margin-top:5px;font-weight:500}
+    .summary{white-space:pre-wrap;background:#142b38;border-radius:11px;padding:15px;font-size:12px;line-height:1.75;color:#e4eee9;word-break:break-word;max-height:280px;overflow:auto}.footer{font-size:11px;line-height:1.6;color:#afc5c8;margin:13px 3px}.footer strong{color:#e7bf8b}[hidden]{display:none!important}
+    @media(max-width:800px){body{padding:10px}.hero{padding:14px}.layout{grid-template-columns:1fr}.stage{min-height:300px;padding:16px}.side{padding:13px}.side ul{grid-template-columns:repeat(2,minmax(0,1fr))}.fox{width:47px;height:47px;font-size:27px}nav button{font-size:11px;padding:11px 3px}.fields{gap:8px}}
+    @media(max-width:390px){.fields{grid-template-columns:1fr}.hero h1{font-size:20px}.stage h2{font-size:18px}.fox{display:none}.side ul{gap:7px}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+<main>
+  <header class="hero"><div><div class="eyebrow">GOMFOX · WINDOWS FIRST-RUN QA</div><h1>곰같은여우의 AI 스튜디오</h1><p class="sub">v0.20 · 진짜 PC에서 무료 첫 제작을 확인하는 기록장. 프로그램 설치나 GPU 작업은 이 페이지에서 실행하지 않습니다.</p></div><div class="fox" aria-hidden="true">🦊</div></header>
+  <div class="chips"><span class="chip">무료 로컬 기본</span><span class="chip">Windows 16GB 목표</span><span class="chip warm">GPT 연결 불필요</span><span class="chip warm">검증 전 기록용</span></div>
+  <nav role="tablist" aria-label="검수 단계">
+    <button type="button" role="tab" aria-selected="true" aria-controls="stage-pc" data-stage="pc">① 내 PC</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="stage-run" data-stage="run">② 실행</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="stage-make" data-stage="make">③ 무료 생성</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="stage-report" data-stage="report">④ 결과</button>
+  </nav>
+  <div class="layout">
+    <div>
+      <section id="stage-pc" class="stage" role="tabpanel" data-panel="pc">
+        <h2>내 PC가 무엇을 지원하나요?</h2><p>별도 <strong>Windows 읽기 전용 설치 점검 도우미</strong>를 실행한 뒤, 작업 관리자에서 VRAM을 확인하고 아래에 직접 적어 주세요. 숫자는 추측하지 마세요.</p>
+        <div class="fields">
+          <label class="field">Windows 버전<input id="os" type="text" maxlength="70" placeholder="예: Windows 11 / 23H2"></label>
+          <label class="field">시스템 RAM (GB)<input id="ram" type="number" min="1" max="1024" step="0.1" placeholder="예: 16"></label>
+          <label class="field wide">그래픽카드 이름<input id="gpu" type="text" maxlength="100" placeholder="작업 관리자 > 성능 > GPU"></label>
+          <label class="field">전용 GPU 메모리 (GB)<input id="vram" type="number" min="0" max="256" step="0.1" placeholder="모르면 빈칸"></label>
+          <label class="field">설치 무결성 점검 결과<select id="integrity"><option value="unchecked">아직 확인 전</option><option value="pass">14개 파일 일치</option><option value="fail">누락·불일치 / 원본 없음</option></select></label>
+        </div><p class="hint">PC 정보는 브라우저 안에서만 사용하며 서버로 보내지 않습니다. 저장하려면 마지막 단계에서 TXT를 다운로드하세요.</p>
+        <div class="actions"><button class="primary next" data-next="run" type="button">다음 · 실행 확인</button></div>
+      </section>
+      <section id="stage-run" class="stage" role="tabpanel" data-panel="run" hidden>
+        <h2>WanGP가 정말 실행됐나요?</h2><p>공식 Manager에서 <strong>Start WanGP</strong>를 누르고 브라우저에서 직접 눈으로 확인한 항목만 체크하세요.</p>
+        <div class="checks">
+          <label><input id="engine" type="checkbox">원본 WanGP의 제작 화면이 정상적으로 열림</label>
+          <label><input id="korean" type="checkbox">곰같은여우의 AI 스튜디오 한국어 탭이 보임</label>
+          <label><input id="art" type="checkbox">영상·이미지·음악·3D의 원화가 잘리지 않고 글씨가 읽힘</label>
+        </div>
+        <p class="important">한글 탭이 뜨지 않거나 원화가 깨지면 통과로 체크하지 마세요. 원본 설정·파일을 지우지 말고, 먼저 설치 버전을 확인하세요.</p>
+        <div class="actions"><button class="secondary next" data-next="pc" type="button">이전</button><button class="primary next" data-next="make" type="button">다음 · 무료 생성</button></div>
+      </section>
+      <section id="stage-make" class="stage" role="tabpanel" data-panel="make" hidden>
+        <h2>무료 로컬 이미지 1장을 만들어 봐요</h2><p>원본 WanGP에서 <strong>실제로 지원되는</strong> 작은 이미지 모델을 선택하세요. 아래 타이머는 시간을 재는 도구이며 GPU 작업을 시작하는 버튼이 아닙니다.</p>
+        <div class="fields"><label class="field wide">직접 선택한 모델명<input id="model" maxlength="100" type="text" placeholder="원본 화면에 표시된 모델명"></label></div>
+        <div class="timer" id="timer" aria-live="off">00:00</div>
+        <div class="actions"><button type="button" class="primary" id="start-timer">측정 시작</button><button type="button" class="secondary" id="stop-timer" disabled>측정 종료</button></div>
+        <p class="hint">실제 생성 버튼을 누를 때 측정을 시작하고 이미지 생성·저장이 끝났을 때 종료하세요. PC가 지원하지 않는 모델은 다운로드하지 말고 '미시도'로 기록하세요.</p>
+        <div class="fields"><label class="field">생성 결과<select id="outcome"><option value="untested">아직 생성하지 않음</option><option value="success">성공 — 직접 확인</option><option value="fail">오류/실패</option><option value="unsupported">지원 모델 없음·미시도</option></select></label><label class="field">이미지 파일 저장 확인<select id="saved"><option value="unchecked">아직 확인 전</option><option value="yes">실제 파일 확인</option><option value="no">파일 없음·미확인</option></select></label></div>
+        <div class="actions"><button class="secondary next" data-next="run" type="button">이전</button><button class="primary next" data-next="report" type="button">다음 · 결과 정리</button></div>
+      </section>
+      <section id="stage-report" class="stage" role="tabpanel" data-panel="report" hidden>
+        <h2>검수 결과 — 사용자 입력 기준</h2><p>여기 표시된 값은 <strong>네가 직접 체크한 기록</strong>이며 Windows/Gradio/GPU를 자동 측정했다는 의미는 아니야. 오류가 있다면 원본 파일을 수정하지 말고 기록을 남겨줘.</p>
+        <div id="summary" class="summary" aria-live="polite">아직 입력된 결과가 없습니다.</div>
+        <div class="actions"><button type="button" class="primary" id="export">결과 TXT 내 PC에 저장</button><button type="button" class="secondary" id="copy">결과 문장 복사</button></div>
+        <p id="export-status" class="hint" role="status">다운로드·복사는 클릭한 때에만 시도합니다. 외부 서버 전송 기능은 없습니다.</p>
+      </section>
+    </div>
+    <aside class="side"><h3>검수 진행 상황</h3><ul>
+      <li><span id="dot-pc" class="dot"></span>PC·해시 점검</li>
+      <li><span id="dot-run" class="dot"></span>실제 앱 화면 확인</li>
+      <li><span id="dot-make" class="dot"></span>무료 이미지 생성·저장</li>
+      <li><span id="dot-report" class="dot"></span>결과 내보내기</li>
+    </ul><div class="status" id="status">미검증<small>이 페이지는 점검을 대신 수행하지 않습니다.</small></div></aside>
+  </div>
+  <p class="footer"><strong>개인정보 주의:</strong> 프롬프트, 비밀번호, 인증키, 개인 파일 경로는 입력하지 마세요. 이 파일은 오프라인 동작하며 원본 WanGP를 실행하거나 GPU·모델·설정·사용자 파일을 변경하지 않습니다. 화면을 닫으면 입력 상태는 보존되지 않으므로 필요하면 TXT로 내려받으세요. SVG·광고·외부 CDN 없음.</p>
+</main>
+<script>
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const fields=['os','ram','gpu','vram','integrity','engine','korean','art','model','outcome','saved'];
+  const elapsed={start:null,ms:null,interval:null};
+  let exported=false;
+  const stageButtons=[...document.querySelectorAll('[data-stage]')];
+  function showStage(name){
+    stageButtons.forEach(button=>button.setAttribute('aria-selected',String(button.dataset.stage===name)));
+    document.querySelectorAll('[data-panel]').forEach(panel=>{panel.hidden=panel.dataset.panel!==name;});
+    if(name==='report')refresh();
+  }
+  stageButtons.forEach(button=>button.addEventListener('click',()=>showStage(button.dataset.stage)));
+  document.querySelectorAll('[data-next]').forEach(button=>button.addEventListener('click',()=>showStage(button.dataset.next)));
+  function duration(ms){const total=Math.max(0,Math.round(ms/1000));return String(Math.floor(total/60)).padStart(2,'0')+':'+String(total%60).padStart(2,'0');}
+  function tick(){if(elapsed.start!==null)$('timer').textContent=duration(performance.now()-elapsed.start);}
+  $('start-timer').addEventListener('click',()=>{
+    if(elapsed.interval!==null)clearInterval(elapsed.interval);
+    elapsed.start=performance.now();elapsed.ms=null;exported=false;
+    $('start-timer').disabled=true;$('stop-timer').disabled=false;$('outcome').value='untested';$('saved').value='unchecked';
+    tick();elapsed.interval=setInterval(tick,350);refresh();
+  });
+  $('stop-timer').addEventListener('click',()=>{
+    if(elapsed.start===null)return;
+    elapsed.ms=performance.now()-elapsed.start;elapsed.start=null;clearInterval(elapsed.interval);elapsed.interval=null;
+    $('timer').textContent=duration(elapsed.ms);$('start-timer').disabled=false;$('stop-timer').disabled=true;refresh();
+  });
+  function v(id){return $(id).value.trim();}
+  function checked(id){return $(id).checked;}
+  function progress(){
+    const pc=v('os')!==''&&Number(v('ram'))>0&&v('gpu')!==''&&v('integrity')==='pass';
+    const run=checked('engine')&&checked('korean')&&checked('art');
+    const made=v('model')!==''&&elapsed.ms!==null&&elapsed.ms>0&&v('outcome')==='success'&&v('saved')==='yes';
+    const failed=v('integrity')==='fail'||v('outcome')==='fail';
+    return {pc,run,made,failed};
+  }
+  function lines(){
+    const p=progress();const result=p.pc&&p.run&&p.made?'사용자 입력 기준 3단계 완료':p.failed?'오류·실패 기록 있음':'미검증 / 진행 중';
+    return [
+      '곰같은여우의 AI 스튜디오 — v0.20 Windows 실기기 점검 기록',
+      '작성 시각: '+new Date().toLocaleString('ko-KR'),
+      '판정: '+result+' (자동 생성·GPU 검증 결과 아님)',
+      'Windows: '+(v('os')||'미입력'),
+      'RAM(GB): '+(v('ram')||'미입력'),
+      'GPU: '+(v('gpu')||'미입력'),
+      '전용 VRAM(GB): '+(v('vram')||'미입력'),
+      '필수 파일 SHA-256: '+({pass:'일치',fail:'불일치 또는 미설치',unchecked:'미확인'}[v('integrity')]),
+      '원본 실행: '+(checked('engine')?'사용자 확인':'미확인'),
+      '한국어 탭: '+(checked('korean')?'사용자 확인':'미확인'),
+      '네 분야 원화: '+(checked('art')?'사용자 확인':'미확인'),
+      '선택 모델: '+(v('model')||'미입력'),
+      '측정 시간: '+(elapsed.ms!==null?duration(elapsed.ms):'미측정'),
+      '생성 결과: '+({untested:'미시도',success:'사용자 확인 성공',fail:'실패',unsupported:'지원 모델 없음 / 미시도'}[v('outcome')]),
+      '이미지 저장: '+({unchecked:'미확인',yes:'사용자 확인',no:'미확인/없음'}[v('saved')]),
+      '안내: 원본 WanGP·GPU를 본 페이지에서 실행하거나 자동 검사하지 않았습니다.',
+      '주의: 실제 결과물 파일·로그·스크린샷과 함께 사람이 대조해야 최종 실기검수입니다.'
+    ];
+  }
+  function refresh(){
+    const p=progress();
+    for(const name of ['pc','run','make']){
+      const ok=name==='make'?p.made:p[name];$('dot-'+name).className='dot'+(ok?' done':p.failed?' fail':'');
+    }
+    $('dot-report').className='dot'+(exported?' done':'');
+    const label=p.pc&&p.run&&p.made?'사용자 체크 기준 완료':p.failed?'오류 기록 · 조치 필요':'미검증 · 기록 진행 중';
+    $('status').firstChild.textContent=label;
+    $('summary').textContent=lines().join('\n');
+  }
+  fields.forEach(id=>{$(id).addEventListener('input',()=>{exported=false;refresh();});$(id).addEventListener('change',()=>{exported=false;refresh();});});
+  $('export').addEventListener('click',()=>{
+    const file=new Blob([lines().join('\r\n')+'\r\n'],{type:'text/plain;charset=utf-8'});
+    const url=URL.createObjectURL(file);const a=document.createElement('a');a.href=url;a.download='gomfox-v020-windows-qa.txt';document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);exported=true;refresh();
+    $('export-status').textContent='다운로드를 요청했어요. PC의 다운로드 폴더에서 실제 TXT 파일이 있는지 확인하세요.';
+  });
+  $('copy').addEventListener('click',async()=>{
+    try{await navigator.clipboard.writeText(lines().join('\n'));$('export-status').textContent='복사를 요청했어요. 붙여넣기로 내용을 확인하세요.';}
+    catch{$('export-status').textContent='브라우저가 복사를 차단했어요. TXT 저장 버튼을 이용해 주세요.';}
+  });
+  refresh();
+</script>
+</body>
+</html>
