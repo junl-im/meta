@@ -1,4 +1,4 @@
-/* Public Naver Web Novel work metadata, verified 2026-11-05.
+/* Public Naver Web Novel work metadata, verified 2026-11-10.
    Only titles, author pen names, official cover thumbnail URLs, status and links.
    No story text or reader data is reproduced. */
 window.NOVEL_CATALOG = [
@@ -14,7 +14,7 @@ window.NOVEL_CATALOG = [
   ["《천하제일 호랑이》","닥터X","1249473","best","https://novel-phinf.pstatic.net/20261027_26/novel_1793082483751ECzxB_PNG/400.png?type=f280_224_2","무협","ongoing"],
   ["《나의 SP파트너》","닥터X","1250566","challenge","https://novel-phinf.pstatic.net/20221231_194/novel_1672413226738B6sKY_PNG/romance_320_16.png?type=f280_224_2","로맨스","ongoing"],
   ["《악녀는 고용직입니다》","닥터X","1248545","challenge","https://novel-phinf.pstatic.net/20221231_150/novel_16724131363820elHi_PNG/romance_320_4.png?type=f280_224_2","로맨스","ongoing"],
-  ["《잿빛 복원사》","[곰같은여우]","1247798","challenge","https://novel-phinf.pstatic.net/20221231_3/novel_1672413559639liBqM_PNG/fantasy_320_7.png?type=f280_224_2","판타지","ongoing"],
+  ["《잿빛 복원사》","[곰같은여우]","1247798","best","https://novel-phinf.pstatic.net/20261110_244/novel_1794295087832BFdm2_PNG/400.png?type=f280_224_2","판타지","ongoing"],
   ["사무라이 코코","[곰같은여우]","1247361","challenge","https://novel-phinf.pstatic.net/20221231_166/novel_1672413105791DV8AY_PNG/romance_320_2.png?type=f280_224_2","로맨스","ongoing"],
   ["배틀그라운드 : 모션플레이","닥터X","1245900","challenge","https://novel-phinf.pstatic.net/20221231_95/novel_1672413539316vuaf9_PNG/fantasy_320_4.png?type=f280_224_2","판타지","ongoing"],
   ["범죄도시: THE FIRST","[곰같은여우]","1244599","challenge","https://novel-phinf.pstatic.net/20221231_64/novel_1672414879501cizJd_PNG/mof_320_4.png?type=f280_224_2","현판","ongoing"],
@@ -36,4 +36,4 @@ window.NOVEL_CATALOG = [
   title, author, id, league, image, genre, status,
   url: `https://m.novel.naver.com/${league}/list?novelId=${id}`
 }));
-window.NOVEL_CATALOG_LAST_CHECK = "2026-11-05";
+window.NOVEL_CATALOG_LAST_CHECK = "2026-11-10";

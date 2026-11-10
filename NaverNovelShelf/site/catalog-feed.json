@@ -2,7 +2,7 @@
   "schema_version": 1,
   "app_id": "gomfox-naver-novel-shelf",
   "source_site": "https://gomfox-naver-novels.glassyroot13.chatgpt.site",
-  "catalog_last_verified": "2026-11-05",
+  "catalog_last_verified": "2026-11-10",
   "copyright_policy": "metadata-and-links-only",
   "navigation_mode": "open-official-naver-novel-url",
   "works": [
@@ -130,11 +130,11 @@
       "id": "1247798",
       "title": "《잿빛 복원사》",
       "author_search_identity": "[곰같은여우]",
-      "league": "challenge",
+      "league": "best",
       "genre": "판타지",
       "publication_status": "ongoing",
-      "official_url": "https://m.novel.naver.com/challenge/list?novelId=1247798",
-      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20221231_3/novel_1672413559639liBqM_PNG/fantasy_320_7.png?type=f280_224_2"
+      "official_url": "https://m.novel.naver.com/best/list?novelId=1247798",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20261110_244/novel_1794295087832BFdm2_PNG/400.png?type=f280_224_2"
     },
     {
       "id": "1247361",
