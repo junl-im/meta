@@ -1,0 +1,112 @@
+# Actor Swap Studio WEB — migration plan
+
+Date: 2026-11-01
+Branch: `feat/faceswap-web-v0.7`
+Target: `junl-im/meta/faceswap/` (one repository, independent subproject)
+
+## Verified historical baseline
+
+- v0.6.6 archived source ZIP and test documentation exist in Google Drive.
+- Archive file inventory: 105 items under `actor_swap_studio_mvp/`, including Python FastAPI backend, scene masks, Product/Hand/Text Lock, batch/partial retry, QA, static app assets, Electron packaging and regression scripts.
+- Oct 27 pilot: private Site -> local `127.0.0.1:7869` FastAPI/FaceFusion CPU runner. This is **not** a portable no-install browser engine. New PC/mobile execution remains unverified.
+- Historical passing tests are not equivalent to current web-only model execution or output verification.
+
+## Architecture
+
+1. Static responsive UI; local `File` objects and object URLs; no upload.
+2. Capability probe: WebGPU adapter, WebCodecs encode/decode, WebAssembly, storage quota, cross-origin isolation.
+3. Future model registry: record source, version, SHA-256, code license, **weights license**, commercial permissions, tested operators, memory and device range.
+4. v0.7.8 adds a **separate synthetic-only** CPU WASM ONNX probe; user-supplied swap model adapter remains `not-ready`. Future WebGPU preference and WASM fallback require individual whole-chain model compatibility testing.
+5. Media decode/encode abstraction: v0.7.4 has bounded WebM Duration metadata repair; complete mux candidate is Mediabunny/WebCodecs (MPL-2.0 source-availability obligations to be reviewed) with optional FFmpeg WASM under separate binary-license review.
+6. Frame pipeline: detection -> landmarks -> identity swap -> mask -> occlusion -> original protected pixels -> temporal QA -> mux.
+7. Local export plus optional provenance metadata and consent workflow.
+8. Optional advanced renderer is a separate opt-in mode with explicit privacy/cost prompts, never silently uploads.
+
+## Existing features to preserve before release
+
+- Original product/logo/text/hand region fidelity, original audio and scene timing.
+- Project revisions, recovery/cancel, per-actor batch metadata and retry ranges.
+- Multiple aspect ratios and output presets.
+- Safe filename handling on Korean Windows and mobile browsers.
+- Clear separation between preview, actual AI swap, encoded output and export.
+
+## Milestones
+
+### M0 — repository isolation (this branch)
+
+- [x] Dedicated `faceswap/` static app and documentation.
+- [x] Local video/reference intake and capability diagnostics.
+- [x] Local input check / JSON manifest export.
+- [ ] Independent browser playthrough and device QA.
+- [ ] Confirm all historical source license notices.
+
+### M0.5 — local video lab and automated browser QA (v0.7.5, NOT AI swap)
+
+- [x] Optional MediaPipe CPU face **location** detection with explicit third-party download notice.
+- [x] Real 3-second in-browser canvas/photo overlay recording, preview and downloaded MP4/WebM candidate.
+- [x] Explicitly label all outputs `DEMO / NOT AI SWAP`; no face-swap model weights included.
+- [x] Static Node tests/CI for normalization, format decision, media-local architecture.
+- [x] Chromium automated E2E: desktop + Pixel 7 mobile emulation × encode/download and consent/reset = 4 PASS (2026-11-01, [Actions 41286780071](https://github.com/junl-im/meta/actions/runs/41286780071)).
+- [x] FFprobe confirms output video track and frame packet timestamps; reset state regression repaired.
+- [x] v0.7.3: Web Audio local audio bridge plus fallback capture; [GitHub Actions 41297129563](https://github.com/junl-im/meta/actions/runs/41297129563) confirms 6/6 Chromium tests: desktop + Pixel 7 emulation × local output, consent/reset, and repeated render. FFprobe checks encoded audio packets; FFmpeg volumedetect proves a non-silent 440 Hz synthetic tone in downloaded output.
+- [x] v0.7.5: [GitHub Actions 41306889969](https://github.com/junl-im/meta/actions/runs/41306889969) added Firefox desktop and iPhone-screen WebKit (Linux) browser compatibility tests. Firefox local 3s video export and FFprobe video stream PASS after a suspended AudioContext hang fix. WebKit fallback correctly disables unsupported recorder formats and explains the limitation. All 12 browser tests PASS, foundation PASS.
+- [ ] Physical Chrome/Edge Windows, Android Chrome and iOS Safari playback, recording and audio-fidelity tests. Linux WebKit emulation is not iPhone Safari hardware.
+- [x] v0.7.4: bounded local EBML Duration repair on eligible unknown-size WebM MediaRecorder output without transcoding; [Actions 41304865701](https://github.com/junl-im/meta/actions/runs/41304865701) confirms finite FFprobe container duration, 1.2s browser seek attempt and audio/video encoded end-time drift bound, 6/6 Chromium E2E PASS.
+- [ ] Full seekable MP4/WebM remux for long videos, Cues/SeekHead correctness, full source-audio fidelity and physical-device verification.
+- [ ] Full source-audio fidelity, A/V synchronization, frame timing and seekable output confirmed on physical devices (Web Audio tone QA is not full preservation proof).
+
+### M0.75 — rights-aware local model preflight (v0.7.7, NOT inference)
+
+- [x] Separate code license from model-weight rights: InsightFace and SimSwap are noncommercial for public pretrained weights; GHOST generator is a research lead but the ArcFace/dependency chain has unresolved rights.
+- [x] Local ONNX/ORT model chooser plus JSON manifest schema with an explicit weights-license claim, HTTPS evidence URL and whole-file SHA-256 comparison. Network-free model check does **not** fetch the claimed evidence URL or validate its legal authenticity.
+- [x] v0.7.7: replace whole-buffer WebCrypto with incremental 1 MiB SHA-256; background module Worker, progress %, Cancel and Reset/input-change termination, Worker-less fallback. Input upper bound 2 GiB for processing scope, not peak-RAM allocation. No model inference or third-party weights distributed.
+- [x] Node strict manifest / tampered-byte / memory budget tests and browser cross-engine UI reset/privacy test are included; CI status tracked on draft PR.
+- [x] Standard SHA-256 vectors and independent Node crypto comparisons across padding boundaries and multi-MiB fixtures; deterministic Worker cancellation tests included.
+- [ ] Measure multi-hundred-MiB throughput and energy on real low-end Windows/Android/iOS hardware, verify sustained cancellation and storage limits.
+- [ ] Independent verified model package provenance, complete rights documentation and ONNX Runtime operator tests.
+
+### M0.8 — synthetic numeric browser inference (v0.7.8, NOT AI swap)
+
+- [x] Pin CPU-only ONNX Runtime Web `1.31.1` to an opt-in runtime panel; the CDN is contacted only after explicit checkbox + click. CDN network metadata can be disclosed, but selected media is not used.
+- [x] Build a minimal original ONNX IR-v8 / opset-13 `Add` fixture from byte arrays; perform a **real** `wasm` execution session and verify `2 + 3 = 5`, release resources and label results accurately.
+- [x] Add local same-origin browser QA runtime asset route and unit tests, without bundling any real identity swap model.
+- [x] [Actions 41314891674](https://github.com/junl-im/meta/actions/runs/41314891674): Node 27/27; desktop+mobile-emulated Chromium 8/8; Firefox+Linux WebKit 12/12; total 20/20 browser PASS. Four browser tests execute real WASM numeric ONNX on all three engines, with QA-local runtime assets and no external requests. Physical-device resource measurements remain future work.
+- [ ] Review all third-party runtime assets for final supply chain and offline redistribution; production currently loads jsDelivr only on permission.
+
+### M0.9 — locally measured synthetic WASM latency (v0.7.9, NOT swap FPS)
+
+- [x] Reuse the pinned opt-in CPU WASM runtime and original face-free Add fixture to run 4 warmup + 24 independently checked numeric inferences, with p50/p95/min/mean/max sample timing and session initialization timing.
+- [x] Support cooperative cancellation and reset/consent invalidation with session cleanup. A currently executing native WASM run/CDN request is not forcibly abortable.
+- [x] Let users explicitly export a local-only JSON summary with optional coarse device RAM/core hints, not selected user media or model files. Do not collect device fingerprints or upload diagnostic results.
+- [x] Extend Node and three-engine Playwright browser tests to verify numeric output, honest claims, JSON export and zero external test network calls.
+- [ ] Measure real 16GB Windows/low-GPU PC, physical Android Chrome and iOS Safari heap/energy/latency. Browser-reported device memory is imprecise or absent; this Add benchmark is not real face-swap FPS.
+- [ ] Audit a complete rights-cleared detector + identity encoder + swap generator model operator set and memory requirements.
+
+### M1 — legally usable 3-second proof
+
+- [ ] Choose and document a distributable ONNX swap model with a clear weights license.
+- [ ] Validate ONNX operators for the browser backend and memory ceilings.
+- [ ] Process a short consented sample entirely within the browser.
+- [ ] Produce actual MP4 with source audio and frame-count/timebase checks.
+- [ ] Ensure no media network requests; verify with network capture.
+
+### M2 — robust video editing
+
+- [ ] Landmark/mask/occlusion improvements; temporal and identity QA.
+- [ ] Partial retry, project recovery and original-pixel protection.
+- [ ] Quality presets with automatic device fallback.
+- [ ] Test Chrome/Edge Windows, Chrome Android and iOS Safari.
+
+### M3 — optional advanced mode
+
+- [ ] High-quality model adapter (including evaluation of Wan Animate 2) without promising mobile/local feasibility.
+- [ ] Explicit local/remote mode, price/privacy confirmation, output labeling and C2PA where applicable.
+- [ ] Dedicated distribution and recovery plan.
+
+## Release gates
+
+Do not describe AI swapping as working until a real source video + authorized reference produces a verified playable MP4. A MediaRecorder photo overlay is an engineering test, not a face swap. Do not use a model whose weights/distribution license is unresolved. Keep the production `main` branch and Firebase deployment unchanged until reviews pass.
+
+## UI conventions
+
+No SVG tags/files/data URIs, emoji-as-icons or excessive glowing buttons. Keep single-screen phone layout with internal scrolling, custom scrollbars and deliberate browser back/exit behavior.

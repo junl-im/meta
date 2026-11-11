@@ -1,0 +1,108 @@
+name: Actor Swap WEB checks
+
+on:
+  pull_request:
+    paths:
+      - "faceswap/**"
+      - ".github/workflows/faceswap-ci.yml"
+  push:
+    branches:
+      - "feat/faceswap-web-v0.7"
+    paths:
+      - "faceswap/**"
+      - ".github/workflows/faceswap-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Syntax check
+        run: |
+          node --check faceswap/src/capabilities.mjs
+          node --check faceswap/src/app.mjs
+          node --check faceswap/src/face_detector.mjs
+          node --check faceswap/src/compositor.mjs
+          node --check faceswap/src/audio_capture.mjs
+          node --check faceswap/src/webm_duration.mjs
+          node --check faceswap/src/video_lab.mjs
+          node --check faceswap/src/model_preflight.mjs
+          node --check faceswap/src/model_lab.mjs
+          node --check faceswap/src/sha256_stream.mjs
+          node --check faceswap/src/sha256_worker.mjs
+          node --check faceswap/src/sha256_worker_client.mjs
+          node --check faceswap/src/synthetic_onnx.mjs
+          node --check faceswap/src/onnx_probe.mjs
+          node --check faceswap/src/synthetic_benchmark.mjs
+          node --check faceswap/src/onnx_lab.mjs
+          node --check faceswap/tests/serve.mjs
+          node --check faceswap/tests/e2e/local-render.spec.mjs
+          node --check faceswap/tests/e2e/browser-compat.spec.mjs
+      - name: Node smoke checks
+        run: node --test faceswap/tests/smoke.mjs
+
+  browser-e2e:
+    # Playwright 1.56 supports Ubuntu 24.04, but not ubuntu-latest (26.04).
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install QA dependencies only
+        working-directory: faceswap
+        run: npm install --no-audit --no-fund
+      - name: Install Chromium for QA
+        working-directory: faceswap
+        run: npx playwright install --with-deps chromium
+      - name: Install FFmpeg and FFprobe for independent media verification
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Generate synthetic test footage and portrait
+        run: |
+          mkdir -p faceswap/tests/fixtures
+          ffmpeg -hide_banner -loglevel error -f lavfi -i testsrc2=size=640x360:rate=25 -f lavfi -i sine=frequency=440:sample_rate=48000 -t 4 -shortest -c:v libvpx -b:v 700k -c:a libopus -y faceswap/tests/fixtures/source.webm
+          ffmpeg -hide_banner -loglevel error -f lavfi -i color=c=yellow:size=256x256 -frames:v 1 -y faceswap/tests/fixtures/portrait.png
+      - name: Test desktop and mobile-emulated Chromium
+        working-directory: faceswap
+        env:
+          CI: "true"
+        run: npm run test:browser -- --project=desktop-chromium --project=mobile-chromium-emulation
+
+  browser-compat:
+    # Linux WebKit is an engine-level signal, not real iOS Safari hardware QA.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install QA dependencies
+        working-directory: faceswap
+        run: npm install --no-audit --no-fund
+      - name: Install Firefox and WebKit for compatibility QA
+        working-directory: faceswap
+        run: npx playwright install --with-deps firefox webkit
+      - name: Install FFmpeg for synthetic media fixture
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Generate offline non-personal compatibility fixtures
+        run: |
+          mkdir -p faceswap/tests/fixtures
+          ffmpeg -hide_banner -loglevel error -f lavfi -i testsrc2=size=640x360:rate=25 -f lavfi -i sine=frequency=440:sample_rate=48000 -t 4 -shortest -c:v libvpx -b:v 700k -c:a libopus -y faceswap/tests/fixtures/source.webm
+          ffmpeg -hide_banner -loglevel error -f lavfi -i color=c=yellow:size=256x256 -frames:v 1 -y faceswap/tests/fixtures/portrait.png
+      - name: Test desktop Firefox and mobile-emulated WebKit
+        working-directory: faceswap
+        env:
+          CI: "true"
+        run: npm run test:browser -- --project=desktop-firefox --project=mobile-webkit-emulation
