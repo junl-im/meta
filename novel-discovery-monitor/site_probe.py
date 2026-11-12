@@ -22,6 +22,7 @@ CHECKS = {
     "view_counts": "/data/view-counts.json",
 }
 MIN_EXPECTED_WORKS = 30
+MIN_EXPECTED_SITEMAP_URLS = 47
 MAX_RESPONSE_BYTES = 1_000_000
 
 
@@ -47,7 +48,7 @@ def inspect_sitemap(blob: bytes, expected_host: str) -> dict:
             for loc in locations
         )
         unique_urls = len(locations) == len(set(locations))
-        enough_urls = kind == "sitemapindex" or len(locations) >= MIN_EXPECTED_WORKS
+        enough_urls = kind == "sitemapindex" or len(locations) >= MIN_EXPECTED_SITEMAP_URLS
         result = {
             "ok": bool(locations) and valid_urls and unique_urls and enough_urls,
             "sitemap_type": kind,
@@ -56,7 +57,7 @@ def inspect_sitemap(blob: bytes, expected_host: str) -> dict:
             "same_host_https": valid_urls,
         }
         if not enough_urls:
-            result["warning"] = "Below the existing 30-work baseline"
+            result["warning"] = "Below the verified 47-URL sitemap baseline"
         return result
     except ET.ParseError:
         return {"ok": False, "error_class": "malformed_xml"}
@@ -73,15 +74,40 @@ def inspect_view_counts(blob: bytes) -> dict:
     if isinstance(parsed, list):
         result["record_count"] = len(parsed)
         result["ok"] = len(parsed) >= MIN_EXPECTED_WORKS
-    else:
-        result["top_level_keys"] = list(parsed.keys())[:12]
-        for key in ("works", "items", "records"):
-            if isinstance(parsed.get(key), list):
-                result["record_count"] = len(parsed[key])
-                result["ok"] = len(parsed[key]) >= MIN_EXPECTED_WORKS
-                break
+        result["schema_coverage"] = "list count only; individual views unverified"
+        return result
+    result["top_level_keys"] = list(parsed.keys())[:12]
+    for key in ("works", "items", "records"):
+        records = parsed.get(key)
+        if not isinstance(records, (list, dict)):
+            continue
+        count = len(records)
+        result["record_count"] = count
+        result["record_container"] = type(records).__name__
+        result["ok"] = count >= MIN_EXPECTED_WORKS
+        catalog_count = parsed.get("catalog_count")
+        if isinstance(catalog_count, int) and not isinstance(catalog_count, bool):
+            result["catalog_count"] = catalog_count
+            result["catalog_count_matches"] = catalog_count == count
+            result["ok"] = result["ok"] and result["catalog_count_matches"]
+        if isinstance(records, dict):
+            id_keys_valid = all(str(item).isdigit() for item in records)
+            values_valid = all(
+                isinstance(value, (int, float)) and not isinstance(value, bool)
+                and value >= 0 and value < float("inf")
+                for value in records.values()
+            )
+            result["numeric_work_ids"] = id_keys_valid
+            result["nonnegative_numeric_views"] = values_valid
+            if not id_keys_valid or not values_valid:
+                result["schema_coverage"] = "record count only; work ID or view value format unverified"
+            else:
+                result["ok"] = result["ok"] and id_keys_valid and values_valid
         else:
-            result["schema_coverage"] = "unknown; JSON presence only"
+            result["schema_coverage"] = "list count only; individual views unverified"
+        break
+    else:
+        result["schema_coverage"] = "unknown; JSON presence only"
     return result
 
 
