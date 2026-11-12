@@ -108,6 +108,36 @@ class Tests(unittest.TestCase):
         self.assertEqual(result["http_status"], 404)
         self.assertFalse(result["ok"])
 
+    def test_html_meta_robots_noindex_flagged(self):
+        result = site_probe.inspect_html_indexability(
+            b'<html><head><meta name="robots" content="noindex, nofollow"></head></html>'
+        )
+        self.assertFalse(result["ok"])
+        self.assertIn("robots", result["meta_noindex_agents"])
+
+    def test_html_index_allowed(self):
+        result = site_probe.inspect_html_indexability(
+            b'<meta name="robots" content="index, follow">'
+        )
+        self.assertTrue(result["ok"])
+
+    def test_header_noindex_flagged(self):
+        result = site_probe.inspect_html_indexability(b"<html></html>", "googlebot: noindex, nofollow")
+        self.assertFalse(result["ok"])
+
+    def test_robots_root_disallow_flagged(self):
+        result = site_probe.inspect_robots_rules(
+            b"User-agent: *\\nDisallow: /\\nSitemap: https://example.test/sitemap.xml"
+        )
+        self.assertFalse(result["ok"])
+        self.assertIn("*", result["root_disallow_agents"])
+
+    def test_robots_other_paths_are_allowed(self):
+        result = site_probe.inspect_robots_rules(
+            b"User-agent: *\\nDisallow: /admin/\\nAllow: /"
+        )
+        self.assertTrue(result["ok"])
+
     def test_nonhttps_url(self):
         with self.assertRaises(ValueError):
             site_probe.generate("http://example.test")
