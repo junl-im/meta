@@ -20,6 +20,21 @@ class ReportRenderingTests(unittest.TestCase):
         self.assertIn("https://github.com/junl-im/meta/actions/runs/777", output)
         self.assertIn("조회수 JSON", output)
 
+    def test_search_crawl_and_catalog_diagnostics_in_status(self):
+        checks = {name: {"ok": True, "http_status": 200} for name in ORDER}
+        checks["homepage"]["meta_noindex_agents"] = []
+        checks["works"]["meta_noindex_agents"] = []
+        checks["robots"]["root_disallow_agents"] = []
+        checks["sitemap"].update({"url_count": 47, "unique_urls": True, "same_host_https": True})
+        checks["view_counts"].update({
+            "record_count": 30, "numeric_work_ids": True, "nonnegative_numeric_views": True
+        })
+        output = render({"checks": checks}, self.now, "junl-im/meta", "777")
+        self.assertIn("noindex 차단 없음", output)
+        self.assertIn("사이트 전체 차단 없음", output)
+        self.assertIn("중복 없음·동일 HTTPS 도메인", output)
+        self.assertIn("작품 ID·조회수 형식 정상", output)
+
     def test_missing_one_check_not_success(self):
         report = {"checks": {name: {"ok": True} for name in ORDER if name != "sitemap"}}
         output = render(report, self.now, "junl-im/meta", "777")
