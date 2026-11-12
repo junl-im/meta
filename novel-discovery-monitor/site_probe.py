@@ -12,6 +12,7 @@ import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from html.parser import HTMLParser
 
 BASE = "https://gomfox-story-discovery.x7x8.chatgpt.site"
 CHECKS = {
@@ -61,6 +62,56 @@ def inspect_sitemap(blob: bytes, expected_host: str) -> dict:
         return result
     except ET.ParseError:
         return {"ok": False, "error_class": "malformed_xml"}
+
+
+class RobotsMetaParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.noindex_agents = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag != "meta":
+            return
+        attributes = {key.lower(): (value or "") for key, value in attrs}
+        name = attributes.get("name", "").lower().strip()
+        directives = {value.strip() for value in attributes.get("content", "").lower().split(",")}
+        if name in {"robots", "googlebot", "yeti", "naverbot"} and "noindex" in directives:
+            self.noindex_agents.append(name)
+
+
+def inspect_html_indexability(blob: bytes, x_robots_tag: str = "") -> dict:
+    parser = RobotsMetaParser()
+    parser.feed(blob.decode("utf-8", errors="replace"))
+    header_blocks = any(
+        segment.strip().lower().endswith("noindex")
+        for segment in x_robots_tag.split(",")
+    )
+    return {
+        "ok": not parser.noindex_agents and not header_blocks,
+        "meta_noindex_agents": parser.noindex_agents,
+        "x_robots_noindex": header_blocks,
+    }
+
+
+def inspect_robots_rules(blob: bytes) -> dict:
+    agents = []
+    saw_rule = False
+    blocked = []
+    for raw_line in blob.decode("utf-8", errors="replace").splitlines():
+        line = raw_line.split("#", 1)[0].strip()
+        if ":" not in line:
+            continue
+        directive, value = (item.strip().lower() for item in line.split(":", 1))
+        if directive == "user-agent":
+            if saw_rule:
+                agents = []
+                saw_rule = False
+            agents.append(value)
+        elif directive in {"allow", "disallow", "crawl-delay"}:
+            saw_rule = True
+            if directive == "disallow" and value == "/":
+                blocked.extend(agent for agent in agents if agent in {"*", "googlebot", "yeti", "naverbot"})
+    return {"ok": not blocked, "root_disallow_agents": sorted(set(blocked))}
 
 
 def inspect_view_counts(blob: bytes) -> dict:
@@ -139,6 +190,10 @@ def probe(url: str, timeout: int = 15) -> dict:
             elif code == 200 and url.endswith("/data/view-counts.json"):
                 details = inspect_view_counts(blob)
                 result.update(details)
+            elif code == 200 and url.endswith("/robots.txt"):
+                result.update(inspect_robots_rules(blob))
+            elif code == 200 and "text/html" in mime.lower():
+                result.update(inspect_html_indexability(blob, response.headers.get("X-Robots-Tag", "")))
             return result
     except urllib.error.HTTPError as exc:
         return {"ok": False, "http_status": exc.code, "error_class": "http_error"}
