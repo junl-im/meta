@@ -1,25 +1,72 @@
+import io
+import json
+import socket
 import unittest
 from unittest import mock
-from urllib.error import URLError, HTTPError
-import socket
-import io
+from urllib.error import HTTPError, URLError
+
 import site_probe
 
 
 class FakeResponse:
     status = 200
-    headers = {"Content-Type": "application/json"}
-    def __enter__(self): return self
-    def __exit__(self, *args): pass
-    def read(self, n): return b'{"works": []}'
+
+    def __init__(self, body: bytes, content_type: str):
+        self.body = body
+        self.headers = {"Content-Type": content_type}
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_):
+        return None
+
+    def read(self, _):
+        return self.body
 
 
 class Tests(unittest.TestCase):
-    @mock.patch("site_probe.urllib.request.urlopen", return_value=FakeResponse())
-    def test_json_success(self, _):
-        result = site_probe.probe("https://example.test/data/view-counts.json")
+    def test_valid_view_counts(self):
+        payload = json.dumps({"works": [{"novelId": str(n), "views": n} for n in range(30)]}).encode()
+        with mock.patch("site_probe.urllib.request.urlopen", return_value=FakeResponse(payload, "application/json")):
+            result = site_probe.probe("https://example.test/data/view-counts.json")
         self.assertTrue(result["ok"])
-        self.assertTrue(result["json_valid"])
+        self.assertEqual(result["record_count"], 30)
+
+    def test_empty_view_counts_rejected(self):
+        self.assertFalse(site_probe.inspect_view_counts(b'{"works": []}')["ok"])
+
+    def test_unknown_nonempty_json_schema_cautiously_accepted(self):
+        result = site_probe.inspect_view_counts(b'{"snapshot":"2026-11-11"}')
+        self.assertTrue(result["ok"])
+        self.assertIn("schema_coverage", result)
+
+    def test_invalid_json_rejected(self):
+        self.assertFalse(site_probe.inspect_view_counts(b"<html>error</html>")["ok"])
+
+    def test_valid_sitemap(self):
+        urls = "".join(f"<url><loc>https://example.test/works/{i}</loc></url>" for i in range(47))
+        payload = f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>'.encode()
+        result = site_probe.inspect_sitemap(payload, "example.test")
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["url_count"], 47)
+
+    def test_sitemap_27_urls_is_not_full_inventory(self):
+        urls = "".join(f"<url><loc>https://example.test/works/{i}</loc></url>" for i in range(27))
+        payload = f"<urlset>{urls}</urlset>".encode()
+        self.assertFalse(site_probe.inspect_sitemap(payload, "example.test")["ok"])
+
+    def test_external_sitemap_urls_rejected(self):
+        urls = "".join(f"<url><loc>https://other.test/works/{i}</loc></url>" for i in range(47))
+        payload = f"<urlset>{urls}</urlset>".encode()
+        self.assertFalse(site_probe.inspect_sitemap(payload, "example.test")["ok"])
+
+    def test_sitemapindex_supported(self):
+        payload = b"<sitemapindex><sitemap><loc>https://example.test/sitemap-1.xml</loc></sitemap></sitemapindex>"
+        self.assertTrue(site_probe.inspect_sitemap(payload, "example.test")["ok"])
+
+    def test_malformed_sitemap_rejected(self):
+        self.assertFalse(site_probe.inspect_sitemap(b"<xml>", "example.test")["ok"])
 
     @mock.patch("site_probe.urllib.request.urlopen", side_effect=URLError(socket.gaierror(-2, "not known")))
     def test_dns_failure(self, _):
