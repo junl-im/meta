@@ -38,6 +38,14 @@ def render(report: dict | None, now: dt.datetime, repository: str, run_id: str) 
             detail = f"{detail}, URL {item['url_count']}개"
         if "record_count" in item:
             detail = f"{detail}, 데이터 {item['record_count']}건"
+        if key in {"homepage", "works"} and "meta_noindex_agents" in item and item.get("ok"):
+            detail = f"{detail}, noindex 차단 없음"
+        if key == "robots" and "root_disallow_agents" in item and item.get("ok"):
+            detail = f"{detail}, 사이트 전체 차단 없음"
+        if key == "sitemap" and item.get("unique_urls") is True and item.get("same_host_https") is True:
+            detail = f"{detail}, 중복 없음·동일 HTTPS 도메인"
+        if key == "view_counts" and item.get("numeric_work_ids") is True and item.get("nonnegative_numeric_views") is True:
+            detail = f"{detail}, 작품 ID·조회수 형식 정상"
         if item.get("schema_coverage"):
             detail = f"{detail}, 실제 스키마 검증 미완"
         rows.append(f"| {LABELS[key]} | {mark} | {detail} |")
