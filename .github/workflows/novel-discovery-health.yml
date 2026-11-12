@@ -2,6 +2,11 @@ name: Novel discovery site health
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "novel-discovery-monitor/**"
+      - ".github/workflows/novel-discovery-health.yml"
   schedule:
     # UTC 15:00 / 23:00 / 07:00 = KST 00:00 / 08:00 / 16:00
     - cron: "0 15,23,7 * * *"
