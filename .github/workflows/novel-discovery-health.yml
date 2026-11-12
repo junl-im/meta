@@ -1,0 +1,35 @@
+name: Novel discovery site health
+
+on:
+  workflow_dispatch:
+  schedule:
+    # UTC 15:00 / 23:00 / 07:00 = KST 00:00 / 08:00 / 16:00
+    - cron: "0 15,23,7 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  public-site-connectivity:
+    name: Read-only public site connectivity
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test probe
+        run: python -m unittest discover -s novel-discovery-monitor -p 'test_*.py' -v
+      - name: Check live endpoints (no writes)
+        run: python novel-discovery-monitor/site_probe.py --out site-health.json --timeout 12
+      - name: Upload diagnostic report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: novel-discovery-site-health
+          path: site-health.json
+          retention-days: 14
+          if-no-files-found: warn
