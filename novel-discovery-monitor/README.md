@@ -9,11 +9,17 @@
 
 - 매일 한국시간 00:00·08:00·16:00 실행 (UTC 15:00·23:00·07:00).
 - 확인 경로: /, /works/, /robots.txt, /sitemap.xml, /data/view-counts.json
+- 사이트맵 XML과 URL 개수(현재 30편 최소 기준)·중복·동일 도메인 HTTPS 확인.
+- 조회수 JSON이 비어 있는지, 알려진 구조(`works`/`items`/`records`)이면 30편 이상인지 확인. 구조를 모르는 경우 숫자 검증 완료라고 표시하지 않음.
+- 코드 변경 시에도 GitHub Actions `push` 검사를 실행하며, 실행 성공 여부는 Actions 로그에서 별도 확인.
 - DNS 실패, HTTP 오류, JSON 형식 오류를 구분해 GitHub Actions 결과와 JSON artifact에 기록한다.
 - DNS 오류가 나더라도 사이트 자체가 장애라고 단정하지 않고, 실행 환경별 결과를 비교한다.
 - 읽기 전용으로만 실행한다. **회차별 조회수 재합산, 신규 작품 수집, Sites 공개 배포 기능은 아직 연결되지 않았다.**
 
 ## 검증
+
+단위 테스트 12개: DNS·HTTP·JSON·사이트맵 등 실패 조건을 확인한다. 성공한 실행 환경이 아닌 곳의 DNS 오류만으로 운영 사이트 장애를 확정하지 않는다.
+
 ```bash
 cd novel-discovery-monitor
 python3 -m unittest discover -s . -p 'test_*.py' -v
