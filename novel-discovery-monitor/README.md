@@ -35,3 +35,10 @@ python3 site_probe.py --out site-health.json
 6. 자동 예약을 실행 가능한 환경에 연결한 뒤, **실제 첫 자동 실행 성공**을 확인하고 상태를 활성으로 표기.
 
 이 저장소의 진단 자동화가 실행되더라도 위 기능들을 구현하거나 복구한 것으로 보고하면 안 된다.
+## 정기 진단 현황 페이지
+
+- [자동 진단 상태](https://github.com/junl-im/meta/issues/136)
+- [워크플로 실행 기록](https://github.com/junl-im/meta/actions/workflows/novel-discovery-health.yml)
+- 매 실행 시 마지막 검사 시간, 5개 주소의 결과, GitHub Actions 실행 기록 링크를 한 이슈에 갱신한다.
+- 실제 예약 실행이 실패하거나 GitHub Actions 권한이 없어 갱신되지 않을 수 있다. **이슈가 오래 유지된 것은 정상이라는 뜻이 아니라 미실행 또는 기록 실패 가능성**이므로 실행 로그와 대조한다.
+- 이 모니터는 읽기 전용이다. 네이버 회차별 조회수 수집·Sites 배포 자동화와 구분한다.
