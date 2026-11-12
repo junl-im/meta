@@ -1,4 +1,4 @@
-/* Public Naver Web Novel work metadata, verified 2026-11-10.
+/* Public Naver Web Novel work metadata, verified 2026-11-12.
    Only titles, author pen names, official cover thumbnail URLs, status and links.
    No story text or reader data is reproduced. */
 window.NOVEL_CATALOG = [
@@ -31,9 +31,10 @@ window.NOVEL_CATALOG = [
   ["눈 떠보니 박보검","[ZERO]","1248550","challenge","https://novel-phinf.pstatic.net/20221231_33/novel_1672413126990maFR1_PNG/romance_320_3.png?type=f280_224_2","로맨스","ongoing"],
   ["검은 나를 기억한다","[ZERO]","1242932","challenge","https://novel-phinf.pstatic.net/20221231_133/novel_1672413518094fk60i_PNG/fantasy_320_1.png?type=f280_224_2","판타지","ongoing"],
   ["무림까지 집착하는 힐러가 되었다","[곰같은여우]","1250781","best","https://novel-phinf.pstatic.net/20261103_260/novel_1793685795437YlwpJ_PNG/400.png?type=f280_224_2","판타지","ongoing"],
-  ["X같은 남자, X같은 여자","[ZERO]","1251347","challenge","https://novel-phinf.pstatic.net/20221231_194/novel_1672413226738B6sKY_PNG/romance_320_16.png?type=f280_224_2","로맨스","ongoing"]
+  ["X같은 남자, X같은 여자","[ZERO]","1251347","challenge","https://novel-phinf.pstatic.net/20221231_194/novel_1672413226738B6sKY_PNG/romance_320_16.png?type=f280_224_2","로맨스","ongoing"],
+  ["《한 권의 밤》","[곰같은여우]","1252685","challenge","https://novel-phinf.pstatic.net/20221231_277/novel_16724131586787UIQL_PNG/romance_320_7.png?type=f280_224_2","로맨스","ongoing"]
 ].map(([title,author,id,league,image,genre,status])=>({
   title, author, id, league, image, genre, status,
   url: `https://m.novel.naver.com/${league}/list?novelId=${id}`
 }));
-window.NOVEL_CATALOG_LAST_CHECK = "2026-11-10";
+window.NOVEL_CATALOG_LAST_CHECK = "2026-11-12";

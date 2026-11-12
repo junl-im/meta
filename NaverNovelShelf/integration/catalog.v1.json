@@ -2,7 +2,7 @@
   "schema_version": 1,
   "app_id": "gomfox-naver-novel-shelf",
   "source_site": "https://gomfox-naver-novels.glassyroot13.chatgpt.site",
-  "catalog_last_verified": "2026-11-10",
+  "catalog_last_verified": "2026-11-12",
   "copyright_policy": "metadata-and-links-only",
   "navigation_mode": "open-official-naver-novel-url",
   "works": [
@@ -305,6 +305,16 @@
       "publication_status": "ongoing",
       "official_url": "https://m.novel.naver.com/challenge/list?novelId=1251347",
       "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20221231_194/novel_1672413226738B6sKY_PNG/romance_320_16.png?type=f280_224_2"
+    },
+    {
+      "id": "1252685",
+      "title": "《한 권의 밤》",
+      "author_search_identity": "[곰같은여우]",
+      "league": "challenge",
+      "genre": "로맨스",
+      "publication_status": "ongoing",
+      "official_url": "https://m.novel.naver.com/challenge/list?novelId=1252685",
+      "cover_thumbnail_url": "https://novel-phinf.pstatic.net/20221231_277/novel_16724131586787UIQL_PNG/romance_320_7.png?type=f280_224_2"
     }
   ]
 }
