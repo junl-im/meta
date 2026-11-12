@@ -33,6 +33,32 @@ class Tests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertEqual(result["record_count"], 30)
 
+    def test_real_keyed_view_counts_passes(self):
+        payload = json.dumps({
+            "metric": "episode_views_sum",
+            "source": "naver",
+            "verified_at": "2026-11-11",
+            "catalog_count": 30,
+            "works": {str(1240000 + n): n * 3 for n in range(30)}
+        }).encode()
+        result = site_probe.inspect_view_counts(payload)
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["record_count"], 30)
+        self.assertTrue(result["numeric_work_ids"])
+        self.assertTrue(result["nonnegative_numeric_views"])
+        self.assertNotIn("schema_coverage", result)
+
+    def test_keyed_catalog_count_mismatch_rejected(self):
+        payload = json.dumps({"catalog_count": 31, "works": {str(n): n for n in range(30)}}).encode()
+        result = site_probe.inspect_view_counts(payload)
+        self.assertFalse(result["ok"])
+        self.assertFalse(result["catalog_count_matches"])
+
+    def test_keyed_negative_view_not_verified(self):
+        payload = json.dumps({"catalog_count": 30, "works": {str(n): (-1 if n == 2 else n) for n in range(30)}}).encode()
+        result = site_probe.inspect_view_counts(payload)
+        self.assertIn("schema_coverage", result)
+
     def test_empty_view_counts_rejected(self):
         self.assertFalse(site_probe.inspect_view_counts(b'{"works": []}')["ok"])
 
@@ -50,6 +76,10 @@ class Tests(unittest.TestCase):
         result = site_probe.inspect_sitemap(payload, "example.test")
         self.assertTrue(result["ok"])
         self.assertEqual(result["url_count"], 47)
+
+    def test_sitemap_30_urls_does_not_meet_47_page_baseline(self):
+        urls = "".join(f"<url><loc>https://example.test/works/{i}</loc></url>" for i in range(30))
+        self.assertFalse(site_probe.inspect_sitemap(f"<urlset>{urls}</urlset>".encode(), "example.test")["ok"])
 
     def test_sitemap_27_urls_is_not_full_inventory(self):
         urls = "".join(f"<url><loc>https://example.test/works/{i}</loc></url>" for i in range(27))
