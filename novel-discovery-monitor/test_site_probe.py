@@ -127,14 +127,14 @@ class Tests(unittest.TestCase):
 
     def test_robots_root_disallow_flagged(self):
         result = site_probe.inspect_robots_rules(
-            b"User-agent: *\\nDisallow: /\\nSitemap: https://example.test/sitemap.xml"
+            b"User-agent: *\nDisallow: /\nSitemap: https://example.test/sitemap.xml"
         )
         self.assertFalse(result["ok"])
         self.assertIn("*", result["root_disallow_agents"])
 
     def test_robots_other_paths_are_allowed(self):
         result = site_probe.inspect_robots_rules(
-            b"User-agent: *\\nDisallow: /admin/\\nAllow: /"
+            b"User-agent: *\nDisallow: /admin/\nAllow: /"
         )
         self.assertTrue(result["ok"])
 
