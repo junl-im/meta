@@ -61,6 +61,18 @@ def render(report: dict | None, now: dt.datetime, repository: str, run_id: str, 
                 seo_lines.append(f"- 접근·색인 차단 오류: {item.get('url', '?')} ({item.get('error', '오류')})")
             for item in seo.get("warnings", [])[:6]:
                 seo_lines.append(f"- SEO 확인 필요: {item.get('url', '?')} ({', '.join(item.get('warnings', []))})")
+
+            titles = seo.get("duplicate_title_groups", [])
+            desc = seo.get("duplicate_description_groups", [])
+            canonical = seo.get("shared_canonical_groups", [])
+            seo_lines.append(
+                f"**중복 메타 신호:** 동일 제목 그룹 {len(titles)}개 · 동일 설명 그룹 {len(desc)}개 · 동일 canonical 공유 그룹 {len(canonical)}개"
+            )
+            for label, groups in (("제목", titles), ("설명", desc), ("canonical", canonical)):
+                for group in groups[:3]:
+                    urls = group.get("urls", [])
+                    seo_lines.append(f"- {label} 중복 의심: {len(urls)}개 URL ({', '.join(urls[:3])})")
+            seo_lines.append("이 중복 신호는 HTML 메타 정보에 관한 경고이며 Google의 실제 중복 판정과 동일하지 않습니다.")
             seo_lines.append("개별 페이지 진단은 HTTP 응답과 메타 태그만 확인하며 실제 검색엔진 색인 여부와는 별개입니다.")
         else:
             seo_lines = ["", "**사이트맵 개별 페이지 검사:** 실행 실패 또는 대상 없음"]
