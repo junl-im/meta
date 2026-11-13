@@ -25,6 +25,26 @@ class SitemapSEOTests(unittest.TestCase):
         self.assertTrue(p.noindex)
         self.assertEqual(p.canonical,"https://example.test/works/a/")
 
+    def test_detect_duplicate_titles_and_descriptions(self):
+        pages = [
+            {"url": "https://example.test/a/", "ok": True, "title": "같은 제목", "description": "동일 소개", "canonical_url": "https://example.test/a/"},
+            {"url": "https://example.test/b/", "ok": True, "title": "같은 제목", "description": "동일 소개", "canonical_url": "https://example.test/a/"},
+            {"url": "https://example.test/c/", "ok": True, "title": "다른 제목", "description": "다른 소개", "canonical_url": "https://example.test/c/"},
+        ]
+        findings = seo_pages.detect_duplicate_metadata(pages)
+        self.assertEqual(len(findings["duplicate_title_groups"]), 1)
+        self.assertEqual(len(findings["duplicate_description_groups"]), 1)
+        self.assertEqual(len(findings["shared_canonical_groups"]), 1)
+        self.assertEqual(len(findings["shared_canonical_groups"][0]["urls"]), 2)
+
+    def test_unique_metadata_has_no_duplicates(self):
+        pages = [
+            {"url": "https://example.test/a", "ok": True, "title": "A", "description": "A unique"},
+            {"url": "https://example.test/b", "ok": True, "title": "B", "description": "B unique"},
+        ]
+        findings = seo_pages.detect_duplicate_metadata(pages)
+        self.assertFalse(any(findings.values()))
+
     def test_no_robots_meta_defaults_to_indexable(self):
         p=seo_pages.HeadInfo()
         p.feed('<title>표지 소개</title>')
