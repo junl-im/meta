@@ -35,6 +35,19 @@ class ReportRenderingTests(unittest.TestCase):
         self.assertIn("중복 없음·동일 HTTPS 도메인", output)
         self.assertIn("작품 ID·조회수 형식 정상", output)
 
+    def test_individual_page_audit_is_reported(self):
+        checks = {name: {"ok": True, "http_status": 200} for name in ORDER}
+        seo = {
+            "checked_page_count": 47,
+            "failed_page_count": 1,
+            "warned_page_count": 2,
+            "failures": [{"url": "https://example.test/broken", "error": "noindex"}],
+            "warnings": [{"url": "https://example.test/a", "warnings": ["missing_meta_description"]}],
+        }
+        output = render({"checks": checks}, self.now, "junl-im/meta", "777", None, seo)
+        self.assertIn("47개 확인 · 실패 1개 · SEO 주의 2개", output)
+        self.assertIn("missing_meta_description", output)
+
     def test_missing_one_check_not_success(self):
         report = {"checks": {name: {"ok": True} for name in ORDER if name != "sitemap"}}
         output = render(report, self.now, "junl-im/meta", "777")
