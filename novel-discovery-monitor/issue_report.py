@@ -50,12 +50,12 @@ def render(report: dict | None, now: dt.datetime, repository: str, run_id: str, 
     seo_lines = []
     if isinstance(seo, dict):
         if seo.get("checked_page_count", 0):
-            checked = seo.get("checked_page_count", 0)
+            pages_checked = seo.get("checked_page_count", 0)
             failures = seo.get("failed_page_count", 0)
             warnings = seo.get("warned_page_count", 0)
             seo_lines = [
                 "",
-                f"**사이트맵 내 개별 페이지 검사:** {checked}개 확인 · 실패 {failures}개 · SEO 주의 {warnings}개",
+                f"**사이트맵 내 개별 페이지 검사:** {pages_checked}개 확인 · 실패 {failures}개 · SEO 주의 {warnings}개",
             ]
             for item in seo.get("failures", [])[:6]:
                 seo_lines.append(f"- 접근·색인 차단 오류: {item.get('url', '?')} ({item.get('error', '오류')})")
