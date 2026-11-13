@@ -46,6 +46,7 @@ class ReportRenderingTests(unittest.TestCase):
         }
         output = render({"checks": checks}, self.now, "junl-im/meta", "777", None, seo)
         self.assertIn("47개 확인 · 실패 1개 · SEO 주의 2개", output)
+        self.assertIn("2026-11-12 16:00 KST", output)
         self.assertIn("missing_meta_description", output)
 
     def test_missing_one_check_not_success(self):
