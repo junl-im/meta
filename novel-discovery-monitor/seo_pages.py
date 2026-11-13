@@ -96,15 +96,46 @@ def audit_page(url, timeout=10):
         if not parsed.description.strip():
             result["warnings"].append("missing_meta_description")
         if parsed.canonical:
-            canon = urllib.parse.urlsplit(urllib.parse.urljoin(final_url, parsed.canonical))
+            absolute_canonical = urllib.parse.urljoin(final_url, parsed.canonical)
+            canon = urllib.parse.urlsplit(absolute_canonical)
+            result["canonical_url"] = absolute_canonical
             if canon.hostname != urllib.parse.urlsplit(url).hostname or canon.scheme != "https":
                 result["warnings"].append("canonical_cross_domain")
+            current = urllib.parse.urlsplit(final_url)
+            if (canon.scheme, canon.hostname, canon.path.rstrip("/"), canon.query) != (
+                current.scheme, current.hostname, current.path.rstrip("/"), current.query
+            ):
+                result["warnings"].append("canonical_non_self_review")
         else:
             result["warnings"].append("canonical_not_declared")
         result["title"] = parsed.title.strip()[:150]
+        result["description"] = parsed.description.strip()[:400]
         return result
     except (OSError, ValueError, UnicodeError, urllib.error.URLError) as exc:
         return {"url": url, "ok": False, "error": type(exc).__name__, "warnings": []}
+
+
+def detect_duplicate_metadata(pages):
+    """Shared metadata signals, not conclusions about Google's canonical choice."""
+    output = {}
+    for field, label in (
+        ("title", "duplicate_title_groups"),
+        ("description", "duplicate_description_groups"),
+        ("canonical_url", "shared_canonical_groups"),
+    ):
+        grouped = {}
+        for page in pages:
+            if not page.get("ok"):
+                continue
+            value = (page.get(field) or "").strip()
+            if value:
+                grouped.setdefault(value, []).append(page["url"])
+        output[label] = [
+            {"sample": value[:120], "urls": sorted(set(urls))}
+            for value, urls in sorted(grouped.items())
+            if len(set(urls)) > 1
+        ][:15]
+    return output
 
 
 def audit(base=BASE, timeout=10):
@@ -119,6 +150,7 @@ def audit(base=BASE, timeout=10):
         urls = sitemap_urls(response.read(400_000), host)
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as pool:
         pages = list(pool.map(lambda url: audit_page(url, timeout), urls))
+    duplicate_signals = detect_duplicate_metadata(pages)
     bad = [p for p in pages if not p["ok"]]
     cautions = [p for p in pages if p["warnings"]]
     return {
@@ -127,6 +159,7 @@ def audit(base=BASE, timeout=10):
         "checked_page_count": len(pages),
         "failed_page_count": len(bad),
         "warned_page_count": len(cautions),
+        **duplicate_signals,
         "all_ok": not bad and len(pages) == len(urls),
         "failures": bad[:30],
         "warnings": cautions[:30],
