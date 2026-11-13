@@ -31,9 +31,11 @@ jobs:
         run: python -m unittest discover -s novel-discovery-monitor -p 'test_*.py' -v
       - name: Check live endpoints (no writes)
         run: python novel-discovery-monitor/site_probe.py --out site-health.json --timeout 12
+      - name: Compare public catalog with latest shelf catalog
+        run: python novel-discovery-monitor/catalog_reconcile.py --shelf NaverNovelShelf/site/catalog.js --out catalog-reconciliation.json
       - name: Prepare persistent status report
         if: always()
-        run: python novel-discovery-monitor/issue_report.py --input site-health.json --output issue-body.md
+        run: python novel-discovery-monitor/issue_report.py --input site-health.json --catalog-report catalog-reconciliation.json --output issue-body.md
       - name: Update live status issue
         if: always()
         env:
@@ -44,6 +46,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: novel-discovery-site-health
-          path: site-health.json
+          path: |
+            site-health.json
+            catalog-reconciliation.json
           retention-days: 14
           if-no-files-found: warn
