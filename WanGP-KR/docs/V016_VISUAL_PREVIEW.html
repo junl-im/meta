@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>곰같은여우의 AI 스튜디오 | v0.16 디자인 미리보기</title>
+  <style>
+    :root {font-family:"Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;color:#f5f0e8;background:#0e1929}
+    * {box-sizing:border-box}
+    body {margin:0;padding:20px 16px 32px;background:radial-gradient(ellipse at 52% 0%,#28445d 0%,#15273c 45%,#0c1625 100%);min-height:100vh}
+    main {max-width:1120px;margin:auto}
+    .hero {height:184px;border-radius:19px;background:#112745 url('../plugin/wan2gp-gomfox-studio/studio-hero.png') center 47%/cover no-repeat}
+    .brand {display:flex;align-items:center;gap:11px;margin-top:9px}
+    .brand img {width:68px;height:68px;object-fit:contain;flex:none}
+    .brand small {display:block;color:#efad71;letter-spacing:.13em;font-size:11px;font-weight:800;margin-bottom:3px}
+    .brand h1 {font-size:clamp(22px,2.6vw,31px);letter-spacing:-.045em;line-height:1.2;margin:0}
+    .intro {font-size:14px;line-height:1.5;color:#d8e0e8;margin:7px 0 5px}
+    .chips {display:flex;flex-wrap:wrap;gap:6px;margin:5px 0 13px}
+    .chip {background:#224746;border-radius:20px;color:#cbf0e0;padding:6px 10px;font-size:11px;font-weight:700}
+    .chip.warm {background:#483629;color:#ffd8ad}
+    .tabs {display:flex;overflow-x:auto;white-space:nowrap;gap:4px;scrollbar-width:thin;scrollbar-color:#4a6671 transparent;margin-bottom:12px}
+    .tab {font-size:12px;color:#c2ceda;padding:10px 12px;flex:none;border-radius:9px 9px 0 0}
+    .tab.active {background:#314b53;color:#fff4dd;box-shadow:inset 0 -2px #dda66b;font-weight:800}
+    .lead {background:linear-gradient(110deg,#213e4c,#283946);padding:13px 16px;border-radius:15px;margin-bottom:12px}
+    .lead h2 {font-size:18px;margin:0 0 5px;letter-spacing:-.03em}
+    .lead p {font-size:13px;line-height:1.55;color:#d4e1e6;margin:0}
+    .lead span {display:block;font-size:12px;margin-top:6px;color:#b2c6cb}
+    .cards {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .card {min-height:184px;border-radius:15px;background-position:right 67%;background-size:cover;background-repeat:no-repeat;display:flex;align-items:center;padding:21px 23px;box-shadow:0 5px 14px #0003;overflow:hidden}
+    .card span {font-size:20px;font-weight:850;line-height:1.45;letter-spacing:-.03em;text-shadow:0 2px 7px #000b;white-space:pre-line;max-width:70%}
+    .video {background-image:linear-gradient(90deg,#07111f7a,#07111f12 69%,transparent 88%),url('../plugin/wan2gp-gomfox-studio/category-video.webp')}
+    .image {background-image:linear-gradient(90deg,#07111f7a,#07111f12 69%,transparent 88%),url('../plugin/wan2gp-gomfox-studio/category-image.webp')}
+    .audio {background-image:linear-gradient(90deg,#07111f7a,#07111f12 69%,transparent 88%),url('../plugin/wan2gp-gomfox-studio/category-audio.webp')}
+    .model {background-image:linear-gradient(90deg,#07111f7a,#07111f12 69%,transparent 88%),url('../plugin/wan2gp-gomfox-studio/category-3d.webp')}
+    .hint {font-size:13px;color:#d4e1e6;margin:12px 0;line-height:1.5}
+    .action {background:linear-gradient(110deg,#245b68,#236a69);font-size:14px;font-weight:800;text-align:center;border-radius:13px;padding:14px 12px;color:#fff6e8;box-shadow:0 4px 12px #0002}
+    .fineprint {font-size:11px;color:#a9bfc9;line-height:1.5;margin:12px 0}
+    @media(max-width:740px) {
+      body {padding:9px 10px 20px}
+      .hero {height:112px;border-radius:14px}
+      .brand {gap:7px;margin-top:5px}
+      .brand img {width:47px;height:47px}
+      .brand small {font-size:10px;letter-spacing:.06em}
+      .brand h1 {font-size:21px}
+      .intro {font-size:12px;margin:4px 0}
+      .chips {gap:5px;margin:4px 0 9px}
+      .chip {font-size:10px;padding:4px 7px}
+      .tab {font-size:11px;padding:9px}
+      .lead {padding:10px 12px;border-radius:12px;margin-bottom:7px}
+      .lead h2 {font-size:16px}
+      .lead p,.lead span {font-size:11px}
+      .cards {gap:7px}
+      .card {min-height:112px;border-radius:12px;padding:13px}
+      .card span {font-size:14px;max-width:78%}
+      .hint {font-size:12px;margin:8px 0}
+      .action {padding:12px;font-size:12px}
+    }
+    @media(max-width:740px) and (max-height:740px) {
+      .hero {height:89px}
+      .brand img {width:40px;height:40px}
+      .brand h1 {font-size:18px}
+      .card {min-height:96px}
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="hero" role="img" aria-label="여우와 곰이 함께 창작하는 스튜디오 원화"></div>
+    <div class="brand">
+      <img src="../plugin/wan2gp-gomfox-studio/gomfox-studio-icon.png" alt="곰같은여우의 시그니처 아이콘">
+      <div><small>GOMFOX CREATIVE WORKSPACE</small><h1>곰같은여우의 AI 스튜디오</h1></div>
+    </div>
+    <p class="intro">처음에는 간단하게, 익숙해지면 원본 WanGP의 전문 기능까지.</p>
+    <div class="chips"><span class="chip">무료 로컬 기본</span><span class="chip">Windows 16GB 배려</span><span class="chip warm">GPT 선택 · 기본 꺼짐</span></div>
+    <div class="tabs" aria-label="화면 탭의 배치 미리보기"><span class="tab active">무료 제작 · 시작</span><span class="tab">처음 실행</span><span class="tab">프롬프트</span><span class="tab">도움말</span><span class="tab">모델 찾기</span></div>
+    <div class="lead"><h2>무엇을 만들고 싶나요?</h2><p>원하는 그림 카드를 누르면 해당 분야의 사용 순서가 나타나요.</p><span>① 작업 선택　② 설명 확인　③ 원본 무료 제작 화면 열기</span></div>
+    <div class="cards" aria-label="네 분야 전용 원화 카드">
+      <div class="card video"><span>영상 제작
+움직이는 장면</span></div>
+      <div class="card image"><span>이미지 제작
+사진과 그림</span></div>
+      <div class="card audio"><span>음성 · 음악
+소리 만들기</span></div>
+      <div class="card model"><span>3D · 월드
+입체와 장면</span></div>
+    </div>
+    <p class="hint">카드를 하나 선택하면 사용 순서가 이곳에 표시됩니다.</p>
+    <div class="action">원본 WanGP 무료 제작 화면 열기</div>
+    <p class="fineprint">이 파일은 v0.16의 오프라인 시각 배치 미리보기입니다. 그림·간격·반응형 구도를 확인할 수 있으며 버튼 동작이나 실제 GPU 생성은 포함하지 않습니다. 실제 화면은 WanGP의 Gradio 테마에 따라 다를 수 있습니다. SVG 및 외부 CDN을 사용하지 않습니다.</p>
+  </main>
+</body>
+</html>
